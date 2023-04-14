@@ -1,4 +1,9 @@
-import { Context, GuestTotal, StateType } from "@/context/CalculatePage";
+import {
+  Context,
+  ExtraFee,
+  GuestTotal,
+  StateType,
+} from "@/context/CalculatePage";
 import { getRoomTypes } from "@/pages/api/stays";
 import pricing, { countRoomTypes } from "@/utils/calculation";
 import { Stay } from "@/utils/types";
@@ -134,11 +139,11 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
     (nonResidentFullTotalPrice * Number(calculateStay.nonResidentCommission)) /
       100;
 
-  const residentExtraFees = calculateStay.extraFee.filter(
+  const residentExtraFees: ExtraFee[] = calculateStay.extraFee.filter(
     (item) => item.guestType === "Resident"
   );
 
-  const nonResidentExtraFees = calculateStay.extraFee.filter(
+  const nonResidentExtraFees: ExtraFee[] = calculateStay.extraFee.filter(
     (item) => item.guestType === "Non-resident"
   );
 
@@ -311,7 +316,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
 
             {calculateStay.date[0] &&
               calculateStay.date[1] &&
-              residentExtraFees[0].name && (
+              calculateStay.rooms[0].name && (
                 <div className="flex flex-col gap-2">
                   <Divider size="xs" mt={8}></Divider>
                   <Flex justify="space-between" align="center">
@@ -542,7 +547,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
 
             {calculateStay.date[0] &&
               calculateStay.date[1] &&
-              nonResidentExtraFees.length > 0 && (
+              calculateStay.rooms[0].name && (
                 <div className="flex flex-col gap-2">
                   <Divider size="xs" mt={8}></Divider>
                   <Flex justify="space-between" align="center">
