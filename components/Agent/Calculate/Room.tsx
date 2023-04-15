@@ -337,8 +337,10 @@ export default function Room({ room, stay, index }: RoomProps) {
                 <Text size="xs" weight={600} className="text-gray-500">
                   Rooms
                 </Text>
-                <Text size="sm" weight={600}>
-                  {room.name ? room.name : "Select the room"}
+                <Text size="sm" w="60%" weight={600}>
+                  {room.name
+                    ? `${room.name}kjkjfkjkfjfkjfjdj`
+                    : "Select the room"}
                 </Text>
               </Flex>
 
