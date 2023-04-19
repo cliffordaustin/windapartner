@@ -5,7 +5,7 @@ export type ParkFee = {
   name?: string;
   price: number;
   feeType?: string;
-  guestType?: string;
+  guestType?: "ADULT" | "CHILD" | "INFANT" | "TEEN" | "";
 };
 
 export type ExtraFee = {
@@ -14,6 +14,20 @@ export type ExtraFee = {
   price: number | "";
   pricingType: "PER PERSON" | "WHOLE GROUP" | "PER PERSON PER NIGHT" | string;
   guestType: "Resident" | "Non-resident" | string;
+};
+
+export type ResidentGuests = {
+  id: string;
+  resident: "Adult" | "Child" | "Infant" | "Teen" | "";
+  guestType?: string;
+  description: string;
+};
+
+export type NonResidentGuests = {
+  id: string;
+  nonResident: "Adult" | "Child" | "Infant" | "Teen" | "";
+  guestType?: string;
+  description: string;
 };
 
 export type Room = {
@@ -25,6 +39,8 @@ export type Room = {
   nonResidentAdult: number;
   nonResidentChild: number;
   nonResidentInfant: number;
+  residentGuests: ResidentGuests[];
+  nonResidentGuests: NonResidentGuests[];
   package: string;
   residentParkFee: ParkFee[];
   nonResidentParkFee: ParkFee[];

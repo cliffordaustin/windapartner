@@ -328,6 +328,13 @@ export default function NonResidentGuestsSummary({
     });
   }, [nonResidentPriceTotal]);
 
+  const countNonResidentGuestTypes =
+    pricing.countNonResidentGuestTypesWithPrice(
+      room.nonResidentGuests,
+      room,
+      roomTypes
+    );
+
   return (
     <div>
       <Text size="sm" weight={600}>
@@ -335,6 +342,19 @@ export default function NonResidentGuestsSummary({
         {room.package.charAt(0).toUpperCase() +
           room.package.slice(1).toLowerCase()}
       </Text>
+
+      <div className="ml-1 mt-1 flex flex-col gap-1">
+        {countNonResidentGuestTypes.map((guestType, index) => (
+          <Flex key={index} align="center" justify="space-between">
+            <Text className="text-gray-600" size="sm">
+              {guestType.name}
+            </Text>
+            <Text className="text-gray-600" size="sm">
+              ${guestType.price?.toLocaleString()}
+            </Text>
+          </Flex>
+        ))}
+      </div>
 
       <div className="ml-1 mt-1 flex flex-col gap-1">
         {!!priceSingleNonResidentAdultAllInclusive && (

@@ -1,8 +1,12 @@
 import {
   Context,
+  NonResidentGuests,
   ParkFee,
+  ResidentGuests,
   Room as StateRoomType,
 } from "@/context/CalculatePage";
+import { getRoomTypes } from "@/pages/api/stays";
+import pricing from "@/utils/calculation";
 import {
   OtherFeesNonResident,
   OtherFeesResident,
@@ -11,7 +15,10 @@ import {
 } from "@/utils/types";
 import { Flex, Popover, Text, Divider, Checkbox } from "@mantine/core";
 import { IconMinus, IconPlus, IconSelector, IconX } from "@tabler/icons-react";
+import moment from "moment";
 import { useContext, useEffect, useState } from "react";
+import { useQuery } from "react-query";
+import { v4 as uuidv4 } from "uuid";
 
 type RoomProps = {
   room: StateRoomType;
@@ -67,7 +74,7 @@ export default function Room({ room, stay, index }: RoomProps) {
     setSelectedPackages(packages);
   }, [room.name]);
 
-  const currentStay = state.find((item) => item.id === stay.id);
+  const currentState = state.find((item) => item.id === stay.id);
 
   type GuestType =
     | "residentAdult"
@@ -316,6 +323,107 @@ export default function Room({ room, stay, index }: RoomProps) {
     );
   };
 
+  type GuestTypes = "Adult" | "Child" | "Infant" | "Teen" | "";
+
+  const guestTypes: GuestTypes[] = ["Adult", "Child", "Teen", "Infant"];
+
+  const queryStr = stay ? stay.slug : "room-type";
+
+  const { data: roomTypes, isLoading: roomTypesLoading } = useQuery(
+    queryStr,
+    () =>
+      getRoomTypes(
+        stay,
+        moment(currentState?.date[0]?.toLocaleDateString()).format(
+          "YYYY-MM-DD"
+        ),
+        moment(currentState?.date[1]?.toLocaleDateString()).format("YYYY-MM-DD")
+      ),
+    { enabled: currentState?.date[0] && currentState.date[1] ? true : false }
+  );
+
+  const commonRoomResidentNamesWithDescription =
+    pricing.findCommonRoomResidentNamesWithDescription(
+      room.name,
+      room.package,
+      roomTypes
+    );
+
+  const commonRoomNonResidentNamesWithDescription =
+    pricing.findCommonRoomNonResidentNamesWithDescription(
+      room.name,
+      room.package,
+      roomTypes
+    );
+
+  const removeResidentGuest = (guest: ResidentGuests) => {
+    setState(
+      state.map((item) => {
+        if (item.id === stay.id) {
+          return {
+            ...item,
+            rooms: item.rooms.map((item) => {
+              if (item.id === room.id) {
+                return {
+                  ...item,
+                  residentGuests: item.residentGuests.filter(
+                    (item) => item.id !== guest.id
+                  ),
+                };
+              }
+              return item;
+            }),
+          };
+        }
+        return item;
+      })
+    );
+  };
+
+  const removeNonResidentGuest = (guest: NonResidentGuests) => {
+    setState(
+      state.map((item) => {
+        if (item.id === stay.id) {
+          return {
+            ...item,
+            rooms: item.rooms.map((item) => {
+              if (item.id === room.id) {
+                return {
+                  ...item,
+                  nonResidentGuests: item.nonResidentGuests.filter(
+                    (item) => item.id !== guest.id
+                  ),
+                };
+              }
+              return item;
+            }),
+          };
+        }
+        return item;
+      })
+    );
+  };
+
+  const getNumGuests = (room: StateRoomType): number => {
+    let numGuests = 0;
+
+    for (const guest of room.residentGuests) {
+      if (guest.resident && guest.guestType) {
+        numGuests++;
+      }
+    }
+
+    for (const guest of room.nonResidentGuests) {
+      if (guest.nonResident && guest.guestType) {
+        numGuests++;
+      }
+    }
+
+    return numGuests;
+  };
+
+  const totalNumberOfGuests = getNumGuests(room);
+
   return (
     <div className="flex items-center">
       <Flex w="100%" mt={18}>
@@ -337,10 +445,8 @@ export default function Room({ room, stay, index }: RoomProps) {
                 <Text size="xs" weight={600} className="text-gray-500">
                   Rooms
                 </Text>
-                <Text size="sm" w="60%" weight={600}>
-                  {room.name
-                    ? `${room.name}kjkjfkjkfjfkjfjdj`
-                    : "Select the room"}
+                <Text size="sm" weight={600}>
+                  {room.name ? `${room.name}` : "Select the room"}
                 </Text>
               </Flex>
 
@@ -464,7 +570,7 @@ export default function Room({ room, stay, index }: RoomProps) {
         </Popover>
 
         <Popover
-          width={350}
+          width={400}
           position="bottom-start"
           arrowOffset={60}
           withArrow
@@ -481,8 +587,10 @@ export default function Room({ room, stay, index }: RoomProps) {
                   Guests
                 </Text>
                 <Text size="sm" weight={600}>
-                  {totalGuests > 0
-                    ? `${totalGuests} ${totalGuests === 1 ? "Guest" : "Guests"}`
+                  {totalNumberOfGuests > 0
+                    ? `${totalNumberOfGuests} ${
+                        totalNumberOfGuests === 1 ? "Guest" : "Guests"
+                      }`
                     : "Add guests"}
                 </Text>
               </Flex>
@@ -493,170 +601,492 @@ export default function Room({ room, stay, index }: RoomProps) {
 
           <Popover.Dropdown className="px-3">
             <Flex direction="column" gap={5}>
-              <Text size="sm" weight={600}>
+              <Text size="sm" mb={2} weight={600}>
                 Resident guests
               </Text>
+              {room.residentGuests.map((guest, index) => (
+                <Flex key={index} gap={7} align={"center"}>
+                  <Popover
+                    width={150}
+                    position="bottom-start"
+                    arrowOffset={60}
+                    withArrow
+                    shadow="md"
+                  >
+                    <Popover.Target>
+                      <Flex
+                        justify={"space-between"}
+                        align={"center"}
+                        className="px-2 py-1 cursor-pointer border rounded-md border-solid w-[48%] border-gray-300"
+                      >
+                        <Flex direction="column" gap={4}>
+                          <Text
+                            size="xs"
+                            weight={600}
+                            className="text-gray-500"
+                          >
+                            Guest
+                          </Text>
+                          <Text transform="capitalize" size="sm" weight={600}>
+                            {guest.resident ? guest.resident : "Select guest"}
+                          </Text>
+                        </Flex>
 
-              <Flex justify={"space-between"} mt={6} align={"center"}>
-                <Text size="sm">Adult (18+ years)</Text>
+                        <IconSelector className="text-gray-500"></IconSelector>
+                      </Flex>
+                    </Popover.Target>
 
-                <Flex>
+                    <Popover.Dropdown className="px-2 py-2">
+                      {guestTypes.map((guestType, index) => (
+                        <Flex
+                          w="100%"
+                          onClick={() => {
+                            setState(
+                              state.map((item) => {
+                                if (item.id === stay.id) {
+                                  return {
+                                    ...item,
+                                    rooms: item.rooms.map((item) => {
+                                      if (item.id === room.id) {
+                                        return {
+                                          ...item,
+                                          residentGuests:
+                                            item.residentGuests.map((item) => {
+                                              if (item.id === guest.id) {
+                                                return {
+                                                  ...item,
+                                                  resident: guestType,
+                                                };
+                                              }
+                                              return item;
+                                            }),
+                                        };
+                                      }
+                                      return item;
+                                    }),
+                                  };
+                                }
+                                return item;
+                              })
+                            );
+                          }}
+                          key={index}
+                        >
+                          <Text
+                            w="100%"
+                            className={
+                              "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                              (guest.resident === guestType
+                                ? "bg-[#FA5252] text-white"
+                                : "hover:bg-gray-100")
+                            }
+                            size="sm"
+                            weight={600}
+                          >
+                            {guestType}
+                          </Text>
+                        </Flex>
+                      ))}
+                    </Popover.Dropdown>
+                  </Popover>
+
+                  <Popover
+                    width={300}
+                    position="bottom-start"
+                    arrowOffset={60}
+                    withArrow
+                    shadow="md"
+                  >
+                    <Popover.Target>
+                      <Flex
+                        justify={"space-between"}
+                        align={"center"}
+                        className="px-2 py-1 cursor-pointer border rounded-md border-solid w-[48%] border-gray-300"
+                      >
+                        <Flex direction="column" gap={4}>
+                          <Text
+                            size="xs"
+                            weight={600}
+                            className="text-gray-500"
+                          >
+                            Guest type
+                          </Text>
+                          <Text transform="capitalize" size="sm" weight={600}>
+                            {guest.guestType
+                              ? guest.guestType
+                              : "Select guest type"}
+                          </Text>
+                        </Flex>
+
+                        <IconSelector className="text-gray-500"></IconSelector>
+                      </Flex>
+                    </Popover.Target>
+
+                    <Popover.Dropdown className="px-2 py-2">
+                      {commonRoomResidentNamesWithDescription.map(
+                        (guestType, index) => (
+                          <Flex
+                            w="100%"
+                            onClick={() => {
+                              setState(
+                                state.map((item) => {
+                                  if (item.id === stay.id) {
+                                    return {
+                                      ...item,
+                                      rooms: item.rooms.map((item) => {
+                                        if (item.id === room.id) {
+                                          return {
+                                            ...item,
+                                            residentGuests:
+                                              item.residentGuests.map(
+                                                (item) => {
+                                                  if (item.id === guest.id) {
+                                                    return {
+                                                      ...item,
+                                                      guestType:
+                                                        guestType?.name,
+                                                    };
+                                                  }
+                                                  return item;
+                                                }
+                                              ),
+                                          };
+                                        }
+                                        return item;
+                                      }),
+                                    };
+                                  }
+                                  return item;
+                                })
+                              );
+                            }}
+                            key={index}
+                          >
+                            <Text
+                              w="100%"
+                              className={
+                                "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                                (guest.guestType === guestType?.name
+                                  ? "bg-[#FA5252] text-white"
+                                  : "hover:bg-gray-100")
+                              }
+                              size="sm"
+                              weight={600}
+                              transform="capitalize"
+                            >
+                              {guestType?.name}
+                            </Text>
+                          </Flex>
+                        )
+                      )}
+                    </Popover.Dropdown>
+                  </Popover>
+
                   <div
                     onClick={() => {
-                      removeGuest("residentAdult");
+                      removeResidentGuest(guest);
                     }}
-                    className={guestClassName}
+                    className="mt-2 cursor-pointer"
                   >
-                    <IconMinus className="w-5 h-5"></IconMinus>
-                  </div>
-                  <div className="h-[35px] flex text-gray-600 items-center justify-center w-[35px] border-x-transparent border border-solid border-gray-400">
-                    {room.residentAdult}
-                  </div>
-                  <div
-                    onClick={() => {
-                      addGuest("residentAdult");
-                    }}
-                    className={guestClassName}
-                  >
-                    <IconPlus className="w-5 h-5"></IconPlus>
+                    {index > 0 && (
+                      <IconX className="text-gray-600 w-5 h-5"></IconX>
+                    )}
                   </div>
                 </Flex>
+              ))}
+              <Flex
+                onClick={() => {
+                  setState(
+                    state.map((item) => {
+                      if (item.id === stay.id) {
+                        return {
+                          ...item,
+                          rooms: item.rooms.map((item) => {
+                            if (item.id === room.id) {
+                              return {
+                                ...item,
+                                residentGuests: [
+                                  ...item.residentGuests,
+                                  {
+                                    id: uuidv4(),
+                                    resident: "",
+                                    guestType: "",
+                                    description: "",
+                                  },
+                                ],
+                              };
+                            }
+                            return item;
+                          }),
+                        };
+                      }
+                      return item;
+                    })
+                  );
+                }}
+                className="cursor-pointer w-fit"
+                align="center"
+                mt={5}
+                gap={4}
+              >
+                <Text
+                  className="text-blue-500"
+                  size="sm"
+                  weight={600}
+                  color="blue"
+                >
+                  Add Resident Guest
+                </Text>
+
+                <IconPlus className="w-5 h-5 text-blue-500"></IconPlus>
               </Flex>
+            </Flex>
 
-              <Flex justify={"space-between"} mt={6} align={"center"}>
-                <Text size="sm">Child (2-12 years)</Text>
+            <Divider className="my-2"></Divider>
 
-                <Flex>
-                  <div
-                    onClick={() => {
-                      removeGuest("residentChild");
-                    }}
-                    className={guestClassName}
-                  >
-                    <IconMinus className="w-5 h-5"></IconMinus>
-                  </div>
-                  <div className="h-[35px] flex text-gray-600 items-center justify-center w-[35px] border-x-transparent border border-solid border-gray-400">
-                    {room.residentChild}
-                  </div>
-                  <div
-                    onClick={() => {
-                      addGuest("residentChild");
-                    }}
-                    className={guestClassName}
-                  >
-                    <IconPlus className="w-5 h-5"></IconPlus>
-                  </div>
-                </Flex>
-              </Flex>
-
-              <Flex justify={"space-between"} mt={6} align={"center"}>
-                <Text size="sm">Infant (Under 2 years)</Text>
-
-                <Flex>
-                  <div
-                    onClick={() => {
-                      removeGuest("residentInfant");
-                    }}
-                    className={guestClassName}
-                  >
-                    <IconMinus className="w-5 h-5"></IconMinus>
-                  </div>
-                  <div className="h-[35px] flex text-gray-600 items-center justify-center w-[35px] border-x-transparent border border-solid border-gray-400">
-                    {room.residentInfant}
-                  </div>
-                  <div
-                    onClick={() => {
-                      addGuest("residentInfant");
-                    }}
-                    className={guestClassName}
-                  >
-                    <IconPlus className="w-5 h-5"></IconPlus>
-                  </div>
-                </Flex>
-              </Flex>
-
-              <Divider mt={6} size="xs" />
-
-              <Text size="sm" weight={600}>
-                Non-resident guests
+            <Flex direction="column" gap={5}>
+              <Text size="sm" mb={2} weight={600}>
+                Non-Resident guests
               </Text>
+              {room.nonResidentGuests.map((guest, index) => (
+                <Flex gap={7} key={index} align={"center"}>
+                  <Popover
+                    width={150}
+                    position="bottom-start"
+                    arrowOffset={60}
+                    withArrow
+                    shadow="md"
+                  >
+                    <Popover.Target>
+                      <Flex
+                        justify={"space-between"}
+                        align={"center"}
+                        className="px-2 py-1 cursor-pointer border rounded-md border-solid w-[48%] border-gray-300"
+                      >
+                        <Flex direction="column" gap={4}>
+                          <Text
+                            size="xs"
+                            weight={600}
+                            className="text-gray-500"
+                          >
+                            Guest
+                          </Text>
+                          <Text transform="capitalize" size="sm" weight={600}>
+                            {guest.nonResident
+                              ? guest.nonResident
+                              : "Select guest"}
+                          </Text>
+                        </Flex>
 
-              <Flex justify={"space-between"} mt={6} align={"center"}>
-                <Text size="sm">Adult (18+ years)</Text>
+                        <IconSelector className="text-gray-500"></IconSelector>
+                      </Flex>
+                    </Popover.Target>
 
-                <Flex>
+                    <Popover.Dropdown className="px-2 py-2">
+                      {guestTypes.map((guestType, index) => (
+                        <Flex
+                          w="100%"
+                          onClick={() => {
+                            setState(
+                              state.map((item) => {
+                                if (item.id === stay.id) {
+                                  return {
+                                    ...item,
+                                    rooms: item.rooms.map((item) => {
+                                      if (item.id === room.id) {
+                                        return {
+                                          ...item,
+                                          nonResidentGuests:
+                                            item.nonResidentGuests.map(
+                                              (item) => {
+                                                if (item.id === guest.id) {
+                                                  return {
+                                                    ...item,
+                                                    nonResident: guestType,
+                                                  };
+                                                }
+                                                return item;
+                                              }
+                                            ),
+                                        };
+                                      }
+                                      return item;
+                                    }),
+                                  };
+                                }
+                                return item;
+                              })
+                            );
+                          }}
+                          key={index}
+                        >
+                          <Text
+                            w="100%"
+                            className={
+                              "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                              (guest.nonResident === guestType
+                                ? "bg-[#FA5252] text-white"
+                                : "hover:bg-gray-100")
+                            }
+                            size="sm"
+                            weight={600}
+                          >
+                            {guestType}
+                          </Text>
+                        </Flex>
+                      ))}
+                    </Popover.Dropdown>
+                  </Popover>
+
+                  <Popover
+                    width={300}
+                    position="bottom-start"
+                    arrowOffset={60}
+                    withArrow
+                    shadow="md"
+                  >
+                    <Popover.Target>
+                      <Flex
+                        justify={"space-between"}
+                        align={"center"}
+                        className="px-2 py-1 cursor-pointer border rounded-md border-solid w-[48%] border-gray-300"
+                      >
+                        <Flex direction="column" gap={4}>
+                          <Text
+                            size="xs"
+                            weight={600}
+                            className="text-gray-500"
+                          >
+                            Guest type
+                          </Text>
+                          <Text transform="capitalize" size="sm" weight={600}>
+                            {guest.guestType
+                              ? guest.guestType
+                              : "Select guest type"}
+                          </Text>
+                        </Flex>
+
+                        <IconSelector className="text-gray-500"></IconSelector>
+                      </Flex>
+                    </Popover.Target>
+
+                    <Popover.Dropdown className="px-2 py-2">
+                      {commonRoomNonResidentNamesWithDescription.map(
+                        (guestType, index) => (
+                          <Flex
+                            w="100%"
+                            onClick={() => {
+                              setState(
+                                state.map((item) => {
+                                  if (item.id === stay.id) {
+                                    return {
+                                      ...item,
+                                      rooms: item.rooms.map((item) => {
+                                        if (item.id === room.id) {
+                                          return {
+                                            ...item,
+                                            nonResidentGuests:
+                                              item.nonResidentGuests.map(
+                                                (item) => {
+                                                  if (item.id === guest.id) {
+                                                    return {
+                                                      ...item,
+                                                      guestType:
+                                                        guestType?.name,
+                                                    };
+                                                  }
+                                                  return item;
+                                                }
+                                              ),
+                                          };
+                                        }
+                                        return item;
+                                      }),
+                                    };
+                                  }
+                                  return item;
+                                })
+                              );
+                            }}
+                            key={index}
+                          >
+                            <Text
+                              w="100%"
+                              className={
+                                "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                                (guest.guestType === guestType?.name
+                                  ? "bg-[#FA5252] text-white"
+                                  : "hover:bg-gray-100")
+                              }
+                              size="sm"
+                              weight={600}
+                              transform="capitalize"
+                            >
+                              {guestType?.name}
+                            </Text>
+                          </Flex>
+                        )
+                      )}
+                    </Popover.Dropdown>
+                  </Popover>
+
                   <div
                     onClick={() => {
-                      removeGuest("nonResidentAdult");
+                      removeNonResidentGuest(guest);
                     }}
-                    className={guestClassName}
+                    className="mt-2 cursor-pointer"
                   >
-                    <IconMinus className="w-5 h-5"></IconMinus>
-                  </div>
-                  <div className="h-[35px] flex text-gray-600 items-center justify-center w-[35px] border-x-transparent border border-solid border-gray-400">
-                    {room.nonResidentAdult}
-                  </div>
-                  <div
-                    onClick={() => {
-                      addGuest("nonResidentAdult");
-                    }}
-                    className={guestClassName}
-                  >
-                    <IconPlus className="w-5 h-5"></IconPlus>
+                    {index > 0 && (
+                      <IconX className="text-gray-600 w-5 h-5"></IconX>
+                    )}
                   </div>
                 </Flex>
-              </Flex>
+              ))}
+              <Flex
+                onClick={() => {
+                  setState(
+                    state.map((item) => {
+                      if (item.id === stay.id) {
+                        return {
+                          ...item,
+                          rooms: item.rooms.map((item) => {
+                            if (item.id === room.id) {
+                              return {
+                                ...item,
+                                nonResidentGuests: [
+                                  ...item.nonResidentGuests,
+                                  {
+                                    id: uuidv4(),
+                                    nonResident: "",
+                                    guestType: "",
+                                    description: "",
+                                  },
+                                ],
+                              };
+                            }
+                            return item;
+                          }),
+                        };
+                      }
+                      return item;
+                    })
+                  );
+                }}
+                className="cursor-pointer w-fit"
+                align="center"
+                mt={5}
+                gap={4}
+              >
+                <Text
+                  className="text-blue-500"
+                  size="sm"
+                  weight={600}
+                  color="blue"
+                >
+                  Add Non-Resident Guest
+                </Text>
 
-              <Flex justify={"space-between"} mt={6} align={"center"}>
-                <Text size="sm">Child (2-12 years)</Text>
-
-                <Flex>
-                  <div
-                    onClick={() => {
-                      removeGuest("nonResidentChild");
-                    }}
-                    className={guestClassName}
-                  >
-                    <IconMinus className="w-5 h-5"></IconMinus>
-                  </div>
-                  <div className="h-[35px] flex text-gray-600 items-center justify-center w-[35px] border-x-transparent border border-solid border-gray-400">
-                    {room.nonResidentChild}
-                  </div>
-                  <div
-                    onClick={() => {
-                      addGuest("nonResidentChild");
-                    }}
-                    className={guestClassName}
-                  >
-                    <IconPlus className="w-5 h-5"></IconPlus>
-                  </div>
-                </Flex>
-              </Flex>
-
-              <Flex justify={"space-between"} mt={6} align={"center"}>
-                <Text size="sm">Infant (Under 2 years)</Text>
-
-                <Flex>
-                  <div
-                    onClick={() => {
-                      removeGuest("nonResidentInfant");
-                    }}
-                    className={guestClassName}
-                  >
-                    <IconMinus className="w-5 h-5"></IconMinus>
-                  </div>
-                  <div className="h-[35px] flex text-gray-600 items-center justify-center w-[35px] border-x-transparent border border-solid border-gray-400">
-                    {room.nonResidentInfant}
-                  </div>
-                  <div
-                    onClick={() => {
-                      addGuest("nonResidentInfant");
-                    }}
-                    className={guestClassName}
-                  >
-                    <IconPlus className="w-5 h-5"></IconPlus>
-                  </div>
-                </Flex>
+                <IconPlus className="w-5 h-5 text-blue-500"></IconPlus>
               </Flex>
             </Flex>
           </Popover.Dropdown>

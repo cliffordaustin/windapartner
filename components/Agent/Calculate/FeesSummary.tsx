@@ -1,6 +1,7 @@
 import { RoomType } from "@/utils/types";
 import { Room } from "@/context/CalculatePage";
 import { Text } from "@mantine/core";
+import pricing from "@/utils/calculation";
 
 type FeesSummaryProps = {
   room: Room;
@@ -8,6 +9,9 @@ type FeesSummaryProps = {
 };
 
 export default function FeesSummary({ room, index }: FeesSummaryProps) {
+  const roomArr = [room];
+
+  const totalGuests = pricing.getTotalGuestsByCategory(roomArr);
   return (
     <div>
       <Text size="sm" weight={600}>
@@ -19,21 +23,32 @@ export default function FeesSummary({ room, index }: FeesSummaryProps) {
         {room.residentParkFee.map((item, index) => (
           <div key={index} className="flex items-center justify-between">
             <Text size="sm" className="text-gray-600" weight={500}>
-              {item.name}
+              {item.name} (For {""}
+              {item.guestType === "ADULT"
+                ? totalGuests.residentAdults
+                : item.guestType === "CHILD"
+                ? totalGuests.residentChildren
+                : item.guestType === "INFANT"
+                ? totalGuests.residentInfants
+                : item.guestType === "TEEN"
+                ? totalGuests.residentTeens
+                : 0}
+              )
             </Text>
             <Text size="sm" className="text-gray-600" weight={500}>
-              KES{item.price.toLocaleString()}
-            </Text>
-          </div>
-        ))}
-
-        {room.nonResidentParkFee.map((item, index) => (
-          <div key={index} className="flex items-center justify-between">
-            <Text size="sm" className="text-gray-600" weight={500}>
-              {item.name}
-            </Text>
-            <Text size="sm" className="text-gray-600" weight={500}>
-              ${item.price.toLocaleString()}
+              KES
+              {(
+                item.price *
+                (item.guestType === "ADULT"
+                  ? totalGuests.residentAdults
+                  : item.guestType === "CHILD"
+                  ? totalGuests.residentChildren
+                  : item.guestType === "INFANT"
+                  ? totalGuests.residentInfants
+                  : item.guestType === "TEEN"
+                  ? totalGuests.residentTeens
+                  : 0)
+              ).toLocaleString()}
             </Text>
           </div>
         ))}

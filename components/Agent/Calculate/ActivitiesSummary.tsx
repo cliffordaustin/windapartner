@@ -20,6 +20,7 @@ export default function ActivitiesSummary({
     numberOfGuests,
     nights
   );
+
   return (
     <div>
       <div className="flex flex-col gap-1 ml-1">

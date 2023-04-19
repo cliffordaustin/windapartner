@@ -56,7 +56,7 @@ export type OtherFeesResident = {
   name?: string;
   price: number;
   resident_fee_type?: string;
-  guest_type?: string;
+  guest_type?: "CHILD" | "ADULT" | "INFANT" | "TEEN" | "";
 };
 
 export type OtherFeesNonResident = {
@@ -64,12 +64,13 @@ export type OtherFeesNonResident = {
   name?: string;
   price: number;
   nonresident_fee_type?: string;
-  guest_type?: string;
+  guest_type?: "CHILD" | "ADULT" | "INFANT" | "TEEN" | "";
 };
 
 export type RoomAvailabilityResidentGuest = {
   id: number;
   name?: string;
+  description?: string;
   age_group?: string;
   price: number;
 };

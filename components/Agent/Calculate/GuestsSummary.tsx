@@ -325,6 +325,12 @@ export default function GuestsSummary({
     });
   }, [residentPriceTotal]);
 
+  const countResidentGuestTypes = pricing.countResidentGuestTypesWithPrice(
+    room.residentGuests,
+    room,
+    roomTypes
+  );
+
   return (
     <div>
       <Text size="sm" weight={600}>
@@ -332,6 +338,19 @@ export default function GuestsSummary({
         {room.package.charAt(0).toUpperCase() +
           room.package.slice(1).toLowerCase()}
       </Text>
+
+      <div className="ml-1 mt-1 flex flex-col gap-1">
+        {countResidentGuestTypes.map((guestType, index) => (
+          <Flex key={index} align="center" justify="space-between">
+            <Text className="text-gray-600" size="sm">
+              {guestType.name}
+            </Text>
+            <Text className="text-gray-600" size="sm">
+              KES{guestType.price?.toLocaleString()}
+            </Text>
+          </Flex>
+        ))}
+      </div>
 
       <div className="ml-1 mt-1 flex flex-col gap-1">
         {!!priceSingleResidentAdultAllInclusive && (

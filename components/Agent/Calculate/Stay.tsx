@@ -50,7 +50,7 @@ export function Stay({ stay, index }: StayProps) {
   )?.nonResidentCommission;
 
   const addRoom = () => {
-    const updatedItems = state.map((item) => {
+    const updatedItems: StateType[] = state.map((item) => {
       if (item.id === stay.id) {
         return {
           ...item,
@@ -68,6 +68,22 @@ export function Stay({ stay, index }: StayProps) {
               package: "",
               residentParkFee: [],
               nonResidentParkFee: [],
+              residentGuests: [
+                {
+                  id: uuidv4(),
+                  resident: "",
+                  guestType: "",
+                  description: "",
+                },
+              ],
+              nonResidentGuests: [
+                {
+                  id: uuidv4(),
+                  nonResident: "",
+                  guestType: "",
+                  description: "",
+                },
+              ],
             },
           ],
         };
@@ -170,11 +186,15 @@ export function Stay({ stay, index }: StayProps) {
           </Text>
         </Flex>
 
-        <Divider mt={16} mb={16} />
+        {stay.activity_fees.length > 0 && (
+          <>
+            <Divider mt={16} mb={16} />
 
-        <Text size="md" weight={600}>
-          Activities
-        </Text>
+            <Text size="md" weight={600}>
+              Activities
+            </Text>
+          </>
+        )}
 
         <div className="flex flex-col gap-4 mt-4">
           {stay.activity_fees?.map((activity, index) => (

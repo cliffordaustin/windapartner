@@ -1,4 +1,10 @@
-import { ActivityFee, ExtraFee, Room } from "@/context/CalculatePage";
+import {
+  ActivityFee,
+  ExtraFee,
+  NonResidentGuests,
+  ResidentGuests,
+  Room,
+} from "@/context/CalculatePage";
 import { RoomType } from "./types";
 
 export function countRoomTypes(roomArray: Room[]): string[] {
@@ -2895,6 +2901,328 @@ function calculateExtraFees(
   return totalExtraFees;
 }
 
+function residentPrice(
+  roomName: string,
+  guestName: string | undefined,
+  packageName: string | undefined,
+  numberOfGuests: number,
+  availabilities: RoomType[] | undefined
+) {
+  if (!availabilities) {
+    return null; // Invalid input, return null
+  }
+
+  let totalPrice = 0;
+
+  for (const availability of availabilities) {
+    if (
+      availability.name?.toLowerCase() === roomName.toLowerCase() &&
+      availability.package.toLowerCase() === packageName?.toLowerCase()
+    ) {
+      for (const roomAvailability of availability.room_resident_availabilities) {
+        for (const guestAvailability of roomAvailability.room_resident_guest_availabilities) {
+          if (
+            guestAvailability.name?.toLowerCase() === guestName?.toLowerCase()
+          ) {
+            totalPrice += guestAvailability.price;
+          }
+        }
+      }
+    }
+  }
+
+  return totalPrice * numberOfGuests;
+}
+
+const nonResidentPrice = (
+  roomName: string,
+  guestName: string | undefined,
+  packageName: string | undefined,
+  numberOfGuests: number,
+  availabilities: RoomType[] | undefined
+) => {
+  if (!availabilities) {
+    return null; // Invalid input, return null
+  }
+
+  let totalPrice = 0;
+
+  for (const availability of availabilities) {
+    if (
+      availability.name?.toLowerCase() === roomName.toLowerCase() &&
+      availability.package.toLowerCase() === packageName?.toLowerCase()
+    ) {
+      for (const roomAvailability of availability.room_non_resident_availabilities) {
+        for (const guestAvailability of roomAvailability.room_non_resident_guest_availabilities) {
+          if (
+            guestAvailability.name?.toLowerCase() === guestName?.toLowerCase()
+          ) {
+            totalPrice += guestAvailability.price;
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  return totalPrice * numberOfGuests;
+};
+
+const findCommonRoomResidentNamesWithDescription = (
+  name: string | undefined,
+  packageName: string | undefined,
+  packages: RoomType[] | undefined
+): ({ name?: string; description?: string } | undefined)[] => {
+  if (packages && name && packageName) {
+    const filteredPackage = packages.find(
+      (pkg) => pkg.name === name && pkg.package === packageName
+    );
+    if (!filteredPackage) {
+      return [];
+    }
+
+    const { room_resident_availabilities } = filteredPackage;
+    const nameSets = room_resident_availabilities.map((room) =>
+      room.room_resident_guest_availabilities.map((guest) => ({
+        name: guest.name?.toLowerCase(),
+        description: guest.description,
+      }))
+    );
+
+    const nameSet = new Set();
+    const commonNames = [];
+
+    for (const nameArr of nameSets) {
+      for (const nameObj of nameArr) {
+        if (!nameSet.has(nameObj.name)) {
+          nameSet.add(nameObj.name);
+          commonNames.push(nameObj);
+        }
+      }
+    }
+    return commonNames;
+  }
+  return [];
+};
+
+const findCommonRoomNonResidentNamesWithDescription = (
+  name: string | undefined,
+  packageName: string | undefined,
+  packages: RoomType[] | undefined
+): ({ name?: string; description?: string } | undefined)[] => {
+  if (packages && name && packageName) {
+    const filteredPackage = packages.find(
+      (pkg) => pkg.name === name && pkg.package === packageName
+    );
+    if (!filteredPackage) {
+      return [];
+    }
+
+    const { room_non_resident_availabilities } = filteredPackage;
+    const nameSets = room_non_resident_availabilities.map((room) =>
+      room.room_non_resident_guest_availabilities.map((guest) => ({
+        name: guest.name?.toLowerCase(),
+        description: guest.description,
+      }))
+    );
+
+    const nameSet = new Set();
+    const commonNames = [];
+
+    for (const nameArr of nameSets) {
+      for (const nameObj of nameArr) {
+        if (!nameSet.has(nameObj.name)) {
+          nameSet.add(nameObj.name);
+          commonNames.push(nameObj);
+        }
+      }
+    }
+    return commonNames;
+  }
+  return [];
+};
+
+function countResidentGuestTypesWithPrice(
+  residentGuests: ResidentGuests[],
+  room: Room,
+  roomTypes: RoomType[] | undefined
+): { name: string; price: number | null }[] {
+  const counts: { [key: string]: number } = {};
+
+  for (const guest of residentGuests) {
+    if (guest.resident === "") continue;
+
+    const guestType = guest.guestType ? `(${guest.guestType})` : "";
+    const name = `${guest.resident}${guestType}`;
+
+    counts[name] = (counts[name] || 0) + 1;
+  }
+
+  return Object.keys(counts).map((name) => {
+    const count = counts[name];
+    const guestType =
+      name.includes("(") && name.includes(")")
+        ? name.split("(")[1].split(")")[0]
+        : undefined;
+    const price = guestType
+      ? residentPrice(room.name, guestType, room.package, count, roomTypes)
+      : 0;
+
+    return { name: `${count} ${name}`, price };
+  });
+}
+
+function countNonResidentGuestTypesWithPrice(
+  nonResidentGuests: NonResidentGuests[],
+  room: Room,
+  roomTypes: RoomType[] | undefined
+): { name: string; price: number | null }[] {
+  const counts: { [key: string]: number } = {};
+
+  for (const guest of nonResidentGuests) {
+    if (guest.nonResident === "") continue;
+
+    const guestType = guest.guestType ? `(${guest.guestType})` : "";
+    const name = `${guest.nonResident}${guestType}`;
+
+    counts[name] = (counts[name] || 0) + 1;
+  }
+
+  return Object.keys(counts).map((name) => {
+    const count = counts[name];
+    const guestType =
+      name.includes("(") && name.includes(")")
+        ? name.split("(")[1].split(")")[0]
+        : undefined;
+    const price = guestType
+      ? nonResidentPrice(room.name, guestType, room.package, count, roomTypes)
+      : 0;
+
+    return { name: `${count} ${name}`, price };
+  });
+}
+
+function getTotalGuestsByCategory(rooms: Room[]): {
+  residentAdults: number;
+  residentChildren: number;
+  residentInfants: number;
+  residentTeens: number;
+  nonResidentAdults: number;
+  nonResidentChildren: number;
+  nonResidentInfants: number;
+  nonResidentTeens: number;
+} {
+  let residentAdults = 0;
+  let residentChildren = 0;
+  let residentInfants = 0;
+  let residentTeens = 0;
+  let nonResidentAdults = 0;
+  let nonResidentChildren = 0;
+  let nonResidentInfants = 0;
+  let nonResidentTeens = 0;
+
+  rooms.forEach((room) => {
+    room.residentGuests.forEach((guest) => {
+      switch (guest.resident) {
+        case "Adult":
+          residentAdults += 1;
+          break;
+        case "Child":
+          residentChildren += 1;
+          break;
+        case "Infant":
+          residentInfants += 1;
+          break;
+        case "Teen":
+          residentTeens += 1;
+          break;
+        default:
+          break;
+      }
+    });
+
+    room.nonResidentGuests.forEach((guest) => {
+      switch (guest.nonResident) {
+        case "Adult":
+          nonResidentAdults += 1;
+          break;
+        case "Child":
+          nonResidentChildren += 1;
+          break;
+        case "Infant":
+          nonResidentInfants += 1;
+          break;
+        case "Teen":
+          nonResidentTeens += 1;
+          break;
+        default:
+          break;
+      }
+    });
+  });
+
+  return {
+    residentAdults,
+    residentChildren,
+    residentInfants,
+    residentTeens,
+    nonResidentAdults,
+    nonResidentChildren,
+    nonResidentInfants,
+    nonResidentTeens,
+  };
+}
+
+export function getTotalParkFeesByCategory(rooms: Room[]): {
+  residentParkFee: {
+    adult: number;
+    child: number;
+    infant: number;
+    teen: number;
+  };
+  nonResidentParkFee: {
+    adult: number;
+    child: number;
+    infant: number;
+    teen: number;
+  };
+} {
+  const totalFeesByCategory = {
+    residentParkFee: { adult: 0, child: 0, infant: 0, teen: 0 },
+    nonResidentParkFee: { adult: 0, child: 0, infant: 0, teen: 0 },
+  };
+
+  rooms.forEach((room) => {
+    // Calculate resident park fees
+    room.residentParkFee.forEach((parkFee) => {
+      if (parkFee.guestType === "ADULT") {
+        totalFeesByCategory.residentParkFee.adult += parkFee.price;
+      } else if (parkFee.guestType === "CHILD") {
+        totalFeesByCategory.residentParkFee.child += parkFee.price;
+      } else if (parkFee.guestType === "INFANT") {
+        totalFeesByCategory.residentParkFee.infant += parkFee.price;
+      } else if (parkFee.guestType === "TEEN") {
+        totalFeesByCategory.residentParkFee.teen += parkFee.price;
+      }
+    });
+
+    // Calculate non-resident park fees
+    room.nonResidentParkFee.forEach((parkFee) => {
+      if (parkFee.guestType === "ADULT") {
+        totalFeesByCategory.nonResidentParkFee.adult += parkFee.price;
+      } else if (parkFee.guestType === "CHILD") {
+        totalFeesByCategory.nonResidentParkFee.child += parkFee.price;
+      } else if (parkFee.guestType === "INFANT") {
+        totalFeesByCategory.nonResidentParkFee.infant += parkFee.price;
+      } else if (parkFee.guestType === "TEEN") {
+        totalFeesByCategory.nonResidentParkFee.teen += parkFee.price;
+      }
+    });
+  });
+
+  return totalFeesByCategory;
+}
+
 const pricing = {
   singleResidentAdultAllInclusivePrice,
   singleResidentAdultGamePackagePrice,
@@ -2969,6 +3297,13 @@ const pricing = {
   nonResidentInfantBedAndBreakfastPrice,
   calculateActivityFees,
   calculateExtraFees,
+
+  findCommonRoomResidentNamesWithDescription,
+  findCommonRoomNonResidentNamesWithDescription,
+  countResidentGuestTypesWithPrice,
+  countNonResidentGuestTypesWithPrice,
+  getTotalGuestsByCategory,
+  getTotalParkFeesByCategory,
 };
 
 export default pricing;

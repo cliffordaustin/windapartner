@@ -65,6 +65,22 @@ export default function Calculate() {
               nonResidentAdult: 0,
               nonResidentChild: 0,
               nonResidentInfant: 0,
+              residentGuests: [
+                {
+                  id: uuidv4(),
+                  resident: "",
+                  guestType: "",
+                  description: "",
+                },
+              ],
+              nonResidentGuests: [
+                {
+                  id: uuidv4(),
+                  nonResident: "",
+                  guestType: "",
+                  description: "",
+                },
+              ],
               package: "",
               residentParkFee: [],
               nonResidentParkFee: [],

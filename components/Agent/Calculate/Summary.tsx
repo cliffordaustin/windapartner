@@ -63,45 +63,87 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
     0
   );
 
-  const totalResidentFee = calculateStay.rooms.reduce(
-    (acc, room) =>
-      acc +
-      room.residentParkFee.reduce(
-        (parkFeeAcc, parkFee) => parkFeeAcc + parkFee.price,
-        0
-      ),
-    0
-  );
-  const totalNonResidentFee = calculateStay.rooms.reduce(
-    (acc, room) =>
-      acc +
-      room.nonResidentParkFee.reduce(
-        (parkFeeAcc, parkFee) => parkFeeAcc + parkFee.price,
-        0
-      ),
-    0
-  );
-
   const activityTotal = calculateStay.activityFee.reduce(
     (acc, item) => Number(acc) + Number(item.price),
     0
   );
 
-  const totalNumberOfGuests = calculateStay.rooms.reduce(
-    (acc, room) =>
-      acc +
-      room.nonResidentAdult +
-      room.nonResidentChild +
-      room.nonResidentInfant +
-      room.residentAdult +
-      room.residentChild +
-      room.residentInfant,
+  const totalNumberOfGuests = calculateStay.rooms.reduce((acc, room) => {
+    const countResidentGuestTypes = pricing.countResidentGuestTypesWithPrice(
+      room.residentGuests,
+      room,
+      roomTypes
+    );
+    const roomTotal = countResidentGuestTypes.reduce((acc, item) => {
+      const numGuests = parseInt(item.name.split(" ")[0]);
+      return acc + numGuests;
+    }, 0);
+    return acc + roomTotal;
+  }, 0);
+
+  const totalNumberOfNonResidentGuests = calculateStay.rooms.reduce(
+    (acc, room) => {
+      const countNonResidentGuestTypes =
+        pricing.countNonResidentGuestTypesWithPrice(
+          room.nonResidentGuests,
+          room,
+          roomTypes
+        );
+      const roomTotal = countNonResidentGuestTypes.reduce((acc, item) => {
+        const numGuests = parseInt(item.name.split(" ")[0]);
+        return acc + numGuests;
+      }, 0);
+      return acc + roomTotal;
+    },
     0
   );
 
+  const totalGuests = pricing.getTotalGuestsByCategory(calculateStay.rooms);
+  const totalPriceParkFee = pricing.getTotalParkFeesByCategory(
+    calculateStay.rooms
+  );
+
+  const totalNumberOfResidentAdultGuests =
+    totalPriceParkFee.residentParkFee.adult * totalGuests.residentAdults;
+
+  const totalNumberOfResidentChildGuests =
+    totalPriceParkFee.residentParkFee.child * totalGuests.residentChildren;
+
+  const totalNumberOfResidentTeenGuests =
+    totalPriceParkFee.residentParkFee.teen * totalGuests.residentTeens;
+
+  const totalNumberOfResidentInfantGuests =
+    totalPriceParkFee.residentParkFee.infant * totalGuests.residentInfants;
+
+  const totalNumberOfNonResidentAdultGuests =
+    totalPriceParkFee.nonResidentParkFee.adult * totalGuests.nonResidentAdults;
+
+  const totalNumberOfNonResidentChildGuests =
+    totalPriceParkFee.nonResidentParkFee.child *
+    totalGuests.nonResidentChildren;
+
+  const totalNumberOfNonResidentTeenGuests =
+    totalPriceParkFee.nonResidentParkFee.teen * totalGuests.nonResidentTeens;
+
+  const totalNumberOfNonResidentInfantGuests =
+    totalPriceParkFee.nonResidentParkFee.infant *
+    totalGuests.nonResidentInfants;
+
+  const totalResidentFee =
+    totalNumberOfResidentAdultGuests +
+    totalNumberOfResidentChildGuests +
+    totalNumberOfResidentTeenGuests +
+    totalNumberOfResidentInfantGuests;
+
+  const totalNonResidentFee =
+    totalNumberOfNonResidentAdultGuests +
+    totalNumberOfNonResidentChildGuests +
+    totalNumberOfNonResidentTeenGuests +
+    totalNumberOfNonResidentInfantGuests;
+
   const activityTotalPrice = pricing.calculateActivityFees(
     calculateStay.activityFee,
-    totalNumberOfGuests,
+    totalNumberOfGuests + totalNumberOfNonResidentGuests,
     nights
   );
 
@@ -121,18 +163,44 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
 
   const totalNonResidentExtraFees = pricing.calculateExtraFees(
     nonResidentTotalExtraFees,
-    totalNumberOfGuests,
+    totalNumberOfNonResidentGuests,
     nights
   );
 
+  const totalResidentPrice = calculateStay.rooms.reduce((acc, room) => {
+    const countResidentGuestTypes = pricing.countResidentGuestTypesWithPrice(
+      room.residentGuests,
+      room,
+      roomTypes
+    );
+    const roomTotal = countResidentGuestTypes.reduce(
+      (acc, item) => acc + (item.price || 0),
+      0
+    );
+    return acc + roomTotal;
+  }, 0);
+
+  const totalNonResidentPrice = calculateStay.rooms.reduce((acc, room) => {
+    const countResidentGuestTypes = pricing.countNonResidentGuestTypesWithPrice(
+      room.nonResidentGuests,
+      room,
+      roomTypes
+    );
+    const roomTotal = countResidentGuestTypes.reduce(
+      (acc, item) => acc + (item.price || 0),
+      0
+    );
+    return acc + roomTotal;
+  }, 0);
+
   let residentFullTotalPrice =
-    residentTotal + totalResidentFee + totalResidentExtraFees;
+    totalResidentPrice + totalResidentFee + totalResidentExtraFees;
 
   residentFullTotalPrice =
     residentFullTotalPrice +
     (residentFullTotalPrice * Number(calculateStay.residentCommission)) / 100;
   let nonResidentFullTotalPrice =
-    nonResidentTotal + totalNonResidentFee + totalNonResidentExtraFees;
+    totalNonResidentPrice + totalNonResidentFee + totalNonResidentExtraFees;
 
   nonResidentFullTotalPrice =
     nonResidentFullTotalPrice +
@@ -221,7 +289,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
 
             {calculateStay.date[0] &&
               calculateStay.date[1] &&
-              calculateStay.rooms[0].name && (
+              calculateStay.rooms[0].residentGuests.length > 0 && (
                 <div className="flex flex-col gap-2">
                   <Flex justify="space-between" className="mt-2" align="center">
                     <Text size="sm" weight={700}>
@@ -229,8 +297,8 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
                     </Text>
 
                     <Text size="sm" weight={600}>
-                      {residentTotal
-                        ? `KES ${residentTotal.toLocaleString()}`
+                      {totalResidentPrice
+                        ? `KES ${totalResidentPrice.toLocaleString()}`
                         : ""}{" "}
                     </Text>
                   </Flex>
@@ -259,16 +327,6 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
                 <Flex justify="space-between" align="center">
                   <Text size="sm" weight={700}>
                     Fees
-                  </Text>
-
-                  <Text size="sm" weight={600}>
-                    {totalResidentFee
-                      ? `KES ${totalResidentFee.toLocaleString()}`
-                      : ""}{" "}
-                    {totalResidentFee && totalNonResidentFee ? "/" : ""}{" "}
-                    {totalNonResidentFee
-                      ? `$ ${totalNonResidentFee.toLocaleString()}`
-                      : ""}
                   </Text>
                 </Flex>
 
@@ -306,7 +364,9 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
                       <ActivitiesSummary
                         key={index}
                         activity={activity}
-                        numberOfGuests={totalNumberOfGuests}
+                        numberOfGuests={
+                          totalNumberOfGuests + totalNumberOfNonResidentGuests
+                        }
                         nights={nights}
                       ></ActivitiesSummary>
                     ))}
@@ -316,7 +376,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
 
             {calculateStay.date[0] &&
               calculateStay.date[1] &&
-              calculateStay.rooms[0].name && (
+              calculateStay.extraFee[0].name && (
                 <div className="flex flex-col gap-2">
                   <Divider size="xs" mt={8}></Divider>
                   <Flex justify="space-between" align="center">
@@ -464,8 +524,8 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
                     </Text>
 
                     <Text size="sm" weight={600}>
-                      {nonResidentTotal
-                        ? `$ ${nonResidentTotal.toLocaleString()}`
+                      {totalNonResidentPrice
+                        ? `$ ${totalNonResidentPrice.toLocaleString()}`
                         : ""}
                     </Text>
                   </Flex>
@@ -494,12 +554,6 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
                 <Flex justify="space-between" align="center">
                   <Text size="sm" weight={700}>
                     Fees
-                  </Text>
-
-                  <Text size="sm" weight={600}>
-                    {totalNonResidentFee
-                      ? `$ ${totalNonResidentFee.toLocaleString()}`
-                      : ""}
                   </Text>
                 </Flex>
 
@@ -537,7 +591,9 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
                       <ActivitiesSummary
                         key={index}
                         activity={activity}
-                        numberOfGuests={totalNumberOfGuests}
+                        numberOfGuests={
+                          totalNumberOfGuests + totalNumberOfNonResidentGuests
+                        }
                         nights={nights}
                       ></ActivitiesSummary>
                     ))}
@@ -547,7 +603,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
 
             {calculateStay.date[0] &&
               calculateStay.date[1] &&
-              calculateStay.rooms[0].name && (
+              calculateStay.extraFee[0].name && (
                 <div className="flex flex-col gap-2">
                   <Divider size="xs" mt={8}></Divider>
                   <Flex justify="space-between" align="center">
