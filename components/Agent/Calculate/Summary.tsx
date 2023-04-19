@@ -135,6 +135,8 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
     totalNumberOfResidentTeenGuests +
     totalNumberOfResidentInfantGuests;
 
+  console.log(totalGuests.residentAdults);
+
   const totalNonResidentFee =
     totalNumberOfNonResidentAdultGuests +
     totalNumberOfNonResidentChildGuests +
@@ -199,6 +201,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
   residentFullTotalPrice =
     residentFullTotalPrice +
     (residentFullTotalPrice * Number(calculateStay.residentCommission)) / 100;
+
   let nonResidentFullTotalPrice =
     totalNonResidentPrice + totalNonResidentFee + totalNonResidentExtraFees;
 
@@ -328,6 +331,12 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
                   <Text size="sm" weight={700}>
                     Fees
                   </Text>
+
+                  <Text size="sm" weight={600}>
+                    {totalResidentFee
+                      ? `KES ${totalResidentFee.toLocaleString()}`
+                      : ""}{" "}
+                  </Text>
                 </Flex>
 
                 <Flex direction="column" gap={2}>
@@ -431,9 +440,10 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
             )}
           </div>
 
-          {calculateStay.date[0] &&
-            calculateStay.date[1] &&
-            calculateStay.rooms[0].name && (
+          {!!calculateStay.date[0] &&
+            !!calculateStay.date[1] &&
+            !!calculateStay.rooms[0].name &&
+            !!residentFullTotalPrice && (
               <div className="sticky flex items-center py-1 px-2 left-4 bottom-0 w-full bg-white border-x-transparent border-b-transparent shadow-md border-t border-t-gray-200 border-solid h-[60px]">
                 <div className="flex flex-col">
                   <Text className="text-gray-400" size="xs">
@@ -658,9 +668,10 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
             )}
           </div>
 
-          {calculateStay.date[0] &&
-            calculateStay.date[1] &&
-            calculateStay.rooms[0].name && (
+          {!!calculateStay.date[0] &&
+            !!calculateStay.date[1] &&
+            !!calculateStay.rooms[0].name &&
+            !!nonResidentFullTotalPrice && (
               <div className="sticky flex items-center py-1 px-2 left-4 bottom-0 w-full bg-white border-x-transparent border-b-transparent shadow-md border-t border-t-gray-200 border-solid h-[60px]">
                 <div className="flex flex-col">
                   <Text className="text-gray-400" size="xs">

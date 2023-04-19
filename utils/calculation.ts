@@ -3122,43 +3122,46 @@ function getTotalGuestsByCategory(rooms: Room[]): {
   let nonResidentTeens = 0;
 
   rooms.forEach((room) => {
-    room.residentGuests.forEach((guest) => {
-      switch (guest.resident) {
-        case "Adult":
-          residentAdults += 1;
-          break;
-        case "Child":
-          residentChildren += 1;
-          break;
-        case "Infant":
-          residentInfants += 1;
-          break;
-        case "Teen":
-          residentTeens += 1;
-          break;
-        default:
-          break;
-      }
-    });
-
-    room.nonResidentGuests.forEach((guest) => {
-      switch (guest.nonResident) {
-        case "Adult":
-          nonResidentAdults += 1;
-          break;
-        case "Child":
-          nonResidentChildren += 1;
-          break;
-        case "Infant":
-          nonResidentInfants += 1;
-          break;
-        case "Teen":
-          nonResidentTeens += 1;
-          break;
-        default:
-          break;
-      }
-    });
+    if (room.residentParkFee.length > 0) {
+      room.residentGuests.forEach((guest) => {
+        switch (guest.resident) {
+          case "Adult":
+            residentAdults += 1;
+            break;
+          case "Child":
+            residentChildren += 1;
+            break;
+          case "Infant":
+            residentInfants += 1;
+            break;
+          case "Teen":
+            residentTeens += 1;
+            break;
+          default:
+            break;
+        }
+      });
+    }
+    if (room.nonResidentParkFee.length > 0) {
+      room.nonResidentGuests.forEach((guest) => {
+        switch (guest.nonResident) {
+          case "Adult":
+            nonResidentAdults += 1;
+            break;
+          case "Child":
+            nonResidentChildren += 1;
+            break;
+          case "Infant":
+            nonResidentInfants += 1;
+            break;
+          case "Teen":
+            nonResidentTeens += 1;
+            break;
+          default:
+            break;
+        }
+      });
+    }
   });
 
   return {
