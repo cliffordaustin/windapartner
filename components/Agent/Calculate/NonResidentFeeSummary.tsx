@@ -15,6 +15,28 @@ export default function NonResidentFeesSummary({
   const roomArr = [room];
 
   const totalGuests = pricing.getTotalGuestsByCategory(roomArr);
+
+  function hasAdultNonResident(room: Room): boolean {
+    return room.nonResidentGuests.some(
+      (guest) => guest.nonResident === "Adult"
+    );
+  }
+
+  function hasChildNonResident(room: Room): boolean {
+    return room.nonResidentGuests.some(
+      (guest) => guest.nonResident === "Child"
+    );
+  }
+
+  function hasInfantNonResident(room: Room): boolean {
+    return room.nonResidentGuests.some(
+      (guest) => guest.nonResident === "Infant"
+    );
+  }
+
+  function hasTeenNonResident(room: Room): boolean {
+    return room.nonResidentGuests.some((guest) => guest.nonResident === "Teen");
+  }
   return (
     <div>
       <Text size="sm" weight={600}>
@@ -27,13 +49,13 @@ export default function NonResidentFeesSummary({
           <div key={index} className="flex items-center justify-between">
             <Text size="sm" className="text-gray-600" weight={500}>
               {item.name} (For {""}{" "}
-              {item.guestType === "ADULT"
+              {item.guestType === "ADULT" && hasAdultNonResident(room)
                 ? totalGuests.residentAdults
-                : item.guestType === "CHILD"
+                : item.guestType === "CHILD" && hasChildNonResident(room)
                 ? totalGuests.residentChildren
-                : item.guestType === "INFANT"
+                : item.guestType === "INFANT" && hasInfantNonResident(room)
                 ? totalGuests.residentInfants
-                : item.guestType === "TEEN"
+                : item.guestType === "TEEN" && hasTeenNonResident(room)
                 ? totalGuests.residentTeens
                 : 0}
               )
@@ -42,13 +64,13 @@ export default function NonResidentFeesSummary({
               $
               {(
                 item.price *
-                (item.guestType === "ADULT"
+                (item.guestType === "ADULT" && hasAdultNonResident(room)
                   ? totalGuests.residentAdults
-                  : item.guestType === "CHILD"
+                  : item.guestType === "CHILD" && hasChildNonResident(room)
                   ? totalGuests.residentChildren
-                  : item.guestType === "INFANT"
+                  : item.guestType === "INFANT" && hasInfantNonResident(room)
                   ? totalGuests.residentInfants
-                  : item.guestType === "TEEN"
+                  : item.guestType === "TEEN" && hasTeenNonResident(room)
                   ? totalGuests.residentTeens
                   : 0)
               ).toLocaleString()}

@@ -3000,6 +3000,7 @@ const findCommonRoomResidentNamesWithDescription = (
         }
       }
     }
+
     return commonNames;
   }
   return [];
@@ -3037,6 +3038,8 @@ const findCommonRoomNonResidentNamesWithDescription = (
         }
       }
     }
+    // console.log("Common names ", commonNames);
+    // console.log("Name sets ", nameSets);
     return commonNames;
   }
   return [];
@@ -3090,10 +3093,9 @@ function countNonResidentGuestTypesWithPrice(
 
   return Object.keys(counts).map((name) => {
     const count = counts[name];
-    const guestType =
-      name.includes("(") && name.includes(")")
-        ? name.split("(")[1].split(")")[0]
-        : undefined;
+
+    const guestType = name.slice(name.indexOf("(") + 1, name.lastIndexOf(")"));
+
     const price = guestType
       ? nonResidentPrice(room.name, guestType, room.package, count, roomTypes)
       : 0;
@@ -3226,6 +3228,62 @@ export function getTotalParkFeesByCategory(rooms: Room[]): {
   return totalFeesByCategory;
 }
 
+function calculateRoomFees(rooms: Room[]): {
+  residentTotalFeePrice: number;
+  nonResidentTotalFeePrice: number;
+} {
+  let residentTotalFeePrice = 0;
+  let nonResidentTotalFeePrice = 0;
+
+  for (const room of rooms) {
+    for (const residentGuest of room.residentGuests) {
+      const residentGuestType = residentGuest.resident.toLowerCase() || "";
+      const residentGuestCount = countGuestsOfType(
+        room.residentGuests,
+        residentGuest.resident
+      );
+
+      const residentParkFees = room.residentParkFee.filter(
+        (fee) => fee.guestType?.toLowerCase() === residentGuestType
+      );
+
+      for (const residentParkFee of residentParkFees) {
+        residentTotalFeePrice += residentParkFee.price;
+      }
+    }
+
+    for (const nonResidentGuest of room.nonResidentGuests) {
+      const nonResidentGuestType =
+        nonResidentGuest.nonResident.toLowerCase() || "";
+      const nonResidentGuestCount = countGuestsOfType(
+        room.nonResidentGuests,
+        nonResidentGuest.nonResident
+      );
+
+      const nonResidentParkFees = room.nonResidentParkFee.filter((fee) => {
+        return fee.guestType?.toLowerCase() === nonResidentGuestType;
+      });
+
+      for (const nonResidentParkFee of nonResidentParkFees) {
+        nonResidentTotalFeePrice += nonResidentParkFee.price;
+      }
+    }
+  }
+
+  return { residentTotalFeePrice, nonResidentTotalFeePrice };
+}
+
+function countGuestsOfType(
+  guests: { resident?: string; nonResident?: string }[],
+  type: string
+): number {
+  return guests.filter(
+    (guest) =>
+      guest.resident?.toLowerCase() === type.toLowerCase() ||
+      guest.nonResident?.toLowerCase() === type.toLowerCase()
+  ).length;
+}
+
 const pricing = {
   singleResidentAdultAllInclusivePrice,
   singleResidentAdultGamePackagePrice,
@@ -3307,6 +3365,7 @@ const pricing = {
   countNonResidentGuestTypesWithPrice,
   getTotalGuestsByCategory,
   getTotalParkFeesByCategory,
+  calculateRoomFees,
 };
 
 export default pricing;

@@ -135,8 +135,6 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
     totalNumberOfResidentTeenGuests +
     totalNumberOfResidentInfantGuests;
 
-  console.log(totalGuests.residentAdults);
-
   const totalNonResidentFee =
     totalNumberOfNonResidentAdultGuests +
     totalNumberOfNonResidentChildGuests +
@@ -156,6 +154,8 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
   const nonResidentTotalExtraFees = calculateStay.extraFee.filter(
     (item) => item.guestType === "Non-resident"
   );
+
+  const feePrice = pricing.calculateRoomFees(calculateStay.rooms);
 
   const totalResidentExtraFees = pricing.calculateExtraFees(
     residentTotalExtraFees,
@@ -196,14 +196,18 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
   }, 0);
 
   let residentFullTotalPrice =
-    totalResidentPrice + totalResidentFee + totalResidentExtraFees;
+    totalResidentPrice +
+    feePrice.residentTotalFeePrice +
+    totalResidentExtraFees;
 
   residentFullTotalPrice =
     residentFullTotalPrice +
     (residentFullTotalPrice * Number(calculateStay.residentCommission)) / 100;
 
   let nonResidentFullTotalPrice =
-    totalNonResidentPrice + totalNonResidentFee + totalNonResidentExtraFees;
+    totalNonResidentPrice +
+    feePrice.nonResidentTotalFeePrice +
+    totalNonResidentExtraFees;
 
   nonResidentFullTotalPrice =
     nonResidentFullTotalPrice +
@@ -333,8 +337,8 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
                   </Text>
 
                   <Text size="sm" weight={600}>
-                    {totalResidentFee
-                      ? `KES ${totalResidentFee.toLocaleString()}`
+                    {feePrice.residentTotalFeePrice
+                      ? `KES ${feePrice.residentTotalFeePrice.toLocaleString()}`
                       : ""}{" "}
                   </Text>
                 </Flex>
@@ -564,6 +568,12 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
                 <Flex justify="space-between" align="center">
                   <Text size="sm" weight={700}>
                     Fees
+                  </Text>
+
+                  <Text size="sm" weight={600}>
+                    {feePrice.nonResidentTotalFeePrice
+                      ? `$ ${feePrice.nonResidentTotalFeePrice.toLocaleString()}`
+                      : ""}{" "}
                   </Text>
                 </Flex>
 
