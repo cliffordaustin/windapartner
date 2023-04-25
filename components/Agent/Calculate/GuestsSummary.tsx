@@ -294,36 +294,36 @@ export default function GuestsSummary({
     (priceResidentInfantFullBoard || 0) +
     (priceResidentInfantBedAndBreakfast || 0);
 
-  const { setPriceTotal } = useContext(Context);
+  // const { setPriceTotal } = useContext(Context);
 
-  useEffect(() => {
-    const newGuestTotal: GuestTotal = {
-      id: room.id,
-      resident: residentPriceTotal,
-      nonResident: 0,
-    };
+  // useEffect(() => {
+  //   const newGuestTotal: GuestTotal = {
+  //     id: room.id,
+  //     resident: residentPriceTotal,
+  //     nonResident: 0,
+  //   };
 
-    setPriceTotal((prevState) => {
-      const existingIndex = prevState.guestTotal.findIndex(
-        (guest) => guest.id === newGuestTotal.id
-      );
-      if (existingIndex !== -1) {
-        // If the id already exists, replace the existing object with the new object
-        return {
-          ...prevState,
-          guestTotal: prevState.guestTotal.map((guest, index) =>
-            index === existingIndex ? newGuestTotal : guest
-          ),
-        };
-      } else {
-        // If the id doesn't exist, add the new object to the array
-        return {
-          ...prevState,
-          guestTotal: [...prevState.guestTotal, newGuestTotal],
-        };
-      }
-    });
-  }, [residentPriceTotal]);
+  //   setPriceTotal((prevState) => {
+  //     const existingIndex = prevState.guestTotal.findIndex(
+  //       (guest) => guest.id === newGuestTotal.id
+  //     );
+  //     if (existingIndex !== -1) {
+  //       // If the id already exists, replace the existing object with the new object
+  //       return {
+  //         ...prevState,
+  //         guestTotal: prevState.guestTotal.map((guest, index) =>
+  //           index === existingIndex ? newGuestTotal : guest
+  //         ),
+  //       };
+  //     } else {
+  //       // If the id doesn't exist, add the new object to the array
+  //       return {
+  //         ...prevState,
+  //         guestTotal: [...prevState.guestTotal, newGuestTotal],
+  //       };
+  //     }
+  //   });
+  // }, [residentPriceTotal]);
 
   const countResidentGuestTypes = pricing.countResidentGuestTypesWithPrice(
     room.residentGuests,

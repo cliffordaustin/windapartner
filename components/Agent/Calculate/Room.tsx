@@ -630,297 +630,8 @@ export default function Room({ room, stay, index }: RoomProps) {
           </Popover.Target>
 
           <Popover.Dropdown className="px-3">
-            {commonRoomResidentNamesWithDescription.length > 0 && (
-              <Flex direction="column" gap={5}>
-                <Text size="sm" mb={2} weight={600}>
-                  Resident guests
-                </Text>
-                {room.residentGuests.map((guest, index) => (
-                  <Flex key={index} gap={7} align={"center"}>
-                    <Popover
-                      width={150}
-                      position="bottom-start"
-                      arrowOffset={60}
-                      withArrow
-                      shadow="md"
-                    >
-                      <Popover.Target>
-                        <Flex
-                          justify={"space-between"}
-                          align={"center"}
-                          className="px-2 py-1 cursor-pointer border rounded-md border-solid w-[48%] border-gray-300"
-                        >
-                          <Flex direction="column" gap={4}>
-                            <Text
-                              size="xs"
-                              weight={600}
-                              className="text-gray-500"
-                            >
-                              Guest
-                            </Text>
-                            <Text transform="capitalize" size="sm" weight={600}>
-                              {guest.resident ? guest.resident : "Select guest"}
-                            </Text>
-                          </Flex>
-
-                          <IconSelector className="text-gray-500"></IconSelector>
-                        </Flex>
-                      </Popover.Target>
-
-                      <Popover.Dropdown className="px-2 py-2">
-                        {guestTypes.map((guestType, index) => (
-                          <Flex
-                            w="100%"
-                            onClick={() => {
-                              setState(
-                                state.map((item) => {
-                                  if (item.id === stay.id) {
-                                    return {
-                                      ...item,
-                                      rooms: item.rooms.map((item) => {
-                                        if (item.id === room.id) {
-                                          return {
-                                            ...item,
-                                            residentGuests:
-                                              item.residentGuests.map(
-                                                (item) => {
-                                                  if (item.id === guest.id) {
-                                                    return {
-                                                      ...item,
-                                                      resident: guestType,
-                                                    };
-                                                  }
-                                                  return item;
-                                                }
-                                              ),
-                                          };
-                                        }
-                                        return item;
-                                      }),
-                                    };
-                                  }
-                                  return item;
-                                })
-                              );
-                            }}
-                            key={index}
-                          >
-                            <Text
-                              w="100%"
-                              className={
-                                "py-2 px-2 rounded-md mt-1 cursor-pointer " +
-                                (guest.resident === guestType
-                                  ? "bg-[#FA5252] text-white"
-                                  : "hover:bg-gray-100")
-                              }
-                              size="sm"
-                              weight={600}
-                            >
-                              {guestType}
-                            </Text>
-                          </Flex>
-                        ))}
-                      </Popover.Dropdown>
-                    </Popover>
-
-                    <Popover
-                      width={300}
-                      position="bottom-start"
-                      arrowOffset={60}
-                      withArrow
-                      shadow="md"
-                    >
-                      <Popover.Target>
-                        <Flex
-                          justify={"space-between"}
-                          align={"center"}
-                          className="px-2 py-1 cursor-pointer border rounded-md border-solid w-[48%] border-gray-300"
-                        >
-                          <Flex direction="column" gap={4}>
-                            <Text
-                              size="xs"
-                              weight={600}
-                              className="text-gray-500"
-                            >
-                              Guest type
-                            </Text>
-                            <div className="w-[140px] overflow-hidden">
-                              <Text
-                                transform="capitalize"
-                                size="sm"
-                                truncate
-                                weight={600}
-                              >
-                                {guest.guestType
-                                  ? guest.guestType
-                                  : "Select guest type"}
-                              </Text>
-                            </div>
-                          </Flex>
-
-                          <IconSelector className="text-gray-500"></IconSelector>
-                        </Flex>
-                      </Popover.Target>
-
-                      <Popover.Dropdown className="px-0 py-2">
-                        <ScrollArea.Autosize
-                          type="auto"
-                          mah={300}
-                          offsetScrollbars={true}
-                          className="w-full px-2"
-                        >
-                          {commonRoomResidentNamesWithDescription.map(
-                            (guestType, index) => (
-                              <Flex
-                                w="100%"
-                                onClick={() => {
-                                  setState(
-                                    state.map((item) => {
-                                      if (item.id === stay.id) {
-                                        return {
-                                          ...item,
-                                          rooms: item.rooms.map((item) => {
-                                            if (item.id === room.id) {
-                                              return {
-                                                ...item,
-                                                residentGuests:
-                                                  item.residentGuests.map(
-                                                    (item) => {
-                                                      if (
-                                                        item.id === guest.id
-                                                      ) {
-                                                        return {
-                                                          ...item,
-                                                          guestType:
-                                                            guestType?.name,
-                                                        };
-                                                      }
-                                                      return item;
-                                                    }
-                                                  ),
-                                              };
-                                            }
-                                            return item;
-                                          }),
-                                        };
-                                      }
-                                      return item;
-                                    })
-                                  );
-                                }}
-                                key={index}
-                              >
-                                {guestType?.description ? (
-                                  <Tooltip.Floating
-                                    multiline
-                                    width={220}
-                                    color="white"
-                                    position="bottom"
-                                    className="text-gray-800 font-semibold border-gray-200 border border-solid"
-                                    label={guestType.description}
-                                  >
-                                    <Text
-                                      w="100%"
-                                      className={
-                                        "py-2 px-2 rounded-md mt-1 cursor-pointer " +
-                                        (guest.guestType === guestType?.name
-                                          ? "bg-[#FA5252] text-white"
-                                          : "hover:bg-gray-100")
-                                      }
-                                      size="sm"
-                                      weight={600}
-                                      transform="capitalize"
-                                    >
-                                      {guestType?.name}
-                                    </Text>
-                                  </Tooltip.Floating>
-                                ) : (
-                                  <Text
-                                    w="100%"
-                                    className={
-                                      "py-2 px-2 rounded-md mt-1 cursor-pointer " +
-                                      (guest.guestType === guestType?.name
-                                        ? "bg-[#FA5252] text-white"
-                                        : "hover:bg-gray-100")
-                                    }
-                                    size="sm"
-                                    weight={600}
-                                    transform="capitalize"
-                                  >
-                                    {guestType?.name}
-                                  </Text>
-                                )}
-                              </Flex>
-                            )
-                          )}
-                        </ScrollArea.Autosize>
-                      </Popover.Dropdown>
-                    </Popover>
-
-                    <div
-                      onClick={() => {
-                        removeResidentGuest(guest);
-                      }}
-                      className="mt-2 cursor-pointer"
-                    >
-                      {index > 0 && (
-                        <IconX className="text-gray-600 w-5 h-5"></IconX>
-                      )}
-                    </div>
-                  </Flex>
-                ))}
-                <Flex
-                  onClick={() => {
-                    setState(
-                      state.map((item) => {
-                        if (item.id === stay.id) {
-                          return {
-                            ...item,
-                            rooms: item.rooms.map((item) => {
-                              if (item.id === room.id) {
-                                return {
-                                  ...item,
-                                  residentGuests: [
-                                    ...item.residentGuests,
-                                    {
-                                      id: uuidv4(),
-                                      resident: "",
-                                      guestType: "",
-                                      description: "",
-                                    },
-                                  ],
-                                };
-                              }
-                              return item;
-                            }),
-                          };
-                        }
-                        return item;
-                      })
-                    );
-                  }}
-                  className="cursor-pointer w-fit"
-                  align="center"
-                  mt={5}
-                  gap={4}
-                >
-                  <Text
-                    className="text-blue-500"
-                    size="sm"
-                    weight={600}
-                    color="blue"
-                  >
-                    Add Resident Guest
-                  </Text>
-
-                  <IconPlus className="w-5 h-5 text-blue-500"></IconPlus>
-                </Flex>
-              </Flex>
-            )}
             {commonRoomNonResidentNamesWithDescription.length > 0 && (
               <>
-                <Divider className="my-2"></Divider>
-
                 <Flex direction="column" gap={5}>
                   <Text size="sm" mb={2} weight={600}>
                     Non-Resident guests
@@ -1207,6 +918,303 @@ export default function Room({ room, stay, index }: RoomProps) {
                       color="blue"
                     >
                       Add Non-Resident Guest
+                    </Text>
+
+                    <IconPlus className="w-5 h-5 text-blue-500"></IconPlus>
+                  </Flex>
+                </Flex>
+              </>
+            )}
+            {commonRoomResidentNamesWithDescription.length > 0 && (
+              <>
+                <Divider className="my-2"></Divider>
+
+                <Flex direction="column" gap={5}>
+                  <Text size="sm" mb={2} weight={600}>
+                    Resident guests
+                  </Text>
+                  {room.residentGuests.map((guest, index) => (
+                    <Flex key={index} gap={7} align={"center"}>
+                      <Popover
+                        width={150}
+                        position="bottom-start"
+                        arrowOffset={60}
+                        withArrow
+                        shadow="md"
+                      >
+                        <Popover.Target>
+                          <Flex
+                            justify={"space-between"}
+                            align={"center"}
+                            className="px-2 py-1 cursor-pointer border rounded-md border-solid w-[48%] border-gray-300"
+                          >
+                            <Flex direction="column" gap={4}>
+                              <Text
+                                size="xs"
+                                weight={600}
+                                className="text-gray-500"
+                              >
+                                Guest
+                              </Text>
+                              <Text
+                                transform="capitalize"
+                                size="sm"
+                                weight={600}
+                              >
+                                {guest.resident
+                                  ? guest.resident
+                                  : "Select guest"}
+                              </Text>
+                            </Flex>
+
+                            <IconSelector className="text-gray-500"></IconSelector>
+                          </Flex>
+                        </Popover.Target>
+
+                        <Popover.Dropdown className="px-2 py-2">
+                          {guestTypes.map((guestType, index) => (
+                            <Flex
+                              w="100%"
+                              onClick={() => {
+                                setState(
+                                  state.map((item) => {
+                                    if (item.id === stay.id) {
+                                      return {
+                                        ...item,
+                                        rooms: item.rooms.map((item) => {
+                                          if (item.id === room.id) {
+                                            return {
+                                              ...item,
+                                              residentGuests:
+                                                item.residentGuests.map(
+                                                  (item) => {
+                                                    if (item.id === guest.id) {
+                                                      return {
+                                                        ...item,
+                                                        resident: guestType,
+                                                      };
+                                                    }
+                                                    return item;
+                                                  }
+                                                ),
+                                            };
+                                          }
+                                          return item;
+                                        }),
+                                      };
+                                    }
+                                    return item;
+                                  })
+                                );
+                              }}
+                              key={index}
+                            >
+                              <Text
+                                w="100%"
+                                className={
+                                  "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                                  (guest.resident === guestType
+                                    ? "bg-[#FA5252] text-white"
+                                    : "hover:bg-gray-100")
+                                }
+                                size="sm"
+                                weight={600}
+                              >
+                                {guestType}
+                              </Text>
+                            </Flex>
+                          ))}
+                        </Popover.Dropdown>
+                      </Popover>
+
+                      <Popover
+                        width={300}
+                        position="bottom-start"
+                        arrowOffset={60}
+                        withArrow
+                        shadow="md"
+                      >
+                        <Popover.Target>
+                          <Flex
+                            justify={"space-between"}
+                            align={"center"}
+                            className="px-2 py-1 cursor-pointer border rounded-md border-solid w-[48%] border-gray-300"
+                          >
+                            <Flex direction="column" gap={4}>
+                              <Text
+                                size="xs"
+                                weight={600}
+                                className="text-gray-500"
+                              >
+                                Guest type
+                              </Text>
+                              <div className="w-[140px] overflow-hidden">
+                                <Text
+                                  transform="capitalize"
+                                  size="sm"
+                                  truncate
+                                  weight={600}
+                                >
+                                  {guest.guestType
+                                    ? guest.guestType
+                                    : "Select guest type"}
+                                </Text>
+                              </div>
+                            </Flex>
+
+                            <IconSelector className="text-gray-500"></IconSelector>
+                          </Flex>
+                        </Popover.Target>
+
+                        <Popover.Dropdown className="px-0 py-2">
+                          <ScrollArea.Autosize
+                            type="auto"
+                            mah={300}
+                            offsetScrollbars={true}
+                            className="w-full px-2"
+                          >
+                            {commonRoomResidentNamesWithDescription.map(
+                              (guestType, index) => (
+                                <Flex
+                                  w="100%"
+                                  onClick={() => {
+                                    setState(
+                                      state.map((item) => {
+                                        if (item.id === stay.id) {
+                                          return {
+                                            ...item,
+                                            rooms: item.rooms.map((item) => {
+                                              if (item.id === room.id) {
+                                                return {
+                                                  ...item,
+                                                  residentGuests:
+                                                    item.residentGuests.map(
+                                                      (item) => {
+                                                        if (
+                                                          item.id === guest.id
+                                                        ) {
+                                                          return {
+                                                            ...item,
+                                                            guestType:
+                                                              guestType?.name,
+                                                          };
+                                                        }
+                                                        return item;
+                                                      }
+                                                    ),
+                                                };
+                                              }
+                                              return item;
+                                            }),
+                                          };
+                                        }
+                                        return item;
+                                      })
+                                    );
+                                  }}
+                                  key={index}
+                                >
+                                  {guestType?.description ? (
+                                    <Tooltip.Floating
+                                      multiline
+                                      width={220}
+                                      color="white"
+                                      position="bottom"
+                                      className="text-gray-800 font-semibold border-gray-200 border border-solid"
+                                      label={guestType.description}
+                                    >
+                                      <Text
+                                        w="100%"
+                                        className={
+                                          "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                                          (guest.guestType === guestType?.name
+                                            ? "bg-[#FA5252] text-white"
+                                            : "hover:bg-gray-100")
+                                        }
+                                        size="sm"
+                                        weight={600}
+                                        transform="capitalize"
+                                      >
+                                        {guestType?.name}
+                                      </Text>
+                                    </Tooltip.Floating>
+                                  ) : (
+                                    <Text
+                                      w="100%"
+                                      className={
+                                        "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                                        (guest.guestType === guestType?.name
+                                          ? "bg-[#FA5252] text-white"
+                                          : "hover:bg-gray-100")
+                                      }
+                                      size="sm"
+                                      weight={600}
+                                      transform="capitalize"
+                                    >
+                                      {guestType?.name}
+                                    </Text>
+                                  )}
+                                </Flex>
+                              )
+                            )}
+                          </ScrollArea.Autosize>
+                        </Popover.Dropdown>
+                      </Popover>
+
+                      <div
+                        onClick={() => {
+                          removeResidentGuest(guest);
+                        }}
+                        className="mt-2 cursor-pointer"
+                      >
+                        {index > 0 && (
+                          <IconX className="text-gray-600 w-5 h-5"></IconX>
+                        )}
+                      </div>
+                    </Flex>
+                  ))}
+                  <Flex
+                    onClick={() => {
+                      setState(
+                        state.map((item) => {
+                          if (item.id === stay.id) {
+                            return {
+                              ...item,
+                              rooms: item.rooms.map((item) => {
+                                if (item.id === room.id) {
+                                  return {
+                                    ...item,
+                                    residentGuests: [
+                                      ...item.residentGuests,
+                                      {
+                                        id: uuidv4(),
+                                        resident: "",
+                                        guestType: "",
+                                        description: "",
+                                      },
+                                    ],
+                                  };
+                                }
+                                return item;
+                              }),
+                            };
+                          }
+                          return item;
+                        })
+                      );
+                    }}
+                    className="cursor-pointer w-fit"
+                    align="center"
+                    mt={5}
+                    gap={4}
+                  >
+                    <Text
+                      className="text-blue-500"
+                      size="sm"
+                      weight={600}
+                      color="blue"
+                    >
+                      Add Resident Guest
                     </Text>
 
                     <IconPlus className="w-5 h-5 text-blue-500"></IconPlus>
