@@ -187,9 +187,14 @@ export default function Calculate() {
     }
   };
 
-  const handleDownloadClick = async (imageUrl: string | undefined) => {
-    if (imageUrl) {
-      window.open(imageUrl, "_blank");
+  const handleDownloadClick = async (
+    pdfUrl: string | undefined,
+    lodgeName: string | undefined
+  ) => {
+    if (pdfUrl) {
+      const name = lodgeName?.replace(/\s/g, "");
+      const fileName = `${name}pricing_sheet.pdf`;
+      saveAs(pdfUrl, fileName);
     }
   };
 
@@ -251,10 +256,13 @@ export default function Calculate() {
                     </Text>
                     {stays.map((item, index) => (
                       <Tabs.Panel key={index} value={item.slug}>
-                        {item.lodge_price_data && (
+                        {item.lodge_price_data_pdf && (
                           <Text
                             onClick={() => {
-                              handleDownloadClick(item.lodge_price_data);
+                              handleDownloadClick(
+                                item.lodge_price_data_pdf,
+                                item.property_name
+                              );
                             }}
                             className="hover:bg-gray-100 flex items-center gap-2 p-2 rounded-md cursor-pointer"
                             size="sm"

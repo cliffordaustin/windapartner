@@ -4,10 +4,21 @@ import UserDropdown from "../Homepage/UserDropdown";
 import { UserTypes } from "@/utils/types";
 import { Input, Tooltip } from "@mantine/core";
 import { IconSearch } from "@tabler/icons-react";
+import { useState } from "react";
+import { useRouter } from "next/router";
 
 type NavbarProps = { user?: UserTypes | null };
 
 export default function Navbar({ user }: NavbarProps) {
+  const [location, setLocation] = useState("");
+  const router = useRouter();
+  const search = () => {
+    router.push({
+      query: {
+        location: location,
+      },
+    });
+  };
   return (
     <div className="flex items-center border-b justify-between sm:px-8 px-6 md:px-6 lg:px-12 h-[80px]">
       <Link href="/">
@@ -21,7 +32,7 @@ export default function Navbar({ user }: NavbarProps) {
               33vw"
             fill
             priority
-          ></Image>
+          />
         </div>
       </Link>
 
@@ -38,8 +49,15 @@ export default function Navbar({ user }: NavbarProps) {
               },
             },
           }}
+          value={location}
+          onChange={(event) => setLocation(event.currentTarget.value)}
           rightSection={
-            <div className="w-[30px] h-[30px] flex items-center justify-center rounded-full bg-red-500">
+            <div
+              onClick={() => {
+                search();
+              }}
+              className="w-[30px] h-[30px] cursor-pointer flex items-center justify-center rounded-full bg-red-500"
+            >
               <IconSearch size="1rem" className="text-white" />
             </div>
           }

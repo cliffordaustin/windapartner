@@ -1,4 +1,4 @@
-import { Button, Flex, Text, Grid, Skeleton } from "@mantine/core";
+import { Button, Flex, Text, Grid, Skeleton, NavLink } from "@mantine/core";
 import { getUser } from "../../api/user";
 import { GetServerSideProps } from "next";
 import { Stay, UserTypes } from "@/utils/types";
@@ -8,23 +8,31 @@ import getToken from "@/utils/getToken";
 import { dehydrate, QueryClient, useQuery } from "react-query";
 import Navbar from "@/components/Agent/Navbar";
 import { getPartnerStays } from "@/pages/api/stays";
-import { useRouter } from "next/router";
+import { NextRouter, useRouter } from "next/router";
 import { IconInfoCircle, IconCalculator } from "@tabler/icons-react";
 import Listing from "@/components/Agent/Listing";
 import { Context } from "@/context/AgentPage";
 import { useContext, useEffect } from "react";
+import Link from "next/link";
 
 export default function AgentPage() {
   const token = Cookies.get("token");
-  const router = useRouter();
+  const router: NextRouter = useRouter();
   const { data: user } = useQuery<UserTypes | null>("user", () =>
     getUser(token)
   );
 
-  const { data: stays, isLoading: isStayLoading } = useQuery<Stay[]>(
-    "partner-stays",
-    () => getPartnerStays(router.query.location as string, "")
+  const {
+    data: stays,
+    isLoading: isStayLoading,
+    refetch,
+  } = useQuery<Stay[]>("partner-stays", () =>
+    getPartnerStays(router.query.location as string, "")
   );
+
+  useEffect(() => {
+    refetch();
+  }, [router.query.location]);
 
   const { state, setState } = useContext(Context);
 
@@ -74,15 +82,13 @@ export default function AgentPage() {
       </div>
 
       {state.itemIds.length > 0 && !isStayLoading && (
-        <Button
-          radius="xl"
-          size="sm"
-          onClick={() => router.push("/partner/agent/calculate")}
-          className="fixed z-10 bg-[#000] hover:bg-[#333] font-semibold bottom-10 left-[45%]"
-        >
-          Calculate pricing ({state.itemIds.length} selected)
-          <IconCalculator size="1.4rem" className="text-white ml-1" />
-        </Button>
+        <NavLink
+          label={`Calculate pricing (${state.itemIds.length} selected)`}
+          component="a"
+          href="/partner/agent/calculate"
+          className="fixed w-fit rounded-3xl px-4 text-white z-10 bg-[#000] hover:bg-[#333] font-semibold bottom-10 left-[40%]"
+          icon={<IconCalculator size="1.4rem" className="text-white ml-1" />}
+        />
       )}
     </div>
   );
@@ -97,10 +103,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     await queryClient.fetchQuery<UserTypes | null>("user", () =>
       getUser(token)
     );
-
-    // await queryClient.prefetchQuery<Stay[]>("partner-stays", () =>
-    //   getPartnerStays(context.query.location as string)
-    // );
 
     return {
       props: {

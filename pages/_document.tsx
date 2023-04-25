@@ -4,15 +4,7 @@ class MyDocument extends Document {
   render() {
     return (
       <Html>
-        <Head>
-          <link
-            href="/fonts/OpenSans-Bold.ttf"
-            rel="preload"
-            as="font"
-            crossOrigin=""
-          />
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
-        </Head>
+        <Head></Head>
         <body>
           <Main />
           <NextScript />

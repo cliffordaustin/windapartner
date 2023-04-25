@@ -124,7 +124,7 @@ export interface Stay {
   beds?: number;
   bathrooms?: number;
   has_options: boolean;
-  lodge_price_data?: string;
+  lodge_price_data_pdf?: string;
   total_num_of_reviews: number;
   stay_images: stayImages[];
   inclusions: Inclusions[];
