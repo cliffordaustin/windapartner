@@ -134,40 +134,6 @@ export default function Calculate() {
     }
   };
 
-  // const handleGeneratePdf = () => {
-  //   if (contentRef.current) {
-  //     const contentHeight = contentRef.current.clientHeight;
-  //     const pageHeight = 900; // adjust this value as needed
-  //     const pageCount = Math.ceil(contentHeight / pageHeight);
-  //     let pdf: jsPDF | null = null;
-
-  //     // Generate each page of the PDF document
-  //     for (let i = 0; i < pageCount; i++) {
-  //       const canvas = document.createElement("canvas");
-  //       const canvasContext = canvas.getContext("2d");
-  //       const contentOffset = i * pageHeight;
-  //       canvas.width = contentRef.current.clientWidth;
-  //       canvas.height = Math.min(pageHeight, contentHeight - contentOffset);
-  //       canvasContext?.translate(0, -contentOffset);
-  //       html2canvas(contentRef.current, {
-  //         canvas: canvas,
-  //         y: contentOffset,
-  //       }).then((canvas) => {
-  //         const imgData = canvas.toDataURL("image/png");
-  //         if (!pdf) {
-  //           pdf = new jsPDF("p", "pt", [canvas.width, canvas.height]);
-  //         } else {
-  //           pdf.addPage();
-  //         }
-  //         pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
-  //         if (i === pageCount - 1) {
-  //           pdf.save("calculation.pdf");
-  //         }
-  //       });
-  //     }
-  //   }
-  // };
-
   const [totalResident, setTotalResident] = useState<number>(0);
   const [totalResidentPriceList, setTotalResidentPriceList] = useState<
     number[]
