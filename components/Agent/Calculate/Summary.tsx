@@ -323,37 +323,34 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
                 </div>
               )}
 
-            {((calculateStay.date[0] &&
+            {calculateStay.date[0] &&
               calculateStay.date[1] &&
-              calculateStay.rooms[0].residentParkFee.length > 0) ||
-              (calculateStay.date[0] &&
-                calculateStay.date[1] &&
-                calculateStay.rooms[0].nonResidentParkFee.length > 0)) && (
-              <div className="flex flex-col gap-2">
-                <Divider size="xs" mt={8}></Divider>
-                <Flex justify="space-between" align="center">
-                  <Text size="sm" weight={700}>
-                    Fees
-                  </Text>
+              calculateStay.rooms[0].nonResidentParkFee.length > 0 && (
+                <div className="flex flex-col gap-2">
+                  <Divider size="xs" mt={8}></Divider>
+                  <Flex justify="space-between" align="center">
+                    <Text size="sm" weight={700}>
+                      Fees
+                    </Text>
 
-                  <Text size="sm" weight={600}>
-                    {feePrice.nonResidentTotalFeePrice
-                      ? `$ ${feePrice.nonResidentTotalFeePrice.toLocaleString()}`
-                      : ""}{" "}
-                  </Text>
-                </Flex>
+                    <Text size="sm" weight={600}>
+                      {feePrice.nonResidentTotalFeePrice
+                        ? `$ ${feePrice.nonResidentTotalFeePrice.toLocaleString()}`
+                        : ""}{" "}
+                    </Text>
+                  </Flex>
 
-                <Flex direction="column" gap={2}>
-                  {calculateStay.rooms.map((room, index) => (
-                    <NonResidentFeesSummary
-                      key={index}
-                      room={room}
-                      index={index}
-                    ></NonResidentFeesSummary>
-                  ))}
-                </Flex>
-              </div>
-            )}
+                  <Flex direction="column" gap={2}>
+                    {calculateStay.rooms.map((room, index) => (
+                      <NonResidentFeesSummary
+                        key={index}
+                        room={room}
+                        index={index}
+                      ></NonResidentFeesSummary>
+                    ))}
+                  </Flex>
+                </div>
+              )}
 
             {calculateStay.date[0] &&
               calculateStay.date[1] &&
@@ -557,37 +554,34 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
                 </div>
               )}
 
-            {((calculateStay.date[0] &&
+            {calculateStay.date[0] &&
               calculateStay.date[1] &&
-              calculateStay.rooms[0].residentParkFee.length > 0) ||
-              (calculateStay.date[0] &&
-                calculateStay.date[1] &&
-                calculateStay.rooms[0].nonResidentParkFee.length > 0)) && (
-              <div className="flex flex-col gap-2">
-                <Divider size="xs" mt={8}></Divider>
-                <Flex justify="space-between" align="center">
-                  <Text size="sm" weight={700}>
-                    Fees
-                  </Text>
+              calculateStay.rooms[0].residentParkFee.length > 0 && (
+                <div className="flex flex-col gap-2">
+                  <Divider size="xs" mt={8}></Divider>
+                  <Flex justify="space-between" align="center">
+                    <Text size="sm" weight={700}>
+                      Fees
+                    </Text>
 
-                  <Text size="sm" weight={600}>
-                    {feePrice.residentTotalFeePrice
-                      ? `KES ${feePrice.residentTotalFeePrice.toLocaleString()}`
-                      : ""}{" "}
-                  </Text>
-                </Flex>
+                    <Text size="sm" weight={600}>
+                      {feePrice.residentTotalFeePrice
+                        ? `KES ${feePrice.residentTotalFeePrice.toLocaleString()}`
+                        : ""}{" "}
+                    </Text>
+                  </Flex>
 
-                <Flex direction="column" gap={2}>
-                  {calculateStay.rooms.map((room, index) => (
-                    <FeesSummary
-                      key={index}
-                      room={room}
-                      index={index}
-                    ></FeesSummary>
-                  ))}
-                </Flex>
-              </div>
-            )}
+                  <Flex direction="column" gap={2}>
+                    {calculateStay.rooms.map((room, index) => (
+                      <FeesSummary
+                        key={index}
+                        room={room}
+                        index={index}
+                      ></FeesSummary>
+                    ))}
+                  </Flex>
+                </div>
+              )}
 
             {calculateStay.date[0] &&
               calculateStay.date[1] &&
