@@ -33,6 +33,7 @@ import ExtraFeesSummaryPdf from "./Calculate/ExtraFeesSummaryPdf";
 import NonResidentGuestsSummaryPdf from "./Calculate/NonResidentGuestSummaryPdf";
 import NonResidentFeesSummaryPdf from "./Calculate/NonResidentFeesSummaryPdf";
 import ActivitiesSummaryPdf from "./Calculate/ActivitySummaryPdf";
+// import OpenSansBold from "../../public/fonts/OpenSans-Bold.ttf";
 
 type SummaryProps = {
   calculateStay: StateType;
@@ -46,16 +47,16 @@ Font.register({
   family: "Open Sans",
   fonts: [
     {
-      src: "https://fonts.gstatic.com/s/opensans/v23/mem8YaGs126MiZpBA-UFVZ0e.ttf",
-      fontStyle: "normal",
-    },
-    {
-      src: "http://fonts.gstatic.com/s/opensans/v34/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsg-1y4nY1M2xLER.ttf",
+      src: "/fonts/OpenSans-Bold.ttf",
       fontWeight: 700,
     },
     {
-      src: "http://fonts.gstatic.com/s/opensans/v34/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsgH1y4nY1M2xLER.ttf",
+      src: "/fonts/OpenSans-Medium.ttf",
       fontWeight: 600,
+    },
+    {
+      src: "/fonts/OpenSans-Regular.ttf",
+      fontWeight: 400,
     },
   ],
 });

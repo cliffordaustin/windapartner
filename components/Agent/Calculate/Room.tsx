@@ -1259,37 +1259,6 @@ export default function Room({ room, stay, index }: RoomProps) {
 
           <Popover.Dropdown className="px-3">
             <Flex direction="column" gap={5}>
-              {stay.other_fees_resident.length > 0 && (
-                <Text size="sm" weight={600}>
-                  Resident guests
-                </Text>
-              )}
-
-              {stay.other_fees_resident.map((fee, index) => (
-                <Flex
-                  mt={6}
-                  key={index}
-                  justify={"space-between"}
-                  align={"center"}
-                >
-                  <Checkbox
-                    color="red"
-                    label={`${fee.name}`}
-                    checked={
-                      !!room.residentParkFee.find((item) => item.id === fee.id)
-                    }
-                    onChange={(event) => {
-                      handleResidentFees(event, fee);
-                    }}
-                  ></Checkbox>
-                  <Text size="sm" weight={600}>
-                    KES{fee.price}
-                  </Text>
-                </Flex>
-              ))}
-
-              <Divider mt={6} size="xs" />
-
               <Text size="sm" weight={600}>
                 Non-resident guests
               </Text>
@@ -1316,6 +1285,37 @@ export default function Room({ room, stay, index }: RoomProps) {
 
                   <Text size="sm" weight={600}>
                     ${fee.price}
+                  </Text>
+                </Flex>
+              ))}
+
+              <Divider mt={6} size="xs" />
+
+              {stay.other_fees_resident.length > 0 && (
+                <Text size="sm" weight={600}>
+                  Resident guests
+                </Text>
+              )}
+
+              {stay.other_fees_resident.map((fee, index) => (
+                <Flex
+                  mt={6}
+                  key={index}
+                  justify={"space-between"}
+                  align={"center"}
+                >
+                  <Checkbox
+                    color="red"
+                    label={`${fee.name}`}
+                    checked={
+                      !!room.residentParkFee.find((item) => item.id === fee.id)
+                    }
+                    onChange={(event) => {
+                      handleResidentFees(event, fee);
+                    }}
+                  ></Checkbox>
+                  <Text size="sm" weight={600}>
+                    KES{fee.price}
                   </Text>
                 </Flex>
               ))}
