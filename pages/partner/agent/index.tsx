@@ -104,6 +104,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       getUser(token)
     );
 
+    await queryClient.fetchQuery<Stay[] | null>("partner-stays", () =>
+      getPartnerStays(context.query.location as string, "")
+    );
+
     return {
       props: {
         dehydratedState: dehydrate(queryClient),
