@@ -5,6 +5,8 @@ import { createStyles } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { useState, useEffect, useContext } from "react";
 import { Context } from "@/context/AgentPage";
+import axios from "axios";
+import Cookies from "js-cookie";
 
 const useStyles = createStyles(() => ({
   control: {
@@ -32,6 +34,42 @@ export default function Listing({ stay }: ListingProps) {
 
   const { state, setState } = useContext(Context);
 
+  // interface Item {
+  //   id: number;
+  //   timestamp: number;
+  // }
+
+  // function addListingToCalculate(id: number): void {
+  //   const now = new Date().getTime();
+  //   setState((prev) => ({
+  //     ...prev,
+  //     itemIds: [
+  //       ...prev.itemIds,
+  //       {
+  //         id,
+  //         timestamp: now,
+  //       },
+  //     ],
+  //   }));
+
+  //   const storedItemIds = localStorage.getItem("itemIds");
+  //   let itemIds: Item[] = [];
+
+  //   if (storedItemIds) {
+  //     const parsedItemIds = JSON.parse(storedItemIds) as Item[];
+  //     itemIds = parsedItemIds.filter((item) => {
+  //       // Check if the timestamp is less than 1 minute old
+  //       return now - item.timestamp < 1 * 60 * 1000;
+  //     });
+  //   }
+
+  //   // Add the filtered items and the new item with a timestamp
+  //   itemIds.push({ id, timestamp: now });
+
+  //   // Store the updated itemIds array in localStorage
+  //   localStorage.setItem("itemIds", JSON.stringify(itemIds));
+  // }
+
   function addListingToCalculate(id: number) {
     setState((prev) => ({ ...prev, itemIds: [...prev.itemIds, id] }));
     const storedItemIds = localStorage.getItem("itemIds");
@@ -40,6 +78,24 @@ export default function Listing({ stay }: ListingProps) {
       JSON.stringify([...JSON.parse(storedItemIds || "[]"), id])
     );
   }
+
+  // function addListingToCalculate(id: number) {
+  //   const sessionKey = Cookies.get("sessionid");
+
+  //   axios
+  //     .post(
+  //       `${process.env.NEXT_PUBLIC_baseURL}/stays/add-to-calculate/`,
+  //       {
+  //         stay_id: id,
+  //       },
+  //       {
+  //         withCredentials: true,
+  //       }
+  //     )
+  //     .then((res) => {
+  //       console.log(res.data);
+  //     });
+  // }
 
   const isAdded = state.itemIds.includes(stay.id);
 

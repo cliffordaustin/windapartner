@@ -43,8 +43,6 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
     { enabled: calculateStay.date[0] && calculateStay.date[1] ? true : false }
   );
 
-  const { priceTotal } = useContext(Context);
-
   const nights =
     calculateStay.date[0] && calculateStay.date[1]
       ? moment(calculateStay.date[1]).diff(
@@ -52,21 +50,6 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
           "days"
         )
       : 1;
-
-  const residentTotal = priceTotal.guestTotal.reduce(
-    (acc, item) => acc + item.resident,
-    0
-  );
-
-  const nonResidentTotal = priceTotal.guestTotal.reduce(
-    (acc, item) => acc + item.nonResident,
-    0
-  );
-
-  const activityTotal = calculateStay.activityFee.reduce(
-    (acc, item) => Number(acc) + Number(item.price),
-    0
-  );
 
   const totalNumberOfGuests = calculateStay.rooms.reduce((acc, room) => {
     const countResidentGuestTypes = pricing.countResidentGuestTypesWithPrice(
@@ -223,9 +206,18 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
   );
 
   return (
-    <Tabs color="red" variant="outline" defaultValue={"non-resident"}>
+    <Tabs
+      color="red"
+      variant="outline"
+      defaultValue={
+        residentFullTotalPrice && !nonResidentFullTotalPrice
+          ? "resident"
+          : "non-resident"
+      }
+    >
       <Tabs.List grow>
         <Tabs.Tab value="non-resident">Non-resident</Tabs.Tab>
+
         <Tabs.Tab value="resident">Resident</Tabs.Tab>
       </Tabs.List>
 
@@ -235,49 +227,52 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
             <Text className="font-bold" mb={8}>
               {calculateStay.name}
             </Text>
-            {calculateStay.date[0] && calculateStay.date[1] && (
-              <>
-                <div className="flex justify-between gap-8">
-                  <div className="flex border w-[45%] flex-col gap-2">
-                    <div className="flex gap-2 items-center">
-                      <IconCalendarEvent></IconCalendarEvent>
-                      <Text size="sm">Check-in</Text>
+            {calculateStay.date[0] &&
+              calculateStay.date[1] &&
+              totalNumberOfNonResidentGuests > 0 && (
+                <>
+                  <div className="flex justify-between gap-8">
+                    <div className="flex border w-[45%] flex-col gap-2">
+                      <div className="flex gap-2 items-center">
+                        <IconCalendarEvent></IconCalendarEvent>
+                        <Text size="sm">Check-in</Text>
+                      </div>
+
+                      <Text size="sm" weight={700} ml={4}>
+                        {moment(
+                          calculateStay.date[0]?.toLocaleDateString()
+                        ).format("DD MMM YYYY")}
+                      </Text>
                     </div>
 
-                    <Text size="sm" weight={700} ml={4}>
-                      {moment(
-                        calculateStay.date[0]?.toLocaleDateString()
-                      ).format("DD MMM YYYY")}
-                    </Text>
-                  </div>
+                    <div className="flex w-[45%] flex-col gap-2">
+                      <div className="flex gap-2 items-center">
+                        <IconCalendarEvent></IconCalendarEvent>
+                        <Text size="sm">Check-out</Text>
+                      </div>
 
-                  <div className="flex w-[45%] flex-col gap-2">
-                    <div className="flex gap-2 items-center">
-                      <IconCalendarEvent></IconCalendarEvent>
-                      <Text size="sm">Check-out</Text>
+                      <Text size="sm" weight={700} ml={4}>
+                        {moment(
+                          calculateStay.date[1]?.toLocaleDateString()
+                        ).format("DD MMM YYYY")}
+                      </Text>
                     </div>
-
-                    <Text size="sm" weight={700} ml={4}>
-                      {moment(
-                        calculateStay.date[1]?.toLocaleDateString()
-                      ).format("DD MMM YYYY")}
-                    </Text>
                   </div>
-                </div>
 
-                <Text
-                  size="sm"
-                  weight={600}
-                  className="mt-2 border border-solid w-fit px-2 border-gray-200"
-                >
-                  {nights} {nights > 1 ? "nights" : "night"}
-                </Text>
-                <Divider size="xs" mt={8}></Divider>
-              </>
-            )}
+                  <Text
+                    size="sm"
+                    weight={600}
+                    className="mt-2 border border-solid w-fit px-2 border-gray-200"
+                  >
+                    {nights} {nights > 1 ? "nights" : "night"}
+                  </Text>
+                  <Divider size="xs" mt={8}></Divider>
+                </>
+              )}
 
             {calculateStay.date[0] &&
               calculateStay.date[1] &&
+              totalNumberOfNonResidentGuests > 0 &&
               countRoomType.length > 0 && (
                 <div className="flex flex-col gap-2">
                   <Text size="sm" weight={700} className="mt-2">
@@ -296,6 +291,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
 
             {calculateStay.date[0] &&
               calculateStay.date[1] &&
+              totalNumberOfNonResidentGuests > 0 &&
               calculateStay.rooms[0].name && (
                 <div className="flex flex-col gap-2">
                   <Flex justify="space-between" className="mt-2" align="center">
@@ -325,6 +321,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
 
             {calculateStay.date[0] &&
               calculateStay.date[1] &&
+              totalNumberOfNonResidentGuests > 0 &&
               calculateStay.rooms[0].nonResidentParkFee.length > 0 && (
                 <div className="flex flex-col gap-2">
                   <Divider size="xs" mt={8}></Divider>
@@ -354,6 +351,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
 
             {calculateStay.date[0] &&
               calculateStay.date[1] &&
+              totalNumberOfNonResidentGuests > 0 &&
               calculateStay.activityFee.length > 0 && (
                 <div className="flex flex-col gap-2">
                   <Divider size="xs" mt={8}></Divider>
@@ -386,6 +384,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
 
             {calculateStay.date[0] &&
               calculateStay.date[1] &&
+              totalNumberOfNonResidentGuests > 0 &&
               calculateStay.extraFee[0].name && (
                 <div className="flex flex-col gap-2">
                   <Divider size="xs" mt={8}></Divider>
@@ -431,11 +430,14 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
               </div>
             )}
 
-            {(!calculateStay.date[0] || !calculateStay.date[1]) && (
+            {(!calculateStay.date[0] ||
+              !calculateStay.date[1] ||
+              totalNumberOfNonResidentGuests === 0) && (
               <div className="flex flex-col mt-12 mx-auto items-center gap-2">
                 <IconCalculator></IconCalculator>
                 <Text size={"sm"} className="text-gray-600 text-center">
-                  Enter your dates to start calculating.
+                  Enter your dates and non-resident guests (if available) to
+                  begin the calculation.
                 </Text>
               </div>
             )}
@@ -443,6 +445,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
 
           {!!calculateStay.date[0] &&
             !!calculateStay.date[1] &&
+            totalNumberOfNonResidentGuests > 0 &&
             !!calculateStay.rooms[0].name &&
             !!nonResidentFullTotalPrice && (
               <div className="sticky flex items-center py-1 px-2 left-4 bottom-0 w-full bg-white border-x-transparent border-b-transparent shadow-md border-t border-t-gray-200 border-solid h-[60px]">
@@ -460,55 +463,59 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
             )}
         </div>
       </Tabs.Panel>
+
       <Tabs.Panel value="resident">
         <div className="relative">
           <div className="w-full px-4 py-4">
             <Text className="font-bold" mb={8}>
               {calculateStay.name}
             </Text>
-            {calculateStay.date[0] && calculateStay.date[1] && (
-              <>
-                <div className="flex justify-between gap-8">
-                  <div className="flex border w-[45%] flex-col gap-2">
-                    <div className="flex gap-2 items-center">
-                      <IconCalendarEvent></IconCalendarEvent>
-                      <Text size="sm">Check-in</Text>
+            {calculateStay.date[0] &&
+              calculateStay.date[1] &&
+              totalNumberOfGuests > 0 && (
+                <>
+                  <div className="flex justify-between gap-8">
+                    <div className="flex border w-[45%] flex-col gap-2">
+                      <div className="flex gap-2 items-center">
+                        <IconCalendarEvent></IconCalendarEvent>
+                        <Text size="sm">Check-in</Text>
+                      </div>
+
+                      <Text size="sm" weight={700} ml={4}>
+                        {moment(
+                          calculateStay.date[0]?.toLocaleDateString()
+                        ).format("DD MMM YYYY")}
+                      </Text>
                     </div>
 
-                    <Text size="sm" weight={700} ml={4}>
-                      {moment(
-                        calculateStay.date[0]?.toLocaleDateString()
-                      ).format("DD MMM YYYY")}
-                    </Text>
-                  </div>
+                    <div className="flex w-[45%] flex-col gap-2">
+                      <div className="flex gap-2 items-center">
+                        <IconCalendarEvent></IconCalendarEvent>
+                        <Text size="sm">Check-out</Text>
+                      </div>
 
-                  <div className="flex w-[45%] flex-col gap-2">
-                    <div className="flex gap-2 items-center">
-                      <IconCalendarEvent></IconCalendarEvent>
-                      <Text size="sm">Check-out</Text>
+                      <Text size="sm" weight={700} ml={4}>
+                        {moment(
+                          calculateStay.date[1]?.toLocaleDateString()
+                        ).format("DD MMM YYYY")}
+                      </Text>
                     </div>
-
-                    <Text size="sm" weight={700} ml={4}>
-                      {moment(
-                        calculateStay.date[1]?.toLocaleDateString()
-                      ).format("DD MMM YYYY")}
-                    </Text>
                   </div>
-                </div>
 
-                <Text
-                  size="sm"
-                  weight={600}
-                  className="mt-2 border border-solid w-fit px-2 border-gray-200"
-                >
-                  {nights} {nights > 1 ? "nights" : "night"}
-                </Text>
-                <Divider size="xs" mt={8}></Divider>
-              </>
-            )}
+                  <Text
+                    size="sm"
+                    weight={600}
+                    className="mt-2 border border-solid w-fit px-2 border-gray-200"
+                  >
+                    {nights} {nights > 1 ? "nights" : "night"}
+                  </Text>
+                  <Divider size="xs" mt={8}></Divider>
+                </>
+              )}
 
             {calculateStay.date[0] &&
               calculateStay.date[1] &&
+              totalNumberOfGuests > 0 &&
               countRoomType.length > 0 && (
                 <div className="flex flex-col gap-2">
                   <Text size="sm" weight={700} className="mt-2">
@@ -527,6 +534,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
 
             {calculateStay.date[0] &&
               calculateStay.date[1] &&
+              totalNumberOfGuests > 0 &&
               calculateStay.rooms[0].residentGuests.length > 0 && (
                 <div className="flex flex-col gap-2">
                   <Flex justify="space-between" className="mt-2" align="center">
@@ -556,6 +564,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
 
             {calculateStay.date[0] &&
               calculateStay.date[1] &&
+              totalNumberOfGuests > 0 &&
               calculateStay.rooms[0].residentParkFee.length > 0 && (
                 <div className="flex flex-col gap-2">
                   <Divider size="xs" mt={8}></Divider>
@@ -585,6 +594,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
 
             {calculateStay.date[0] &&
               calculateStay.date[1] &&
+              totalNumberOfGuests > 0 &&
               calculateStay.activityFee.length > 0 && (
                 <div className="flex flex-col gap-2">
                   <Divider size="xs" mt={8}></Divider>
@@ -617,6 +627,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
 
             {calculateStay.date[0] &&
               calculateStay.date[1] &&
+              totalNumberOfGuests > 0 &&
               calculateStay.extraFee[0].name && (
                 <div className="flex flex-col gap-2">
                   <Divider size="xs" mt={8}></Divider>
@@ -662,11 +673,14 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
               </div>
             )}
 
-            {(!calculateStay.date[0] || !calculateStay.date[1]) && (
+            {(!calculateStay.date[0] ||
+              !calculateStay.date[1] ||
+              totalNumberOfGuests === 0) && (
               <div className="flex flex-col mt-12 mx-auto items-center gap-2">
                 <IconCalculator></IconCalculator>
                 <Text size={"sm"} className="text-gray-600 text-center">
-                  Enter your dates to start calculating.
+                  Enter your dates and resident guests (if available) to begin
+                  the calculation.
                 </Text>
               </div>
             )}
@@ -674,6 +688,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
 
           {!!calculateStay.date[0] &&
             !!calculateStay.date[1] &&
+            totalNumberOfGuests > 0 &&
             !!calculateStay.rooms[0].name &&
             !!residentFullTotalPrice && (
               <div className="sticky flex items-center py-1 px-2 left-4 bottom-0 w-full bg-white border-x-transparent border-b-transparent shadow-md border-t border-t-gray-200 border-solid h-[60px]">

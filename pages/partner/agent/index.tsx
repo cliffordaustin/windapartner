@@ -12,7 +12,7 @@ import { NextRouter, useRouter } from "next/router";
 import { IconInfoCircle, IconCalculator } from "@tabler/icons-react";
 import Listing from "@/components/Agent/Listing";
 import { Context } from "@/context/AgentPage";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function AgentPage() {
@@ -35,6 +35,25 @@ export default function AgentPage() {
   }, [router.query.location]);
 
   const { state, setState } = useContext(Context);
+
+  const [stayIds, setStayIds] = useState<string | undefined>("0");
+
+  const itemIds = process.browser ? localStorage.getItem("itemIds") : "";
+
+  useEffect(() => {
+    const ids = localStorage.getItem("itemIds");
+    const newIds = ids?.replace(/[\[\]']+/g, "");
+    if (ids) {
+      setStayIds(newIds || "0");
+    }
+  }, [itemIds]);
+
+  const [addedStays, setAddedStays] = useState<Stay[]>([]);
+
+  useEffect(() => {
+    const getStay = getPartnerStays(router.query.location as string, stayIds);
+    getStay.then((res) => setAddedStays(res));
+  }, [stayIds]);
 
   useEffect(() => {
     const storedItemIds = localStorage.getItem("itemIds");
@@ -81,9 +100,9 @@ export default function AgentPage() {
         </Grid>
       </div>
 
-      {state.itemIds.length > 0 && !isStayLoading && (
+      {addedStays && addedStays.length > 0 && !isStayLoading && (
         <NavLink
-          label={`Calculate pricing (${state.itemIds.length} selected)`}
+          label={`Calculate pricing (${addedStays?.length} selected)`}
           component="a"
           href="/partner/agent/calculate"
           className="fixed w-fit rounded-3xl px-4 text-white z-10 bg-[#000] hover:bg-[#333] font-semibold bottom-10 left-[40%]"

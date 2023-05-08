@@ -4,6 +4,11 @@ type ContextProviderProps = {
   children: React.ReactNode;
 };
 
+// interface Item {
+//   id: number;
+//   timestamp: number;
+// }
+
 type StateTypes = {
   itemIds: number[];
 };

@@ -876,51 +876,89 @@ export default function Room({ room, stay, index }: RoomProps) {
                       </div>
                     </Flex>
                   ))}
-                  <Flex
-                    onClick={() => {
-                      setState(
-                        state.map((item) => {
-                          if (item.id === stay.id) {
-                            return {
-                              ...item,
-                              rooms: item.rooms.map((item) => {
-                                if (item.id === room.id) {
-                                  return {
-                                    ...item,
-                                    nonResidentGuests: [
-                                      ...item.nonResidentGuests,
-                                      {
-                                        id: uuidv4(),
-                                        nonResident: "",
-                                        guestType: "",
-                                        description: "",
-                                      },
-                                    ],
-                                  };
-                                }
-                                return item;
-                              }),
-                            };
-                          }
-                          return item;
-                        })
-                      );
-                    }}
-                    className="cursor-pointer w-fit"
-                    align="center"
-                    mt={5}
-                    gap={4}
-                  >
-                    <Text
-                      className="text-blue-500"
-                      size="sm"
-                      weight={600}
-                      color="blue"
+                  <Flex mt={5} pr={5} align="center" justify="space-between">
+                    <Flex
+                      onClick={() => {
+                        setState(
+                          state.map((item) => {
+                            if (item.id === stay.id) {
+                              return {
+                                ...item,
+                                rooms: item.rooms.map((item) => {
+                                  if (item.id === room.id) {
+                                    return {
+                                      ...item,
+                                      nonResidentGuests: [
+                                        ...item.nonResidentGuests,
+                                        {
+                                          id: uuidv4(),
+                                          nonResident: "",
+                                          guestType: "",
+                                          description: "",
+                                        },
+                                      ],
+                                    };
+                                  }
+                                  return item;
+                                }),
+                              };
+                            }
+                            return item;
+                          })
+                        );
+                      }}
+                      className="cursor-pointer w-fit"
+                      align="center"
+                      gap={4}
                     >
-                      Add Non-Resident Guest
-                    </Text>
+                      <Text
+                        className="text-blue-500"
+                        size="sm"
+                        weight={600}
+                        color="blue"
+                      >
+                        Add Non-Resident Guest
+                      </Text>
 
-                    <IconPlus className="w-5 h-5 text-blue-500"></IconPlus>
+                      <IconPlus className="w-5 h-5 text-blue-500"></IconPlus>
+                    </Flex>
+
+                    <Text
+                      underline
+                      className="cursor-pointer"
+                      color="red"
+                      size="sm"
+                      onClick={() => {
+                        setState(
+                          state.map((item) => {
+                            if (item.id === stay.id) {
+                              return {
+                                ...item,
+                                rooms: item.rooms.map((item) => {
+                                  if (item.id === room.id) {
+                                    return {
+                                      ...item,
+                                      nonResidentGuests: [
+                                        {
+                                          id: uuidv4(),
+                                          nonResident: "",
+                                          guestType: "",
+                                          description: "",
+                                        },
+                                      ],
+                                    };
+                                  }
+                                  return item;
+                                }),
+                              };
+                            }
+                            return item;
+                          })
+                        );
+                      }}
+                    >
+                      Clear all
+                    </Text>
                   </Flex>
                 </Flex>
               </>
@@ -1173,51 +1211,90 @@ export default function Room({ room, stay, index }: RoomProps) {
                       </div>
                     </Flex>
                   ))}
-                  <Flex
-                    onClick={() => {
-                      setState(
-                        state.map((item) => {
-                          if (item.id === stay.id) {
-                            return {
-                              ...item,
-                              rooms: item.rooms.map((item) => {
-                                if (item.id === room.id) {
-                                  return {
-                                    ...item,
-                                    residentGuests: [
-                                      ...item.residentGuests,
-                                      {
-                                        id: uuidv4(),
-                                        resident: "",
-                                        guestType: "",
-                                        description: "",
-                                      },
-                                    ],
-                                  };
-                                }
-                                return item;
-                              }),
-                            };
-                          }
-                          return item;
-                        })
-                      );
-                    }}
-                    className="cursor-pointer w-fit"
-                    align="center"
-                    mt={5}
-                    gap={4}
-                  >
-                    <Text
-                      className="text-blue-500"
-                      size="sm"
-                      weight={600}
-                      color="blue"
+                  <Flex mt={5} pr={5} align="center" justify="space-between">
+                    <Flex
+                      onClick={() => {
+                        setState(
+                          state.map((item) => {
+                            if (item.id === stay.id) {
+                              return {
+                                ...item,
+                                rooms: item.rooms.map((item) => {
+                                  if (item.id === room.id) {
+                                    return {
+                                      ...item,
+                                      residentGuests: [
+                                        ...item.residentGuests,
+                                        {
+                                          id: uuidv4(),
+                                          resident: "",
+                                          guestType: "",
+                                          description: "",
+                                        },
+                                      ],
+                                    };
+                                  }
+                                  return item;
+                                }),
+                              };
+                            }
+                            return item;
+                          })
+                        );
+                      }}
+                      className="cursor-pointer w-fit"
+                      align="center"
+                      mt={5}
+                      gap={4}
                     >
-                      Add Resident Guest
-                    </Text>
+                      <Text
+                        className="text-blue-500"
+                        size="sm"
+                        weight={600}
+                        color="blue"
+                      >
+                        Add Resident Guest
+                      </Text>
 
-                    <IconPlus className="w-5 h-5 text-blue-500"></IconPlus>
+                      <IconPlus className="w-5 h-5 text-blue-500"></IconPlus>
+                    </Flex>
+
+                    <Text
+                      underline
+                      className="cursor-pointer"
+                      color="red"
+                      size="sm"
+                      onClick={() => {
+                        setState(
+                          state.map((item) => {
+                            if (item.id === stay.id) {
+                              return {
+                                ...item,
+                                rooms: item.rooms.map((item) => {
+                                  if (item.id === room.id) {
+                                    return {
+                                      ...item,
+                                      residentGuests: [
+                                        {
+                                          id: uuidv4(),
+                                          resident: "",
+                                          guestType: "",
+                                          description: "",
+                                        },
+                                      ],
+                                    };
+                                  }
+                                  return item;
+                                }),
+                              };
+                            }
+                            return item;
+                          })
+                        );
+                      }}
+                    >
+                      Clear all
+                    </Text>
                   </Flex>
                 </Flex>
               </>

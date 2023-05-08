@@ -309,6 +309,18 @@ const MyDocument = ({
   useEffect(() => {
     updateNonResidentTotal(nonResidentFullTotalPrice, index);
   }, [nonResidentFullTotalPrice, index, updateNonResidentTotal]);
+
+  const nonResidentContainerWidth: string =
+    nonResidentFullTotalPrice && !residentFullTotalPrice ? "100%" : "50%";
+  const residentContainerWidth: string =
+    residentFullTotalPrice && !nonResidentFullTotalPrice ? "100%" : "50%";
+
+  const nonResidentContainerStyle = {
+    width: nonResidentContainerWidth,
+    borderRightWidth: residentFullTotalPrice ? 1 : 0,
+    borderRightColor: "#E5E5E5",
+  };
+
   return (
     <Page style={styles.page} size="A4">
       <View>
@@ -369,46 +381,171 @@ const MyDocument = ({
           paddingBottom: 6,
         }}
       >
-        <View
-          style={{
-            display: "flex",
-            width: "50%",
-            borderRightWidth: 1,
-            borderRightColor: "#E5E5E5",
-            flexDirection: "column",
-            marginTop: 10,
-            fontFamily: "Open Sans",
-            paddingRight: 10,
-          }}
-        >
-          <Text
+        {!!nonResidentFullTotalPrice && (
+          <View
             style={{
-              fontSize: 14,
-              fontWeight: 700,
+              display: "flex",
+              flexDirection: "column",
+              marginTop: 10,
+              fontFamily: "Open Sans",
+              paddingRight: 10,
+              ...nonResidentContainerStyle,
             }}
           >
-            Non-Resident
-          </Text>
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: 700,
+              }}
+            >
+              Non-Resident
+            </Text>
 
-          {calculateStay.date[0] &&
-            calculateStay.date[1] &&
-            countRoomType.length > 0 && (
-              <View style={{ marginTop: 10 }}>
-                <Text style={{ fontSize: 12, fontWeight: 700 }}>Rooms</Text>
-                <View style={{ flexDirection: "column", marginTop: 5 }}>
-                  {countRoomType.map((item, index) => (
-                    <Text key={index} style={{ fontSize: 12 }}>
-                      {item}
-                    </Text>
-                  ))}
+            {calculateStay.date[0] &&
+              calculateStay.date[1] &&
+              countRoomType.length > 0 && (
+                <View style={{ marginTop: 10 }}>
+                  <Text style={{ fontSize: 12, fontWeight: 700 }}>Rooms</Text>
+                  <View style={{ flexDirection: "column", marginTop: 5 }}>
+                    {countRoomType.map((item, index) => (
+                      <Text key={index} style={{ fontSize: 12 }}>
+                        {item}
+                      </Text>
+                    ))}
+                  </View>
                 </View>
-              </View>
-            )}
+              )}
 
-          {!!calculateStay.date[0] &&
-            !!calculateStay.date[1] &&
-            calculateStay.rooms[0].nonResidentGuests.length > 0 && (
-              <View style={{ marginTop: 10 }}>
+            {!!calculateStay.date[0] &&
+              !!calculateStay.date[1] &&
+              calculateStay.rooms[0].nonResidentGuests.length > 0 && (
+                <View style={{ marginTop: 10 }}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text style={{ fontSize: 12, fontWeight: 700 }}>
+                      Guests
+                    </Text>
+                    <Text style={{ fontSize: 12, fontWeight: 600 }}>
+                      {totalNonResidentPrice
+                        ? `$ ${totalNonResidentPrice.toLocaleString()}`
+                        : ""}
+                    </Text>
+                  </View>
+                  <View style={{ marginTop: 5, flexDirection: "column" }}>
+                    {calculateStay.rooms.map((room, index) => (
+                      <NonResidentGuestsSummaryPdf
+                        key={index}
+                        room={room}
+                        index={index}
+                        roomTypes={roomTypes}
+                      />
+                    ))}
+                  </View>
+                </View>
+              )}
+
+            {calculateStay.date[0] &&
+              calculateStay.date[1] &&
+              calculateStay.rooms[0].nonResidentParkFee.length > 0 && (
+                <View
+                  style={{
+                    marginTop: 8,
+                    flexDirection: "column",
+                    borderTopWidth: 1,
+                    borderColor: "#E5E5E5",
+                    paddingTop: 8,
+                    paddingBottom: 8,
+                  }}
+                >
+                  {/* <Divider style={{ marginTop: 8 }}></Divider> */}
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text style={{ fontSize: 12, fontWeight: "bold" }}>
+                      Fees
+                    </Text>
+                    <Text style={{ fontSize: 12, fontWeight: 600 }}>
+                      {feePrice.nonResidentTotalFeePrice
+                        ? `$ ${feePrice.nonResidentTotalFeePrice.toLocaleString()}`
+                        : ""}
+                    </Text>
+                  </View>
+                  <View style={{ marginTop: 5, flexDirection: "column" }}>
+                    {calculateStay.rooms.map((room, index) => (
+                      <NonResidentFeesSummaryPdf
+                        key={index}
+                        room={room}
+                        index={index}
+                      ></NonResidentFeesSummaryPdf>
+                    ))}
+                  </View>
+                </View>
+              )}
+
+            {!!calculateStay.date[0] &&
+              !!calculateStay.date[1] &&
+              !!calculateStay.extraFee[0].name && (
+                <View
+                  style={{
+                    marginTop: 8,
+                    flexDirection: "column",
+                    borderTopWidth: 1,
+                    borderColor: "#E5E5E5",
+                    paddingTop: 8,
+                    paddingBottom: 8,
+                  }}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text style={{ fontSize: 12, fontWeight: 700 }}>
+                      Extra Fees
+                    </Text>
+
+                    <Text style={{ fontSize: 12, fontWeight: 600 }}>
+                      {totalNonResidentExtraFees
+                        ? `KES ${totalNonResidentExtraFees.toLocaleString()}`
+                        : ""}
+                    </Text>
+                  </View>
+
+                  <View style={{ flexDirection: "column", marginTop: 5 }}>
+                    {nonResidentExtraFees.map((fee, index) => (
+                      <ExtraFeesSummaryPdf
+                        key={index}
+                        index={index}
+                        fee={fee}
+                        numberOfGuests={totalNumberOfGuests}
+                        nights={nights}
+                      />
+                    ))}
+                  </View>
+                </View>
+              )}
+
+            {!!calculateStay.residentCommission && (
+              <View
+                style={{
+                  marginTop: 8,
+                  borderTopWidth: 1,
+                  borderColor: "#E5E5E5",
+                  paddingTop: 8,
+                  paddingBottom: 8,
+                }}
+              >
                 <View
                   style={{
                     flexDirection: "row",
@@ -416,29 +553,91 @@ const MyDocument = ({
                     alignItems: "center",
                   }}
                 >
-                  <Text style={{ fontSize: 12, fontWeight: 700 }}>Guests</Text>
-                  <Text style={{ fontSize: 12, fontWeight: 600 }}>
-                    {totalNonResidentPrice
-                      ? `$ ${totalNonResidentPrice.toLocaleString()}`
-                      : ""}
+                  <Text style={{ fontSize: 12, fontWeight: 700 }}>
+                    Non-resident Commission
                   </Text>
-                </View>
-                <View style={{ marginTop: 5, flexDirection: "column" }}>
-                  {calculateStay.rooms.map((room, index) => (
-                    <NonResidentGuestsSummaryPdf
-                      key={index}
-                      room={room}
-                      index={index}
-                      roomTypes={roomTypes}
-                    />
-                  ))}
+                  <Text style={{ fontSize: 12, fontWeight: 600 }}>
+                    {calculateStay.nonResidentCommission}%
+                  </Text>
                 </View>
               </View>
             )}
+          </View>
+        )}
+        {!!residentFullTotalPrice && (
+          <View
+            style={{
+              display: "flex",
+              width: residentContainerWidth,
+              flexDirection: "column",
+              marginTop: 10,
+              fontFamily: "Open Sans",
+              paddingLeft: 10,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: 700,
+              }}
+            >
+              Resident
+            </Text>
 
-          {calculateStay.date[0] &&
-            calculateStay.date[1] &&
-            calculateStay.rooms[0].nonResidentParkFee.length > 0 && (
+            {calculateStay.date[0] &&
+              calculateStay.date[1] &&
+              countRoomType.length > 0 && (
+                <View style={{ marginTop: 10 }}>
+                  <Text style={{ fontSize: 12, fontWeight: 700 }}>Rooms</Text>
+                  <View style={{ flexDirection: "column", marginTop: 5 }}>
+                    {countRoomType.map((item, index) => (
+                      <Text key={index} style={{ fontSize: 12 }}>
+                        {item}
+                      </Text>
+                    ))}
+                  </View>
+                </View>
+              )}
+
+            {calculateStay.date[0] &&
+              calculateStay.date[1] &&
+              calculateStay.rooms[0].residentGuests.length > 0 && (
+                <View style={{ marginTop: 10 }}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text style={{ fontSize: 12, fontWeight: 700 }}>
+                      Guests
+                    </Text>
+                    <Text style={{ fontSize: 12, fontWeight: 600 }}>
+                      {totalResidentPrice
+                        ? `KES ${totalResidentPrice.toLocaleString()}`
+                        : ""}
+                    </Text>
+                  </View>
+                  <View style={{ marginTop: 5, flexDirection: "column" }}>
+                    {calculateStay.rooms.map((room, index) => (
+                      <GuestsSummaryPdf
+                        key={index}
+                        room={room}
+                        index={index}
+                        roomTypes={roomTypes}
+                      />
+                    ))}
+                  </View>
+                </View>
+              )}
+
+            {((calculateStay.date[0] &&
+              calculateStay.date[1] &&
+              calculateStay.rooms[0].residentParkFee.length > 0) ||
+              (calculateStay.date[0] &&
+                calculateStay.date[1] &&
+                calculateStay.rooms[0].nonResidentParkFee.length > 0)) && (
               <View
                 style={{
                   marginTop: 8,
@@ -459,210 +658,72 @@ const MyDocument = ({
                 >
                   <Text style={{ fontSize: 12, fontWeight: "bold" }}>Fees</Text>
                   <Text style={{ fontSize: 12, fontWeight: 600 }}>
-                    {feePrice.nonResidentTotalFeePrice
-                      ? `$ ${feePrice.nonResidentTotalFeePrice.toLocaleString()}`
+                    {feePrice.residentTotalFeePrice
+                      ? `KES ${feePrice.residentTotalFeePrice.toLocaleString()}`
                       : ""}
                   </Text>
                 </View>
                 <View style={{ marginTop: 5, flexDirection: "column" }}>
                   {calculateStay.rooms.map((room, index) => (
-                    <NonResidentFeesSummaryPdf
+                    <FeesSummaryPdf
                       key={index}
                       room={room}
                       index={index}
-                    ></NonResidentFeesSummaryPdf>
+                    ></FeesSummaryPdf>
                   ))}
                 </View>
               </View>
             )}
 
-          {!!calculateStay.date[0] &&
-            !!calculateStay.date[1] &&
-            !!calculateStay.extraFee[0].name && (
-              <View
-                style={{
-                  marginTop: 8,
-                  flexDirection: "column",
-                  borderTopWidth: 1,
-                  borderColor: "#E5E5E5",
-                  paddingTop: 8,
-                  paddingBottom: 8,
-                }}
-              >
+            {!!calculateStay.date[0] &&
+              !!calculateStay.date[1] &&
+              !!calculateStay.extraFee[0].name && (
                 <View
                   style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
+                    marginTop: 8,
+                    flexDirection: "column",
+                    borderTopWidth: 1,
+                    borderColor: "#E5E5E5",
+                    paddingTop: 8,
+                    paddingBottom: 8,
                   }}
                 >
-                  <Text style={{ fontSize: 12, fontWeight: 700 }}>
-                    Extra Fees
-                  </Text>
-
-                  <Text style={{ fontSize: 12, fontWeight: 600 }}>
-                    {totalNonResidentExtraFees
-                      ? `KES ${totalNonResidentExtraFees.toLocaleString()}`
-                      : ""}
-                  </Text>
-                </View>
-
-                <View style={{ flexDirection: "column", marginTop: 5 }}>
-                  {nonResidentExtraFees.map((fee, index) => (
-                    <ExtraFeesSummaryPdf
-                      key={index}
-                      index={index}
-                      fee={fee}
-                      numberOfGuests={totalNumberOfGuests}
-                      nights={nights}
-                    />
-                  ))}
-                </View>
-              </View>
-            )}
-
-          {!!calculateStay.residentCommission && (
-            <View
-              style={{
-                marginTop: 8,
-                borderTopWidth: 1,
-                borderColor: "#E5E5E5",
-                paddingTop: 8,
-                paddingBottom: 8,
-              }}
-            >
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <Text style={{ fontSize: 12, fontWeight: 700 }}>
-                  Non-resident Commission
-                </Text>
-                <Text style={{ fontSize: 12, fontWeight: 600 }}>
-                  {calculateStay.nonResidentCommission}%
-                </Text>
-              </View>
-            </View>
-          )}
-        </View>
-        <View
-          style={{
-            display: "flex",
-            width: "50%",
-            flexDirection: "column",
-            marginTop: 10,
-            fontFamily: "Open Sans",
-            paddingLeft: 10,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 14,
-              fontWeight: 700,
-            }}
-          >
-            Resident
-          </Text>
-
-          {calculateStay.date[0] &&
-            calculateStay.date[1] &&
-            countRoomType.length > 0 && (
-              <View style={{ marginTop: 10 }}>
-                <Text style={{ fontSize: 12, fontWeight: 700 }}>Rooms</Text>
-                <View style={{ flexDirection: "column", marginTop: 5 }}>
-                  {countRoomType.map((item, index) => (
-                    <Text key={index} style={{ fontSize: 12 }}>
-                      {item}
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text style={{ fontSize: 12, fontWeight: 700 }}>
+                      Extra Fees
                     </Text>
-                  ))}
-                </View>
-              </View>
-            )}
 
-          {calculateStay.date[0] &&
-            calculateStay.date[1] &&
-            calculateStay.rooms[0].residentGuests.length > 0 && (
-              <View style={{ marginTop: 10 }}>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Text style={{ fontSize: 12, fontWeight: 700 }}>Guests</Text>
-                  <Text style={{ fontSize: 12, fontWeight: 600 }}>
-                    {totalResidentPrice
-                      ? `KES ${totalResidentPrice.toLocaleString()}`
-                      : ""}
-                  </Text>
-                </View>
-                <View style={{ marginTop: 5, flexDirection: "column" }}>
-                  {calculateStay.rooms.map((room, index) => (
-                    <GuestsSummaryPdf
-                      key={index}
-                      room={room}
-                      index={index}
-                      roomTypes={roomTypes}
-                    />
-                  ))}
-                </View>
-              </View>
-            )}
+                    <Text style={{ fontSize: 12, fontWeight: 600 }}>
+                      {totalResidentExtraFees
+                        ? `KES ${totalResidentExtraFees.toLocaleString()}`
+                        : ""}
+                    </Text>
+                  </View>
 
-          {((calculateStay.date[0] &&
-            calculateStay.date[1] &&
-            calculateStay.rooms[0].residentParkFee.length > 0) ||
-            (calculateStay.date[0] &&
-              calculateStay.date[1] &&
-              calculateStay.rooms[0].nonResidentParkFee.length > 0)) && (
-            <View
-              style={{
-                marginTop: 8,
-                flexDirection: "column",
-                borderTopWidth: 1,
-                borderColor: "#E5E5E5",
-                paddingTop: 8,
-                paddingBottom: 8,
-              }}
-            >
-              {/* <Divider style={{ marginTop: 8 }}></Divider> */}
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <Text style={{ fontSize: 12, fontWeight: "bold" }}>Fees</Text>
-                <Text style={{ fontSize: 12, fontWeight: 600 }}>
-                  {feePrice.residentTotalFeePrice
-                    ? `KES ${feePrice.residentTotalFeePrice.toLocaleString()}`
-                    : ""}
-                </Text>
-              </View>
-              <View style={{ marginTop: 5, flexDirection: "column" }}>
-                {calculateStay.rooms.map((room, index) => (
-                  <FeesSummaryPdf
-                    key={index}
-                    room={room}
-                    index={index}
-                  ></FeesSummaryPdf>
-                ))}
-              </View>
-            </View>
-          )}
+                  <View style={{ flexDirection: "column", marginTop: 5 }}>
+                    {residentExtraFees.map((fee, index) => (
+                      <ExtraFeesSummaryPdf
+                        key={index}
+                        index={index}
+                        fee={fee}
+                        numberOfGuests={totalNumberOfGuests}
+                        nights={nights}
+                      />
+                    ))}
+                  </View>
+                </View>
+              )}
 
-          {!!calculateStay.date[0] &&
-            !!calculateStay.date[1] &&
-            !!calculateStay.extraFee[0].name && (
+            {!!calculateStay.residentCommission && (
               <View
                 style={{
                   marginTop: 8,
-                  flexDirection: "column",
                   borderTopWidth: 1,
                   borderColor: "#E5E5E5",
                   paddingTop: 8,
@@ -677,57 +738,16 @@ const MyDocument = ({
                   }}
                 >
                   <Text style={{ fontSize: 12, fontWeight: 700 }}>
-                    Extra Fees
+                    Resident Commission
                   </Text>
-
                   <Text style={{ fontSize: 12, fontWeight: 600 }}>
-                    {totalResidentExtraFees
-                      ? `KES ${totalResidentExtraFees.toLocaleString()}`
-                      : ""}
+                    {calculateStay.residentCommission}%
                   </Text>
-                </View>
-
-                <View style={{ flexDirection: "column", marginTop: 5 }}>
-                  {residentExtraFees.map((fee, index) => (
-                    <ExtraFeesSummaryPdf
-                      key={index}
-                      index={index}
-                      fee={fee}
-                      numberOfGuests={totalNumberOfGuests}
-                      nights={nights}
-                    />
-                  ))}
                 </View>
               </View>
             )}
-
-          {!!calculateStay.residentCommission && (
-            <View
-              style={{
-                marginTop: 8,
-                borderTopWidth: 1,
-                borderColor: "#E5E5E5",
-                paddingTop: 8,
-                paddingBottom: 8,
-              }}
-            >
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <Text style={{ fontSize: 12, fontWeight: 700 }}>
-                  Resident Commission
-                </Text>
-                <Text style={{ fontSize: 12, fontWeight: 600 }}>
-                  {calculateStay.residentCommission}%
-                </Text>
-              </View>
-            </View>
-          )}
-        </View>
+          </View>
+        )}
       </View>
 
       <View

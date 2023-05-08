@@ -27,7 +27,14 @@ import PdfSummary from "@/components/Agent/PdfSummary";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
-import { PDFDownloadLink, Document, pdf, PDFViewer } from "@react-pdf/renderer";
+import {
+  PDFDownloadLink,
+  Document,
+  pdf,
+  PDFViewer,
+  Page,
+  Text as PdfText,
+} from "@react-pdf/renderer";
 import { saveAs } from "file-saver";
 import MyDocument from "@/components/Agent/Document";
 import { useDisclosure } from "@mantine/hooks";
@@ -216,6 +223,8 @@ export default function Calculate() {
                   {stay.property_name}
                 </Tabs.Tab>
               ))}
+
+              <Tabs.Tab value="summary">Summary</Tabs.Tab>
             </Tabs.List>
 
             <div className="w-full mt-4 flex flex-col gap-4">
@@ -224,6 +233,25 @@ export default function Calculate() {
                   <CalculateStay stay={stay} index={index}></CalculateStay>
                 </Tabs.Panel>
               ))}
+
+              <Tabs.Panel value="summary" pt="xs">
+                <PDFViewer width="100%" height="1000px">
+                  <QueryClientProvider client={queryClient}>
+                    <Document>
+                      {state.map((item, index) => (
+                        <MyDocument
+                          key={index}
+                          calculateStay={item}
+                          stays={stays}
+                          index={index}
+                          updateResidentTotal={updateResidentTotal}
+                          updateNonResidentTotal={updateNonResidentTotal}
+                        ></MyDocument>
+                      ))}
+                    </Document>
+                  </QueryClientProvider>
+                </PDFViewer>
+              </Tabs.Panel>
             </div>
             <div className="w-[30%] right-6 md:right-12 fixed top-[100px]">
               <div className="flex justify-between px-4 items-center gap-4">

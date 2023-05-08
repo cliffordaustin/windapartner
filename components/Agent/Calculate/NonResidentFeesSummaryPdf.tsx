@@ -54,13 +54,13 @@ export default function NonResidentFeesSummaryPdf({
             <Text style={{ fontSize: 12, color: "#777", fontWeight: 500 }}>
               {item.name} (For{" "}
               {item.guestType === "ADULT" && hasAdultNonResident(room)
-                ? totalGuests.residentAdults
+                ? totalGuests.nonResidentAdults
                 : item.guestType === "CHILD" && hasChildNonResident(room)
-                ? totalGuests.residentChildren
+                ? totalGuests.nonResidentChildren
                 : item.guestType === "INFANT" && hasInfantNonResident(room)
-                ? totalGuests.residentInfants
+                ? totalGuests.nonResidentInfants
                 : item.guestType === "TEEN" && hasTeenNonResident(room)
-                ? totalGuests.residentTeens
+                ? totalGuests.nonResidentTeens
                 : 0}
               )
             </Text>
@@ -69,13 +69,13 @@ export default function NonResidentFeesSummaryPdf({
               {(
                 item.price *
                 (item.guestType === "ADULT" && hasAdultNonResident(room)
-                  ? totalGuests.residentAdults
+                  ? totalGuests.nonResidentAdults
                   : item.guestType === "CHILD" && hasChildNonResident(room)
-                  ? totalGuests.residentChildren
+                  ? totalGuests.nonResidentChildren
                   : item.guestType === "INFANT" && hasInfantNonResident(room)
-                  ? totalGuests.residentInfants
+                  ? totalGuests.nonResidentInfants
                   : item.guestType === "TEEN" && hasTeenNonResident(room)
-                  ? totalGuests.residentTeens
+                  ? totalGuests.nonResidentTeens
                   : 0)
               ).toLocaleString()}
             </Text>

@@ -126,6 +126,7 @@ export interface Stay {
   has_options: boolean;
   lodge_price_data_pdf?: string;
   total_num_of_reviews: number;
+  has_user_added_to_calculate: boolean;
   stay_images: stayImages[];
   inclusions: Inclusions[];
   extras_included: ExtrasIncluded[];
