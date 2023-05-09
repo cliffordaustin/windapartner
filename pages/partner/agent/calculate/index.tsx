@@ -224,7 +224,7 @@ export default function Calculate() {
                 </Tabs.Tab>
               ))}
 
-              <Tabs.Tab value="summary">Summary</Tabs.Tab>
+              {/* <Tabs.Tab value="summary">Summary</Tabs.Tab> */}
             </Tabs.List>
 
             <div className="w-full mt-4 flex flex-col gap-4">
@@ -234,7 +234,7 @@ export default function Calculate() {
                 </Tabs.Panel>
               ))}
 
-              <Tabs.Panel value="summary" pt="xs">
+              {/* <Tabs.Panel value="summary" pt="xs">
                 <PDFViewer width="100%" height="1000px">
                   <QueryClientProvider client={queryClient}>
                     <Document>
@@ -251,7 +251,7 @@ export default function Calculate() {
                     </Document>
                   </QueryClientProvider>
                 </PDFViewer>
-              </Tabs.Panel>
+              </Tabs.Panel> */}
             </div>
             <div className="w-[30%] right-6 md:right-12 fixed top-[100px]">
               <div className="flex justify-between px-4 items-center gap-4">
