@@ -1,4 +1,12 @@
-import { Button, Flex, Text, Grid, Skeleton, NavLink } from "@mantine/core";
+import {
+  Button,
+  Flex,
+  Text,
+  Grid,
+  Skeleton,
+  NavLink,
+  Loader,
+} from "@mantine/core";
 import { getUser } from "../../api/user";
 import { GetServerSideProps } from "next";
 import { Stay, UserTypes } from "@/utils/types";
@@ -50,9 +58,19 @@ export default function AgentPage() {
 
   const [addedStays, setAddedStays] = useState<Stay[]>([]);
 
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   useEffect(() => {
+    setIsLoading(true);
     const getStay = getPartnerStays(router.query.location as string, stayIds);
-    getStay.then((res) => setAddedStays(res));
+    getStay
+      .then((res) => {
+        setAddedStays(res);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        setIsLoading(false);
+      });
   }, [stayIds]);
 
   useEffect(() => {
@@ -105,8 +123,15 @@ export default function AgentPage() {
           label={`Calculate pricing (${addedStays?.length} selected)`}
           component="a"
           href="/partner/agent/calculate"
-          className="fixed w-fit rounded-3xl px-4 text-white z-10 bg-[#000] hover:bg-[#333] font-semibold bottom-10 left-[40%]"
-          icon={<IconCalculator size="1.4rem" className="text-white ml-1" />}
+          disabled={isLoading}
+          className="fixed w-fit flex items-center justify-center rounded-3xl px-4 text-white z-10 bg-[#000] hover:bg-[#333] font-semibold bottom-10 left-[40%]"
+          icon={
+            isLoading ? (
+              <Loader size="sm" color="white" />
+            ) : (
+              <IconCalculator size="1.4rem" className="text-white ml-1" />
+            )
+          }
         />
       )}
     </div>

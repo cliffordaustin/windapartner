@@ -7,21 +7,37 @@ import { IconSearch } from "@tabler/icons-react";
 import { useState } from "react";
 import { useRouter } from "next/router";
 
-type NavbarProps = { user?: UserTypes | null };
+type NavbarProps = { user?: UserTypes | null; calculatePage?: boolean };
 
-export default function Navbar({ user }: NavbarProps) {
+export default function Navbar({ user, calculatePage = false }: NavbarProps) {
   const [location, setLocation] = useState("");
   const router = useRouter();
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      search();
+    }
+  };
+
   const search = () => {
-    router.push({
-      query: {
-        location: location,
-      },
-    });
+    if (calculatePage) {
+      router.push({
+        pathname: "/partner/agent",
+        query: {
+          location: location,
+        },
+      });
+      return;
+    } else {
+      router.push({
+        query: {
+          location: location,
+        },
+      });
+    }
   };
   return (
     <div className="flex items-center border-b justify-between sm:px-8 px-6 md:px-6 lg:px-12 h-[80px]">
-      <Link href="/">
+      <Link href="/partner/agent">
         <div className="relative w-28 h-9 cursor-pointer">
           <Image
             alt="Winda logo"
@@ -51,6 +67,7 @@ export default function Navbar({ user }: NavbarProps) {
           }}
           value={location}
           onChange={(event) => setLocation(event.currentTarget.value)}
+          onKeyDown={handleKeyPress}
           rightSection={
             <div
               onClick={() => {

@@ -15,7 +15,15 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { Stay } from "@/utils/types";
 import { getPartnerStays } from "@/pages/api/stays";
 import { useRouter } from "next/router";
-import { Button, Divider, NavLink, Popover, Tabs, Text } from "@mantine/core";
+import {
+  Button,
+  Divider,
+  Loader,
+  NavLink,
+  Popover,
+  Tabs,
+  Text,
+} from "@mantine/core";
 import { Context } from "@/context/CalculatePage";
 import { StateType, Room } from "@/context/CalculatePage";
 import { Stay as CalculateStay } from "@/components/Agent/Calculate/Stay";
@@ -208,33 +216,34 @@ export default function Calculate() {
   return (
     <div>
       <div className="border-b sticky top-0 z-10 bg-white left-0 right-0 border-x-0 border-t-0 border-solid border-b-gray-200">
-        <Navbar user={user}></Navbar>
+        <Navbar calculatePage={true} user={user}></Navbar>
       </div>
-      <div className="md:px-12 relative max-w-[1440px] mx-auto px-6 mt-4">
-        {stays && (
-          <Tabs
-            color="red"
-            defaultValue={stays?.length > 0 ? stays[0].slug : ""}
-            className="w-[64%]"
-          >
-            <Tabs.List>
-              {stays?.map((stay, index) => (
-                <Tabs.Tab value={stay.slug} key={index}>
-                  {stay.property_name}
-                </Tabs.Tab>
-              ))}
+      {!isStayLoading && (
+        <div className="md:px-12 relative max-w-[1440px] mx-auto px-6 mt-4">
+          {stays && (
+            <Tabs
+              color="red"
+              defaultValue={stays?.length > 0 ? stays[0].slug : ""}
+              className="w-[64%] mb-4"
+            >
+              <Tabs.List>
+                {stays?.map((stay, index) => (
+                  <Tabs.Tab value={stay.slug} key={index}>
+                    {stay.property_name}
+                  </Tabs.Tab>
+                ))}
 
-              {/* <Tabs.Tab value="summary">Summary</Tabs.Tab> */}
-            </Tabs.List>
+                {/* <Tabs.Tab value="summary">Summary</Tabs.Tab> */}
+              </Tabs.List>
 
-            <div className="w-full mt-4 flex flex-col gap-4">
-              {stays?.map((stay, index) => (
-                <Tabs.Panel key={index} value={stay.slug} pt="xs">
-                  <CalculateStay stay={stay} index={index}></CalculateStay>
-                </Tabs.Panel>
-              ))}
+              <div className="w-full mt-4 flex flex-col gap-4">
+                {stays?.map((stay, index) => (
+                  <Tabs.Panel key={index} value={stay.slug} pt="xs">
+                    <CalculateStay stay={stay} index={index}></CalculateStay>
+                  </Tabs.Panel>
+                ))}
 
-              {/* <Tabs.Panel value="summary" pt="xs">
+                {/* <Tabs.Panel value="summary" pt="xs">
                 <PDFViewer width="100%" height="1000px">
                   <QueryClientProvider client={queryClient}>
                     <Document>
@@ -252,73 +261,80 @@ export default function Calculate() {
                   </QueryClientProvider>
                 </PDFViewer>
               </Tabs.Panel> */}
-            </div>
-            <div className="w-[30%] right-6 md:right-12 fixed top-[100px]">
-              <div className="flex justify-between px-4 items-center gap-4">
-                <div></div>
+              </div>
+              <div className="w-[30%] right-6 md:right-12 fixed top-[100px]">
+                <div className="flex justify-between px-4 items-center gap-4">
+                  <div></div>
 
-                <Popover width={200} position="bottom" withArrow shadow="md">
-                  <Popover.Target>
-                    <Button
-                      variant="gradient"
-                      gradient={{
-                        from: "red",
-                        to: "red",
-                      }}
-                      className="flex items-center gap-4"
+                  <Popover width={200} position="bottom" withArrow shadow="md">
+                    <Popover.Target>
+                      <Button
+                        variant="gradient"
+                        gradient={{
+                          from: "red",
+                          to: "red",
+                        }}
+                        className="flex items-center gap-4"
+                      >
+                        <IconDownload></IconDownload>
+                        <span>Download</span>
+                      </Button>
+                    </Popover.Target>
+                    <Popover.Dropdown>
+                      <Text
+                        onClick={() => {
+                          handleDownloadPdf();
+                        }}
+                        className="hover:bg-gray-100 flex items-center gap-2 font-semibold p-2 rounded-md cursor-pointer"
+                        size="sm"
+                      >
+                        <IconCalculator></IconCalculator>
+                        <span>Your calculation</span>
+                      </Text>
+                      {stays.map((item, index) => (
+                        <Tabs.Panel key={index} value={item.slug}>
+                          {item.lodge_price_data_pdf && (
+                            <Text
+                              onClick={() => {
+                                handleDownloadClick(
+                                  item.lodge_price_data_pdf,
+                                  item.property_name
+                                );
+                              }}
+                              className="hover:bg-gray-100 flex items-center gap-2 p-2 rounded-md cursor-pointer"
+                              size="sm"
+                            >
+                              <IconGraph></IconGraph>
+                              <span>Lodge price data</span>
+                            </Text>
+                          )}
+                        </Tabs.Panel>
+                      ))}
+                    </Popover.Dropdown>
+                  </Popover>
+                </div>
+                <div className="overflow-y-scroll h-[450px] mt-4 flex flex-col gap-4 shadow-lg border border-solid border-gray-100 rounded-xl">
+                  {state.map((item, index) => (
+                    <Tabs.Panel
+                      key={index}
+                      value={item.slug}
+                      className="h-[500px]"
                     >
-                      <IconDownload></IconDownload>
-                      <span>Download</span>
-                    </Button>
-                  </Popover.Target>
-                  <Popover.Dropdown>
-                    <Text
-                      onClick={() => {
-                        handleDownloadPdf();
-                      }}
-                      className="hover:bg-gray-100 flex items-center gap-2 font-semibold p-2 rounded-md cursor-pointer"
-                      size="sm"
-                    >
-                      <IconCalculator></IconCalculator>
-                      <span>Your calculation</span>
-                    </Text>
-                    {stays.map((item, index) => (
-                      <Tabs.Panel key={index} value={item.slug}>
-                        {item.lodge_price_data_pdf && (
-                          <Text
-                            onClick={() => {
-                              handleDownloadClick(
-                                item.lodge_price_data_pdf,
-                                item.property_name
-                              );
-                            }}
-                            className="hover:bg-gray-100 flex items-center gap-2 p-2 rounded-md cursor-pointer"
-                            size="sm"
-                          >
-                            <IconGraph></IconGraph>
-                            <span>Lodge price data</span>
-                          </Text>
-                        )}
-                      </Tabs.Panel>
-                    ))}
-                  </Popover.Dropdown>
-                </Popover>
+                      <Summary stays={stays} calculateStay={item}></Summary>
+                    </Tabs.Panel>
+                  ))}
+                </div>
               </div>
-              <div className="overflow-y-scroll h-[450px] mt-4 flex flex-col gap-4 shadow-lg border border-solid border-gray-100 rounded-xl">
-                {state.map((item, index) => (
-                  <Tabs.Panel
-                    key={index}
-                    value={item.slug}
-                    className="h-[500px]"
-                  >
-                    <Summary stays={stays} calculateStay={item}></Summary>
-                  </Tabs.Panel>
-                ))}
-              </div>
-            </div>
-          </Tabs>
-        )}
-      </div>
+            </Tabs>
+          )}
+        </div>
+      )}
+
+      {isStayLoading && (
+        <div className="absolute top-[50%] left-[50%] -translate-x-2/4">
+          <Loader color="red" />
+        </div>
+      )}
     </div>
   );
 }

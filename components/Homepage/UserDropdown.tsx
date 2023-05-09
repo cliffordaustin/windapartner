@@ -17,7 +17,7 @@ export default function UserDropdown({ user }: UserDropdownProps) {
   const fullName = (user?.first_name || "") + " " + (user?.last_name || "");
   return (
     <>
-      <Popover width={250} position="bottom" withArrow shadow="md">
+      <Popover width={250} position="bottom-end" withArrow shadow="md">
         <Popover.Target>
           <div className="flex items-center gap-1 px-1 py-1 rounded-3xl cursor-pointer">
             {!user && <Avatar color="red" radius="xl" />}
