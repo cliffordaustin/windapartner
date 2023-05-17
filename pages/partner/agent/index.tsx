@@ -118,7 +118,22 @@ export default function AgentPage() {
         </Grid>
       </div>
 
-      {addedStays && addedStays.length > 0 && !isStayLoading && (
+      <NavLink
+        label={`Calculate pricing (${addedStays?.length} selected)`}
+        component="a"
+        href="/partner/agent/calculate"
+        disabled={isLoading || addedStays.length === 0}
+        className="fixed w-fit flex items-center justify-center rounded-3xl px-4 text-white z-10 bg-[#000] hover:bg-[#333] font-semibold bottom-10 left-[40%]"
+        icon={
+          isLoading ? (
+            <Loader size="sm" color="white" />
+          ) : (
+            <IconCalculator size="1.4rem" className="text-white ml-1" />
+          )
+        }
+      />
+
+      {/* {addedStays && addedStays.length > 0 && !isStayLoading && (
         <NavLink
           label={`Calculate pricing (${addedStays?.length} selected)`}
           component="a"
@@ -133,7 +148,7 @@ export default function AgentPage() {
             )
           }
         />
-      )}
+      )} */}
     </div>
   );
 }
