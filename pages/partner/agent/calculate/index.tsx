@@ -243,24 +243,24 @@ export default function Calculate() {
                   </Tabs.Panel>
                 ))}
 
-                {/* <Tabs.Panel value="summary" pt="xs">
-                <PDFViewer width="100%" height="1000px">
-                  <QueryClientProvider client={queryClient}>
-                    <Document>
-                      {state.map((item, index) => (
-                        <MyDocument
-                          key={index}
-                          calculateStay={item}
-                          stays={stays}
-                          index={index}
-                          updateResidentTotal={updateResidentTotal}
-                          updateNonResidentTotal={updateNonResidentTotal}
-                        ></MyDocument>
-                      ))}
-                    </Document>
-                  </QueryClientProvider>
-                </PDFViewer>
-              </Tabs.Panel> */}
+                <Tabs.Panel value="summary" pt="xs">
+                  <PDFViewer width="100%" height="1000px">
+                    <QueryClientProvider client={queryClient}>
+                      <Document>
+                        {state.map((item, index) => (
+                          <MyDocument
+                            key={index}
+                            calculateStay={item}
+                            stays={stays}
+                            index={index}
+                            updateResidentTotal={updateResidentTotal}
+                            updateNonResidentTotal={updateNonResidentTotal}
+                          ></MyDocument>
+                        ))}
+                      </Document>
+                    </QueryClientProvider>
+                  </PDFViewer>
+                </Tabs.Panel>
               </div>
               <div className="w-[30%] right-6 md:right-12 fixed top-[100px]">
                 <div className="flex justify-between px-4 items-center gap-4">
