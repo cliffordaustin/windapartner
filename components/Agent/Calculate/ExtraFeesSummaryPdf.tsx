@@ -14,6 +14,8 @@ type ExtraFeesSummaryProps = {
   fee: ExtraFee;
   numberOfGuests: number;
   nights: number;
+  includeClientInCalculation: boolean;
+  commission: number;
 };
 
 export default function ExtraFeesSummaryPdf({
@@ -21,6 +23,8 @@ export default function ExtraFeesSummaryPdf({
   fee,
   numberOfGuests,
   nights,
+  includeClientInCalculation,
+  commission,
 }: ExtraFeesSummaryProps) {
   const feeArr = [fee];
 

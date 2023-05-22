@@ -39,6 +39,7 @@ type SummaryProps = {
   calculateStay: StateType;
   stays?: Stay[];
   index: number;
+  includeClientInCalculation: boolean;
   updateResidentTotal: (value: number, index: number) => void;
   updateNonResidentTotal: (value: number, index: number) => void;
 };
@@ -124,6 +125,7 @@ const MyDocument = ({
   updateResidentTotal,
   updateNonResidentTotal,
   index,
+  includeClientInCalculation,
 }: SummaryProps) => {
   const countRoomType = countRoomTypes(calculateStay.rooms);
 
@@ -237,19 +239,42 @@ const MyDocument = ({
 
   const feePrice = pricing.calculateRoomFees(calculateStay.rooms);
 
-  const totalResidentExtraFees = pricing.calculateExtraFees(
+  const residentFeePrice = includeClientInCalculation
+    ? feePrice.residentTotalFeePrice +
+      feePrice.residentTotalFeePrice *
+        ((calculateStay.residentCommission || 0) / 100)
+    : feePrice.residentTotalFeePrice;
+
+  const nonResidentFeePrice = includeClientInCalculation
+    ? feePrice.nonResidentTotalFeePrice +
+      feePrice.nonResidentTotalFeePrice *
+        ((calculateStay.nonResidentCommission || 0) / 100)
+    : feePrice.nonResidentTotalFeePrice;
+
+  let totalResidentExtraFees = pricing.calculateExtraFees(
     residentTotalExtraFees,
     totalNumberOfGuests,
     nights
   );
 
-  const totalNonResidentExtraFees = pricing.calculateExtraFees(
+  totalResidentExtraFees = includeClientInCalculation
+    ? totalResidentExtraFees +
+      totalResidentExtraFees * ((calculateStay.residentCommission || 0) / 100)
+    : totalResidentExtraFees;
+
+  let totalNonResidentExtraFees = pricing.calculateExtraFees(
     nonResidentTotalExtraFees,
     totalNumberOfNonResidentGuests,
     nights
   );
 
-  const totalResidentPrice = calculateStay.rooms.reduce((acc, room) => {
+  totalNonResidentExtraFees = includeClientInCalculation
+    ? totalNonResidentExtraFees +
+      totalNonResidentExtraFees *
+        ((calculateStay.nonResidentCommission || 0) / 100)
+    : totalNonResidentExtraFees;
+
+  let totalResidentPrice = calculateStay.rooms.reduce((acc, room) => {
     const countResidentGuestTypes = pricing.countResidentGuestTypesWithPrice(
       room.residentGuests,
       room,
@@ -262,7 +287,12 @@ const MyDocument = ({
     return acc + roomTotal;
   }, 0);
 
-  const totalNonResidentPrice = calculateStay.rooms.reduce((acc, room) => {
+  totalResidentPrice = includeClientInCalculation
+    ? totalResidentPrice +
+      totalResidentPrice * ((calculateStay.residentCommission || 0) / 100)
+    : totalResidentPrice;
+
+  let totalNonResidentPrice = calculateStay.rooms.reduce((acc, room) => {
     const countResidentGuestTypes = pricing.countNonResidentGuestTypesWithPrice(
       room.nonResidentGuests,
       room,
@@ -275,24 +305,27 @@ const MyDocument = ({
     return acc + roomTotal;
   }, 0);
 
-  let residentFullTotalPrice =
-    totalResidentPrice +
-    feePrice.residentTotalFeePrice +
-    totalResidentExtraFees;
+  totalNonResidentPrice = includeClientInCalculation
+    ? totalNonResidentPrice +
+      totalNonResidentPrice * ((calculateStay.nonResidentCommission || 0) / 100)
+    : totalNonResidentPrice;
 
-  residentFullTotalPrice =
-    residentFullTotalPrice +
-    (residentFullTotalPrice * Number(calculateStay.residentCommission)) / 100;
+  let residentFullTotalPrice =
+    totalResidentPrice + residentFeePrice + totalResidentExtraFees;
+
+  residentFullTotalPrice = includeClientInCalculation
+    ? residentFullTotalPrice
+    : residentFullTotalPrice +
+      residentFullTotalPrice * (Number(calculateStay.residentCommission) / 100);
 
   let nonResidentFullTotalPrice =
-    totalNonResidentPrice +
-    feePrice.nonResidentTotalFeePrice +
-    totalNonResidentExtraFees;
+    totalNonResidentPrice + nonResidentFeePrice + totalNonResidentExtraFees;
 
-  nonResidentFullTotalPrice =
-    nonResidentFullTotalPrice +
-    (nonResidentFullTotalPrice * Number(calculateStay.nonResidentCommission)) /
-      100;
+  nonResidentFullTotalPrice = includeClientInCalculation
+    ? nonResidentFullTotalPrice
+    : nonResidentFullTotalPrice +
+      nonResidentFullTotalPrice *
+        (Number(calculateStay.nonResidentCommission) / 100);
 
   const residentExtraFees: ExtraFee[] = calculateStay.extraFee.filter(
     (item) => item.guestType === "Resident"
@@ -440,6 +473,8 @@ const MyDocument = ({
                     {calculateStay.rooms.map((room, index) => (
                       <NonResidentGuestsSummaryPdf
                         key={index}
+                        includeClientInCalculation={includeClientInCalculation}
+                        commission={Number(calculateStay.nonResidentCommission)}
                         room={room}
                         index={index}
                         roomTypes={roomTypes}
@@ -474,8 +509,8 @@ const MyDocument = ({
                       Fees
                     </Text>
                     <Text style={{ fontSize: 12, fontWeight: 600 }}>
-                      {feePrice.nonResidentTotalFeePrice
-                        ? `$ ${feePrice.nonResidentTotalFeePrice.toLocaleString()}`
+                      {nonResidentFeePrice
+                        ? `$ ${nonResidentFeePrice.toLocaleString()}`
                         : ""}
                     </Text>
                   </View>
@@ -483,6 +518,8 @@ const MyDocument = ({
                     {calculateStay.rooms.map((room, index) => (
                       <NonResidentFeesSummaryPdf
                         key={index}
+                        includeClientInCalculation={includeClientInCalculation}
+                        commission={Number(calculateStay.nonResidentCommission)}
                         room={room}
                         index={index}
                       ></NonResidentFeesSummaryPdf>
@@ -517,7 +554,7 @@ const MyDocument = ({
 
                     <Text style={{ fontSize: 12, fontWeight: 600 }}>
                       {totalNonResidentExtraFees
-                        ? `KES ${totalNonResidentExtraFees.toLocaleString()}`
+                        ? `$ ${totalNonResidentExtraFees.toLocaleString()}`
                         : ""}
                     </Text>
                   </View>
@@ -527,6 +564,8 @@ const MyDocument = ({
                       <ExtraFeesSummaryPdf
                         key={index}
                         index={index}
+                        includeClientInCalculation={includeClientInCalculation}
+                        commission={Number(calculateStay.nonResidentCommission)}
                         fee={fee}
                         numberOfGuests={totalNumberOfGuests}
                         nights={nights}
@@ -536,32 +575,33 @@ const MyDocument = ({
                 </View>
               )}
 
-            {!!calculateStay.residentCommission && (
-              <View
-                style={{
-                  marginTop: 8,
-                  borderTopWidth: 1,
-                  borderColor: "#E5E5E5",
-                  paddingTop: 8,
-                  paddingBottom: 8,
-                }}
-              >
+            {!!calculateStay.nonResidentCommission &&
+              !includeClientInCalculation && (
                 <View
                   style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
+                    marginTop: 8,
+                    borderTopWidth: 1,
+                    borderColor: "#E5E5E5",
+                    paddingTop: 8,
+                    paddingBottom: 8,
                   }}
                 >
-                  <Text style={{ fontSize: 12, fontWeight: 700 }}>
-                    Non-resident Commission
-                  </Text>
-                  <Text style={{ fontSize: 12, fontWeight: 600 }}>
-                    {calculateStay.nonResidentCommission}%
-                  </Text>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text style={{ fontSize: 12, fontWeight: 700 }}>
+                      Non-resident Commission
+                    </Text>
+                    <Text style={{ fontSize: 12, fontWeight: 600 }}>
+                      {calculateStay.nonResidentCommission}%
+                    </Text>
+                  </View>
                 </View>
-              </View>
-            )}
+              )}
           </View>
         )}
         {!!residentFullTotalPrice && (
@@ -623,6 +663,8 @@ const MyDocument = ({
                     {calculateStay.rooms.map((room, index) => (
                       <GuestsSummaryPdf
                         key={index}
+                        includeClientInCalculation={includeClientInCalculation}
+                        commission={Number(calculateStay.residentCommission)}
                         room={room}
                         index={index}
                         roomTypes={roomTypes}
@@ -658,8 +700,8 @@ const MyDocument = ({
                 >
                   <Text style={{ fontSize: 12, fontWeight: "bold" }}>Fees</Text>
                   <Text style={{ fontSize: 12, fontWeight: 600 }}>
-                    {feePrice.residentTotalFeePrice
-                      ? `KES ${feePrice.residentTotalFeePrice.toLocaleString()}`
+                    {residentFeePrice
+                      ? `KES ${residentFeePrice.toLocaleString()}`
                       : ""}
                   </Text>
                 </View>
@@ -667,6 +709,8 @@ const MyDocument = ({
                   {calculateStay.rooms.map((room, index) => (
                     <FeesSummaryPdf
                       key={index}
+                      includeClientInCalculation={includeClientInCalculation}
+                      commission={Number(calculateStay.residentCommission)}
                       room={room}
                       index={index}
                     ></FeesSummaryPdf>
@@ -711,6 +755,8 @@ const MyDocument = ({
                       <ExtraFeesSummaryPdf
                         key={index}
                         index={index}
+                        includeClientInCalculation={includeClientInCalculation}
+                        commission={Number(calculateStay.nonResidentCommission)}
                         fee={fee}
                         numberOfGuests={totalNumberOfGuests}
                         nights={nights}
@@ -720,32 +766,33 @@ const MyDocument = ({
                 </View>
               )}
 
-            {!!calculateStay.residentCommission && (
-              <View
-                style={{
-                  marginTop: 8,
-                  borderTopWidth: 1,
-                  borderColor: "#E5E5E5",
-                  paddingTop: 8,
-                  paddingBottom: 8,
-                }}
-              >
+            {!!calculateStay.residentCommission &&
+              !includeClientInCalculation && (
                 <View
                   style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
+                    marginTop: 8,
+                    borderTopWidth: 1,
+                    borderColor: "#E5E5E5",
+                    paddingTop: 8,
+                    paddingBottom: 8,
                   }}
                 >
-                  <Text style={{ fontSize: 12, fontWeight: 700 }}>
-                    Resident Commission
-                  </Text>
-                  <Text style={{ fontSize: 12, fontWeight: 600 }}>
-                    {calculateStay.residentCommission}%
-                  </Text>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text style={{ fontSize: 12, fontWeight: 700 }}>
+                      Resident Commission
+                    </Text>
+                    <Text style={{ fontSize: 12, fontWeight: 600 }}>
+                      {calculateStay.residentCommission}%
+                    </Text>
+                  </View>
                 </View>
-              </View>
-            )}
+              )}
           </View>
         )}
       </View>

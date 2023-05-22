@@ -14,12 +14,16 @@ type GuestsSummaryProps = {
   room: Room;
   roomTypes: RoomType[] | undefined;
   index: number;
+  includeClientInCalculation: boolean;
+  commission: number;
 };
 
 export default function GuestsSummaryPdf({
   room,
   roomTypes,
   index,
+  includeClientInCalculation,
+  commission,
 }: GuestsSummaryProps) {
   const countResidentGuestTypes = pricing.countResidentGuestTypesWithPrice(
     room.residentGuests,
@@ -49,7 +53,15 @@ export default function GuestsSummaryPdf({
               {guestType.name}
             </Text>
             <Text style={{ fontSize: 12, color: "gray" }}>
-              KES {guestType.price?.toLocaleString()}
+              KES{" "}
+              {guestType.price &&
+                pricing
+                  .clientIncludedInPrice(
+                    guestType.price,
+                    includeClientInCalculation,
+                    commission
+                  )
+                  .toLocaleString()}
             </Text>
           </View>
         ))}

@@ -6,11 +6,15 @@ import { Text, View } from "@react-pdf/renderer";
 type FeesSummaryProps = {
   room: Room;
   index: number;
+  includeClientInCalculation: boolean;
+  commission: number;
 };
 
 export default function NonResidentFeesSummaryPdf({
   room,
   index,
+  includeClientInCalculation,
+  commission,
 }: FeesSummaryProps) {
   const roomArr = [room];
 
@@ -66,18 +70,23 @@ export default function NonResidentFeesSummaryPdf({
             </Text>
             <Text style={{ fontSize: 12, color: "#777", fontWeight: 500 }}>
               $
-              {(
-                item.price *
-                (item.guestType === "ADULT" && hasAdultNonResident(room)
-                  ? totalGuests.nonResidentAdults
-                  : item.guestType === "CHILD" && hasChildNonResident(room)
-                  ? totalGuests.nonResidentChildren
-                  : item.guestType === "INFANT" && hasInfantNonResident(room)
-                  ? totalGuests.nonResidentInfants
-                  : item.guestType === "TEEN" && hasTeenNonResident(room)
-                  ? totalGuests.nonResidentTeens
-                  : 0)
-              ).toLocaleString()}
+              {pricing
+                .clientIncludedInPrice(
+                  item.price *
+                    (item.guestType === "ADULT" && hasAdultNonResident(room)
+                      ? totalGuests.nonResidentAdults
+                      : item.guestType === "CHILD" && hasChildNonResident(room)
+                      ? totalGuests.nonResidentChildren
+                      : item.guestType === "INFANT" &&
+                        hasInfantNonResident(room)
+                      ? totalGuests.nonResidentInfants
+                      : item.guestType === "TEEN" && hasTeenNonResident(room)
+                      ? totalGuests.nonResidentTeens
+                      : 0),
+                  includeClientInCalculation,
+                  commission
+                )
+                .toLocaleString()}
             </Text>
           </View>
         ))}

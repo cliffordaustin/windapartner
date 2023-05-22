@@ -17,12 +17,16 @@ import { getPartnerStays } from "@/pages/api/stays";
 import { useRouter } from "next/router";
 import {
   Button,
+  Checkbox,
   Divider,
+  Flex,
   Loader,
+  Modal,
   NavLink,
   Popover,
   Tabs,
   Text,
+  useMantineTheme,
 } from "@mantine/core";
 import { Context } from "@/context/CalculatePage";
 import { StateType, Room } from "@/context/CalculatePage";
@@ -50,6 +54,9 @@ import { useDisclosure } from "@mantine/hooks";
 export default function Calculate() {
   const token = Cookies.get("token");
   const router = useRouter();
+
+  const [includeClientInCalculation, setIncludeResidentInCalculation] =
+    useState(false);
 
   const { data: user } = useQuery<UserTypes | null>("user", () =>
     getUser(token)
@@ -133,22 +140,6 @@ export default function Calculate() {
     }
   }, [stays, setState]);
 
-  const contentRef = useRef<HTMLDivElement>(null);
-
-  const handleGeneratePdf = () => {
-    if (contentRef.current) {
-      html2canvas(contentRef.current, { scale: 4 }).then((canvas) => {
-        const imgData = canvas.toDataURL("image/png");
-        const pdf = new jsPDF("p", "mm", "a4");
-        const imgProps = pdf.getImageProperties(imgData);
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-        pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-        pdf.save("calculation.pdf");
-      });
-    }
-  };
-
   const [totalResident, setTotalResident] = useState<number>(0);
   const [totalResidentPriceList, setTotalResidentPriceList] = useState<
     number[]
@@ -186,6 +177,7 @@ export default function Calculate() {
             {state.map((item, index) => (
               <MyDocument
                 key={index}
+                includeClientInCalculation={includeClientInCalculation}
                 calculateStay={item}
                 stays={stays}
                 index={index}
@@ -198,7 +190,7 @@ export default function Calculate() {
       ).toBlob();
       saveAs(blob, fileName);
     } catch (error) {
-      console.error("Error generating PDF document", error);
+      // console.error("Error generating PDF document", error);
     }
   };
 
@@ -212,6 +204,9 @@ export default function Calculate() {
       saveAs(pdfUrl, fileName);
     }
   };
+
+  const [opened, { open, close }] = useDisclosure(false);
+  const theme = useMantineTheme();
 
   return (
     <div>
@@ -250,6 +245,9 @@ export default function Calculate() {
                         {state.map((item, index) => (
                           <MyDocument
                             key={index}
+                            includeClientInCalculation={
+                              includeClientInCalculation
+                            }
                             calculateStay={item}
                             stays={stays}
                             index={index}
@@ -262,6 +260,50 @@ export default function Calculate() {
                   </PDFViewer>
                 </Tabs.Panel>
               </div>
+
+              <Modal
+                opened={opened}
+                onClose={close}
+                title="Download PDF"
+                overlayProps={{
+                  color:
+                    theme.colorScheme === "dark"
+                      ? theme.colors.dark[9]
+                      : theme.colors.gray[2],
+                  opacity: 0.55,
+                  blur: 3,
+                }}
+              >
+                <Checkbox
+                  label="Download calculation for client"
+                  checked={includeClientInCalculation}
+                  onChange={(event) =>
+                    setIncludeResidentInCalculation(event.currentTarget.checked)
+                  }
+                ></Checkbox>
+
+                <Flex mt={6} justify="space-between" align="center">
+                  <Text
+                    onClick={() => {
+                      close();
+                    }}
+                    size="sm"
+                    color="blue"
+                    className="hover:underline cursor-pointer"
+                  >
+                    Cancel
+                  </Text>
+
+                  <Button
+                    onClick={() => {
+                      handleDownloadPdf();
+                    }}
+                    color="red"
+                  >
+                    Download now
+                  </Button>
+                </Flex>
+              </Modal>
               <div className="w-[30%] right-6 md:right-12 fixed top-[100px]">
                 <div className="flex justify-between px-4 items-center gap-4">
                   <div></div>
@@ -282,9 +324,7 @@ export default function Calculate() {
                     </Popover.Target>
                     <Popover.Dropdown>
                       <Text
-                        onClick={() => {
-                          handleDownloadPdf();
-                        }}
+                        onClick={open}
                         className="hover:bg-gray-100 flex items-center gap-2 font-semibold p-2 rounded-md cursor-pointer"
                         size="sm"
                       >

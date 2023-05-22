@@ -6,9 +6,16 @@ import { Text, View } from "@react-pdf/renderer";
 type FeesSummaryProps = {
   room: Room;
   index: number;
+  includeClientInCalculation: boolean;
+  commission: number;
 };
 
-export default function FeesSummaryPdf({ room, index }: FeesSummaryProps) {
+export default function FeesSummaryPdf({
+  room,
+  index,
+  includeClientInCalculation,
+  commission,
+}: FeesSummaryProps) {
   const roomArr = [room];
 
   const totalGuests = pricing.getTotalGuestsByCategory(roomArr);
@@ -57,18 +64,22 @@ export default function FeesSummaryPdf({ room, index }: FeesSummaryProps) {
             </Text>
             <Text style={{ fontSize: 12, color: "#777", fontWeight: 500 }}>
               KES
-              {(
-                item.price *
-                (item.guestType === "ADULT" && hasAdultResident(room)
-                  ? totalGuests.residentAdults
-                  : item.guestType === "CHILD" && hasChildResident(room)
-                  ? totalGuests.residentChildren
-                  : item.guestType === "INFANT" && hasInfantResident(room)
-                  ? totalGuests.residentInfants
-                  : item.guestType === "TEEN" && hasTeenResident(room)
-                  ? totalGuests.residentTeens
-                  : 0)
-              ).toLocaleString()}
+              {pricing
+                .clientIncludedInPrice(
+                  item.price *
+                    (item.guestType === "ADULT" && hasAdultResident(room)
+                      ? totalGuests.residentAdults
+                      : item.guestType === "CHILD" && hasChildResident(room)
+                      ? totalGuests.residentChildren
+                      : item.guestType === "INFANT" && hasInfantResident(room)
+                      ? totalGuests.residentInfants
+                      : item.guestType === "TEEN" && hasTeenResident(room)
+                      ? totalGuests.residentTeens
+                      : 0),
+                  includeClientInCalculation,
+                  commission
+                )
+                .toLocaleString()}
             </Text>
           </View>
         ))}

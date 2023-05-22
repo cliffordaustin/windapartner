@@ -3284,6 +3284,14 @@ function countGuestsOfType(
   ).length;
 }
 
+function clientIncludedInPrice(
+  price: number,
+  includeClient: boolean,
+  commission: number
+): number {
+  return includeClient ? price + price * (commission / 100) : price;
+}
+
 const pricing = {
   singleResidentAdultAllInclusivePrice,
   singleResidentAdultGamePackagePrice,
@@ -3366,6 +3374,7 @@ const pricing = {
   getTotalGuestsByCategory,
   getTotalParkFeesByCategory,
   calculateRoomFees,
+  clientIncludedInPrice,
 };
 
 export default pricing;
