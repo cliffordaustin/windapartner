@@ -350,6 +350,8 @@ export default function Room({ room, stay, index }: RoomProps) {
     { enabled: currentState?.date[0] && currentState.date[1] ? true : false }
   );
 
+  console.log(roomTypes);
+
   const commonRoomResidentNamesWithDescription =
     pricing.findCommonRoomResidentNamesWithDescription(
       room.name,
