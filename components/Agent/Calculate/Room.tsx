@@ -23,10 +23,10 @@ import {
   ScrollArea,
 } from "@mantine/core";
 import { IconMinus, IconPlus, IconSelector, IconX } from "@tabler/icons-react";
-import moment from "moment";
 import { useContext, useEffect, useState } from "react";
 import { useQuery } from "react-query";
 import { v4 as uuidv4 } from "uuid";
+import { parse, format } from "date-fns";
 
 type RoomProps = {
   room: StateRoomType;
@@ -342,10 +342,8 @@ export default function Room({ room, stay, index }: RoomProps) {
     () =>
       getRoomTypes(
         stay,
-        moment(currentState?.date[0]?.toLocaleDateString()).format(
-          "YYYY-MM-DD"
-        ),
-        moment(currentState?.date[1]?.toLocaleDateString()).format("YYYY-MM-DD")
+        format(currentState?.date[0] || new Date(), "yyyy-MM-dd"),
+        format(currentState?.date[1] || new Date(), "yyyy-MM-dd")
       ),
     { enabled: currentState?.date[0] && currentState.date[1] ? true : false }
   );

@@ -18,6 +18,7 @@ import ExtraFeesSummary from "./ExtraFeesSummary";
 import { useContext, useEffect, useState } from "react";
 import NonResidentGuestsSummary from "./NonResidentGuestsSummary";
 import NonResidentFeesSummary from "./NonResidentFeeSummary";
+import { format, differenceInCalendarDays } from "date-fns";
 
 type SummaryProps = {
   calculateStay: StateType;
@@ -35,20 +36,15 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
     () =>
       getRoomTypes(
         currentStay,
-        moment(calculateStay.date[0]?.toLocaleDateString()).format(
-          "YYYY-MM-DD"
-        ),
-        moment(calculateStay.date[1]?.toLocaleDateString()).format("YYYY-MM-DD")
+        format(calculateStay.date[0] || new Date(), "yyyy-MM-dd"),
+        format(calculateStay.date[1] || new Date(), "yyyy-MM-dd")
       ),
     { enabled: calculateStay.date[0] && calculateStay.date[1] ? true : false }
   );
 
   const nights =
     calculateStay.date[0] && calculateStay.date[1]
-      ? moment(calculateStay.date[1]).diff(
-          moment(calculateStay.date[0]),
-          "days"
-        )
+      ? differenceInCalendarDays(calculateStay.date[1], calculateStay.date[0])
       : 1;
 
   const totalNumberOfGuests = calculateStay.rooms.reduce((acc, room) => {
@@ -239,9 +235,11 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
                       </div>
 
                       <Text size="sm" weight={700} ml={4}>
-                        {moment(
-                          calculateStay.date[0]?.toLocaleDateString()
-                        ).format("DD MMM YYYY")}
+                        {/* {moment(
+                          calculateStay.date[0]
+                        ).format("DD MMM YYYY")} */}
+
+                        {format(calculateStay.date[0], "dd MMM yyyy")}
                       </Text>
                     </div>
 
@@ -252,9 +250,11 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
                       </div>
 
                       <Text size="sm" weight={700} ml={4}>
-                        {moment(
+                        {/* {moment(
                           calculateStay.date[1]?.toLocaleDateString()
-                        ).format("DD MMM YYYY")}
+                        ).format("DD MMM YYYY")} */}
+
+                        {format(calculateStay.date[1], "dd MMM yyyy")}
                       </Text>
                     </div>
                   </div>
