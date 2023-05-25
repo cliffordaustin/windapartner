@@ -349,6 +349,9 @@ export default function Room({ room, stay, index }: RoomProps) {
   );
 
   console.log(roomTypes);
+  console.log(new Date());
+  console.log(currentState?.date[0]);
+  console.log(currentState?.date[1]);
 
   const commonRoomResidentNamesWithDescription =
     pricing.findCommonRoomResidentNamesWithDescription(
