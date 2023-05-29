@@ -6,9 +6,10 @@ import pricing from "@/utils/calculation";
 type FeesSummaryProps = {
   room: Room;
   index: number;
+  nights: number;
 };
 
-export default function FeesSummary({ room, index }: FeesSummaryProps) {
+export default function FeesSummary({ room, index, nights }: FeesSummaryProps) {
   const roomArr = [room];
 
   const totalGuests = pricing.getTotalGuestsByCategory(roomArr);
@@ -42,13 +43,17 @@ export default function FeesSummary({ room, index }: FeesSummaryProps) {
             <Text size="sm" className="text-gray-600" weight={500}>
               {item.name} (For {""}
               {item.guestType === "ADULT" && hasAdultResident(room)
-                ? totalGuests.residentAdults
+                ? totalGuests.residentAdults +
+                  (totalGuests.residentAdults > 1 ? " adults" : " adult")
                 : item.guestType === "CHILD" && hasChildResident(room)
-                ? totalGuests.residentChildren
+                ? totalGuests.residentChildren +
+                  (totalGuests.residentChildren > 1 ? " children" : " child")
                 : item.guestType === "INFANT" && hasInfantResident(room)
-                ? totalGuests.residentInfants
+                ? totalGuests.residentInfants +
+                  (totalGuests.residentInfants > 1 ? " infants" : " infant")
                 : item.guestType === "TEEN" && hasTeenResident(room)
-                ? totalGuests.residentTeens
+                ? totalGuests.residentTeens +
+                  (totalGuests.residentTeens > 1 ? " teens" : " teen")
                 : 0}
               )
             </Text>
@@ -64,7 +69,8 @@ export default function FeesSummary({ room, index }: FeesSummaryProps) {
                   ? totalGuests.residentInfants
                   : item.guestType === "TEEN" && hasTeenResident(room)
                   ? totalGuests.residentTeens
-                  : 0)
+                  : 0) *
+                nights
               ).toLocaleString()}
             </Text>
           </div>

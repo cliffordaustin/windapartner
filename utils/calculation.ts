@@ -3228,7 +3228,10 @@ export function getTotalParkFeesByCategory(rooms: Room[]): {
   return totalFeesByCategory;
 }
 
-function calculateRoomFees(rooms: Room[]): {
+function calculateRoomFees(
+  rooms: Room[],
+  nights: number
+): {
   residentTotalFeePrice: number;
   nonResidentTotalFeePrice: number;
 } {
@@ -3269,6 +3272,9 @@ function calculateRoomFees(rooms: Room[]): {
       }
     }
   }
+
+  residentTotalFeePrice *= nights;
+  nonResidentTotalFeePrice *= nights;
 
   return { residentTotalFeePrice, nonResidentTotalFeePrice };
 }

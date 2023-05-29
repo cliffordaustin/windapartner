@@ -134,7 +134,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
     (item) => item.guestType === "Non-resident"
   );
 
-  const feePrice = pricing.calculateRoomFees(calculateStay.rooms);
+  const feePrice = pricing.calculateRoomFees(calculateStay.rooms, nights);
 
   const totalResidentExtraFees = pricing.calculateExtraFees(
     residentTotalExtraFees,
@@ -342,6 +342,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
                       <NonResidentFeesSummary
                         key={index}
                         room={room}
+                        nights={nights}
                         index={index}
                       ></NonResidentFeesSummary>
                     ))}
@@ -585,6 +586,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
                       <FeesSummary
                         key={index}
                         room={room}
+                        nights={nights}
                         index={index}
                       ></FeesSummary>
                     ))}
