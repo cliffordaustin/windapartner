@@ -228,7 +228,7 @@ export default function Calculate() {
                   </Tabs.Tab>
                 ))}
 
-                {/* <Tabs.Tab value="summary">Summary</Tabs.Tab> */}
+                <Tabs.Tab value="summary">Summary</Tabs.Tab>
               </Tabs.List>
 
               <div className="w-full mt-4 flex flex-col gap-4">

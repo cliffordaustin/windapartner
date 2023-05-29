@@ -8,6 +8,7 @@ type FeesSummaryProps = {
   index: number;
   includeClientInCalculation: boolean;
   commission: number;
+  nights: number;
 };
 
 export default function FeesSummaryPdf({
@@ -15,6 +16,7 @@ export default function FeesSummaryPdf({
   index,
   includeClientInCalculation,
   commission,
+  nights,
 }: FeesSummaryProps) {
   const roomArr = [room];
 
@@ -52,34 +54,35 @@ export default function FeesSummaryPdf({
             <Text style={{ fontSize: 12, color: "#777", fontWeight: 500 }}>
               {item.name} (For{" "}
               {item.guestType === "ADULT" && hasAdultResident(room)
-                ? totalGuests.residentAdults
+                ? totalGuests.residentAdults +
+                  (totalGuests.residentAdults > 1 ? " adults" : " adult")
                 : item.guestType === "CHILD" && hasChildResident(room)
-                ? totalGuests.residentChildren
+                ? totalGuests.residentChildren +
+                  (totalGuests.residentChildren > 1 ? " children" : " child")
                 : item.guestType === "INFANT" && hasInfantResident(room)
-                ? totalGuests.residentInfants
+                ? totalGuests.residentInfants +
+                  (totalGuests.residentInfants > 1 ? " infants" : " infant")
                 : item.guestType === "TEEN" && hasTeenResident(room)
-                ? totalGuests.residentTeens
+                ? totalGuests.residentTeens +
+                  (totalGuests.residentTeens > 1 ? " teens" : " teen")
                 : 0}
               )
             </Text>
             <Text style={{ fontSize: 12, color: "#777", fontWeight: 500 }}>
               KES
-              {pricing
-                .clientIncludedInPrice(
-                  item.price *
-                    (item.guestType === "ADULT" && hasAdultResident(room)
-                      ? totalGuests.residentAdults
-                      : item.guestType === "CHILD" && hasChildResident(room)
-                      ? totalGuests.residentChildren
-                      : item.guestType === "INFANT" && hasInfantResident(room)
-                      ? totalGuests.residentInfants
-                      : item.guestType === "TEEN" && hasTeenResident(room)
-                      ? totalGuests.residentTeens
-                      : 0),
-                  includeClientInCalculation,
-                  commission
-                )
-                .toLocaleString()}
+              {(
+                item.price *
+                (item.guestType === "ADULT" && hasAdultResident(room)
+                  ? totalGuests.residentAdults
+                  : item.guestType === "CHILD" && hasChildResident(room)
+                  ? totalGuests.residentChildren
+                  : item.guestType === "INFANT" && hasInfantResident(room)
+                  ? totalGuests.residentInfants
+                  : item.guestType === "TEEN" && hasTeenResident(room)
+                  ? totalGuests.residentTeens
+                  : 0) *
+                nights
+              ).toLocaleString()}
             </Text>
           </View>
         ))}

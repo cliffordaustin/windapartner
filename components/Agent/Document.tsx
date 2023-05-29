@@ -237,19 +237,17 @@ const MyDocument = ({
     (item) => item.guestType === "Non-resident"
   );
 
-  const feePrice = pricing.calculateRoomFees(calculateStay.rooms);
+  const feePrice = pricing.calculateRoomFees(calculateStay.rooms, nights);
 
-  const residentFeePrice = includeClientInCalculation
-    ? feePrice.residentTotalFeePrice +
-      feePrice.residentTotalFeePrice *
-        ((calculateStay.residentCommission || 0) / 100)
-    : feePrice.residentTotalFeePrice;
+  // const residentFeePrice = includeClientInCalculation
+  //   ? feePrice.residentTotalFeePrice +
+  //     feePrice.residentTotalFeePrice *
+  //       ((calculateStay.residentCommission || 0) / 100)
+  //   : feePrice.residentTotalFeePrice;
 
-  const nonResidentFeePrice = includeClientInCalculation
-    ? feePrice.nonResidentTotalFeePrice +
-      feePrice.nonResidentTotalFeePrice *
-        ((calculateStay.nonResidentCommission || 0) / 100)
-    : feePrice.nonResidentTotalFeePrice;
+  const residentFeePrice = feePrice.residentTotalFeePrice;
+
+  const nonResidentFeePrice = feePrice.nonResidentTotalFeePrice;
 
   let totalResidentExtraFees = pricing.calculateExtraFees(
     residentTotalExtraFees,
@@ -518,6 +516,7 @@ const MyDocument = ({
                     {calculateStay.rooms.map((room, index) => (
                       <NonResidentFeesSummaryPdf
                         key={index}
+                        nights={nights}
                         includeClientInCalculation={includeClientInCalculation}
                         commission={Number(calculateStay.nonResidentCommission)}
                         room={room}
@@ -709,6 +708,7 @@ const MyDocument = ({
                   {calculateStay.rooms.map((room, index) => (
                     <FeesSummaryPdf
                       key={index}
+                      nights={nights}
                       includeClientInCalculation={includeClientInCalculation}
                       commission={Number(calculateStay.residentCommission)}
                       room={room}

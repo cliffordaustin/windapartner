@@ -8,6 +8,7 @@ type FeesSummaryProps = {
   index: number;
   includeClientInCalculation: boolean;
   commission: number;
+  nights: number;
 };
 
 export default function NonResidentFeesSummaryPdf({
@@ -15,6 +16,7 @@ export default function NonResidentFeesSummaryPdf({
   index,
   includeClientInCalculation,
   commission,
+  nights,
 }: FeesSummaryProps) {
   const roomArr = [room];
 
@@ -58,35 +60,35 @@ export default function NonResidentFeesSummaryPdf({
             <Text style={{ fontSize: 12, color: "#777", fontWeight: 500 }}>
               {item.name} (For{" "}
               {item.guestType === "ADULT" && hasAdultNonResident(room)
-                ? totalGuests.nonResidentAdults
+                ? totalGuests.nonResidentAdults +
+                  (totalGuests.nonResidentAdults > 1 ? " Adults" : " Adult")
                 : item.guestType === "CHILD" && hasChildNonResident(room)
-                ? totalGuests.nonResidentChildren
+                ? totalGuests.nonResidentChildren +
+                  (totalGuests.nonResidentChildren > 1 ? " Children" : " Child")
                 : item.guestType === "INFANT" && hasInfantNonResident(room)
-                ? totalGuests.nonResidentInfants
+                ? totalGuests.nonResidentInfants +
+                  (totalGuests.nonResidentInfants > 1 ? " Infants" : " Infant")
                 : item.guestType === "TEEN" && hasTeenNonResident(room)
-                ? totalGuests.nonResidentTeens
+                ? totalGuests.nonResidentTeens +
+                  (totalGuests.nonResidentTeens > 1 ? " Teens" : " Teen")
                 : 0}
               )
             </Text>
             <Text style={{ fontSize: 12, color: "#777", fontWeight: 500 }}>
               $
-              {pricing
-                .clientIncludedInPrice(
-                  item.price *
-                    (item.guestType === "ADULT" && hasAdultNonResident(room)
-                      ? totalGuests.nonResidentAdults
-                      : item.guestType === "CHILD" && hasChildNonResident(room)
-                      ? totalGuests.nonResidentChildren
-                      : item.guestType === "INFANT" &&
-                        hasInfantNonResident(room)
-                      ? totalGuests.nonResidentInfants
-                      : item.guestType === "TEEN" && hasTeenNonResident(room)
-                      ? totalGuests.nonResidentTeens
-                      : 0),
-                  includeClientInCalculation,
-                  commission
-                )
-                .toLocaleString()}
+              {(
+                item.price *
+                (item.guestType === "ADULT" && hasAdultNonResident(room)
+                  ? totalGuests.nonResidentAdults
+                  : item.guestType === "CHILD" && hasChildNonResident(room)
+                  ? totalGuests.nonResidentChildren
+                  : item.guestType === "INFANT" && hasInfantNonResident(room)
+                  ? totalGuests.nonResidentInfants
+                  : item.guestType === "TEEN" && hasTeenNonResident(room)
+                  ? totalGuests.nonResidentTeens
+                  : 0) *
+                nights
+              ).toLocaleString()}
             </Text>
           </View>
         ))}
