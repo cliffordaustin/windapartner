@@ -34,10 +34,6 @@ import { Stay as CalculateStay } from "@/components/Agent/Calculate/Stay";
 import { v4 as uuidv4 } from "uuid";
 import { IconCalculator, IconDownload, IconGraph } from "@tabler/icons-react";
 import Summary from "@/components/Agent/Calculate/Summary";
-import PdfSummary from "@/components/Agent/PdfSummary";
-
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
 
 import {
   PDFDownloadLink,
