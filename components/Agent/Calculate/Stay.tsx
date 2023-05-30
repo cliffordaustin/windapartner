@@ -94,7 +94,7 @@ export function Stay({ stay, index }: StayProps) {
   };
 
   const addFee = () => {
-    const updatedItems = state.map((item) => {
+    const updatedItems: StateType[] = state.map((item) => {
       if (item.id === stay.id) {
         return {
           ...item,
@@ -103,7 +103,7 @@ export function Stay({ stay, index }: StayProps) {
             {
               id: uuidv4(),
               name: "",
-              price: 0,
+              price: "",
               pricingType: "",
               guestType: "",
             },

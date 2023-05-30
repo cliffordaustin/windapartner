@@ -1,4 +1,4 @@
-import { Context, ExtraFee } from "@/context/CalculatePage";
+import { Context, ExtraFee, StateType } from "@/context/CalculatePage";
 import { Stay } from "@/utils/types";
 import {
   Flex,
@@ -127,6 +127,48 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
       }
       return item;
     });
+    setState(updatedItems);
+  };
+
+  const hasContentInFirstFee = state.find((item) => {
+    if (item.id === stay.id) {
+      if (
+        item.extraFee[0].name ||
+        item.extraFee[0].price ||
+        item.extraFee[0].guestType ||
+        item.extraFee[0].pricingType
+      ) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+    return false;
+  });
+
+  const clearFee = () => {
+    // clear all fields in first fee state
+    const updatedItems: StateType[] = state.map((item) => {
+      if (item.id === stay.id) {
+        return {
+          ...item,
+          extraFee: item.extraFee.map((extraFee) => {
+            if (extraFee.id === fee.id) {
+              return {
+                ...extraFee,
+                name: "",
+                price: "",
+                guestType: "",
+                pricingType: "",
+              };
+            }
+            return extraFee;
+          }),
+        };
+      }
+      return item;
+    });
+
     setState(updatedItems);
   };
 
@@ -332,6 +374,17 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
         className="mt-5 cursor-pointer"
       >
         {index > 0 && <IconX className="text-gray-600"></IconX>}
+      </div>
+
+      <div
+        onClick={() => {
+          clearFee();
+        }}
+        className="mt-5 cursor-pointer"
+      >
+        {index === 0 && hasContentInFirstFee && (
+          <IconX className="text-gray-600"></IconX>
+        )}
       </div>
     </div>
   );

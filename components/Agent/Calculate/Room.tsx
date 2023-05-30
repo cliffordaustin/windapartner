@@ -4,6 +4,7 @@ import {
   ParkFee,
   ResidentGuests,
   Room as StateRoomType,
+  StateType,
 } from "@/context/CalculatePage";
 import { getRoomTypes } from "@/pages/api/stays";
 import pricing from "@/utils/calculation";
@@ -21,6 +22,7 @@ import {
   Checkbox,
   Tooltip,
   ScrollArea,
+  Container,
 } from "@mantine/core";
 import { IconMinus, IconPlus, IconSelector, IconX } from "@tabler/icons-react";
 import { useContext, useEffect, useState } from "react";
@@ -434,6 +436,45 @@ export default function Room({ room, stay, index }: RoomProps) {
   };
 
   const totalNumberOfGuests = getNumGuests(room);
+
+  const hasContentInFirstFee = state.find((item) => {
+    if (item.id === stay.id) {
+      if (item.rooms[0].name || item.rooms[0].package) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+    return false;
+  });
+
+  const clearFee = () => {
+    // clear all fields in first fee state
+    const updatedItems: StateType[] = state.map((item) => {
+      if (item.id === stay.id) {
+        return {
+          ...item,
+          rooms: item.rooms.map((item) => {
+            if (item.id === room.id) {
+              return {
+                ...item,
+                residentParkFee: [],
+                nonResidentParkFee: [],
+                package: "",
+                name: "",
+                residentGuests: [],
+                nonResidentGuests: [],
+              };
+            }
+            return item;
+          }),
+        };
+      }
+      return item;
+    });
+
+    setState(updatedItems);
+  };
 
   return (
     <div className="flex justify-between items-center">
@@ -866,6 +907,31 @@ export default function Room({ room, stay, index }: RoomProps) {
                           </ScrollArea.Autosize>
                         </Popover.Dropdown>
                       </Popover>
+
+                      {/* <Flex
+                        h={50}
+                        className="border rounded-md border-solid border-gray-300"
+                        align="center"
+                        justify="center"
+                        gap={5}
+                      >
+                        <Container
+                          w={15}
+                          h={48}
+                          className="flex hover:bg-gray-100 cursor-pointer rounded-l-
+                          md items-center justify-center"
+                        >
+                          <Text className="text-2xl mb-1"> - </Text>
+                        </Container>
+                        <Text>1</Text>
+                        <Container
+                          w={15}
+                          h={48}
+                          className="flex hover:bg-gray-100 cursor-pointer rounded-r-md items-center justify-center"
+                        >
+                          <Text className="text-2xl"> + </Text>
+                        </Container>
+                      </Flex> */}
 
                       <div
                         onClick={() => {
@@ -1411,6 +1477,17 @@ export default function Room({ room, stay, index }: RoomProps) {
         className="mt-5 cursor-pointer"
       >
         {index > 0 && <IconX className="text-gray-600"></IconX>}
+      </div>
+
+      <div
+        onClick={() => {
+          clearFee();
+        }}
+        className="mt-5 cursor-pointer"
+      >
+        {index === 0 && hasContentInFirstFee && (
+          <IconX className="text-gray-600"></IconX>
+        )}
       </div>
     </div>
   );
