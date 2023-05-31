@@ -69,7 +69,7 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
   };
 
   const handleGuestTypeChange = (guestType: GuestType) => {
-    const updatedItems = state.map((item) => {
+    const updatedItems: StateType[] = state.map((item) => {
       if (item.id === stay.id) {
         return {
           ...item,
@@ -78,6 +78,31 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
               return {
                 ...extraFee,
                 guestType,
+                pricingType: "",
+                price: "",
+              };
+            }
+            return extraFee;
+          }),
+        };
+      }
+      return item;
+    });
+    setState(updatedItems);
+  };
+
+  const handleGuestTypeDeselect = () => {
+    const updatedItems: StateType[] = state.map((item) => {
+      if (item.id === stay.id) {
+        return {
+          ...item,
+          extraFee: item.extraFee.map((extraFee) => {
+            if (extraFee.id === fee.id) {
+              return {
+                ...extraFee,
+                guestType: "",
+                pricingType: "",
+                price: "",
               };
             }
             return extraFee;
@@ -90,7 +115,7 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
   };
 
   const handlePricingTypeChange = (pricingType: PricingType) => {
-    const updatedItems = state.map((item) => {
+    const updatedItems: StateType[] = state.map((item) => {
       if (item.id === stay.id) {
         return {
           ...item,
@@ -99,6 +124,29 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
               return {
                 ...extraFee,
                 pricingType,
+                price: "",
+              };
+            }
+            return extraFee;
+          }),
+        };
+      }
+      return item;
+    });
+    setState(updatedItems);
+  };
+
+  const handlePricingTypeDeselect = () => {
+    const updatedItems: StateType[] = state.map((item) => {
+      if (item.id === stay.id) {
+        return {
+          ...item,
+          extraFee: item.extraFee.map((extraFee) => {
+            if (extraFee.id === fee.id) {
+              return {
+                ...extraFee,
+                pricingType: "",
+                price: "",
               };
             }
             return extraFee;
@@ -250,7 +298,11 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
                 justify={"space-between"}
                 align={"center"}
                 onClick={() => {
-                  handleGuestTypeChange(guestType);
+                  if (guestType === fee.guestType) {
+                    handleGuestTypeDeselect();
+                  } else {
+                    handleGuestTypeChange(guestType);
+                  }
                 }}
                 className={
                   "py-2 px-2 rounded-md mt-1 cursor-pointer " +
@@ -304,7 +356,12 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
                 justify={"space-between"}
                 align={"center"}
                 onClick={() => {
-                  handlePricingTypeChange(pricingType);
+                  // handlePricingTypeChange(pricingType);
+                  if (pricingType === fee.pricingType) {
+                    handlePricingTypeDeselect();
+                  } else {
+                    handlePricingTypeChange(pricingType);
+                  }
                 }}
                 className={
                   "py-2 px-2 rounded-md mt-1 cursor-pointer " +

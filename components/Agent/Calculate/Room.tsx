@@ -476,6 +476,258 @@ export default function Room({ room, stay, index }: RoomProps) {
     setState(updatedItems);
   };
 
+  const clickSelectRoom = (selectRoom: UniqueRoomsType) => {
+    setState(
+      state.map((item) => {
+        if (item.id === stay.id) {
+          return {
+            ...item,
+            rooms: item.rooms.map((item) => {
+              if (item.id === room.id) {
+                return {
+                  ...item,
+                  name: selectRoom.name || "",
+                  package: "",
+                  residentGuests: [
+                    {
+                      id: uuidv4(),
+                      resident: "",
+                      guestType: "",
+                      description: "",
+                    },
+                  ],
+                  nonResidentGuests: [
+                    {
+                      id: uuidv4(),
+                      nonResident: "",
+                      guestType: "",
+                      description: "",
+                    },
+                  ],
+                };
+              }
+              return item;
+            }),
+          };
+        }
+        return item;
+      })
+    );
+  };
+
+  const deselectRoom = () => {
+    setState(
+      state.map((item) => {
+        if (item.id === stay.id) {
+          return {
+            ...item,
+            rooms: item.rooms.map((item) => {
+              if (item.id === room.id) {
+                return {
+                  ...item,
+                  name: "",
+                  package: "",
+                  residentGuests: [],
+                  nonResidentGuests: [],
+                };
+              }
+              return item;
+            }),
+          };
+        }
+        return item;
+      })
+    );
+  };
+
+  const clickSelectPackage = (selectPackage: string) => {
+    setState(
+      state.map((item) => {
+        if (item.id === stay.id) {
+          return {
+            ...item,
+            rooms: item.rooms.map((item) => {
+              if (item.id === room.id) {
+                return {
+                  ...item,
+                  package: selectPackage,
+                };
+              }
+              return item;
+            }),
+          };
+        }
+        return item;
+      })
+    );
+  };
+
+  const deselectPackage = () => {
+    setState(
+      state.map((item) => {
+        if (item.id === stay.id) {
+          return {
+            ...item,
+            rooms: item.rooms.map((item) => {
+              if (item.id === room.id) {
+                return {
+                  ...item,
+                  package: "",
+                  residentGuests: [
+                    {
+                      id: uuidv4(),
+                      resident: "",
+                      guestType: "",
+                      description: "",
+                    },
+                  ],
+                  nonResidentGuests: [
+                    {
+                      id: uuidv4(),
+                      nonResident: "",
+                      guestType: "",
+                      description: "",
+                    },
+                  ],
+                };
+              }
+              return item;
+            }),
+          };
+        }
+        return item;
+      })
+    );
+  };
+
+  const clickSelectNonResidentGuest = (
+    guest: NonResidentGuests,
+    guestType: GuestTypes
+  ) => {
+    setState(
+      state.map((item) => {
+        if (item.id === stay.id) {
+          return {
+            ...item,
+            rooms: item.rooms.map((item) => {
+              if (item.id === room.id) {
+                return {
+                  ...item,
+                  nonResidentGuests: item.nonResidentGuests.map((item) => {
+                    if (item.id === guest.id) {
+                      return {
+                        ...item,
+                        nonResident: guestType,
+                      };
+                    }
+                    return item;
+                  }),
+                };
+              }
+              return item;
+            }),
+          };
+        }
+        return item;
+      })
+    );
+  };
+
+  const deselectNonResidentGuest = (guest: NonResidentGuests) => {
+    setState(
+      state.map((item) => {
+        if (item.id === stay.id) {
+          return {
+            ...item,
+            rooms: item.rooms.map((item) => {
+              if (item.id === room.id) {
+                return {
+                  ...item,
+                  nonResidentGuests: item.nonResidentGuests.map((item) => {
+                    if (item.id === guest.id) {
+                      return {
+                        ...item,
+                        nonResident: "",
+                        guestType: "",
+                      };
+                    }
+                    return item;
+                  }),
+                };
+              }
+              return item;
+            }),
+          };
+        }
+        return item;
+      })
+    );
+  };
+
+  const clickSelectResidentGuest = (
+    guest: ResidentGuests,
+    guestType: GuestTypes
+  ) => {
+    setState(
+      state.map((item) => {
+        if (item.id === stay.id) {
+          return {
+            ...item,
+            rooms: item.rooms.map((item) => {
+              if (item.id === room.id) {
+                return {
+                  ...item,
+                  residentGuests: item.residentGuests.map((item) => {
+                    if (item.id === guest.id) {
+                      return {
+                        ...item,
+                        resident: guestType,
+                      };
+                    }
+                    return item;
+                  }),
+                };
+              }
+              return item;
+            }),
+          };
+        }
+        return item;
+      })
+    );
+  };
+
+  const deselectResidentGuest = (guest: ResidentGuests) => {
+    setState(
+      state.map((item) => {
+        if (item.id === stay.id) {
+          return {
+            ...item,
+            rooms: item.rooms.map((item) => {
+              if (item.id === room.id) {
+                return {
+                  ...item,
+                  residentGuests: item.residentGuests.map((item) => {
+                    if (item.id === guest.id) {
+                      return {
+                        ...item,
+                        resident: "",
+                        guestType: "",
+                      };
+                    }
+                    return item;
+                  }),
+                };
+              }
+              return item;
+            }),
+          };
+        }
+        return item;
+      })
+    );
+  };
+
   return (
     <div className="flex justify-between items-center">
       <Flex className="w-full" mt={18}>
@@ -515,42 +767,11 @@ export default function Room({ room, stay, index }: RoomProps) {
                 justify={"space-between"}
                 align={"center"}
                 onClick={() => {
-                  setState(
-                    state.map((item) => {
-                      if (item.id === stay.id) {
-                        return {
-                          ...item,
-                          rooms: item.rooms.map((item) => {
-                            if (item.id === room.id) {
-                              return {
-                                ...item,
-                                name: selectRoom.name || "",
-                                package: "",
-                                residentGuests: [
-                                  {
-                                    id: uuidv4(),
-                                    resident: "",
-                                    guestType: "",
-                                    description: "",
-                                  },
-                                ],
-                                nonResidentGuests: [
-                                  {
-                                    id: uuidv4(),
-                                    nonResident: "",
-                                    guestType: "",
-                                    description: "",
-                                  },
-                                ],
-                              };
-                            }
-                            return item;
-                          }),
-                        };
-                      }
-                      return item;
-                    })
-                  );
+                  if (selectRoom.name === room.name) {
+                    deselectRoom();
+                  } else {
+                    clickSelectRoom(selectRoom);
+                  }
                 }}
                 className={
                   "py-2 px-2 rounded-md mt-1 cursor-pointer " +
@@ -605,25 +826,11 @@ export default function Room({ room, stay, index }: RoomProps) {
                 justify={"space-between"}
                 align={"center"}
                 onClick={() => {
-                  setState(
-                    state.map((item) => {
-                      if (item.id === stay.id) {
-                        return {
-                          ...item,
-                          rooms: item.rooms.map((item) => {
-                            if (item.id === room.id) {
-                              return {
-                                ...item,
-                                package: roomPackage,
-                              };
-                            }
-                            return item;
-                          }),
-                        };
-                      }
-                      return item;
-                    })
-                  );
+                  if (roomPackage === room.package) {
+                    deselectPackage();
+                  } else {
+                    clickSelectPackage(roomPackage);
+                  }
                 }}
                 className={
                   "py-2 px-2 rounded-md mt-1 cursor-pointer " +
@@ -723,36 +930,11 @@ export default function Room({ room, stay, index }: RoomProps) {
                             <Flex
                               w="100%"
                               onClick={() => {
-                                setState(
-                                  state.map((item) => {
-                                    if (item.id === stay.id) {
-                                      return {
-                                        ...item,
-                                        rooms: item.rooms.map((item) => {
-                                          if (item.id === room.id) {
-                                            return {
-                                              ...item,
-                                              nonResidentGuests:
-                                                item.nonResidentGuests.map(
-                                                  (item) => {
-                                                    if (item.id === guest.id) {
-                                                      return {
-                                                        ...item,
-                                                        nonResident: guestType,
-                                                      };
-                                                    }
-                                                    return item;
-                                                  }
-                                                ),
-                                            };
-                                          }
-                                          return item;
-                                        }),
-                                      };
-                                    }
-                                    return item;
-                                  })
-                                );
+                                if (guest.nonResident === guestType) {
+                                  deselectNonResidentGuest(guest);
+                                } else {
+                                  clickSelectNonResidentGuest(guest, guestType);
+                                }
                               }}
                               key={index}
                             >
@@ -1083,36 +1265,11 @@ export default function Room({ room, stay, index }: RoomProps) {
                             <Flex
                               w="100%"
                               onClick={() => {
-                                setState(
-                                  state.map((item) => {
-                                    if (item.id === stay.id) {
-                                      return {
-                                        ...item,
-                                        rooms: item.rooms.map((item) => {
-                                          if (item.id === room.id) {
-                                            return {
-                                              ...item,
-                                              residentGuests:
-                                                item.residentGuests.map(
-                                                  (item) => {
-                                                    if (item.id === guest.id) {
-                                                      return {
-                                                        ...item,
-                                                        resident: guestType,
-                                                      };
-                                                    }
-                                                    return item;
-                                                  }
-                                                ),
-                                            };
-                                          }
-                                          return item;
-                                        }),
-                                      };
-                                    }
-                                    return item;
-                                  })
-                                );
+                                if (guest.resident === guestType) {
+                                  deselectResidentGuest(guest);
+                                } else {
+                                  clickSelectResidentGuest(guest, guestType);
+                                }
                               }}
                               key={index}
                             >

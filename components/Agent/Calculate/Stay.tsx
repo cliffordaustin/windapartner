@@ -160,7 +160,7 @@ export function Stay({ stay, index }: StayProps) {
           styles={{ input: { paddingTop: 13, paddingBottom: 13 } }}
           labelProps={{ className: "font-semibold mb-1" }}
           rightSection={<IconSelector className="text-gray-500" />}
-          maw={300}
+          className="max-w-fit min-w-[250px]"
           minDate={new Date()}
           icon={<IconCalendar className="text-gray-500" />}
           numberOfColumns={2}
