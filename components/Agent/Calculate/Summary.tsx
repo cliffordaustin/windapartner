@@ -212,9 +212,27 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
       }
     >
       <Tabs.List grow>
-        <Tabs.Tab value="non-resident">Non-resident</Tabs.Tab>
+        <Tabs.Tab value="non-resident">
+          <div className="flex items-center justify-center gap-2">
+            <span>Non-resident</span>
+            {totalNumberOfNonResidentGuests > 0 && (
+              <div className="w-5 h-5 flex items-center justify-center rounded-full bg-red-500 text-white">
+                {totalNumberOfNonResidentGuests}
+              </div>
+            )}
+          </div>
+        </Tabs.Tab>
 
-        <Tabs.Tab value="resident">Resident</Tabs.Tab>
+        <Tabs.Tab value="resident">
+          <div className="flex items-center justify-center gap-2">
+            <span>Resident</span>
+            {totalNumberOfGuests > 0 && (
+              <div className="w-5 h-5 flex items-center justify-center rounded-full bg-red-500 text-white">
+                {totalNumberOfGuests}
+              </div>
+            )}
+          </div>
+        </Tabs.Tab>
       </Tabs.List>
 
       <Tabs.Panel value="non-resident">
@@ -223,52 +241,50 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
             <Text className="font-bold" mb={8}>
               {calculateStay.name}
             </Text>
-            {calculateStay.date[0] &&
-              calculateStay.date[1] &&
-              totalNumberOfNonResidentGuests > 0 && (
-                <>
-                  <div className="flex justify-between gap-8">
-                    <div className="flex border w-[45%] flex-col gap-2">
-                      <div className="flex gap-2 items-center">
-                        <IconCalendarEvent></IconCalendarEvent>
-                        <Text size="sm">Check-in</Text>
-                      </div>
+            {calculateStay.date[0] && calculateStay.date[1] && (
+              <>
+                <div className="flex justify-between gap-8">
+                  <div className="flex border w-[45%] flex-col gap-2">
+                    <div className="flex gap-2 items-center">
+                      <IconCalendarEvent></IconCalendarEvent>
+                      <Text size="sm">Check-in</Text>
+                    </div>
 
-                      <Text size="sm" weight={700} ml={4}>
-                        {/* {moment(
+                    <Text size="sm" weight={700} ml={4}>
+                      {/* {moment(
                           calculateStay.date[0]
                         ).format("DD MMM YYYY")} */}
 
-                        {format(calculateStay.date[0], "dd MMM yyyy")}
-                      </Text>
+                      {format(calculateStay.date[0], "dd MMM yyyy")}
+                    </Text>
+                  </div>
+
+                  <div className="flex w-[45%] flex-col gap-2">
+                    <div className="flex gap-2 items-center">
+                      <IconCalendarEvent></IconCalendarEvent>
+                      <Text size="sm">Check-out</Text>
                     </div>
 
-                    <div className="flex w-[45%] flex-col gap-2">
-                      <div className="flex gap-2 items-center">
-                        <IconCalendarEvent></IconCalendarEvent>
-                        <Text size="sm">Check-out</Text>
-                      </div>
-
-                      <Text size="sm" weight={700} ml={4}>
-                        {/* {moment(
+                    <Text size="sm" weight={700} ml={4}>
+                      {/* {moment(
                           calculateStay.date[1]?.toLocaleDateString()
                         ).format("DD MMM YYYY")} */}
 
-                        {format(calculateStay.date[1], "dd MMM yyyy")}
-                      </Text>
-                    </div>
+                      {format(calculateStay.date[1], "dd MMM yyyy")}
+                    </Text>
                   </div>
+                </div>
 
-                  <Text
-                    size="sm"
-                    weight={600}
-                    className="mt-2 border border-solid w-fit px-2 border-gray-200"
-                  >
-                    {nights} {nights > 1 ? "nights" : "night"}
-                  </Text>
-                  <Divider size="xs" mt={8}></Divider>
-                </>
-              )}
+                <Text
+                  size="sm"
+                  weight={600}
+                  className="mt-2 border border-solid w-fit px-2 border-gray-200"
+                >
+                  {nights} {nights > 1 ? "nights" : "night"}
+                </Text>
+                <Divider size="xs" mt={8}></Divider>
+              </>
+            )}
 
             {calculateStay.date[0] &&
               calculateStay.date[1] &&
@@ -431,9 +447,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
               </div>
             )}
 
-            {(!calculateStay.date[0] ||
-              !calculateStay.date[1] ||
-              totalNumberOfNonResidentGuests === 0) && (
+            {(!calculateStay.date[0] || !calculateStay.date[1]) && (
               <div className="flex flex-col mt-12 mx-auto items-center gap-2">
                 <IconCalculator></IconCalculator>
                 <Text size={"sm"} className="text-gray-600 text-center">
@@ -675,9 +689,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
               </div>
             )}
 
-            {(!calculateStay.date[0] ||
-              !calculateStay.date[1] ||
-              totalNumberOfGuests === 0) && (
+            {(!calculateStay.date[0] || !calculateStay.date[1]) && (
               <div className="flex flex-col mt-12 mx-auto items-center gap-2">
                 <IconCalculator></IconCalculator>
                 <Text size={"sm"} className="text-gray-600 text-center">

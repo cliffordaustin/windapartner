@@ -729,7 +729,7 @@ export default function Room({ room, stay, index }: RoomProps) {
   };
 
   return (
-    <div className="flex justify-between items-center">
+    <div className="flex gap-0.5 items-center">
       <Flex className="w-full" mt={18}>
         <Popover
           width={350}
