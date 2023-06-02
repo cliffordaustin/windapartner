@@ -1,4 +1,5 @@
 import { createContext, useState, useEffect } from "react";
+import { number } from "yup";
 
 export type ParkFee = {
   id: number;
@@ -19,6 +20,7 @@ export type ExtraFee = {
 export type ResidentGuests = {
   id: string;
   resident: "Adult" | "Child" | "Infant" | "Teen" | "";
+  numberOfGuests: number;
   guestType?: string;
   description: string;
 };
@@ -26,6 +28,7 @@ export type ResidentGuests = {
 export type NonResidentGuests = {
   id: string;
   nonResident: "Adult" | "Child" | "Infant" | "Teen" | "";
+  numberOfGuests: number;
   guestType?: string;
   description: string;
 };

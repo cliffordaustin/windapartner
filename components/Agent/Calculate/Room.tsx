@@ -28,7 +28,7 @@ import { IconMinus, IconPlus, IconSelector, IconX } from "@tabler/icons-react";
 import { useContext, useEffect, useState } from "react";
 import { useQuery } from "react-query";
 import { v4 as uuidv4 } from "uuid";
-import { parse, format } from "date-fns";
+import { parse, format, add } from "date-fns";
 
 type RoomProps = {
   room: StateRoomType;
@@ -493,6 +493,7 @@ export default function Room({ room, stay, index }: RoomProps) {
                       id: uuidv4(),
                       resident: "",
                       guestType: "",
+                      numberOfGuests: 1,
                       description: "",
                     },
                   ],
@@ -500,6 +501,7 @@ export default function Room({ room, stay, index }: RoomProps) {
                     {
                       id: uuidv4(),
                       nonResident: "",
+                      numberOfGuests: 1,
                       guestType: "",
                       description: "",
                     },
@@ -577,6 +579,7 @@ export default function Room({ room, stay, index }: RoomProps) {
                     {
                       id: uuidv4(),
                       resident: "",
+                      numberOfGuests: 0,
                       guestType: "",
                       description: "",
                     },
@@ -585,6 +588,7 @@ export default function Room({ room, stay, index }: RoomProps) {
                     {
                       id: uuidv4(),
                       nonResident: "",
+                      numberOfGuests: 0,
                       guestType: "",
                       description: "",
                     },
@@ -728,6 +732,132 @@ export default function Room({ room, stay, index }: RoomProps) {
     );
   };
 
+  const addNumberOfNonResidentGuest = (guest: NonResidentGuests) => {
+    setState(
+      state.map((item) => {
+        if (item.id === stay.id) {
+          return {
+            ...item,
+            rooms: item.rooms.map((item) => {
+              if (item.id === room.id) {
+                return {
+                  ...item,
+                  nonResidentGuests: item.nonResidentGuests.map((item) => {
+                    if (item.id === guest.id) {
+                      return {
+                        ...item,
+                        numberOfGuests: item.numberOfGuests + 1,
+                      };
+                    }
+                    return item;
+                  }),
+                };
+              }
+              return item;
+            }),
+          };
+        }
+        return item;
+      })
+    );
+  };
+
+  const subtractNumberOfNonResidentGuest = (guest: NonResidentGuests) => {
+    if (guest.numberOfGuests === 0) {
+      return;
+    }
+    setState(
+      state.map((item) => {
+        if (item.id === stay.id) {
+          return {
+            ...item,
+            rooms: item.rooms.map((item) => {
+              if (item.id === room.id) {
+                return {
+                  ...item,
+                  nonResidentGuests: item.nonResidentGuests.map((item) => {
+                    if (item.id === guest.id) {
+                      return {
+                        ...item,
+                        numberOfGuests: item.numberOfGuests - 1,
+                      };
+                    }
+                    return item;
+                  }),
+                };
+              }
+              return item;
+            }),
+          };
+        }
+        return item;
+      })
+    );
+  };
+
+  const addNumberOfResidentGuest = (guest: ResidentGuests) => {
+    setState(
+      state.map((item) => {
+        if (item.id === stay.id) {
+          return {
+            ...item,
+            rooms: item.rooms.map((item) => {
+              if (item.id === room.id) {
+                return {
+                  ...item,
+                  residentGuests: item.residentGuests.map((item) => {
+                    if (item.id === guest.id) {
+                      return {
+                        ...item,
+                        numberOfGuests: item.numberOfGuests + 1,
+                      };
+                    }
+                    return item;
+                  }),
+                };
+              }
+              return item;
+            }),
+          };
+        }
+        return item;
+      })
+    );
+  };
+
+  const subtractNumberOfResidentGuest = (guest: ResidentGuests) => {
+    if (guest.numberOfGuests === 0) {
+      return;
+    }
+    setState(
+      state.map((item) => {
+        if (item.id === stay.id) {
+          return {
+            ...item,
+            rooms: item.rooms.map((item) => {
+              if (item.id === room.id) {
+                return {
+                  ...item,
+                  residentGuests: item.residentGuests.map((item) => {
+                    if (item.id === guest.id) {
+                      return {
+                        ...item,
+                        numberOfGuests: item.numberOfGuests - 1,
+                      };
+                    }
+                    return item;
+                  }),
+                };
+              }
+              return item;
+            }),
+          };
+        }
+        return item;
+      })
+    );
+  };
+
   return (
     <div className="flex gap-0.5 items-center">
       <Flex className="w-full" mt={18}>
@@ -849,7 +979,7 @@ export default function Room({ room, stay, index }: RoomProps) {
         </Popover>
 
         <Popover
-          width={400}
+          width={470}
           position="bottom-start"
           arrowOffset={60}
           withArrow
@@ -1090,7 +1220,7 @@ export default function Room({ room, stay, index }: RoomProps) {
                         </Popover.Dropdown>
                       </Popover>
 
-                      {/* <Flex
+                      <Flex
                         h={50}
                         className="border rounded-md border-solid border-gray-300"
                         align="center"
@@ -1100,20 +1230,23 @@ export default function Room({ room, stay, index }: RoomProps) {
                         <Container
                           w={15}
                           h={48}
-                          className="flex hover:bg-gray-100 cursor-pointer rounded-l-
-                          md items-center justify-center"
+                          className="flex hover:bg-gray-100 cursor-pointer rounded-l-md items-center justify-center"
+                          onClick={() =>
+                            subtractNumberOfNonResidentGuest(guest)
+                          }
                         >
                           <Text className="text-2xl mb-1"> - </Text>
                         </Container>
-                        <Text>1</Text>
+                        <Text>{guest.numberOfGuests}</Text>
                         <Container
                           w={15}
                           h={48}
                           className="flex hover:bg-gray-100 cursor-pointer rounded-r-md items-center justify-center"
+                          onClick={() => addNumberOfNonResidentGuest(guest)}
                         >
                           <Text className="text-2xl"> + </Text>
                         </Container>
-                      </Flex> */}
+                      </Flex>
 
                       <div
                         onClick={() => {
@@ -1144,6 +1277,7 @@ export default function Room({ room, stay, index }: RoomProps) {
                                         {
                                           id: uuidv4(),
                                           nonResident: "",
+                                          numberOfGuests: 1,
                                           guestType: "",
                                           description: "",
                                         },
@@ -1193,6 +1327,7 @@ export default function Room({ room, stay, index }: RoomProps) {
                                         {
                                           id: uuidv4(),
                                           nonResident: "",
+                                          numberOfGuests: 1,
                                           guestType: "",
                                           description: "",
                                         },
@@ -1425,6 +1560,32 @@ export default function Room({ room, stay, index }: RoomProps) {
                         </Popover.Dropdown>
                       </Popover>
 
+                      <Flex
+                        h={50}
+                        className="border rounded-md border-solid border-gray-300"
+                        align="center"
+                        justify="center"
+                        gap={5}
+                      >
+                        <Container
+                          w={15}
+                          h={48}
+                          className="flex hover:bg-gray-100 cursor-pointer rounded-l-md items-center justify-center"
+                          onClick={() => subtractNumberOfResidentGuest(guest)}
+                        >
+                          <Text className="text-2xl mb-1"> - </Text>
+                        </Container>
+                        <Text>{guest.numberOfGuests}</Text>
+                        <Container
+                          w={15}
+                          h={48}
+                          className="flex hover:bg-gray-100 cursor-pointer rounded-r-md items-center justify-center"
+                          onClick={() => addNumberOfResidentGuest(guest)}
+                        >
+                          <Text className="text-2xl"> + </Text>
+                        </Container>
+                      </Flex>
+
                       <div
                         onClick={() => {
                           removeResidentGuest(guest);
@@ -1454,6 +1615,7 @@ export default function Room({ room, stay, index }: RoomProps) {
                                         {
                                           id: uuidv4(),
                                           resident: "",
+                                          numberOfGuests: 1,
                                           guestType: "",
                                           description: "",
                                         },
@@ -1503,6 +1665,7 @@ export default function Room({ room, stay, index }: RoomProps) {
                                       residentGuests: [
                                         {
                                           id: uuidv4(),
+                                          numberOfGuests: 1,
                                           resident: "",
                                           guestType: "",
                                           description: "",

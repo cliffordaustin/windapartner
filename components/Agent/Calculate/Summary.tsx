@@ -176,22 +176,19 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
 
   let residentFullTotalPrice =
     totalResidentPrice +
+    totalResidentPrice * (Number(calculateStay.residentCommission) / 100) +
     feePrice.residentTotalFeePrice +
-    totalResidentExtraFees;
-
-  residentFullTotalPrice =
-    residentFullTotalPrice +
-    (residentFullTotalPrice * Number(calculateStay.residentCommission)) / 100;
+    totalResidentExtraFees +
+    totalResidentExtraFees * (Number(calculateStay.residentCommission) / 100);
 
   let nonResidentFullTotalPrice =
     totalNonResidentPrice +
+    totalNonResidentPrice *
+      (Number(calculateStay.nonResidentCommission) / 100) +
     feePrice.nonResidentTotalFeePrice +
-    totalNonResidentExtraFees;
-
-  nonResidentFullTotalPrice =
-    nonResidentFullTotalPrice +
-    (nonResidentFullTotalPrice * Number(calculateStay.nonResidentCommission)) /
-      100;
+    totalNonResidentExtraFees +
+    totalNonResidentExtraFees *
+      (Number(calculateStay.nonResidentCommission) / 100);
 
   const residentExtraFees: ExtraFee[] = calculateStay.extraFee.filter(
     (item) => item.guestType === "Resident"
@@ -485,48 +482,46 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
             <Text className="font-bold" mb={8}>
               {calculateStay.name}
             </Text>
-            {calculateStay.date[0] &&
-              calculateStay.date[1] &&
-              totalNumberOfGuests > 0 && (
-                <>
-                  <div className="flex justify-between gap-8">
-                    <div className="flex border w-[45%] flex-col gap-2">
-                      <div className="flex gap-2 items-center">
-                        <IconCalendarEvent></IconCalendarEvent>
-                        <Text size="sm">Check-in</Text>
-                      </div>
-
-                      <Text size="sm" weight={700} ml={4}>
-                        {moment(
-                          calculateStay.date[0]?.toLocaleDateString()
-                        ).format("DD MMM YYYY")}
-                      </Text>
+            {calculateStay.date[0] && calculateStay.date[1] && (
+              <>
+                <div className="flex justify-between gap-8">
+                  <div className="flex border w-[45%] flex-col gap-2">
+                    <div className="flex gap-2 items-center">
+                      <IconCalendarEvent></IconCalendarEvent>
+                      <Text size="sm">Check-in</Text>
                     </div>
 
-                    <div className="flex w-[45%] flex-col gap-2">
-                      <div className="flex gap-2 items-center">
-                        <IconCalendarEvent></IconCalendarEvent>
-                        <Text size="sm">Check-out</Text>
-                      </div>
-
-                      <Text size="sm" weight={700} ml={4}>
-                        {moment(
-                          calculateStay.date[1]?.toLocaleDateString()
-                        ).format("DD MMM YYYY")}
-                      </Text>
-                    </div>
+                    <Text size="sm" weight={700} ml={4}>
+                      {moment(
+                        calculateStay.date[0]?.toLocaleDateString()
+                      ).format("DD MMM YYYY")}
+                    </Text>
                   </div>
 
-                  <Text
-                    size="sm"
-                    weight={600}
-                    className="mt-2 border border-solid w-fit px-2 border-gray-200"
-                  >
-                    {nights} {nights > 1 ? "nights" : "night"}
-                  </Text>
-                  <Divider size="xs" mt={8}></Divider>
-                </>
-              )}
+                  <div className="flex w-[45%] flex-col gap-2">
+                    <div className="flex gap-2 items-center">
+                      <IconCalendarEvent></IconCalendarEvent>
+                      <Text size="sm">Check-out</Text>
+                    </div>
+
+                    <Text size="sm" weight={700} ml={4}>
+                      {moment(
+                        calculateStay.date[1]?.toLocaleDateString()
+                      ).format("DD MMM YYYY")}
+                    </Text>
+                  </div>
+                </div>
+
+                <Text
+                  size="sm"
+                  weight={600}
+                  className="mt-2 border border-solid w-fit px-2 border-gray-200"
+                >
+                  {nights} {nights > 1 ? "nights" : "night"}
+                </Text>
+                <Divider size="xs" mt={8}></Divider>
+              </>
+            )}
 
             {calculateStay.date[0] &&
               calculateStay.date[1] &&

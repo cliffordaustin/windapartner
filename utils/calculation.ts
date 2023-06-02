@@ -3056,9 +3056,10 @@ function countResidentGuestTypesWithPrice(
     if (guest.resident === "") continue;
 
     const guestType = guest.guestType ? `(${guest.guestType})` : "";
+    const numberOfGuests = guest.numberOfGuests;
     const name = `${guest.resident}${guestType}`;
 
-    counts[name] = (counts[name] || 0) + 1;
+    counts[name] = (counts[name] || 0) + numberOfGuests;
   }
 
   return Object.keys(counts).map((name) => {
@@ -3086,9 +3087,10 @@ function countNonResidentGuestTypesWithPrice(
     if (guest.nonResident === "") continue;
 
     const guestType = guest.guestType ? `(${guest.guestType})` : "";
+    const numberOfGuests = guest.numberOfGuests;
     const name = `${guest.nonResident}${guestType}`;
 
-    counts[name] = (counts[name] || 0) + 1;
+    counts[name] = (counts[name] || 0) + numberOfGuests;
   }
 
   return Object.keys(counts).map((name) => {

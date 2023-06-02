@@ -7,6 +7,7 @@ type FeesSummaryProps = {
   room: Room;
   index: number;
   includeClientInCalculation: boolean;
+  summarizedCalculation: boolean;
   commission: number;
   nights: number;
 };
@@ -17,6 +18,7 @@ export default function FeesSummaryPdf({
   includeClientInCalculation,
   commission,
   nights,
+  summarizedCalculation,
 }: FeesSummaryProps) {
   const roomArr = [room];
 
@@ -68,22 +70,24 @@ export default function FeesSummaryPdf({
                 : 0}
               )
             </Text>
-            <Text style={{ fontSize: 12, color: "#777", fontWeight: 500 }}>
-              KES
-              {(
-                item.price *
-                (item.guestType === "ADULT" && hasAdultResident(room)
-                  ? totalGuests.residentAdults
-                  : item.guestType === "CHILD" && hasChildResident(room)
-                  ? totalGuests.residentChildren
-                  : item.guestType === "INFANT" && hasInfantResident(room)
-                  ? totalGuests.residentInfants
-                  : item.guestType === "TEEN" && hasTeenResident(room)
-                  ? totalGuests.residentTeens
-                  : 0) *
-                nights
-              ).toLocaleString()}
-            </Text>
+            {!summarizedCalculation && (
+              <Text style={{ fontSize: 12, color: "#777", fontWeight: 500 }}>
+                KES
+                {(
+                  item.price *
+                  (item.guestType === "ADULT" && hasAdultResident(room)
+                    ? totalGuests.residentAdults
+                    : item.guestType === "CHILD" && hasChildResident(room)
+                    ? totalGuests.residentChildren
+                    : item.guestType === "INFANT" && hasInfantResident(room)
+                    ? totalGuests.residentInfants
+                    : item.guestType === "TEEN" && hasTeenResident(room)
+                    ? totalGuests.residentTeens
+                    : 0) *
+                  nights
+                ).toLocaleString()}
+              </Text>
+            )}
           </View>
         ))}
       </View>

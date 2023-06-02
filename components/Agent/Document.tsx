@@ -40,6 +40,7 @@ type SummaryProps = {
   stays?: Stay[];
   index: number;
   includeClientInCalculation: boolean;
+  summarizedCalculation: boolean;
   updateResidentTotal: (value: number, index: number) => void;
   updateNonResidentTotal: (value: number, index: number) => void;
 };
@@ -126,6 +127,7 @@ const MyDocument = ({
   updateNonResidentTotal,
   index,
   includeClientInCalculation,
+  summarizedCalculation,
 }: SummaryProps) => {
   const countRoomType = countRoomTypes(calculateStay.rooms);
 
@@ -461,16 +463,19 @@ const MyDocument = ({
                     <Text style={{ fontSize: 12, fontWeight: 700 }}>
                       Guests
                     </Text>
-                    <Text style={{ fontSize: 12, fontWeight: 600 }}>
-                      {totalNonResidentPrice
-                        ? `$ ${totalNonResidentPrice.toLocaleString()}`
-                        : ""}
-                    </Text>
+                    {!summarizedCalculation && (
+                      <Text style={{ fontSize: 12, fontWeight: 600 }}>
+                        {totalNonResidentPrice
+                          ? `$ ${totalNonResidentPrice.toLocaleString()}`
+                          : ""}
+                      </Text>
+                    )}
                   </View>
                   <View style={{ marginTop: 5, flexDirection: "column" }}>
                     {calculateStay.rooms.map((room, index) => (
                       <NonResidentGuestsSummaryPdf
                         key={index}
+                        summarizedCalculation={summarizedCalculation}
                         includeClientInCalculation={includeClientInCalculation}
                         commission={Number(calculateStay.nonResidentCommission)}
                         room={room}
@@ -506,17 +511,20 @@ const MyDocument = ({
                     <Text style={{ fontSize: 12, fontWeight: "bold" }}>
                       Fees
                     </Text>
-                    <Text style={{ fontSize: 12, fontWeight: 600 }}>
-                      {nonResidentFeePrice
-                        ? `$ ${nonResidentFeePrice.toLocaleString()}`
-                        : ""}
-                    </Text>
+                    {!summarizedCalculation && (
+                      <Text style={{ fontSize: 12, fontWeight: 600 }}>
+                        {nonResidentFeePrice
+                          ? `$ ${nonResidentFeePrice.toLocaleString()}`
+                          : ""}
+                      </Text>
+                    )}
                   </View>
                   <View style={{ marginTop: 5, flexDirection: "column" }}>
                     {calculateStay.rooms.map((room, index) => (
                       <NonResidentFeesSummaryPdf
                         key={index}
                         nights={nights}
+                        summarizedCalculation={summarizedCalculation}
                         includeClientInCalculation={includeClientInCalculation}
                         commission={Number(calculateStay.nonResidentCommission)}
                         room={room}
@@ -551,11 +559,13 @@ const MyDocument = ({
                       Extra Fees
                     </Text>
 
-                    <Text style={{ fontSize: 12, fontWeight: 600 }}>
-                      {totalNonResidentExtraFees
-                        ? `$ ${totalNonResidentExtraFees.toLocaleString()}`
-                        : ""}
-                    </Text>
+                    {!summarizedCalculation && (
+                      <Text style={{ fontSize: 12, fontWeight: 600 }}>
+                        {totalNonResidentExtraFees
+                          ? `$ ${totalNonResidentExtraFees.toLocaleString()}`
+                          : ""}
+                      </Text>
+                    )}
                   </View>
 
                   <View style={{ flexDirection: "column", marginTop: 5 }}>
@@ -563,6 +573,7 @@ const MyDocument = ({
                       <ExtraFeesSummaryPdf
                         key={index}
                         index={index}
+                        summarizedCalculation={summarizedCalculation}
                         includeClientInCalculation={includeClientInCalculation}
                         commission={Number(calculateStay.nonResidentCommission)}
                         fee={fee}
@@ -652,16 +663,19 @@ const MyDocument = ({
                     <Text style={{ fontSize: 12, fontWeight: 700 }}>
                       Guests
                     </Text>
-                    <Text style={{ fontSize: 12, fontWeight: 600 }}>
-                      {totalResidentPrice
-                        ? `KES ${totalResidentPrice.toLocaleString()}`
-                        : ""}
-                    </Text>
+                    {!summarizedCalculation && (
+                      <Text style={{ fontSize: 12, fontWeight: 600 }}>
+                        {totalResidentPrice
+                          ? `KES ${totalResidentPrice.toLocaleString()}`
+                          : ""}
+                      </Text>
+                    )}
                   </View>
                   <View style={{ marginTop: 5, flexDirection: "column" }}>
                     {calculateStay.rooms.map((room, index) => (
                       <GuestsSummaryPdf
                         key={index}
+                        summarizedCalculation={summarizedCalculation}
                         includeClientInCalculation={includeClientInCalculation}
                         commission={Number(calculateStay.residentCommission)}
                         room={room}
@@ -698,17 +712,20 @@ const MyDocument = ({
                   }}
                 >
                   <Text style={{ fontSize: 12, fontWeight: "bold" }}>Fees</Text>
-                  <Text style={{ fontSize: 12, fontWeight: 600 }}>
-                    {residentFeePrice
-                      ? `KES ${residentFeePrice.toLocaleString()}`
-                      : ""}
-                  </Text>
+                  {!summarizedCalculation && (
+                    <Text style={{ fontSize: 12, fontWeight: 600 }}>
+                      {residentFeePrice
+                        ? `KES ${residentFeePrice.toLocaleString()}`
+                        : ""}
+                    </Text>
+                  )}
                 </View>
                 <View style={{ marginTop: 5, flexDirection: "column" }}>
                   {calculateStay.rooms.map((room, index) => (
                     <FeesSummaryPdf
                       key={index}
                       nights={nights}
+                      summarizedCalculation={summarizedCalculation}
                       includeClientInCalculation={includeClientInCalculation}
                       commission={Number(calculateStay.residentCommission)}
                       room={room}
@@ -743,11 +760,13 @@ const MyDocument = ({
                       Extra Fees
                     </Text>
 
-                    <Text style={{ fontSize: 12, fontWeight: 600 }}>
-                      {totalResidentExtraFees
-                        ? `KES ${totalResidentExtraFees.toLocaleString()}`
-                        : ""}
-                    </Text>
+                    {!summarizedCalculation && (
+                      <Text style={{ fontSize: 12, fontWeight: 600 }}>
+                        {totalResidentExtraFees
+                          ? `KES ${totalResidentExtraFees.toLocaleString()}`
+                          : ""}
+                      </Text>
+                    )}
                   </View>
 
                   <View style={{ flexDirection: "column", marginTop: 5 }}>
@@ -755,6 +774,7 @@ const MyDocument = ({
                       <ExtraFeesSummaryPdf
                         key={index}
                         index={index}
+                        summarizedCalculation={summarizedCalculation}
                         includeClientInCalculation={includeClientInCalculation}
                         commission={Number(calculateStay.nonResidentCommission)}
                         fee={fee}

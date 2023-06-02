@@ -54,6 +54,8 @@ export default function Calculate() {
   const [includeClientInCalculation, setIncludeResidentInCalculation] =
     useState(false);
 
+  const [summarizedCalculation, setSummarizedCalculation] = useState(false);
+
   const { data: user } = useQuery<UserTypes | null>("user", () =>
     getUser(token)
   );
@@ -102,6 +104,7 @@ export default function Calculate() {
                   id: uuidv4(),
                   resident: "",
                   guestType: "",
+                  numberOfGuests: 0,
                   description: "",
                 },
               ],
@@ -109,6 +112,7 @@ export default function Calculate() {
                 {
                   id: uuidv4(),
                   nonResident: "",
+                  numberOfGuests: 0,
                   guestType: "",
                   description: "",
                 },
@@ -174,6 +178,7 @@ export default function Calculate() {
               <MyDocument
                 key={index}
                 includeClientInCalculation={includeClientInCalculation}
+                summarizedCalculation={summarizedCalculation}
                 calculateStay={item}
                 stays={stays}
                 index={index}
@@ -244,6 +249,7 @@ export default function Calculate() {
                             includeClientInCalculation={
                               includeClientInCalculation
                             }
+                            summarizedCalculation={summarizedCalculation}
                             calculateStay={item}
                             stays={stays}
                             index={index}
@@ -275,6 +281,16 @@ export default function Calculate() {
                   checked={includeClientInCalculation}
                   onChange={(event) =>
                     setIncludeResidentInCalculation(event.currentTarget.checked)
+                  }
+                ></Checkbox>
+
+                <Checkbox
+                  label="Don't include price for each section"
+                  mt={12}
+                  mb={8}
+                  checked={summarizedCalculation}
+                  onChange={(event) =>
+                    setSummarizedCalculation(event.currentTarget.checked)
                   }
                 ></Checkbox>
 

@@ -15,6 +15,7 @@ type ExtraFeesSummaryProps = {
   numberOfGuests: number;
   nights: number;
   includeClientInCalculation: boolean;
+  summarizedCalculation: boolean;
   commission: number;
 };
 
@@ -23,6 +24,7 @@ export default function ExtraFeesSummaryPdf({
   fee,
   numberOfGuests,
   nights,
+  summarizedCalculation,
   includeClientInCalculation,
   commission,
 }: ExtraFeesSummaryProps) {
@@ -46,7 +48,7 @@ export default function ExtraFeesSummaryPdf({
             })`
           : ""}{" "}
       </Text>
-      {!!price && (
+      {!!price && !summarizedCalculation && (
         <Text style={{ color: "gray", fontSize: 12 }}>
           {" "}
           {fee.guestType === "Resident"
