@@ -43,8 +43,8 @@ export default function Listing({ stay }: ListingProps) {
   //   const now = new Date().getTime();
   //   setState((prev) => ({
   //     ...prev,
-  //     itemIds: [
-  //       ...prev.itemIds,
+  //     stayIds: [
+  //       ...prev.stayIds,
   //       {
   //         id,
   //         timestamp: now,
@@ -52,29 +52,29 @@ export default function Listing({ stay }: ListingProps) {
   //     ],
   //   }));
 
-  //   const storedItemIds = localStorage.getItem("itemIds");
-  //   let itemIds: Item[] = [];
+  //   const storedItemIds = localStorage.getItem("stayIds");
+  //   let stayIds: Item[] = [];
 
   //   if (storedItemIds) {
   //     const parsedItemIds = JSON.parse(storedItemIds) as Item[];
-  //     itemIds = parsedItemIds.filter((item) => {
+  //     stayIds = parsedItemIds.filter((item) => {
   //       // Check if the timestamp is less than 1 minute old
   //       return now - item.timestamp < 1 * 60 * 1000;
   //     });
   //   }
 
   //   // Add the filtered items and the new item with a timestamp
-  //   itemIds.push({ id, timestamp: now });
+  //   stayIds.push({ id, timestamp: now });
 
-  //   // Store the updated itemIds array in localStorage
-  //   localStorage.setItem("itemIds", JSON.stringify(itemIds));
+  //   // Store the updated stayIds array in localStorage
+  //   localStorage.setItem("stayIds", JSON.stringify(stayIds));
   // }
 
   function addListingToCalculate(id: number) {
-    setState((prev) => ({ ...prev, itemIds: [...prev.itemIds, id] }));
-    const storedItemIds = localStorage.getItem("itemIds");
+    setState((prev) => ({ ...prev, stayIds: [...prev.stayIds, id] }));
+    const storedItemIds = localStorage.getItem("stayIds");
     localStorage.setItem(
-      "itemIds",
+      "stayIds",
       JSON.stringify([...JSON.parse(storedItemIds || "[]"), id])
     );
   }
@@ -97,19 +97,19 @@ export default function Listing({ stay }: ListingProps) {
   //     });
   // }
 
-  const isAdded = state.itemIds.includes(stay.id);
+  const isAdded = state.stayIds.includes(stay.id);
 
   function handleRemoveItemClick(id: number) {
     setState((prev) => ({
       ...prev,
-      itemIds: prev.itemIds.filter((itemId) => itemId !== id),
+      stayIds: prev.stayIds.filter((stayId) => stayId !== id),
     }));
-    const storedItemIds = localStorage.getItem("itemIds");
+    const storedItemIds = localStorage.getItem("stayIds");
     localStorage.setItem(
-      "itemIds",
+      "stayIds",
       JSON.stringify(
         JSON.parse(storedItemIds || "[]").filter(
-          (itemId: number) => itemId !== id
+          (stayId: number) => stayId !== id
         )
       )
     );

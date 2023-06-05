@@ -10,7 +10,7 @@ type ContextProviderProps = {
 // }
 
 type StateTypes = {
-  itemIds: number[];
+  stayIds: number[];
 };
 
 type ContextTypes = {
@@ -22,7 +22,7 @@ export const Context = createContext<ContextTypes>({} as ContextTypes);
 
 export function ContextProvider({ children }: ContextProviderProps) {
   const [state, setState] = useState<StateTypes>({
-    itemIds: [],
+    stayIds: [],
   });
   return (
     <Context.Provider value={{ state, setState }}>{children}</Context.Provider>

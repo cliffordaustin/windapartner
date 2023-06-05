@@ -67,7 +67,7 @@ export default function Calculate() {
   const { state, setState } = useContext(Context);
 
   useEffect(() => {
-    const ids = localStorage.getItem("itemIds");
+    const ids = localStorage.getItem("stayIds");
     const newIds = ids?.replace(/[\[\]']+/g, "");
     if (ids) {
       setStayIds(newIds);

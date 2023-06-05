@@ -46,10 +46,10 @@ export default function AgentPage() {
 
   const [stayIds, setStayIds] = useState<string | undefined>("0");
 
-  const itemIds = process.browser ? localStorage.getItem("itemIds") : "";
+  const itemIds = process.browser ? localStorage.getItem("stayIds") : "";
 
   useEffect(() => {
-    const ids = localStorage.getItem("itemIds");
+    const ids = localStorage.getItem("stayIds");
     const newIds = ids?.replace(/[\[\]']+/g, "");
     if (ids) {
       setStayIds(newIds || "0");
@@ -60,23 +60,23 @@ export default function AgentPage() {
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  useEffect(() => {
-    setIsLoading(true);
-    const getStay = getPartnerStays(router.query.location as string, stayIds);
-    getStay
-      .then((res) => {
-        setAddedStays(res);
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        setIsLoading(false);
-      });
-  }, [stayIds]);
+  // useEffect(() => {
+  //   setIsLoading(true);
+  //   const getStay = getPartnerStays(router.query.location as string, stayIds);
+  //   getStay
+  //     .then((res) => {
+  //       setAddedStays(res);
+  //       setIsLoading(false);
+  //     })
+  //     .catch((err) => {
+  //       setIsLoading(false);
+  //     });
+  // }, [stayIds]);
 
   useEffect(() => {
-    const storedItemIds = localStorage.getItem("itemIds");
+    const storedItemIds = localStorage.getItem("stayIds");
     if (storedItemIds) {
-      setState((prev) => ({ ...prev, itemIds: JSON.parse(storedItemIds) }));
+      setState((prev) => ({ ...prev, stayIds: JSON.parse(storedItemIds) }));
     }
   }, []);
 
@@ -119,10 +119,10 @@ export default function AgentPage() {
       </div>
 
       <NavLink
-        label={`Calculate pricing (${addedStays?.length} selected)`}
+        label={`Calculate pricing (${stayIds} selected)`}
         component="a"
         href="/partner/agent/calculate"
-        disabled={isLoading || addedStays.length === 0}
+        disabled={stayIds === "0"}
         className="fixed w-fit flex items-center justify-center rounded-3xl px-4 text-white z-10 bg-[#000] hover:bg-[#333] font-semibold bottom-10 left-[40%]"
         icon={
           isLoading ? (
