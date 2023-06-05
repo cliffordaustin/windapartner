@@ -119,10 +119,10 @@ export default function AgentPage() {
       </div>
 
       <NavLink
-        label={`Calculate pricing (${stayIds} selected)`}
+        label={`Calculate pricing (${state.stayIds.length} selected)`}
         component="a"
         href="/partner/agent/calculate"
-        disabled={stayIds === "0"}
+        disabled={state.stayIds.length === 0}
         className="fixed w-fit flex items-center justify-center rounded-3xl px-4 text-white z-10 bg-[#000] hover:bg-[#333] font-semibold bottom-10 left-[40%]"
         icon={
           isLoading ? (
