@@ -158,7 +158,7 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
     setState(updatedItems);
   };
 
-  const guestTypes: GuestType[] = ["Resident", "Non-resident"];
+  const guestTypes: GuestType[] = ["Non-resident", "Resident"];
   const pricingTypes: PricingType[] = [
     "PER PERSON",
     "WHOLE GROUP",
@@ -223,7 +223,7 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
   return (
     <div className="flex items-center">
       <Flex w="100%" mt={18}>
-        <Popover
+        {/* <Popover
           width={350}
           position="bottom-start"
           arrowOffset={60}
@@ -244,6 +244,17 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
                 <Text size="sm" weight={600}>
                   {fee.name ? fee.name : "Enter fee name"}
                 </Text>
+                <TextInput
+              placeholder="Enter fee name"
+              className="w-full"
+              value={fee.name}
+              id={fee.id}
+              label="Fee name"
+              labelProps={{ className: "font-semibold text-gray-600 mb-1" }}
+              onChange={(event) => {
+                handleFeeNameChange(event);
+              }}
+            ></TextInput>
               </Flex>
 
               <IconSelector className="text-gray-500"></IconSelector>
@@ -263,7 +274,37 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
               }}
             ></TextInput>
           </Popover.Dropdown>
-        </Popover>
+        </Popover> */}
+
+        <Flex
+          justify={"space-between"}
+          align={"center"}
+          className="px-2 py-1 cursor-pointer rounded-l-md border border-solid w-[220px] border-gray-300"
+        >
+          <Flex direction="column" gap={2}>
+            <Text size="xs" weight={600} className="text-gray-500">
+              Fee name
+            </Text>
+
+            {/* <Text size="sm" weight={600}>
+                  {fee.name ? fee.name : "Enter fee name"}
+                </Text> */}
+            <TextInput
+              placeholder="Enter fee name"
+              className="w-full"
+              value={fee.name}
+              id={fee.id}
+              classNames={{
+                input: "border-none px-0 !py-0 focus:ring-0 focus:outline-none",
+              }}
+              onChange={(event) => {
+                handleFeeNameChange(event);
+              }}
+            ></TextInput>
+          </Flex>
+
+          {/* <IconSelector className="text-gray-500"></IconSelector> */}
+        </Flex>
 
         <Popover
           width={350}
@@ -379,7 +420,39 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
           </Popover.Dropdown>
         </Popover>
 
-        <Popover
+        <Flex
+          justify={"space-between"}
+          align={"center"}
+          className="px-2 py-1 cursor-pointer border rounded-r-md border-l-transparent border-solid w-[220px] border-gray-300"
+        >
+          <Flex direction="column" gap={4}>
+            <Text size="xs" weight={600} className="text-gray-500">
+              Price
+            </Text>
+            <NumberInput
+              placeholder="Enter fee price"
+              className="w-full"
+              value={fee.price}
+              classNames={{
+                input: "border-none px-0 !py-0 focus:ring-0 focus:outline-none",
+              }}
+              icon={
+                fee.guestType === "Resident" && fee.price
+                  ? "KES"
+                  : fee.guestType === "Non-resident" && fee.price
+                  ? "$"
+                  : ""
+              }
+              onChange={(value) => {
+                handleFeePriceChange(value);
+              }}
+            ></NumberInput>
+          </Flex>
+
+          {/* <IconSelector className="text-gray-500"></IconSelector> */}
+        </Flex>
+
+        {/* <Popover
           width={350}
           position="bottom-end"
           arrowOffset={60}
@@ -421,7 +494,7 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
               }}
             ></NumberInput>
           </Popover.Dropdown>
-        </Popover>
+        </Popover> */}
       </Flex>
 
       <div

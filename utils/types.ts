@@ -55,6 +55,9 @@ export type OtherFeesResident = {
   id: number;
   name?: string;
   price: number;
+  adult_price: number;
+  child_price: number;
+  teen_price: number;
   resident_fee_type?: string;
   guest_type?: "CHILD" | "ADULT" | "INFANT" | "TEEN" | "";
 };
@@ -63,6 +66,9 @@ export type OtherFeesNonResident = {
   id: number;
   name?: string;
   price: number;
+  adult_price: number;
+  child_price: number;
+  teen_price: number;
   nonresident_fee_type?: string;
   guest_type?: "CHILD" | "ADULT" | "INFANT" | "TEEN" | "";
 };

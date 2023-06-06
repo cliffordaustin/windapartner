@@ -5,7 +5,7 @@ import {
   ResidentGuests,
   Room,
 } from "@/context/CalculatePage";
-import { RoomType } from "./types";
+import { RoomType, Stay } from "./types";
 
 export function countRoomTypes(roomArray: Room[]): string[] {
   const roomCount: { [name: string]: number } = {};
@@ -3126,46 +3126,43 @@ function getTotalGuestsByCategory(rooms: Room[]): {
   let nonResidentTeens = 0;
 
   rooms.forEach((room) => {
-    if (room.residentParkFee.length > 0) {
-      room.residentGuests.forEach((guest) => {
-        switch (guest.resident) {
-          case "Adult":
-            residentAdults += 1;
-            break;
-          case "Child":
-            residentChildren += 1;
-            break;
-          case "Infant":
-            residentInfants += 1;
-            break;
-          case "Teen":
-            residentTeens += 1;
-            break;
-          default:
-            break;
-        }
-      });
-    }
-    if (room.nonResidentParkFee.length > 0) {
-      room.nonResidentGuests.forEach((guest) => {
-        switch (guest.nonResident) {
-          case "Adult":
-            nonResidentAdults += 1;
-            break;
-          case "Child":
-            nonResidentChildren += 1;
-            break;
-          case "Infant":
-            nonResidentInfants += 1;
-            break;
-          case "Teen":
-            nonResidentTeens += 1;
-            break;
-          default:
-            break;
-        }
-      });
-    }
+    room.residentGuests.forEach((guest) => {
+      switch (guest.resident) {
+        case "Adult":
+          residentAdults += guest.numberOfGuests;
+          break;
+        case "Child":
+          residentChildren += guest.numberOfGuests;
+          break;
+        case "Infant":
+          residentInfants += guest.numberOfGuests;
+          break;
+        case "Teen":
+          residentTeens += guest.numberOfGuests;
+          break;
+        default:
+          break;
+      }
+    });
+
+    room.nonResidentGuests.forEach((guest) => {
+      switch (guest.nonResident) {
+        case "Adult":
+          nonResidentAdults += guest.numberOfGuests;
+          break;
+        case "Child":
+          nonResidentChildren += guest.numberOfGuests;
+          break;
+        case "Infant":
+          nonResidentInfants += guest.numberOfGuests;
+          break;
+        case "Teen":
+          nonResidentTeens += guest.numberOfGuests;
+          break;
+        default:
+          break;
+      }
+    });
   });
 
   return {
@@ -3178,6 +3175,113 @@ function getTotalGuestsByCategory(rooms: Room[]): {
     nonResidentInfants,
     nonResidentTeens,
   };
+}
+
+function getTotalResidentParkFees(rooms: Room[]): number {
+  let total = 0;
+  rooms.forEach((room) => {
+    room.otherFees.forEach((fee) => {
+      room.residentGuests.forEach((guest) => {
+        if (guest.resident === "Adult") {
+          total += fee.residentAdultPrice * guest.numberOfGuests;
+        }
+        if (guest.resident === "Child") {
+          total += fee.residentChildPrice * guest.numberOfGuests;
+        }
+        if (guest.resident === "Teen") {
+          total += fee.residentTeenPrice * guest.numberOfGuests;
+        }
+      });
+    });
+  });
+
+  return total;
+}
+
+function getTotalNonResidentParkFees(rooms: Room[]): number {
+  let total = 0;
+  rooms.forEach((room) => {
+    room.otherFees.forEach((fee) => {
+      room.nonResidentGuests.forEach((guest) => {
+        if (guest.nonResident === "Adult") {
+          total += fee.nonResidentAdultPrice * guest.numberOfGuests;
+        }
+        if (guest.nonResident === "Child") {
+          total += fee.nonResidentChildPrice * guest.numberOfGuests;
+        }
+        if (guest.nonResident === "Teen") {
+          total += fee.nonResidentTeenPrice * guest.numberOfGuests;
+        }
+      });
+    });
+  });
+
+  return total;
+}
+
+function findUniqueFees(rooms: Room[]): OtherFees[] {
+  const uniqueFees: OtherFees[] = [];
+  const uniqueNames: Set<string | undefined> = new Set();
+
+  rooms.forEach((room) => {
+    room.otherFees.forEach((fee) => {
+      if (!uniqueNames.has(fee.name)) {
+        uniqueFees.push(fee);
+        uniqueNames.add(fee.name);
+      }
+    });
+  });
+
+  return uniqueFees;
+}
+
+function getResidentTotalPriceOtherFee(rooms: Room[], fee: OtherFees): number {
+  let total = 0;
+  rooms.forEach((room) => {
+    room.otherFees.forEach((roomFee) => {
+      if (roomFee.name === fee.name) {
+        room.residentGuests.forEach((guest) => {
+          if (guest.resident === "Adult") {
+            total += roomFee.residentAdultPrice * guest.numberOfGuests;
+          }
+          if (guest.resident === "Child") {
+            total += roomFee.residentChildPrice * guest.numberOfGuests;
+          }
+          if (guest.resident === "Teen") {
+            total += roomFee.residentTeenPrice * guest.numberOfGuests;
+          }
+        });
+      }
+    });
+  });
+
+  return total;
+}
+
+function getNonResidentTotalPriceOtherFee(
+  rooms: Room[],
+  fee: OtherFees
+): number {
+  let total = 0;
+  rooms.forEach((room) => {
+    room.otherFees.forEach((roomFee) => {
+      if (roomFee.name === fee.name) {
+        room.nonResidentGuests.forEach((guest) => {
+          if (guest.nonResident === "Adult") {
+            total += roomFee.nonResidentAdultPrice * guest.numberOfGuests;
+          }
+          if (guest.nonResident === "Child") {
+            total += roomFee.nonResidentChildPrice * guest.numberOfGuests;
+          }
+          if (guest.nonResident === "Teen") {
+            total += roomFee.nonResidentTeenPrice * guest.numberOfGuests;
+          }
+        });
+      }
+    });
+  });
+
+  return total;
 }
 
 export function getTotalParkFeesByCategory(rooms: Room[]): {
@@ -3300,6 +3404,51 @@ function clientIncludedInPrice(
   return includeClient ? price + price * (commission / 100) : price;
 }
 
+export type OtherFees = {
+  id: number;
+  name?: string;
+  residentAdultPrice: number;
+  residentChildPrice: number;
+  residentTeenPrice: number;
+  nonResidentAdultPrice: number;
+  nonResidentChildPrice: number;
+  nonResidentTeenPrice: number;
+};
+
+function findMatchingFees(stay: Stay): OtherFees[] {
+  const matchingFees: OtherFees[] = [];
+
+  stay.other_fees_non_resident.forEach((nonResidentFee) => {
+    stay.other_fees_resident.forEach((residentFee) => {
+      if (
+        nonResidentFee.name &&
+        residentFee.name &&
+        nonResidentFee.name.toLowerCase() === residentFee.name.toLowerCase() &&
+        (nonResidentFee.adult_price ||
+          nonResidentFee.child_price ||
+          nonResidentFee.teen_price ||
+          residentFee.adult_price ||
+          residentFee.child_price ||
+          residentFee.teen_price)
+      ) {
+        const matchingFee: OtherFees = {
+          id: nonResidentFee.id,
+          name: nonResidentFee.name,
+          residentAdultPrice: residentFee.adult_price,
+          residentChildPrice: residentFee.child_price,
+          residentTeenPrice: residentFee.teen_price,
+          nonResidentAdultPrice: nonResidentFee.adult_price,
+          nonResidentChildPrice: nonResidentFee.child_price,
+          nonResidentTeenPrice: nonResidentFee.teen_price,
+        };
+        matchingFees.push(matchingFee);
+      }
+    });
+  });
+
+  return matchingFees;
+}
+
 const pricing = {
   singleResidentAdultAllInclusivePrice,
   singleResidentAdultGamePackagePrice,
@@ -3374,6 +3523,12 @@ const pricing = {
   nonResidentInfantBedAndBreakfastPrice,
   calculateActivityFees,
   calculateExtraFees,
+  findMatchingFees,
+  getTotalResidentParkFees,
+  getTotalNonResidentParkFees,
+  findUniqueFees,
+  getResidentTotalPriceOtherFee,
+  getNonResidentTotalPriceOtherFee,
 
   findCommonRoomResidentNamesWithDescription,
   findCommonRoomNonResidentNamesWithDescription,

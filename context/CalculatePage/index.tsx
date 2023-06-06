@@ -33,6 +33,17 @@ export type NonResidentGuests = {
   description: string;
 };
 
+export type OtherFees = {
+  id: number;
+  name?: string;
+  residentAdultPrice: number;
+  residentChildPrice: number;
+  residentTeenPrice: number;
+  nonResidentAdultPrice: number;
+  nonResidentChildPrice: number;
+  nonResidentTeenPrice: number;
+};
+
 export type Room = {
   id: string;
   name: string;
@@ -45,6 +56,7 @@ export type Room = {
   residentGuests: ResidentGuests[];
   nonResidentGuests: NonResidentGuests[];
   package: string;
+  otherFees: OtherFees[];
   residentParkFee: ParkFee[];
   nonResidentParkFee: ParkFee[];
 };

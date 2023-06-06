@@ -77,48 +77,17 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
     0
   );
 
-  const totalGuests = pricing.getTotalGuestsByCategory(calculateStay.rooms);
-  const totalPriceParkFee = pricing.getTotalParkFeesByCategory(
+  let totalResidentParkFees = pricing.getTotalResidentParkFees(
     calculateStay.rooms
   );
 
-  const totalNumberOfResidentAdultGuests =
-    totalPriceParkFee.residentParkFee.adult * totalGuests.residentAdults;
+  totalResidentParkFees = totalResidentParkFees * nights;
 
-  const totalNumberOfResidentChildGuests =
-    totalPriceParkFee.residentParkFee.child * totalGuests.residentChildren;
+  let totalNonResidentParkFees = pricing.getTotalNonResidentParkFees(
+    calculateStay.rooms
+  );
 
-  const totalNumberOfResidentTeenGuests =
-    totalPriceParkFee.residentParkFee.teen * totalGuests.residentTeens;
-
-  const totalNumberOfResidentInfantGuests =
-    totalPriceParkFee.residentParkFee.infant * totalGuests.residentInfants;
-
-  const totalNumberOfNonResidentAdultGuests =
-    totalPriceParkFee.nonResidentParkFee.adult * totalGuests.nonResidentAdults;
-
-  const totalNumberOfNonResidentChildGuests =
-    totalPriceParkFee.nonResidentParkFee.child *
-    totalGuests.nonResidentChildren;
-
-  const totalNumberOfNonResidentTeenGuests =
-    totalPriceParkFee.nonResidentParkFee.teen * totalGuests.nonResidentTeens;
-
-  const totalNumberOfNonResidentInfantGuests =
-    totalPriceParkFee.nonResidentParkFee.infant *
-    totalGuests.nonResidentInfants;
-
-  const totalResidentFee =
-    totalNumberOfResidentAdultGuests +
-    totalNumberOfResidentChildGuests +
-    totalNumberOfResidentTeenGuests +
-    totalNumberOfResidentInfantGuests;
-
-  const totalNonResidentFee =
-    totalNumberOfNonResidentAdultGuests +
-    totalNumberOfNonResidentChildGuests +
-    totalNumberOfNonResidentTeenGuests +
-    totalNumberOfNonResidentInfantGuests;
+  totalNonResidentParkFees = totalNonResidentParkFees * nights;
 
   const activityTotalPrice = pricing.calculateActivityFees(
     calculateStay.activityFee,
@@ -177,7 +146,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
   let residentFullTotalPrice =
     totalResidentPrice +
     totalResidentPrice * (Number(calculateStay.residentCommission) / 100) +
-    feePrice.residentTotalFeePrice +
+    totalResidentParkFees +
     totalResidentExtraFees +
     totalResidentExtraFees * (Number(calculateStay.residentCommission) / 100);
 
@@ -185,7 +154,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
     totalNonResidentPrice +
     totalNonResidentPrice *
       (Number(calculateStay.nonResidentCommission) / 100) +
-    feePrice.nonResidentTotalFeePrice +
+    totalNonResidentParkFees +
     totalNonResidentExtraFees +
     totalNonResidentExtraFees *
       (Number(calculateStay.nonResidentCommission) / 100);
@@ -334,8 +303,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
 
             {calculateStay.date[0] &&
               calculateStay.date[1] &&
-              totalNumberOfNonResidentGuests > 0 &&
-              calculateStay.rooms[0].nonResidentParkFee.length > 0 && (
+              totalNonResidentParkFees > 0 && (
                 <div className="flex flex-col gap-2">
                   <Divider size="xs" mt={8}></Divider>
                   <Flex justify="space-between" align="center">
@@ -344,21 +312,17 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
                     </Text>
 
                     <Text size="sm" weight={600}>
-                      {feePrice.nonResidentTotalFeePrice
-                        ? `$ ${feePrice.nonResidentTotalFeePrice.toLocaleString()}`
+                      {totalNonResidentParkFees
+                        ? `$ ${totalNonResidentParkFees.toLocaleString()}`
                         : ""}{" "}
                     </Text>
                   </Flex>
 
                   <Flex direction="column" gap={2}>
-                    {calculateStay.rooms.map((room, index) => (
-                      <NonResidentFeesSummary
-                        key={index}
-                        room={room}
-                        nights={nights}
-                        index={index}
-                      ></NonResidentFeesSummary>
-                    ))}
+                    <NonResidentFeesSummary
+                      rooms={calculateStay.rooms}
+                      nights={nights}
+                    ></NonResidentFeesSummary>
                   </Flex>
                 </div>
               )}
@@ -574,8 +538,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
 
             {calculateStay.date[0] &&
               calculateStay.date[1] &&
-              totalNumberOfGuests > 0 &&
-              calculateStay.rooms[0].residentParkFee.length > 0 && (
+              totalResidentParkFees > 0 && (
                 <div className="flex flex-col gap-2">
                   <Divider size="xs" mt={8}></Divider>
                   <Flex justify="space-between" align="center">
@@ -584,21 +547,17 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
                     </Text>
 
                     <Text size="sm" weight={600}>
-                      {feePrice.residentTotalFeePrice
-                        ? `KES ${feePrice.residentTotalFeePrice.toLocaleString()}`
+                      {totalResidentParkFees
+                        ? `KES ${totalResidentParkFees.toLocaleString()}`
                         : ""}{" "}
                     </Text>
                   </Flex>
 
                   <Flex direction="column" gap={2}>
-                    {calculateStay.rooms.map((room, index) => (
-                      <FeesSummary
-                        key={index}
-                        room={room}
-                        nights={nights}
-                        index={index}
-                      ></FeesSummary>
-                    ))}
+                    <FeesSummary
+                      rooms={calculateStay.rooms}
+                      nights={nights}
+                    ></FeesSummary>
                   </Flex>
                 </div>
               )}

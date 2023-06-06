@@ -68,6 +68,7 @@ export function Stay({ stay, index }: StayProps) {
               package: "",
               residentParkFee: [],
               nonResidentParkFee: [],
+              otherFees: [],
               residentGuests: [
                 {
                   id: uuidv4(),
@@ -241,28 +242,6 @@ export function Stay({ stay, index }: StayProps) {
 
         <Flex mt={4} gap={16} align={"center"}>
           <NumberInput
-            value={residentCommission}
-            onChange={(value) => {
-              const updatedItems = state.map((item) => {
-                if (item.id === stay.id) {
-                  return {
-                    ...item,
-                    residentCommission: value,
-                  };
-                } else {
-                  return item;
-                }
-              });
-              setState(updatedItems);
-            }}
-            label="Resident commission (%)"
-            placeholder="Enter commission"
-            labelProps={{ className: "font-semibold mb-1" }}
-            maw={300}
-            icon={<IconPercentage className="text-gray-500" />}
-          />
-
-          <NumberInput
             value={nonResidentCommission}
             onChange={(value) => {
               const updatedItems = state.map((item) => {
@@ -278,6 +257,28 @@ export function Stay({ stay, index }: StayProps) {
               setState(updatedItems);
             }}
             label="Non-resident commission (%)"
+            placeholder="Enter commission"
+            labelProps={{ className: "font-semibold mb-1" }}
+            maw={300}
+            icon={<IconPercentage className="text-gray-500" />}
+          />
+
+          <NumberInput
+            value={residentCommission}
+            onChange={(value) => {
+              const updatedItems = state.map((item) => {
+                if (item.id === stay.id) {
+                  return {
+                    ...item,
+                    residentCommission: value,
+                  };
+                } else {
+                  return item;
+                }
+              });
+              setState(updatedItems);
+            }}
+            label="Resident commission (%)"
             placeholder="Enter commission"
             labelProps={{ className: "font-semibold mb-1" }}
             maw={300}

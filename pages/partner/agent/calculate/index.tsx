@@ -120,6 +120,7 @@ export default function Calculate() {
               package: "",
               residentParkFee: [],
               nonResidentParkFee: [],
+              otherFees: [],
             },
           ],
           residentCommission: "",

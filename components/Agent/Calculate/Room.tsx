@@ -1,6 +1,7 @@
 import {
   Context,
   NonResidentGuests,
+  OtherFees,
   ParkFee,
   ResidentGuests,
   Room as StateRoomType,
@@ -308,6 +309,65 @@ export default function Room({ room, stay, index }: RoomProps) {
     }
   };
 
+  const handleOtherFees = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    fee: OtherFees
+  ) => {
+    if (e.target.checked) {
+      const otherFee: OtherFees = {
+        id: fee.id,
+        name: fee.name,
+        residentAdultPrice: fee.residentAdultPrice,
+        residentChildPrice: fee.residentChildPrice,
+        residentTeenPrice: fee.residentTeenPrice,
+        nonResidentAdultPrice: fee.nonResidentAdultPrice,
+        nonResidentChildPrice: fee.nonResidentChildPrice,
+        nonResidentTeenPrice: fee.nonResidentTeenPrice,
+      };
+      setState(
+        state.map((item) => {
+          if (item.id === stay.id) {
+            return {
+              ...item,
+              rooms: item.rooms.map((item) => {
+                if (item.id === room.id) {
+                  return {
+                    ...item,
+                    otherFees: [...item.otherFees, otherFee],
+                  };
+                }
+                return item;
+              }),
+            };
+          }
+          return item;
+        })
+      );
+    } else {
+      setState(
+        state.map((item) => {
+          if (item.id === stay.id) {
+            return {
+              ...item,
+              rooms: item.rooms.map((item) => {
+                if (item.id === room.id) {
+                  return {
+                    ...item,
+                    otherFees: item.otherFees.filter(
+                      (item) => item.id !== fee.id
+                    ),
+                  };
+                }
+                return item;
+              }),
+            };
+          }
+          return item;
+        })
+      );
+    }
+  };
+
   const totalGuests =
     room.residentAdult +
     room.residentChild +
@@ -316,8 +376,7 @@ export default function Room({ room, stay, index }: RoomProps) {
     room.nonResidentChild +
     room.nonResidentInfant;
 
-  const numberOfSelectedFees =
-    room.residentParkFee.length + room.nonResidentParkFee.length;
+  const numberOfSelectedFees = room.otherFees.length;
 
   const removeRoom = () => {
     setState(
@@ -421,14 +480,14 @@ export default function Room({ room, stay, index }: RoomProps) {
     let numGuests = 0;
 
     for (const guest of room.residentGuests) {
-      if (guest.resident && guest.guestType) {
-        numGuests++;
+      if (guest.resident) {
+        numGuests += guest.numberOfGuests;
       }
     }
 
     for (const guest of room.nonResidentGuests) {
-      if (guest.nonResident && guest.guestType) {
-        numGuests++;
+      if (guest.nonResident) {
+        numGuests += guest.numberOfGuests;
       }
     }
 
@@ -553,6 +612,24 @@ export default function Room({ room, stay, index }: RoomProps) {
                 return {
                   ...item,
                   package: selectPackage,
+                  residentGuests: [
+                    {
+                      id: uuidv4(),
+                      resident: "",
+                      numberOfGuests: 1,
+                      guestType: "",
+                      description: "",
+                    },
+                  ],
+                  nonResidentGuests: [
+                    {
+                      id: uuidv4(),
+                      nonResident: "",
+                      numberOfGuests: 1,
+                      guestType: "",
+                      description: "",
+                    },
+                  ],
                 };
               }
               return item;
@@ -579,7 +656,7 @@ export default function Room({ room, stay, index }: RoomProps) {
                     {
                       id: uuidv4(),
                       resident: "",
-                      numberOfGuests: 0,
+                      numberOfGuests: 1,
                       guestType: "",
                       description: "",
                     },
@@ -588,7 +665,7 @@ export default function Room({ room, stay, index }: RoomProps) {
                     {
                       id: uuidv4(),
                       nonResident: "",
-                      numberOfGuests: 0,
+                      numberOfGuests: 1,
                       guestType: "",
                       description: "",
                     },
@@ -857,6 +934,8 @@ export default function Room({ room, stay, index }: RoomProps) {
       })
     );
   };
+
+  const otherFees = pricing.findMatchingFees(stay);
 
   return (
     <div className="flex gap-0.5 items-center">
@@ -1726,10 +1805,10 @@ export default function Room({ room, stay, index }: RoomProps) {
           <Popover.Dropdown className="px-3">
             <Flex direction="column" gap={5}>
               <Text size="sm" weight={600}>
-                Non-resident guests
+                Fees
               </Text>
 
-              {stay.other_fees_non_resident.map((fee, index) => (
+              {otherFees.map((fee, index) => (
                 <Flex
                   key={index}
                   justify={"space-between"}
@@ -1740,20 +1819,39 @@ export default function Room({ room, stay, index }: RoomProps) {
                     color="red"
                     label={`${fee.name}`}
                     checked={
-                      !!room.nonResidentParkFee.find(
-                        (item) => item.id === fee.id
-                      )
+                      !!room.otherFees.find((item) => item.id === fee.id)
                     }
                     onChange={(event) => {
-                      handleNonResidentFees(event, fee);
+                      handleOtherFees(event, fee);
                     }}
                   ></Checkbox>
-
-                  <Text size="sm" weight={600}>
-                    ${fee.price}
-                  </Text>
                 </Flex>
               ))}
+
+              {/* {stay.other_fees_non_resident.map(
+                (fee, index) =>
+                  !!(fee.adult_price || fee.child_price || fee.teen_price) && (
+                    <Flex
+                      key={index}
+                      justify={"space-between"}
+                      mt={6}
+                      align={"center"}
+                    >
+                      <Checkbox
+                        color="red"
+                        label={`${fee.name}`}
+                        checked={
+                          !!room.nonResidentParkFee.find(
+                            (item) => item.id === fee.id
+                          )
+                        }
+                        onChange={(event) => {
+                          handleNonResidentFees(event, fee);
+                        }}
+                      ></Checkbox>
+                    </Flex>
+                  )
+              )}
 
               <Divider mt={6} size="xs" />
 
@@ -1784,7 +1882,7 @@ export default function Room({ room, stay, index }: RoomProps) {
                     KES{fee.price}
                   </Text>
                 </Flex>
-              ))}
+              ))} */}
             </Flex>
           </Popover.Dropdown>
         </Popover>
