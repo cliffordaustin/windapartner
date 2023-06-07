@@ -8,8 +8,9 @@ import {
   Text,
   TextInput,
 } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import { IconPlus, IconSelector, IconX } from "@tabler/icons-react";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 type ExtraFeesProps = {
@@ -220,6 +221,10 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
     setState(updatedItems);
   };
 
+  const [opened, setOpened] = useState(false);
+
+  const [pricingTypeOpened, setPricingTypeOpened] = useState(false);
+
   return (
     <div className="flex items-center">
       <Flex w="100%" mt={18}>
@@ -279,7 +284,7 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
         <Flex
           justify={"space-between"}
           align={"center"}
-          className="px-2 py-1 cursor-pointer rounded-l-md border border-solid w-[220px] border-gray-300"
+          className="px-2 py-1 cursor-pointer rounded-l-md border border-solid w-[200px] border-gray-300"
         >
           <Flex direction="column" gap={2}>
             <Text size="xs" weight={600} className="text-gray-500">
@@ -312,11 +317,14 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
           arrowOffset={60}
           withArrow
           shadow="md"
+          opened={opened}
+          onChange={setOpened}
         >
           <Popover.Target>
             <Flex
               justify={"space-between"}
               align={"center"}
+              onClick={() => setOpened((prev) => !prev)}
               className="px-2 py-1 cursor-pointer border-l border-l-transparent border border-solid w-[220px] border-gray-300"
             >
               <Flex direction="column" gap={4}>
@@ -345,6 +353,9 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
                     handleGuestTypeChange(guestType);
                   }
                 }}
+                onMouseDown={() => {
+                  setOpened(false);
+                }}
                 className={
                   "py-2 px-2 rounded-md mt-1 cursor-pointer " +
                   (fee.guestType === guestType
@@ -367,11 +378,14 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
           arrowOffset={60}
           withArrow
           shadow="md"
+          opened={pricingTypeOpened}
+          onChange={setPricingTypeOpened}
         >
           <Popover.Target>
             <Flex
               justify={"space-between"}
               align={"center"}
+              onClick={() => setPricingTypeOpened((prev) => !prev)}
               className="px-2 py-1 cursor-pointer border-l border-l-transparent border border-solid w-[220px] border-gray-300"
             >
               <Flex direction="column" gap={4}>
@@ -404,6 +418,9 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
                     handlePricingTypeChange(pricingType);
                   }
                 }}
+                onMouseDown={() => {
+                  setPricingTypeOpened(false);
+                }}
                 className={
                   "py-2 px-2 rounded-md mt-1 cursor-pointer " +
                   (fee.pricingType === pricingType
@@ -431,7 +448,7 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
             </Text>
             <NumberInput
               placeholder="Enter fee price"
-              className="w-full"
+              className="w-[210px]"
               value={fee.price}
               classNames={{
                 input: "border-none px-0 !py-0 focus:ring-0 focus:outline-none",

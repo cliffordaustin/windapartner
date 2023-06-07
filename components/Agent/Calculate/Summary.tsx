@@ -177,7 +177,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
           : "non-resident"
       }
     >
-      <Tabs.List grow>
+      <Tabs.List className="fixed w-[30%] bg-white" grow>
         <Tabs.Tab value="non-resident">
           <div className="flex items-center justify-center gap-2">
             <span>Non-resident</span>
@@ -202,9 +202,9 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
       </Tabs.List>
 
       <Tabs.Panel value="non-resident">
-        <div className="relative">
+        <div className="">
           <div className="w-full px-4 py-4">
-            <Text className="font-bold" mb={8}>
+            <Text className="font-bold mt-10" mb={8}>
               {calculateStay.name}
             </Text>
             {calculateStay.date[0] && calculateStay.date[1] && (
@@ -308,7 +308,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
                   <Divider size="xs" mt={8}></Divider>
                   <Flex justify="space-between" align="center">
                     <Text size="sm" weight={700}>
-                      Fees
+                      Park/conservancy fees
                     </Text>
 
                     <Text size="sm" weight={600}>
@@ -363,7 +363,8 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
             {calculateStay.date[0] &&
               calculateStay.date[1] &&
               totalNumberOfNonResidentGuests > 0 &&
-              calculateStay.extraFee[0].name && (
+              calculateStay.extraFee[0].name &&
+              totalNonResidentExtraFees > 0 && (
                 <div className="flex flex-col gap-2">
                   <Divider size="xs" mt={8}></Divider>
                   <Flex justify="space-between" align="center">
@@ -441,9 +442,9 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
       </Tabs.Panel>
 
       <Tabs.Panel value="resident">
-        <div className="relative">
+        <div className="">
           <div className="w-full px-4 py-4">
-            <Text className="font-bold" mb={8}>
+            <Text className="font-bold mt-10" mb={8}>
               {calculateStay.name}
             </Text>
             {calculateStay.date[0] && calculateStay.date[1] && (
@@ -543,7 +544,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
                   <Divider size="xs" mt={8}></Divider>
                   <Flex justify="space-between" align="center">
                     <Text size="sm" weight={700}>
-                      Fees
+                      Park/conservancy fees
                     </Text>
 
                     <Text size="sm" weight={600}>
@@ -598,7 +599,8 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
             {calculateStay.date[0] &&
               calculateStay.date[1] &&
               totalNumberOfGuests > 0 &&
-              calculateStay.extraFee[0].name && (
+              calculateStay.extraFee[0].name &&
+              totalResidentExtraFees > 0 && (
                 <div className="flex flex-col gap-2">
                   <Divider size="xs" mt={8}></Divider>
                   <Flex justify="space-between" align="center">

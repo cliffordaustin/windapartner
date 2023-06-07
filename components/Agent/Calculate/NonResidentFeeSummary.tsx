@@ -6,11 +6,13 @@ import pricing from "@/utils/calculation";
 type FeesSummaryProps = {
   rooms: Room[];
   nights: number;
+  summarizedCalculation?: boolean;
 };
 
 export default function NonResidentFeesSummary({
   rooms,
   nights,
+  summarizedCalculation,
 }: FeesSummaryProps) {
   const totalGuests = pricing.getTotalGuestsByCategory(rooms);
 
@@ -23,12 +25,14 @@ export default function NonResidentFeesSummary({
             <Text size="sm" className="text-gray-600" weight={500}>
               {item.name}
             </Text>
-            <Text size="sm" className="text-gray-600" weight={500}>
-              $
-              {(
-                pricing.getNonResidentTotalPriceOtherFee(rooms, item) * nights
-              ).toLocaleString()}
-            </Text>
+            {!summarizedCalculation && (
+              <Text size="sm" className="text-gray-600" weight={500}>
+                $
+                {(
+                  pricing.getNonResidentTotalPriceOtherFee(rooms, item) * nights
+                ).toLocaleString()}
+              </Text>
+            )}
           </div>
         ))}
       </div>

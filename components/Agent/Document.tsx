@@ -509,7 +509,7 @@ const MyDocument = ({
                     }}
                   >
                     <Text style={{ fontSize: 12, fontWeight: "bold" }}>
-                      Fees
+                      Park/conservancy fees
                     </Text>
                     {!summarizedCalculation && (
                       <Text style={{ fontSize: 12, fontWeight: 600 }}>
@@ -711,7 +711,9 @@ const MyDocument = ({
                     alignItems: "center",
                   }}
                 >
-                  <Text style={{ fontSize: 12, fontWeight: "bold" }}>Fees</Text>
+                  <Text style={{ fontSize: 12, fontWeight: "bold" }}>
+                    Park/conservancy fees
+                  </Text>
                   {!summarizedCalculation && (
                     <Text style={{ fontSize: 12, fontWeight: 600 }}>
                       {residentFeePrice

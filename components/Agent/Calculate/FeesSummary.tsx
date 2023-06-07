@@ -6,9 +6,14 @@ import pricing from "@/utils/calculation";
 type FeesSummaryProps = {
   rooms: Room[];
   nights: number;
+  summarizedCalculation?: boolean;
 };
 
-export default function FeesSummary({ rooms, nights }: FeesSummaryProps) {
+export default function FeesSummary({
+  rooms,
+  nights,
+  summarizedCalculation,
+}: FeesSummaryProps) {
   const totalGuests = pricing.getTotalGuestsByCategory(rooms);
 
   const findUniqueFees = pricing.findUniqueFees(rooms);
@@ -21,12 +26,14 @@ export default function FeesSummary({ rooms, nights }: FeesSummaryProps) {
             <Text size="sm" className="text-gray-600" weight={500}>
               {item.name}
             </Text>
-            <Text size="sm" className="text-gray-600" weight={500}>
-              KES
-              {(
-                pricing.getResidentTotalPriceOtherFee(rooms, item) * nights
-              ).toLocaleString()}
-            </Text>
+            {!summarizedCalculation && (
+              <Text size="sm" className="text-gray-600" weight={500}>
+                KES
+                {(
+                  pricing.getResidentTotalPriceOtherFee(rooms, item) * nights
+                ).toLocaleString()}
+              </Text>
+            )}
           </div>
         ))}
       </div>

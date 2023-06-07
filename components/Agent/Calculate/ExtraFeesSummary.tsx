@@ -7,6 +7,9 @@ type ExtraFeesSummaryProps = {
   fee: ExtraFee;
   numberOfGuests: number;
   nights: number;
+  includeClientInCalculation?: boolean;
+  summarizedCalculation?: boolean;
+  commission?: number;
 };
 
 export default function ExtraFeesSummary({
@@ -14,6 +17,9 @@ export default function ExtraFeesSummary({
   fee,
   numberOfGuests,
   nights,
+  summarizedCalculation,
+  includeClientInCalculation,
+  commission,
 }: ExtraFeesSummaryProps) {
   const feeArr = [fee];
 
@@ -37,7 +43,7 @@ export default function ExtraFeesSummary({
               : ""}
           </Text>
 
-          {!!price && (
+          {!!price && !summarizedCalculation && (
             <Text className="text-gray-600" size="sm">
               {" "}
               {fee.guestType === "Resident"

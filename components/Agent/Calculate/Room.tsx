@@ -937,6 +937,9 @@ export default function Room({ room, stay, index }: RoomProps) {
 
   const otherFees = pricing.findMatchingFees(stay);
 
+  const [isRoomOpen, setIsRoomOpen] = useState(false);
+  const [isPackageOpen, setIsPackageOpen] = useState(false);
+
   return (
     <div className="flex gap-0.5 items-center">
       <Flex className="w-full" mt={18}>
@@ -946,13 +949,15 @@ export default function Room({ room, stay, index }: RoomProps) {
           arrowOffset={60}
           withArrow
           shadow="md"
-          styles={{}}
+          opened={isRoomOpen}
+          onChange={setIsRoomOpen}
         >
           <Popover.Target>
             <Flex
               justify={"space-between"}
               align={"center"}
-              className="px-2 py-1 cursor-pointer rounded-l-md border border-solid w-[180px] border-gray-300"
+              onClick={() => setIsRoomOpen((prev) => !prev)}
+              className="px-2 py-1 cursor-pointer rounded-l-md border border-solid w-[220px] border-gray-300"
             >
               <Flex direction="column" gap={4}>
                 <Text size="xs" weight={600} className="text-gray-500">
@@ -982,6 +987,9 @@ export default function Room({ room, stay, index }: RoomProps) {
                     clickSelectRoom(selectRoom);
                   }
                 }}
+                onMouseDown={() => {
+                  setIsRoomOpen(false);
+                }}
                 className={
                   "py-2 px-2 rounded-md mt-1 cursor-pointer " +
                   (selectRoom.name === room.name
@@ -1003,12 +1011,15 @@ export default function Room({ room, stay, index }: RoomProps) {
           arrowOffset={60}
           withArrow
           shadow="md"
+          opened={isPackageOpen}
+          onChange={setIsPackageOpen}
         >
           <Popover.Target>
             <Flex
               justify={"space-between"}
               align={"center"}
-              className="px-2 py-1 cursor-pointer border-l-transparent border border-solid w-[180px] border-gray-300"
+              onClick={() => setIsPackageOpen((prev) => !prev)}
+              className="px-2 py-1 cursor-pointer border-l-transparent border border-solid w-[220px] border-gray-300"
             >
               <Flex direction="column" gap={4}>
                 <Text size="xs" weight={600} className="text-gray-500">
@@ -1041,6 +1052,9 @@ export default function Room({ room, stay, index }: RoomProps) {
                     clickSelectPackage(roomPackage);
                   }
                 }}
+                onMouseDown={() => {
+                  setIsPackageOpen(false);
+                }}
                 className={
                   "py-2 px-2 rounded-md mt-1 cursor-pointer " +
                   (room.package === roomPackage
@@ -1068,7 +1082,7 @@ export default function Room({ room, stay, index }: RoomProps) {
             <Flex
               justify={"space-between"}
               align={"center"}
-              className="px-2 py-1 cursor-pointer border border-l-transparent border-solid w-[180px] border-gray-300"
+              className="px-2 py-1 cursor-pointer border border-l-transparent border-solid w-[220px] border-gray-300"
             >
               <Flex direction="column" gap={4}>
                 <Text size="xs" weight={600} className="text-gray-500">
@@ -1781,7 +1795,7 @@ export default function Room({ room, stay, index }: RoomProps) {
             <Flex
               justify={"space-between"}
               align={"center"}
-              className="px-2 py-1 cursor-pointer rounded-r-md border-l border-l-transparent border border-solid w-[220px] border-gray-300"
+              className="px-2 py-1 cursor-pointer rounded-r-md border-l border-l-transparent border border-solid w-[180px] border-gray-300"
             >
               <Flex direction="column" gap={4}>
                 <Text size="xs" weight={600} className="text-gray-500">
@@ -1805,7 +1819,7 @@ export default function Room({ room, stay, index }: RoomProps) {
           <Popover.Dropdown className="px-3">
             <Flex direction="column" gap={5}>
               <Text size="sm" weight={600}>
-                Fees
+                Park/conservancy fees
               </Text>
 
               {otherFees.map((fee, index) => (
