@@ -16,6 +16,7 @@ import { Stay } from "@/utils/types";
 import { getPartnerStays } from "@/pages/api/stays";
 import { useRouter } from "next/router";
 import {
+  Alert,
   Button,
   Checkbox,
   Divider,
@@ -34,7 +35,12 @@ import { Context } from "@/context/CalculatePage";
 import { StateType, Room } from "@/context/CalculatePage";
 import { Stay as CalculateStay } from "@/components/Agent/Calculate/Stay";
 import { v4 as uuidv4 } from "uuid";
-import { IconCalculator, IconDownload, IconGraph } from "@tabler/icons-react";
+import {
+  IconAlertCircle,
+  IconCalculator,
+  IconDownload,
+  IconGraph,
+} from "@tabler/icons-react";
 import Summary from "@/components/Agent/Calculate/Summary";
 import { useReactToPrint } from "react-to-print";
 
@@ -223,6 +229,16 @@ export default function Calculate() {
     content: () => componentRef.current,
   });
 
+  const sumOfResidentCommission = state.reduce(
+    (a, b) => a + Number(b.residentCommission),
+    0
+  );
+
+  const sumOfNonResidentCommission = state.reduce(
+    (a, b) => a + Number(b.nonResidentCommission),
+    0
+  );
+
   return (
     <div>
       <div className="border-b sticky top-0 z-10 bg-white left-0 right-0 border-x-0 border-t-0 border-solid border-b-gray-200">
@@ -281,7 +297,7 @@ export default function Calculate() {
               <Modal
                 opened={opened}
                 onClose={close}
-                title="Print PDF"
+                title="Print Quotation"
                 classNames={{
                   title: "text-xl font-semibold",
                   close: "text-black hover:text-gray-700 hover:bg-gray-200",
@@ -289,15 +305,22 @@ export default function Calculate() {
                 }}
                 fullScreen
                 transitionProps={{ transition: "fade", duration: 200 }}
+                closeButtonProps={{
+                  style: {
+                    width: 30,
+                    height: 30,
+                  },
+                  iconSize: 20,
+                }}
               >
                 <Flex
                   mt={6}
                   className="relative w-[1080px] mx-auto"
                   justify="space-between"
                 >
-                  <div className="w-[32%] fixed z-40 top-[75px]">
+                  <div className="w-[300px] fixed z-40 top-[75px]">
                     <Checkbox
-                      label="Download calculation for client"
+                      label="Download itemized quote for client"
                       checked={includeClientInCalculation}
                       onChange={(event) =>
                         setIncludeResidentInCalculation(
@@ -307,7 +330,7 @@ export default function Calculate() {
                     ></Checkbox>
 
                     <Checkbox
-                      label="Don't include price for each section"
+                      label="Download summary quote for client"
                       mt={12}
                       mb={8}
                       checked={summarizedCalculation}
@@ -332,12 +355,6 @@ export default function Calculate() {
                       placeholder="Pick one"
                       value={style}
                       mt={10}
-                      classNames={
-                        {
-                          //change the color of the item from blue to red when selected
-                          // item: `border-2 border-solid border-transparent rounded-md hover:border-red-400 focus:border-red-400 focus:ring-0`,
-                        }
-                      }
                       onChange={(value) => setStyle(value)}
                       data={[
                         { value: "default", label: "Default" },
@@ -347,16 +364,29 @@ export default function Calculate() {
                       ]}
                     />
                   </div>
-                  <div className="w-[60%] absolute right-0 flex flex-col gap-5">
+
+                  <div className="w-[75%] pl-12 absolute right-0 flex flex-col gap-5">
+                    {!sumOfResidentCommission &&
+                      !sumOfNonResidentCommission &&
+                      (includeClientInCalculation || summarizedCalculation) && (
+                        <Alert
+                          icon={<IconAlertCircle size="1rem" />}
+                          color="yellow"
+                        >
+                          No commission has been added yet.
+                        </Alert>
+                      )}
+
                     <Button
                       onClick={() => {
                         handlePrint();
                       }}
                       pos={"absolute"}
                       right={0}
+                      top={50}
                       color="red"
                     >
-                      Print PDF
+                      Print Quotation
                     </Button>
                     <div className="mb-12" ref={componentRef}>
                       <Text
@@ -410,7 +440,7 @@ export default function Calculate() {
                       bottom={4}
                       color="red"
                     >
-                      Print PDF
+                      Print Quotation
                     </Button>
                   </div>
                 </Flex>
@@ -479,7 +509,7 @@ export default function Calculate() {
                         size="sm"
                       >
                         <IconCalculator></IconCalculator>
-                        <span>Your calculation</span>
+                        <span>View Quotation</span>
                       </Text>
                       {stays.map((item, index) => (
                         <Tabs.Panel key={index} value={item.slug}>
