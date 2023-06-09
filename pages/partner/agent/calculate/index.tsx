@@ -484,8 +484,8 @@ export default function Calculate() {
                   </Button>
                 </Flex> */}
               </Modal>
-              <div className="w-[30%] right-6 md:right-12 fixed top-[100px]">
-                <div className="flex justify-between px-4 items-center gap-4">
+              <div className="w-[30%] right-6 md:right-12 fixed top-[90px]">
+                {/* <div className="flex justify-between px-4 items-center gap-4">
                   <div></div>
 
                   <Popover width={200} position="bottom" withArrow shadow="md">
@@ -532,8 +532,9 @@ export default function Calculate() {
                       ))}
                     </Popover.Dropdown>
                   </Popover>
-                </div>
-                <div className="overflow-y-scroll h-[450px] mt-4 flex flex-col gap-4 shadow-lg border border-solid border-gray-100 rounded-xl">
+                </div> */}
+
+                <div className="overflow-y-scroll h-[410px] mt-4 flex flex-col gap-4 shadow-lg border border-solid border-gray-100 rounded-xl">
                   {state.map((item, index) => (
                     <Tabs.Panel
                       key={index}
@@ -544,6 +545,44 @@ export default function Calculate() {
                     </Tabs.Panel>
                   ))}
                 </div>
+
+                <Flex mt={18} className="w-full" gap={10}>
+                  <Button
+                    onClick={open}
+                    className="flex w-full justify-center items-center font-semibold p-2 rounded-md cursor-pointer"
+                    size="sm"
+                    color="red"
+                  >
+                    <IconCalculator></IconCalculator>
+                    <span className="ml-1.5">Print quote</span>
+                  </Button>
+
+                  {stays.map((item, index) => (
+                    <Tabs.Panel
+                      className="w-full"
+                      key={index}
+                      value={item.slug}
+                    >
+                      {item.lodge_price_data_pdf && (
+                        <Button
+                          onClick={() => {
+                            handleDownloadClick(
+                              item.lodge_price_data_pdf,
+                              item.property_name
+                            );
+                          }}
+                          className="flex w-full justify-center items-center gap-8 font-semibold p-2 rounded-md cursor-pointer"
+                          size="sm"
+                          color="red"
+                          variant="outline"
+                        >
+                          <IconGraph></IconGraph>
+                          <span className="ml-1.5">Contract rates</span>
+                        </Button>
+                      )}
+                    </Tabs.Panel>
+                  ))}
+                </Flex>
               </div>
             </Tabs>
           )}
