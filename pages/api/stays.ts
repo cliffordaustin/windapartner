@@ -30,6 +30,22 @@ export const getStayDetail = async (slug: string): Promise<Stay> => {
   return stay.data;
 };
 
+export const getStayEmail = async (
+  slug: string,
+  token: string | undefined
+): Promise<Stay> => {
+  const stay = await axios.get(
+    `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${slug}/`,
+    {
+      headers: {
+        Authorization: "Token " + token,
+      },
+    }
+  );
+
+  return stay.data;
+};
+
 export const getRoomTypes = async (
   stay: Stay | undefined,
   startDate: string | null | undefined,
