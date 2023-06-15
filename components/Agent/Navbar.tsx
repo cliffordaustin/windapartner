@@ -7,9 +7,17 @@ import { IconSearch } from "@tabler/icons-react";
 import { useState } from "react";
 import { useRouter } from "next/router";
 
-type NavbarProps = { user?: UserTypes | null; calculatePage?: boolean };
+type NavbarProps = {
+  user?: UserTypes | null;
+  calculatePage?: boolean;
+  includeSearch?: boolean;
+};
 
-export default function Navbar({ user, calculatePage = false }: NavbarProps) {
+export default function Navbar({
+  user,
+  calculatePage = false,
+  includeSearch = true,
+}: NavbarProps) {
   const [location, setLocation] = useState("");
   const router = useRouter();
   const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -52,34 +60,36 @@ export default function Navbar({ user, calculatePage = false }: NavbarProps) {
         </div>
       </Link>
 
-      <div className="px-3 w-[370px] flex items-center shadow-md h-[50px] rounded-3xl">
-        <Input
-          icon={<IconSearch size="1rem" className="text-gray-500" />}
-          placeholder="Search a location"
-          w={350}
-          styles={{
-            input: {
-              borderColor: "transparent",
-              "&:focus": {
+      {includeSearch && (
+        <div className="px-3 w-[370px] flex items-center shadow-md h-[50px] rounded-3xl">
+          <Input
+            icon={<IconSearch size="1rem" className="text-gray-500" />}
+            placeholder="Search a location"
+            w={350}
+            styles={{
+              input: {
                 borderColor: "transparent",
+                "&:focus": {
+                  borderColor: "transparent",
+                },
               },
-            },
-          }}
-          value={location}
-          onChange={(event) => setLocation(event.currentTarget.value)}
-          onKeyDown={handleKeyPress}
-          rightSection={
-            <div
-              onClick={() => {
-                search();
-              }}
-              className="w-[30px] h-[30px] cursor-pointer flex items-center justify-center rounded-full bg-red-500"
-            >
-              <IconSearch size="1rem" className="text-white" />
-            </div>
-          }
-        />
-      </div>
+            }}
+            value={location}
+            onChange={(event) => setLocation(event.currentTarget.value)}
+            onKeyDown={handleKeyPress}
+            rightSection={
+              <div
+                onClick={() => {
+                  search();
+                }}
+                className="w-[30px] h-[30px] cursor-pointer flex items-center justify-center rounded-full bg-red-500"
+              >
+                <IconSearch size="1rem" className="text-white" />
+              </div>
+            }
+          />
+        </div>
+      )}
 
       <UserDropdown user={user}></UserDropdown>
     </div>

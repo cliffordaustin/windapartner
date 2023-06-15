@@ -11,16 +11,33 @@ import {
   createStyles,
   getStylesRef,
   Accordion,
+  Button,
+  Loader,
 } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import { lowerFirst, upperFirst } from "@mantine/hooks";
 import {
   IconCalendar,
+  IconEdit,
+  IconPencil,
   IconPlus,
   IconSelector,
   IconX,
 } from "@tabler/icons-react";
 import React, { useContext, useState } from "react";
+import RoomSeason from "./Season";
+import axios, { AxiosResponse } from "axios";
+import { useRouter } from "next/router";
+import Cookies from "js-cookie";
+import {
+  NonResidentGuestTypesData,
+  ResidentGuestTypesData,
+  RoomPriceProps,
+  RoomReturnType,
+  addRoom,
+} from "@/pages/api/lodge";
+import { useMutation } from "react-query";
+import { addDays, format } from "date-fns";
 
 const useStyles = createStyles((theme) => ({
   link: {
@@ -70,6 +87,8 @@ function AddRoomSecondPage() {
 
   const { classes, cx } = useStyles();
 
+  const router = useRouter();
+
   const links = state.packages.map((item, index) => (
     <Container
       className={cx(classes.link, { [classes.linkActive]: index === active })}
@@ -107,8 +126,107 @@ function AddRoomSecondPage() {
       packages: updatedPackages,
     }));
   };
+
+  const [loading, setLoading] = useState(false);
+
+  const submit = async () => {
+    setLoading(true);
+
+    const allResidentData: ResidentGuestTypesData[][] = [];
+    const allNonResidentData: NonResidentGuestTypesData[][] = [];
+
+    for (const pkg of state.packages) {
+      const response = addRoom(
+        {
+          name: state.name,
+          capacity: state.adult_capacity,
+          childCapacity: state.child_capacity,
+          infantCapacity: state.infant_capacity,
+          roomPackage: pkg.name,
+        },
+        router.query.slug as string
+      );
+
+      const res = await response;
+
+      for (const season of pkg.seasons) {
+        const residentData: ResidentGuestTypesData[] = [];
+        const nonResidentData: NonResidentGuestTypesData[] = [];
+
+        const allDates: string[] = [];
+
+        let currentDate = season.date[0];
+        let stopDate = season.date[1];
+
+        if (currentDate && stopDate) {
+          while (currentDate <= stopDate) {
+            allDates.push(format(currentDate, "yyyy-MM-dd"));
+            currentDate = addDays(currentDate, 1);
+          }
+        }
+
+        allDates.map((date) => {
+          const obj: ResidentGuestTypesData = {
+            date: date,
+            room_resident_guest_availabilities: season.guests.map((guest) => ({
+              name: guest.guestType,
+              description: guest.description,
+              price: guest.residentPrice || 0,
+            })),
+          };
+
+          residentData.push(obj);
+        });
+
+        allDates.map((date) => {
+          const obj: NonResidentGuestTypesData = {
+            date: date,
+            room_non_resident_guest_availabilities: season.guests.map(
+              (guest) => ({
+                name: guest.guestType,
+                description: guest.description,
+                price: guest.nonResidentPrice || 0,
+              })
+            ),
+          };
+
+          nonResidentData.push(obj);
+        });
+
+        allResidentData.push(residentData);
+        allNonResidentData.push(nonResidentData);
+      }
+
+      for (const guest of allResidentData) {
+        await axios.post(
+          `${process.env.NEXT_PUBLIC_baseURL}/room-types/${res?.slug}/resident-availabilities/`,
+          guest,
+          {
+            headers: {
+              Authorization: "Token " + Cookies.get("token"),
+            },
+          }
+        );
+      }
+
+      for (const guest of allNonResidentData) {
+        await axios.post(
+          `${process.env.NEXT_PUBLIC_baseURL}/room-types/${res?.slug}/nonresident-availabilities/`,
+          guest,
+          {
+            headers: {
+              Authorization: "Token " + Cookies.get("token"),
+            },
+          }
+        );
+      }
+    }
+    router.reload();
+    setLoading(false);
+  };
+
   return (
-    <Flex w={1000} gap={20} mt={12} mx="auto">
+    <Flex w={1100} gap={20} mt={12} mx="auto">
       <Container className="w-[30%]">
         <Text weight={700} mb={12} size="md">
           Room and Packages
@@ -119,124 +237,37 @@ function AddRoomSecondPage() {
       <Container className="w-[70%]">
         <Accordion mb={10} defaultValue="0">
           {state.packages[active]?.seasons.map((season, index) => (
-            <Accordion.Item key={index} value={index.toString()}>
-              <Flex align="center">
-                <Accordion.Control>
-                  <span className="font-semibold">{season.name}</span>
-                </Accordion.Control>
-
-                {index > 1 && (
-                  <IconX
-                    size={20}
-                    color="red"
-                    className="cursor-pointer"
-                    onClick={() => {
-                      const newPackages = [...state.packages];
-                      newPackages[active].seasons.splice(index, 1);
-                      setState((prev) => ({ ...prev, packages: newPackages }));
-                    }}
-                  />
-                )}
-              </Flex>
-              <Accordion.Panel>
-                <DatePickerInput
-                  type="range"
-                  value={season.date}
-                  onChange={(date) => {
-                    const newPackages = [...state.packages];
-                    newPackages[active].seasons[index].date = date;
-                    setState((prev) => ({ ...prev, packages: newPackages }));
-                  }}
-                  color="red"
-                  label="Pick date range"
-                  placeholder="Select dates"
-                  styles={{ input: { paddingTop: 13, paddingBottom: 13 } }}
-                  labelProps={{ className: "font-semibold mb-1" }}
-                  rightSection={<IconSelector className="text-gray-500" />}
-                  className="max-w-fit min-w-[250px]"
-                  minDate={new Date()}
-                  icon={<IconCalendar className="text-gray-500" />}
-                  numberOfColumns={2}
-                  autoSave="true"
-                />
-
-                <Flex mt={10} direction="column">
-                  <Flex className="w-full" direction="column" mt={10} gap={8}>
-                    {season.guests.map((guest, guestIndex) => (
-                      <Flex className="w-full" key={guestIndex} gap={8}>
-                        <TextInput
-                          w="20%"
-                          label="Guest Type"
-                          className="w-[50%]"
-                          value={guest.guestType}
-                          disabled
-                          radius="sm"
-                        />
-
-                        <TextInput
-                          w="20%"
-                          label="Description"
-                          className="w-[50%]"
-                          value={guest.description}
-                          disabled
-                          radius="sm"
-                        />
-
-                        <NumberInput
-                          hideControls
-                          w="50%"
-                          label="Resident price(KES)"
-                          placeholder="eg. 2000"
-                          value={guest.residentPrice}
-                          onChange={(value) => {
-                            const newPackages = [...state.packages];
-                            newPackages[active].seasons[index].guests[
-                              guestIndex
-                            ].residentPrice = value;
-                            setState((prev) => ({
-                              ...prev,
-                              packages: newPackages,
-                            }));
-                          }}
-                          radius="sm"
-                        />
-
-                        <NumberInput
-                          w="50%"
-                          hideControls
-                          label="Non-resident price($)"
-                          placeholder="eg. 100"
-                          value={guest.nonResidentPrice}
-                          onChange={(value) => {
-                            const newPackages = [...state.packages];
-                            newPackages[active].seasons[index].guests[
-                              guestIndex
-                            ].nonResidentPrice = value;
-                            setState((prev) => ({
-                              ...prev,
-                              packages: newPackages,
-                            }));
-                          }}
-                          radius="sm"
-                        />
-                      </Flex>
-                    ))}
-                  </Flex>
-                </Flex>
-              </Accordion.Panel>
-            </Accordion.Item>
+            <RoomSeason
+              key={index}
+              index={index}
+              active={active}
+              season={season}
+            ></RoomSeason>
           ))}
         </Accordion>
-        <Anchor
-          size="sm"
-          type="button"
-          color="blue"
-          onClick={() => {
-            addSeason();
-          }}
-        >
-          Add another season
-        </Anchor>
+        <Flex align="center" justify="space-between">
+          <Anchor
+            size="sm"
+            type="button"
+            color="blue"
+            onClick={() => {
+              addSeason();
+            }}
+          >
+            Add another season
+          </Anchor>
+
+          <Button
+            onClick={() => submit()}
+            type="submit"
+            color="red"
+            className="flex items-center"
+            disabled={loading}
+          >
+            Finish
+            {loading && <Loader size="xs" color="gray" ml={5}></Loader>}
+          </Button>
+        </Flex>
       </Container>
     </Flex>
   );

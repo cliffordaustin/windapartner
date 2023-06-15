@@ -13,7 +13,7 @@ export type Season = {
   guests: Guest[];
 };
 
-type Package = {
+export type Package = {
   name: string | null;
   seasons: Season[];
 };

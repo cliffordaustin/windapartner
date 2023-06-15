@@ -82,7 +82,9 @@ function LodgeDetail() {
             onSlideChange={(index) => {
               setCurrentSlideIndex(index);
             }}
+            speed={14}
             mx="auto"
+            mb={30}
           >
             <Carousel.Slide>
               <AddRoomFirstPage></AddRoomFirstPage>
@@ -97,7 +99,7 @@ function LodgeDetail() {
             bottom={0}
             right={0}
             w="100%"
-            className="w-full flex justify-between items-center text-right px-10"
+            className="w-full bg-gray-100 flex justify-between items-center text-right px-10"
           >
             {currentSlideIndex === 0 && <div></div>}
             {currentSlideIndex === 1 && (

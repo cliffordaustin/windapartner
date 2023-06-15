@@ -1,4 +1,4 @@
-import { Context, Guest } from "@/context/LodgeDetailPage";
+import { Context, Guest, Package } from "@/context/LodgeDetailPage";
 import {
   Anchor,
   Container,
@@ -182,6 +182,30 @@ function AddRoomFirstPage() {
 
     setState((prev) => ({ ...prev, packages: newPackages, guests: newGuests }));
   };
+
+  const addPackage = () => {
+    const newPackage: Package = {
+      name: "",
+      seasons: [
+        {
+          date: [null, null],
+          name: "High Season",
+          guests: state.guests,
+        },
+
+        {
+          date: [null, null],
+          name: "Low Season",
+          guests: state.guests,
+        },
+      ],
+    };
+
+    setState((prev) => ({
+      ...prev,
+      packages: [...prev.packages, newPackage],
+    }));
+  };
   return (
     <Flex w={900} gap={35} mt={12} mx="auto">
       <Container className="w-[40%]">
@@ -282,44 +306,9 @@ function AddRoomFirstPage() {
               size="sm"
               type="button"
               color="blue"
-              onClick={() =>
-                setState((prev) => ({
-                  ...prev,
-                  packages: [
-                    ...prev.packages,
-                    {
-                      name: "",
-                      seasons: [
-                        {
-                          date: [null, null],
-                          name: "High Season",
-                          guests: [
-                            {
-                              guestType: "",
-                              description: "",
-                              residentPrice: "",
-                              nonResidentPrice: "",
-                            },
-                          ],
-                        },
-
-                        {
-                          date: [null, null],
-                          name: "Low Season",
-                          guests: [
-                            {
-                              guestType: "",
-                              description: "",
-                              residentPrice: "",
-                              nonResidentPrice: "",
-                            },
-                          ],
-                        },
-                      ],
-                    },
-                  ],
-                }))
-              }
+              onClick={() => {
+                addPackage();
+              }}
             >
               Add another package
             </Anchor>

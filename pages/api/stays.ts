@@ -46,6 +46,21 @@ export const getStayEmail = async (
   return stay.data;
 };
 
+export const getAllStaysEmail = async (
+  token: string | undefined
+): Promise<Stay[]> => {
+  const stay = await axios.get(
+    `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/`,
+    {
+      headers: {
+        Authorization: "Token " + token,
+      },
+    }
+  );
+
+  return stay.data.results;
+};
+
 export const getRoomTypes = async (
   stay: Stay | undefined,
   startDate: string | null | undefined,
