@@ -7,7 +7,6 @@ import {
   NumberInput,
   Select,
   Text,
-  TextInput,
   createStyles,
   getStylesRef,
   Accordion,
