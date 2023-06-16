@@ -11,7 +11,6 @@ import LodgeCard from "@/components/Lodge/LodgeCard";
 import { useRouter } from "next/router";
 import {
   Button,
-  ChevronIcon,
   Container,
   Divider,
   Flex,
