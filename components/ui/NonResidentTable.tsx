@@ -6,55 +6,58 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import {
-  RoomAvailabilityResident,
+  RoomAvailabilityNonResident,
   RoomAvailabilityResidentGuest,
 } from "@/utils/types";
 import { format } from "date-fns";
 
 type TableProps = {
-  residentData: RoomAvailabilityResident[];
+  nonResidentData: RoomAvailabilityNonResident[];
   roomTypeName: string | undefined;
-  residentGuestTypes: (string | undefined)[];
+  nonResidentGuestTypes: (string | undefined)[];
 };
 
-const residentColumnHelper = createColumnHelper<RoomAvailabilityResident>();
+const nonResidentColumnHelper =
+  createColumnHelper<RoomAvailabilityNonResident>();
 
-function Table({ residentData, roomTypeName, residentGuestTypes }: TableProps) {
-  const residentColumns = [
-    residentColumnHelper.accessor("date", {
+function NonResidentTable({
+  nonResidentData,
+  roomTypeName,
+  nonResidentGuestTypes,
+}: TableProps) {
+  const nonResidentColumns = [
+    nonResidentColumnHelper.accessor("date", {
       header: () => "Date",
       cell: (info) => (
         <span>{format(new Date(info.getValue()), "dd MMM yyyy")}</span>
       ),
     }),
-
-    residentColumnHelper.group({
+    nonResidentColumnHelper.group({
       header: roomTypeName || "Pricing",
       columns: [
-        ...residentGuestTypes.map((guestType, index) => {
-          return residentColumnHelper.accessor(
-            (row) => row.room_resident_guest_availabilities,
+        ...nonResidentGuestTypes.map((guestType, index) =>
+          nonResidentColumnHelper.accessor(
+            (row) => row.room_non_resident_guest_availabilities,
             {
-              id: `room_resident_guest_availabilities_${index}`,
+              id: `room_non_resident_guest_availabilities_${index}`,
               header: () => guestType,
               cell: (info) => {
-                const roomResidentGuestAvailabilities: RoomAvailabilityResidentGuest[] =
+                const roomNonResidentGuestAvailabilities: RoomAvailabilityResidentGuest[] =
                   info.getValue();
-                const roomResidentGuestAvailability =
-                  roomResidentGuestAvailabilities.find(
+                const roomNonResidentGuestAvailability =
+                  roomNonResidentGuestAvailabilities.find(
                     (item) => item.name?.toLowerCase() === guestType
                   );
-                return <span>KES{roomResidentGuestAvailability?.price}</span>;
+                return <span>${roomNonResidentGuestAvailability?.price}</span>;
               },
             }
-          );
-        }),
+          )
+        ),
       ],
     }),
   ];
-
-  const column = residentColumns;
-  const data = residentData;
+  const column = nonResidentColumns;
+  const data = nonResidentData;
   const columns = [...column];
 
   // Use the state and functions returned from useTable to build your UI
@@ -68,16 +71,13 @@ function Table({ residentData, roomTypeName, residentGuestTypes }: TableProps) {
   return (
     <table className="!w-full">
       <thead>
-        {table.getHeaderGroups().map((headerGroup) => (
-          <tr
-            className="px-6 py-2 bg-gray-100 text-sm font-medium"
-            key={headerGroup.id}
-          >
-            {headerGroup.headers.map((header) => (
+        {table.getHeaderGroups().map((headerGroup, index) => (
+          <tr className="px-6 py-2 bg-gray-100 text-sm font-medium" key={index}>
+            {headerGroup.headers.map((header, index) => (
               <th
                 colSpan={header.colSpan}
                 className="text-gray-600"
-                key={header.id}
+                key={index}
               >
                 {header.isPlaceholder
                   ? null
@@ -108,6 +108,4 @@ function Table({ residentData, roomTypeName, residentGuestTypes }: TableProps) {
   );
 }
 
-Table.propTypes = {};
-
-export default Table;
+export default NonResidentTable;

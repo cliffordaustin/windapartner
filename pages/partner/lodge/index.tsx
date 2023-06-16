@@ -17,6 +17,7 @@ import {
   Flex,
   Grid,
   Modal,
+  Switch,
   Text,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
@@ -73,6 +74,8 @@ function Lodge({}) {
     null,
     null,
   ]);
+
+  const [isNonResident, setIsNonResident] = React.useState(false);
   return (
     <div className="overflow-x-hidden">
       <div className="border-b border-x-0 border-t-0 border-solid border-b-gray-200">
@@ -100,7 +103,8 @@ function Lodge({}) {
           md={"auto"}
         >
           <Container className="border-l bg-gray-50 border-l-gray-300 border-solid border-y-0 border-r-0 sticky h-[calc(100vh-70px)] overflow-auto">
-            <div className="py-4 flex justify-center border-solid border-x-0 border-t-0 border-b border-b-gray-300">
+            <div className="py-4 items-center gap-4 flex justify-between border-solid border-x-0 border-t-0 border-b border-b-gray-300">
+              <div></div>
               <DatePickerInput
                 type="range"
                 value={date}
@@ -119,11 +123,26 @@ function Lodge({}) {
                 numberOfColumns={2}
                 autoSave="true"
               />
+
+              <Switch
+                label="Non-resident prices"
+                color="red"
+                mt={25}
+                checked={isNonResident}
+                onChange={(event) =>
+                  setIsNonResident(event.currentTarget.checked)
+                }
+              />
             </div>
 
             <Container>
               {selectedStays?.map((stay, index) => (
-                <SelectedStays key={index} stay={stay} date={date} />
+                <SelectedStays
+                  isNonResident={isNonResident}
+                  key={index}
+                  stay={stay}
+                  date={date}
+                />
               ))}
             </Container>
           </Container>

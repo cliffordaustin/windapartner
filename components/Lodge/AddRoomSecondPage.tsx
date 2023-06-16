@@ -13,12 +13,18 @@ import {
   Accordion,
   Button,
   Loader,
+  Modal,
+  List,
+  useMantineTheme,
+  TypographyStylesProvider,
 } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
-import { lowerFirst, upperFirst } from "@mantine/hooks";
+import { lowerFirst, upperFirst, useDisclosure } from "@mantine/hooks";
 import {
   IconCalendar,
   IconEdit,
+  IconExclamationCircle,
+  IconExclamationMark,
   IconPencil,
   IconPlus,
   IconSelector,
@@ -80,7 +86,11 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-function AddRoomSecondPage() {
+type AddRoomSecondPageProps = {
+  staySlug: string;
+};
+
+function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
   const { state, setState } = useContext(Context);
 
   const [active, setActive] = useState(0);
@@ -129,8 +139,38 @@ function AddRoomSecondPage() {
 
   const [loading, setLoading] = useState(false);
 
-  const submit = async () => {
-    setLoading(true);
+  const [loadingProceed, setLoadingProceed] = useState(false);
+
+  type SeasonDataErrorType = {
+    title: string;
+  };
+
+  const [seasonDataError, setSeasonDataError] = useState<SeasonDataErrorType[]>(
+    []
+  );
+
+  const [opened, { close, open }] = useDisclosure(false);
+
+  const hasPriceInSeason = (season: Season) => {
+    let hasPrice = false;
+
+    season.guests.map((guest) => {
+      if (guest.residentPrice || guest.nonResidentPrice) hasPrice = true;
+    });
+
+    return hasPrice;
+  };
+
+  const hasDateInSeason = (season: Season) => {
+    let hasDate = false;
+
+    if (season.date[0] && season.date[1]) hasDate = true;
+
+    return hasDate;
+  };
+
+  const proceedSubmit = async () => {
+    setLoadingProceed(true);
 
     const allResidentData: ResidentGuestTypesData[][] = [];
     const allNonResidentData: NonResidentGuestTypesData[][] = [];
@@ -144,7 +184,7 @@ function AddRoomSecondPage() {
           infantCapacity: state.infant_capacity,
           roomPackage: pkg.name,
         },
-        router.query.slug as string
+        staySlug
       );
 
       const res = await response;
@@ -171,6 +211,7 @@ function AddRoomSecondPage() {
             room_resident_guest_availabilities: season.guests.map((guest) => ({
               name: guest.guestType,
               description: guest.description,
+              season: season.name,
               price: guest.residentPrice || 0,
             })),
           };
@@ -185,6 +226,7 @@ function AddRoomSecondPage() {
               (guest) => ({
                 name: guest.guestType,
                 description: guest.description,
+                season: season.name,
                 price: guest.nonResidentPrice || 0,
               })
             ),
@@ -222,7 +264,172 @@ function AddRoomSecondPage() {
       }
     }
     router.reload();
-    setLoading(false);
+    setLoadingProceed(false);
+  };
+
+  const submit = async () => {
+    const allResidentData: ResidentGuestTypesData[][] = [];
+    const allNonResidentData: NonResidentGuestTypesData[][] = [];
+    const submitSeasonDataError: SeasonDataErrorType[] = [];
+
+    setSeasonDataError([]);
+
+    for (const pkg of state.packages) {
+      for (const season of pkg.seasons) {
+        const residentData: ResidentGuestTypesData[] = [];
+        const nonResidentData: NonResidentGuestTypesData[] = [];
+
+        const allDates: string[] = [];
+
+        let currentDate = season.date[0];
+        let stopDate = season.date[1];
+
+        if (currentDate && stopDate) {
+          while (currentDate <= stopDate) {
+            allDates.push(format(currentDate, "yyyy-MM-dd"));
+            currentDate = addDays(currentDate, 1);
+          }
+        }
+
+        const hasPrice = hasPriceInSeason(season);
+        const hasDate = hasDateInSeason(season);
+
+        if (!hasPrice && hasDate) {
+          setSeasonDataError((prevState) => [
+            ...prevState,
+            {
+              title: `Date has been added to <strong>${pkg.name?.toLowerCase()}</strong> - <strong>${
+                season.name
+              }</strong> but no price has been added`,
+            },
+          ]);
+
+          submitSeasonDataError.push({
+            title: `Date has been added to <strong>${pkg.name}</strong> - <strong>${season.name}</strong> but no price has been added`,
+          });
+        }
+
+        if (hasPrice && !hasDate) {
+          setSeasonDataError((prevState) => [
+            ...prevState,
+            {
+              title: `Price has been added to <strong>${pkg.name?.toLowerCase()}</strong> - <strong>${
+                season.name
+              }</strong> but no date has been added`,
+            },
+          ]);
+
+          submitSeasonDataError.push({
+            title: `Price has been added to <strong>${pkg.name?.toLowerCase()}</strong> - <strong>${
+              season.name
+            }</strong> but no date has been added`,
+          });
+        }
+
+        if (!hasPrice && !hasDate) {
+          setSeasonDataError((prevState) => [
+            ...prevState,
+            {
+              title: `No date or price has been added to <strong>${pkg.name?.toLowerCase()}</strong> - <strong>
+              ${season.name}
+              </strong>`,
+            },
+          ]);
+
+          submitSeasonDataError.push({
+            title: `No date or price has been added to <strong>${pkg.name?.toLowerCase()}</strong> - <strong>
+            ${season.name}
+            </strong>`,
+          });
+        }
+
+        if (hasDate && hasPrice) {
+          allDates.map((date) => {
+            const obj: ResidentGuestTypesData = {
+              date: date,
+              room_resident_guest_availabilities: season.guests.map(
+                (guest) => ({
+                  name: guest.guestType,
+                  description: guest.description,
+                  season: season.name,
+                  price: guest.residentPrice || 0,
+                })
+              ),
+            };
+
+            residentData.push(obj);
+          });
+
+          allDates.map((date) => {
+            const obj: NonResidentGuestTypesData = {
+              date: date,
+              room_non_resident_guest_availabilities: season.guests.map(
+                (guest) => ({
+                  name: guest.guestType,
+                  description: guest.description,
+                  season: season.name,
+                  price: guest.nonResidentPrice || 0,
+                })
+              ),
+            };
+
+            nonResidentData.push(obj);
+          });
+
+          allResidentData.push(residentData);
+          allNonResidentData.push(nonResidentData);
+        }
+      }
+    }
+    if (submitSeasonDataError.length === 0) {
+      for (const pkg of state.packages) {
+        setLoading(true);
+        let res: RoomReturnType | null = null;
+
+        const response = addRoom(
+          {
+            name: state.name,
+            capacity: state.adult_capacity,
+            childCapacity: state.child_capacity,
+            infantCapacity: state.infant_capacity,
+            roomPackage: pkg.name,
+          },
+          staySlug
+        );
+
+        res = await response;
+
+        for (const guest of allResidentData) {
+          await axios.post(
+            `${process.env.NEXT_PUBLIC_baseURL}/room-types/${res?.slug}/resident-availabilities/`,
+            guest,
+            {
+              headers: {
+                Authorization: "Token " + Cookies.get("token"),
+              },
+            }
+          );
+        }
+
+        for (const guest of allNonResidentData) {
+          await axios.post(
+            `${process.env.NEXT_PUBLIC_baseURL}/room-types/${res?.slug}/nonresident-availabilities/`,
+            guest,
+            {
+              headers: {
+                Authorization: "Token " + Cookies.get("token"),
+              },
+            }
+          );
+        }
+      }
+    }
+    if (submitSeasonDataError.length > 0) {
+      open();
+    } else if (submitSeasonDataError.length === 0) {
+      router.reload();
+      setLoading(false);
+    }
   };
 
   return (
@@ -233,6 +440,59 @@ function AddRoomSecondPage() {
         </Text>
         {links}
       </Container>
+
+      <Modal
+        opened={opened}
+        classNames={{
+          header: "bg-yellow-50",
+          body: "px-6 py-4 mt-4",
+        }}
+        onClose={close}
+        title={
+          <div className="flex items-center gap-2">
+            <IconExclamationCircle size={20} color="#333" />
+            <span className="font-bold">Note</span>
+          </div>
+        }
+        size={500}
+        overlayProps={{
+          color: "#333",
+          opacity: 0.4,
+
+          zIndex: 201,
+        }}
+        centered
+      >
+        <List className="flex flex-col gap-1.5">
+          {seasonDataError.map((error, index) => (
+            <List.Item key={index}>
+              <TypographyStylesProvider>
+                <div
+                  className="text-sm"
+                  dangerouslySetInnerHTML={{
+                    __html: error.title,
+                  }}
+                />
+              </TypographyStylesProvider>
+            </List.Item>
+          ))}
+        </List>
+
+        <Flex justify="flex-end" mt={12} gap={6} align="center">
+          <Button onClick={close} variant="default">
+            Go back and update
+          </Button>
+          <Button
+            onClick={() => proceedSubmit()}
+            className="flex items-center"
+            disabled={loadingProceed}
+            color="red"
+          >
+            Post anyways{" "}
+            {loadingProceed && <Loader size="xs" color="gray" ml={5}></Loader>}
+          </Button>
+        </Flex>
+      </Modal>
 
       <Container className="w-[70%]">
         <Accordion mb={10} defaultValue="0">

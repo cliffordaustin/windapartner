@@ -26,8 +26,9 @@ export type NonResidentGuestTypesData = {
   room_non_resident_guest_availabilities: Guest[];
 };
 
-type PostRoomPrices = {
-  slug: string;
+type DeleteRoomTypeProps = {
+  roomSlug: string | null | undefined;
+  staySlug: string | null | undefined;
 };
 
 type RoomProps = {
@@ -63,4 +64,18 @@ export const addRoom = async (
   );
 
   return { slug: response.data.slug };
+};
+
+export const deleteRoom = async ({
+  roomSlug,
+  staySlug,
+}: DeleteRoomTypeProps) => {
+  await axios.delete(
+    `${process.env.NEXT_PUBLIC_baseURL}/stays/${staySlug}/room-types/${roomSlug}/`,
+    {
+      headers: {
+        Authorization: "Token " + Cookies.get("token"),
+      },
+    }
+  );
 };

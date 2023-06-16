@@ -52,13 +52,13 @@ function LodgeDetail() {
       <Divider my={10} />
 
       <Button onClick={open} color="red">
-        Add a room
+        Add rates
       </Button>
       <ContextProvider>
         <Modal
           opened={opened}
           onClose={close}
-          title={"Add a room"}
+          title={"Add rates"}
           classNames={{
             title: "text-xl font-bold",
             close: "text-black hover:text-gray-700 hover:bg-gray-200",
@@ -85,6 +85,7 @@ function LodgeDetail() {
             speed={14}
             mx="auto"
             mb={30}
+            withKeyboardEvents={false}
           >
             <Carousel.Slide>
               <AddRoomFirstPage></AddRoomFirstPage>

@@ -1,9 +1,26 @@
+import { ContextProvider } from "@/context/LodgeDetailPage";
 import { Stay } from "@/utils/types";
 import { Carousel } from "@mantine/carousel";
-import { Button, Image, Text, createStyles } from "@mantine/core";
-import { IconPlus } from "@tabler/icons-react";
+import {
+  Button,
+  Container,
+  Flex,
+  Image,
+  Modal,
+  Text,
+  createStyles,
+} from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import {
+  IconChevronLeft,
+  IconChevronRight,
+  IconPlus,
+} from "@tabler/icons-react";
 import Link from "next/link";
 import React from "react";
+import { EmblaCarouselType } from "embla-carousel-react";
+import AddRoomFirstPage from "./AddRoomFirstPage";
+import AddRoomSecondPage from "./AddRoomSecondPage";
 
 type LodgeProps = {
   stay: Stay;
@@ -54,6 +71,12 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
       JSON.stringify([...JSON.parse(storedItemIds || "[]"), id])
     );
   }
+  const [opened, { open, close }] = useDisclosure(false);
+
+  const [embla, setEmbla] = React.useState<EmblaCarouselType | null>(null);
+
+  const [currentSlideIndex, setCurrentSlideIndex] = React.useState(0);
+
   return (
     <div className="w-full rounded-md relative shadow border">
       <Carousel
@@ -84,17 +107,96 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
         <Text truncate size="sm" className="text-gray-600">
           {stay.location}
         </Text>
-        <Link href={`/partner/lodge/${stay.slug}`}>
-          <Button
-            size="xs"
-            color="red"
-            variant="light"
-            className="w-full mt-1 !py-2"
-          >
-            Add a room
-          </Button>
-        </Link>
+
+        <Button
+          size="xs"
+          color="red"
+          variant="light"
+          className="w-full mt-1 !py-2"
+          onClick={open}
+        >
+          Add rates
+        </Button>
       </div>
+
+      <ContextProvider>
+        <Modal
+          opened={opened}
+          onClose={close}
+          title={"Add rates"}
+          classNames={{
+            title: "text-xl font-bold",
+            close: "text-black hover:text-gray-700 hover:bg-gray-200",
+            header: "bg-gray-100",
+          }}
+          fullScreen
+          transitionProps={{ transition: "fade", duration: 200 }}
+          closeButtonProps={{
+            style: {
+              width: 30,
+              height: 30,
+            },
+            iconSize: 20,
+          }}
+        >
+          <Carousel
+            getEmblaApi={(embla) => {
+              setEmbla(embla);
+            }}
+            withControls={false}
+            onSlideChange={(index) => {
+              setCurrentSlideIndex(index);
+            }}
+            speed={14}
+            mx="auto"
+            mb={30}
+            withKeyboardEvents={false}
+          >
+            <Carousel.Slide>
+              <AddRoomFirstPage></AddRoomFirstPage>
+            </Carousel.Slide>
+            <Carousel.Slide>
+              <AddRoomSecondPage staySlug={stay.slug}></AddRoomSecondPage>
+            </Carousel.Slide>
+          </Carousel>
+
+          <Container
+            pos="fixed"
+            bottom={0}
+            right={0}
+            w="100%"
+            className="w-full bg-gray-100 flex justify-between items-center text-right px-10"
+          >
+            {currentSlideIndex === 0 && <div></div>}
+            {currentSlideIndex === 1 && (
+              <Flex
+                onClick={() => {
+                  embla?.scrollPrev();
+                }}
+                className="cursor-pointer"
+                gap={4}
+                align="center"
+              >
+                <IconChevronLeft className="w-5 h-5" />
+                <p>Previous</p>
+              </Flex>
+            )}
+            {currentSlideIndex === 0 && (
+              <Flex
+                onClick={() => {
+                  embla?.scrollNext();
+                }}
+                className="cursor-pointer"
+                gap={4}
+                align="center"
+              >
+                <p>Next</p>
+                <IconChevronRight className="w-5 h-5" />
+              </Flex>
+            )}
+          </Container>
+        </Modal>
+      </ContextProvider>
 
       {isAdded ? (
         <Button
