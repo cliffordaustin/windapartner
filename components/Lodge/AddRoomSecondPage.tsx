@@ -493,7 +493,7 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
         </Flex>
       </Modal>
 
-      <Container className="w-[70%]">
+      <Container className="w-[70%] h-screen overflow-y-scroll">
         <Accordion mb={10} defaultValue="0">
           {state.packages[active]?.seasons.map((season, index) => (
             <RoomSeason
