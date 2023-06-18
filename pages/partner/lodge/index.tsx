@@ -148,52 +148,43 @@ function Lodge({}) {
 
   const [loading, setLoading] = React.useState(false);
 
-  const submit = (values: FormValues) => {
+  const submit = async (values: FormValues) => {
     if (files.length === 0) {
       setNoFiles(true);
     } else {
       setNoFiles(false);
       setLoading(true);
-      axios
-        .post(
-          `${process.env.NEXT_PUBLIC_baseURL}/create-stay/`,
-          {
-            property_name: values.property_name,
-            name: values.property_name,
-            location: values.location,
-            is_partner_property: true,
-            contact_email: user?.email,
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_baseURL}/create-stay/`,
+        {
+          property_name: values.property_name,
+          name: values.property_name,
+          location: values.location,
+          is_partner_property: true,
+          contact_email: user?.email,
+        },
+        {
+          headers: {
+            Authorization: `Token ${token}`,
           },
+        }
+      );
+
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append("image", file);
+        await axios.post(
+          `${process.env.NEXT_PUBLIC_baseURL}/stays/${res.data?.slug}/create-image/`,
+          formData,
           {
             headers: {
               Authorization: `Token ${token}`,
             },
           }
-        )
-        .then((res) => {
-          const staySlug = res.data.slug;
+        );
+      }
 
-          for (const file of files) {
-            const formData = new FormData();
-            formData.append("image", file);
-            axios
-              .post(
-                `${process.env.NEXT_PUBLIC_baseURL}/stays/${staySlug}/create-image/`,
-                formData,
-                {
-                  headers: {
-                    Authorization: `Token ${token}`,
-                  },
-                }
-              )
-              .then((res) => {})
-              .catch((err) => {
-                setLoading(false);
-              });
-          }
-
-          router.reload();
-        });
+      router.reload();
     }
   };
   return (
