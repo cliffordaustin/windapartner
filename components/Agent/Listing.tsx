@@ -168,11 +168,9 @@ export default function Listing({ stay }: ListingProps) {
 
       <div className="mt-2">
         <Text truncate weight={600} size="md">
-          {stay.name}
-        </Text>
-        <Text size="sm" className="text-gray-600">
           {stay.property_name}
         </Text>
+
         <Text size="sm" className="text-gray-600">
           {stay.location}
         </Text>

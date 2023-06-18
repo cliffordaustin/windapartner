@@ -66,11 +66,11 @@ function Table({ residentData, roomTypeName, residentGuestTypes }: TableProps) {
 
   // Render the UI for your table
   return (
-    <table className="!w-full">
+    <table className="!w-full border border-solid">
       <thead>
         {table.getHeaderGroups().map((headerGroup) => (
           <tr
-            className="px-6 py-2 bg-gray-100 text-sm font-medium"
+            className="px-6 py-2 bg-gray-100 border-b-2 border-gray-400 border-solid text-sm font-medium"
             key={headerGroup.id}
           >
             {headerGroup.headers.map((header) => (
@@ -93,11 +93,11 @@ function Table({ residentData, roomTypeName, residentGuestTypes }: TableProps) {
       <tbody className="text-sm text-gray-600">
         {table.getRowModel().rows.map((row, index) => (
           <tr
-            className="hover:bg-gray-100 border-b transition-colors duration-200 ease-linear"
+            className="hover:bg-gray-100 !border !border-solid transition-colors duration-200 ease-linear"
             key={index}
           >
             {row.getVisibleCells().map((cell) => (
-              <td className="p-1" key={cell.id}>
+              <td className="py-2 px-1" key={cell.id}>
                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
               </td>
             ))}

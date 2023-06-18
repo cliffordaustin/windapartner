@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import UserDropdown from "../Homepage/UserDropdown";
 import { UserTypes } from "@/utils/types";
-import { Input, Tooltip } from "@mantine/core";
+import { Button, Container, Input, Tooltip } from "@mantine/core";
 import { IconSearch } from "@tabler/icons-react";
 import { useState } from "react";
 import { useRouter } from "next/router";
@@ -11,12 +11,16 @@ type NavbarProps = {
   user?: UserTypes | null;
   calculatePage?: boolean;
   includeSearch?: boolean;
+  showAddProperty?: boolean;
+  openModal?: () => void;
 };
 
 export default function Navbar({
   user,
   calculatePage = false,
   includeSearch = true,
+  showAddProperty = false,
+  openModal,
 }: NavbarProps) {
   const [location, setLocation] = useState("");
   const router = useRouter();
@@ -91,7 +95,14 @@ export default function Navbar({
         </div>
       )}
 
-      <UserDropdown user={user}></UserDropdown>
+      <div className="flex items-center gap-4">
+        {showAddProperty && (
+          <Button color="red" onClick={openModal}>
+            Add your property
+          </Button>
+        )}
+        <UserDropdown user={user}></UserDropdown>
+      </div>
     </div>
   );
 }

@@ -70,7 +70,7 @@ function PartnerSignin(props: PaperProps) {
 
         Cookies.set("token", response.data.key);
         setLoginError(false);
-        router.replace((router.query.redirect as string) || "/");
+        router.replace((router.query.redirect as string) || "/partner/lodge");
       } catch (error) {
         setLoginError(true);
       }
@@ -89,7 +89,7 @@ function PartnerSignin(props: PaperProps) {
 
         Cookies.set("token", response.data.key);
 
-        router.replace((router.query.redirect as string) || "/");
+        router.replace((router.query.redirect as string) || "/partner/lodge");
       } catch (error) {
         // console.log(error);
       }
