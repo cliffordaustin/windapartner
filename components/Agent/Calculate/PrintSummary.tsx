@@ -20,6 +20,11 @@ import NonResidentGuestsSummary from "./NonResidentGuestsSummary";
 import NonResidentFeesSummary from "./NonResidentFeeSummary";
 import { format, differenceInCalendarDays } from "date-fns";
 
+type TotalTypes = {
+  id: number;
+  total: number;
+};
+
 type SummaryProps = {
   calculateStay: StateType;
   stays?: Stay[];
@@ -27,6 +32,7 @@ type SummaryProps = {
   summarizedCalculation: boolean;
   pdfTitle: string;
   style: string | null;
+  updateTotals: (id: number, total: number, isResident: boolean) => void;
 };
 
 export default function PrintSummary({
@@ -35,11 +41,10 @@ export default function PrintSummary({
   includeClientInCalculation,
   summarizedCalculation,
   pdfTitle,
+  updateTotals,
   style,
 }: SummaryProps) {
   const countRoomType = countRoomTypes(calculateStay.rooms);
-
-  //   console.log(includeClientInCalculation);
 
   const currentStay = stays?.find((item) => item.id === calculateStay.id);
   const queryStr = currentStay ? currentStay.slug : "room-type";
@@ -202,6 +207,11 @@ export default function PrintSummary({
       totalNonResidentExtraFees +
       totalNonResidentExtraFees *
         (Number(calculateStay.nonResidentCommission) / 100);
+
+  useEffect(() => {
+    updateTotals(calculateStay.id, residentFullTotalPrice, true);
+    updateTotals(calculateStay.id, nonResidentFullTotalPrice, false);
+  }, []);
 
   const residentExtraFees: ExtraFee[] = calculateStay.extraFee.filter(
     (item) => item.guestType === "Resident"

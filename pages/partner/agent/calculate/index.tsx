@@ -3,12 +3,7 @@ import { GetServerSideProps } from "next";
 import { UserTypes } from "@/utils/types";
 import { getUser } from "@/pages/api/user";
 import { AxiosError } from "axios";
-import {
-  dehydrate,
-  QueryClient,
-  useQuery,
-  QueryClientProvider,
-} from "react-query";
+import { dehydrate, QueryClient, useQuery } from "react-query";
 import Cookies from "js-cookie";
 import Navbar from "@/components/Agent/Navbar";
 import { useContext, useEffect, useRef, useState } from "react";
@@ -23,8 +18,6 @@ import {
   Flex,
   Loader,
   Modal,
-  NavLink,
-  Popover,
   Select,
   Tabs,
   Text,
@@ -32,28 +25,18 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { Context } from "@/context/CalculatePage";
-import { StateType, Room } from "@/context/CalculatePage";
+import { StateType } from "@/context/CalculatePage";
 import { Stay as CalculateStay } from "@/components/Agent/Calculate/Stay";
 import { v4 as uuidv4 } from "uuid";
 import {
   IconAlertCircle,
   IconCalculator,
-  IconDownload,
   IconGraph,
 } from "@tabler/icons-react";
 import Summary from "@/components/Agent/Calculate/Summary";
 import { useReactToPrint } from "react-to-print";
 
-import {
-  PDFDownloadLink,
-  Document,
-  pdf,
-  PDFViewer,
-  Page,
-  Text as PdfText,
-} from "@react-pdf/renderer";
 import { saveAs } from "file-saver";
-import MyDocument from "@/components/Agent/Document";
 import { useDisclosure } from "@mantine/hooks";
 import PrintSummary from "@/components/Agent/Calculate/PrintSummary";
 
@@ -151,58 +134,42 @@ export default function Calculate() {
     }
   }, [stays, setState]);
 
-  const [totalResident, setTotalResident] = useState<number>(0);
-  const [totalResidentPriceList, setTotalResidentPriceList] = useState<
-    number[]
-  >([]);
-
-  const updateResidentTotal = (value: number, index: number) => {
-    totalResidentPriceList[index] = value;
+  type TotalTypes = {
+    id: number;
+    total: number;
   };
 
-  useEffect(() => {
-    const total = totalResidentPriceList.reduce((a, b) => a + b, 0);
-    setTotalResident(total);
-  }, [totalResidentPriceList]);
+  const [totalResident, setTotalResident] = useState<TotalTypes[]>([]);
 
-  const [totalNonResident, setTotalNonResident] = useState<number>(0);
-  const [totalNonResidentPriceList, setTotalNonResidentPriceList] = useState<
-    number[]
-  >([]);
+  const [totalNonResident, setTotalNonResident] = useState<TotalTypes[]>([]);
 
-  const updateNonResidentTotal = (value: number, index: number) => {
-    totalNonResidentPriceList[index] = value;
-  };
-
-  useEffect(() => {
-    const total = totalNonResidentPriceList.reduce((a, b) => a + b, 0);
-    setTotalNonResident(total);
-  }, [totalNonResidentPriceList]);
-
-  const handleDownloadPdf = async () => {
-    try {
-      const fileName = "calculation.pdf";
-      const blob = await pdf(
-        <QueryClientProvider client={queryClient}>
-          <Document>
-            {state.map((item, index) => (
-              <MyDocument
-                key={index}
-                includeClientInCalculation={includeClientInCalculation}
-                summarizedCalculation={summarizedCalculation}
-                calculateStay={item}
-                stays={stays}
-                index={index}
-                updateResidentTotal={updateResidentTotal}
-                updateNonResidentTotal={updateNonResidentTotal}
-              ></MyDocument>
-            ))}
-          </Document>
-        </QueryClientProvider>
-      ).toBlob();
-      saveAs(blob, fileName);
-    } catch (error) {
-      // console.error("Error generating PDF document", error);
+  const updateTotals = (id: number, total: number, isResident: boolean) => {
+    if (isResident) {
+      setTotalResident((prevTotalResident) => {
+        const existingIndex = prevTotalResident.findIndex(
+          (total) => total.id === id
+        );
+        if (existingIndex !== -1) {
+          const updatedTotals = [...prevTotalResident];
+          updatedTotals[existingIndex] = { id, total };
+          return updatedTotals;
+        } else {
+          return [...prevTotalResident, { id, total }];
+        }
+      });
+    } else {
+      setTotalNonResident((prevTotalNonResident) => {
+        const existingIndex = prevTotalNonResident.findIndex(
+          (total) => total.id === id
+        );
+        if (existingIndex !== -1) {
+          const updatedTotals = [...prevTotalNonResident];
+          updatedTotals[existingIndex] = { id, total };
+          return updatedTotals;
+        } else {
+          return [...prevTotalNonResident, { id, total }];
+        }
+      });
     }
   };
 
@@ -239,6 +206,16 @@ export default function Calculate() {
     0
   );
 
+  const totalResidentSum = totalResident.reduce(
+    (a, b) => a + Number(b.total),
+    0
+  );
+
+  const totalNonResidentSum = totalNonResident.reduce(
+    (a, b) => a + Number(b.total),
+    0
+  );
+
   return (
     <div>
       <div className="border-b sticky top-0 z-10 bg-white left-0 right-0 border-x-0 border-t-0 border-solid border-b-gray-200">
@@ -269,29 +246,6 @@ export default function Calculate() {
                     <CalculateStay stay={stay} index={index}></CalculateStay>
                   </Tabs.Panel>
                 ))}
-
-                <Tabs.Panel value="summary" pt="xs">
-                  <PDFViewer width="100%" height="1000px">
-                    <QueryClientProvider client={queryClient}>
-                      <Document>
-                        {state.map((item, index) => (
-                          <MyDocument
-                            key={index}
-                            includeClientInCalculation={
-                              includeClientInCalculation
-                            }
-                            summarizedCalculation={summarizedCalculation}
-                            calculateStay={item}
-                            stays={stays}
-                            index={index}
-                            updateResidentTotal={updateResidentTotal}
-                            updateNonResidentTotal={updateNonResidentTotal}
-                          ></MyDocument>
-                        ))}
-                      </Document>
-                    </QueryClientProvider>
-                  </PDFViewer>
-                </Tabs.Panel>
               </div>
 
               <Modal
@@ -421,6 +375,7 @@ export default function Calculate() {
                             pdfTitle={pdfTitle}
                             style={style}
                             calculateStay={item}
+                            updateTotals={updateTotals}
                             includeClientInCalculation={
                               includeClientInCalculation
                             }
@@ -428,6 +383,35 @@ export default function Calculate() {
                           ></PrintSummary>
                         </div>
                       ))}
+
+                      <Divider></Divider>
+
+                      <div className="px-4 flex flex-col gap-2 mt-4">
+                        {totalNonResidentSum && (
+                          <div className="flex items-center justify-between">
+                            <Text className="text-black text-base font-bold">
+                              SUM OF NON-RESIDENT TOTAL
+                            </Text>
+                            <Text size="lg" weight={700}>
+                              {totalNonResidentSum
+                                ? `$ ${totalNonResidentSum.toLocaleString()}`
+                                : ""}
+                            </Text>
+                          </div>
+                        )}
+                        {totalResidentSum && (
+                          <div className="flex items-center justify-between">
+                            <Text className="text-black text-base font-bold">
+                              SUM OF RESIDENT TOTAL
+                            </Text>
+                            <Text size="lg" weight={700}>
+                              {totalResidentSum
+                                ? `KES ${totalResidentSum.toLocaleString()}`
+                                : ""}
+                            </Text>
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     <Button
