@@ -30,8 +30,6 @@ type SummaryProps = {
   stays?: Stay[];
   includeClientInCalculation: boolean;
   summarizedCalculation: boolean;
-  pdfTitle: string;
-  style: string | null;
   updateTotals: (id: number, total: number, isResident: boolean) => void;
 };
 
@@ -40,9 +38,8 @@ export default function PrintSummary({
   stays,
   includeClientInCalculation,
   summarizedCalculation,
-  pdfTitle,
+
   updateTotals,
-  style,
 }: SummaryProps) {
   const countRoomType = countRoomTypes(calculateStay.rooms);
 
@@ -225,29 +222,14 @@ export default function PrintSummary({
     <div className="px-5 py-3">
       {!!(nonResidentFullTotalPrice || residentFullTotalPrice) && (
         <>
-          <Text
-            className={
-              "font-bold font-serif text-xl " +
-              (style === "default"
-                ? "text-red-500"
-                : style === "style1"
-                ? "text-blue-500"
-                : style === "style2"
-                ? "text-green-600"
-                : style === "style3"
-                ? "text-yellow-600"
-                : "")
-            }
-            mt={6}
-            mb={8}
-          >
+          <Text className={"font-bold font-serif text-xl "} mt={6} mb={8}>
             {calculateStay.name}
           </Text>
 
           {calculateStay.date[0] && calculateStay.date[1] && (
-            <div className="mt-4">
+            <div className="mt-4 border-y border-x-0 border-solid border-gray-200 py-6">
               <div className="flex justify-between gap-8 ">
-                <div className="flex border w-[45%] flex-col gap-2">
+                <div className="flex w-[45%] flex-col gap-2">
                   <div className="flex gap-2 items-center">
                     <IconCalendarEvent></IconCalendarEvent>
                     <Text size="sm">Check-in</Text>
@@ -285,34 +267,20 @@ export default function PrintSummary({
               >
                 {nights} {nights > 1 ? "nights" : "night"}
               </Text>
-              <Divider size="xs" color="#a5a5a5" mt={8}></Divider>
+              {/* <Divider size="xs" color="#a5a5a5" mt={8}></Divider> */}
             </div>
           )}
 
           <div className="relative">
             <div className="w-full py-4">
-              <Text
-                className={
-                  "font-bold font-serif text-base " +
-                  (style === "default"
-                    ? "text-red-500"
-                    : style === "style1"
-                    ? "text-blue-500"
-                    : style === "style2"
-                    ? "text-green-600"
-                    : style === "style3"
-                    ? "text-yellow-600"
-                    : "")
-                }
-                mb={4}
-              >
+              <Text className={"font-bold font-serif text-base "} mb={4}>
                 Non-Resident
               </Text>
               {calculateStay.date[0] &&
                 calculateStay.date[1] &&
                 totalNumberOfNonResidentGuests > 0 &&
                 countRoomType.length > 0 && (
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-2 border-b border-t-0 border-x-0 border-solid border-gray-200 pb-5 pt-2">
                     <Text size="sm" weight={700} className="mt-2">
                       Rooms
                     </Text>
@@ -331,7 +299,7 @@ export default function PrintSummary({
                 calculateStay.date[1] &&
                 totalNumberOfNonResidentGuests > 0 &&
                 calculateStay.rooms[0].name && (
-                  <div className="flex flex-col gap-2">
+                  <div className="flex py-5 flex-col gap-2">
                     <Flex
                       justify="space-between"
                       className="mt-2"
@@ -373,8 +341,7 @@ export default function PrintSummary({
               {calculateStay.date[0] &&
                 calculateStay.date[1] &&
                 totalNonResidentParkFees > 0 && (
-                  <div className="flex flex-col gap-2">
-                    <Divider size="xs" mt={8}></Divider>
+                  <div className="flex py-5 border-t border-b-0 border-x-0 border-solid border-gray-200 flex-col gap-2">
                     <Flex justify="space-between" align="center">
                       <Text size="sm" weight={700}>
                         Park/conservancy fees
@@ -403,8 +370,7 @@ export default function PrintSummary({
                 calculateStay.date[1] &&
                 totalNumberOfNonResidentGuests > 0 &&
                 calculateStay.activityFee.length > 0 && (
-                  <div className="flex flex-col gap-2">
-                    <Divider size="xs" mt={8}></Divider>
+                  <div className="flex py-5 border-t border-b-0 border-x-0 border-solid border-gray-200 flex-col gap-2">
                     <Flex justify="space-between" align="center">
                       <Text size="sm" weight={700}>
                         Activities
@@ -439,8 +405,7 @@ export default function PrintSummary({
                 totalNumberOfNonResidentGuests > 0 &&
                 calculateStay.extraFee[0].name &&
                 totalNonResidentExtraFees > 0 && (
-                  <div className="flex flex-col gap-2">
-                    <Divider size="xs" mt={8}></Divider>
+                  <div className="flex py-5 border-t border-solid border-x-0 border-b-0 border-gray-200 flex-col gap-2">
                     <Flex justify="space-between" align="center">
                       <Text size="sm" weight={700} className="">
                         Extra Fees
@@ -479,15 +444,13 @@ export default function PrintSummary({
               {!!calculateStay.nonResidentCommission &&
                 !includeClientInCalculation &&
                 !summarizedCalculation && (
-                  <div className="flex flex-col gap-2">
-                    <Divider size="xs" mt={8}></Divider>
-
+                  <div className="flex pt-5 border-t border-b-0 border-x-0 border-solid border-gray-200 flex-col gap-2">
                     <Flex justify="space-between" align="center">
-                      <Text size="sm" weight={700} className="">
+                      <Text size="md" weight={700} className="">
                         Non-resident Commission
                       </Text>
 
-                      <Text size="sm" weight={600}>
+                      <Text size="md" weight={600}>
                         {calculateStay.nonResidentCommission}%
                       </Text>
                     </Flex>
@@ -509,11 +472,11 @@ export default function PrintSummary({
               totalNumberOfNonResidentGuests > 0 &&
               !!calculateStay.rooms[0].name &&
               !!nonResidentFullTotalPrice && (
-                <div className="flex items-center justify-between">
-                  <Text className="text-black font-bold" size="sm">
-                    NON-RESIDENT TOTAL
+                <div className="flex pb-5 border-t-0 border-b border-x-0 border-solid border-gray-200 items-center justify-between">
+                  <Text className="text-black font-bold" size="md">
+                    Non-resident Total
                   </Text>
-                  <Text size="lg" weight={700}>
+                  <Text size="md" weight={700}>
                     {nonResidentFullTotalPrice
                       ? `$ ${nonResidentFullTotalPrice.toLocaleString()}`
                       : ""}
@@ -522,27 +485,13 @@ export default function PrintSummary({
               )}
           </div>
 
-          {residentFullTotalPrice > 0 && nonResidentFullTotalPrice > 0 && (
+          {/* {residentFullTotalPrice > 0 && nonResidentFullTotalPrice > 0 && (
             <Divider size="xs" color="#a5a5a5" my={12}></Divider>
-          )}
+          )} */}
 
           {residentFullTotalPrice > 0 && (
-            <div className="relative">
-              <Text
-                className={
-                  "font-bold font-serif text-base " +
-                  (style === "default"
-                    ? "text-red-500"
-                    : style === "style1"
-                    ? "text-blue-500"
-                    : style === "style2"
-                    ? "text-green-600"
-                    : style === "style3"
-                    ? "text-yellow-600"
-                    : "")
-                }
-                mb={4}
-              >
+            <div className="relative mt-5">
+              <Text className={"font-bold font-serif text-base "} mb={4}>
                 Resident
               </Text>
               <div className="w-full pb-4">
@@ -550,7 +499,7 @@ export default function PrintSummary({
                   calculateStay.date[1] &&
                   totalNumberOfGuests > 0 &&
                   countRoomType.length > 0 && (
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2 border-b border-t-0 border-x-0 border-solid border-gray-200 pb-5 pt-2">
                       <Text size="sm" weight={700} className="mt-2">
                         Rooms
                       </Text>
@@ -569,7 +518,7 @@ export default function PrintSummary({
                   calculateStay.date[1] &&
                   totalNumberOfGuests > 0 &&
                   calculateStay.rooms[0].residentGuests.length > 0 && (
-                    <div className="flex flex-col gap-2">
+                    <div className="flex py-5 flex-col gap-2">
                       <Flex
                         justify="space-between"
                         className="mt-2"
@@ -611,8 +560,7 @@ export default function PrintSummary({
                 {calculateStay.date[0] &&
                   calculateStay.date[1] &&
                   totalResidentParkFees > 0 && (
-                    <div className="flex flex-col gap-2">
-                      <Divider size="xs" mt={8}></Divider>
+                    <div className="flex py-5 border-t border-b-0 border-x-0 border-solid border-gray-200 flex-col gap-2">
                       <Flex justify="space-between" align="center">
                         <Text size="sm" weight={700}>
                           Park/conservancy fees
@@ -641,8 +589,7 @@ export default function PrintSummary({
                   calculateStay.date[1] &&
                   totalNumberOfGuests > 0 &&
                   calculateStay.activityFee.length > 0 && (
-                    <div className="flex flex-col gap-2">
-                      <Divider size="xs" mt={8}></Divider>
+                    <div className="flex py-5 border-t border-b-0 border-x-0 border-solid border-gray-200 flex-col gap-2">
                       <Flex justify="space-between" align="center">
                         <Text size="sm" weight={700}>
                           Activities
@@ -678,8 +625,7 @@ export default function PrintSummary({
                   totalNumberOfGuests > 0 &&
                   calculateStay.extraFee[0].name &&
                   totalResidentExtraFees > 0 && (
-                    <div className="flex flex-col gap-2">
-                      <Divider size="xs" mt={8}></Divider>
+                    <div className="flex py-5 border-t border-b-0 border-x-0 border-solid border-gray-200 flex-col gap-2">
                       <Flex justify="space-between" align="center">
                         <Text size="sm" weight={700} className="">
                           Extra Fees
@@ -718,15 +664,13 @@ export default function PrintSummary({
                 {calculateStay.residentCommission &&
                   !includeClientInCalculation &&
                   !summarizedCalculation && (
-                    <div className="flex flex-col gap-2">
-                      <Divider size="xs" mt={8}></Divider>
-
+                    <div className="flex pt-5 border-t border-b-0 border-x-0 border-solid border-gray-200 flex-col gap-2">
                       <Flex justify="space-between" align="center">
-                        <Text size="sm" weight={700} className="">
+                        <Text size="md" weight={700} className="">
                           Resident Commission
                         </Text>
 
-                        <Text size="sm" weight={600}>
+                        <Text size="md" weight={600}>
                           {calculateStay.residentCommission}%
                         </Text>
                       </Flex>
@@ -748,11 +692,11 @@ export default function PrintSummary({
                 totalNumberOfGuests > 0 &&
                 !!calculateStay.rooms[0].name &&
                 !!residentFullTotalPrice && (
-                  <div className="flex items-center justify-between">
-                    <Text className="text-black font-bold" size="sm">
-                      RESIDENT TOTAL
+                  <div className="flex border-gray-200 items-center justify-between">
+                    <Text className="text-black font-bold" size="md">
+                      Resident Total
                     </Text>
-                    <Text size="lg" weight={700}>
+                    <Text size="md" weight={700}>
                       {residentFullTotalPrice
                         ? `KES ${residentFullTotalPrice.toLocaleString()}`
                         : ""}

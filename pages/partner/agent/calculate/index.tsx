@@ -12,12 +12,15 @@ import { getPartnerStays } from "@/pages/api/stays";
 import { useRouter } from "next/router";
 import {
   Alert,
+  Anchor,
   Button,
   Checkbox,
   Divider,
+  FileInput,
   Flex,
   Loader,
   Modal,
+  rem,
   Select,
   Tabs,
   Text,
@@ -32,6 +35,7 @@ import {
   IconAlertCircle,
   IconCalculator,
   IconGraph,
+  IconUpload,
 } from "@tabler/icons-react";
 import Summary from "@/components/Agent/Calculate/Summary";
 import { useReactToPrint } from "react-to-print";
@@ -39,6 +43,7 @@ import { useReactToPrint } from "react-to-print";
 import { saveAs } from "file-saver";
 import { useDisclosure } from "@mantine/hooks";
 import PrintSummary from "@/components/Agent/Calculate/PrintSummary";
+import Image from "next/image";
 
 export default function Calculate() {
   const token = Cookies.get("token");
@@ -191,6 +196,8 @@ export default function Calculate() {
 
   const [style, setStyle] = useState<string | null>("default");
 
+  const [files, setFiles] = useState<File>();
+
   const componentRef = useRef<HTMLDivElement>(null);
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
@@ -295,16 +302,20 @@ export default function Calculate() {
 
                     <Divider my="xs" label="STYLE" labelPosition="center" />
 
-                    <TextInput
-                      label="PDF Title"
-                      placeholder="Enter PDF Title"
-                      value={pdfTitle}
-                      onChange={(event) =>
-                        setPdfTitle(event.currentTarget.value)
-                      }
-                    ></TextInput>
+                    <FileInput
+                      label="Your logo"
+                      placeholder="Select one image"
+                      accept="image/png, image/jpeg, image/jpg"
+                      name="files"
+                      icon={<IconUpload size={rem(14)} />}
+                      onChange={(payload: File) => {
+                        setFiles(payload);
+                      }}
+                      required
+                      clearable
+                    />
 
-                    <Select
+                    {/* <Select
                       label="Select a style"
                       placeholder="Pick one"
                       value={style}
@@ -316,7 +327,7 @@ export default function Calculate() {
                         { value: "style2", label: "Style 2" },
                         { value: "style3", label: "Style 3" },
                       ]}
-                    />
+                    /> */}
                   </div>
 
                   <div className="w-[75%] pl-12 absolute right-0 flex flex-col gap-5">
@@ -343,37 +354,24 @@ export default function Calculate() {
                       Print Quotation
                     </Button>
                     <div className="mb-12" ref={componentRef}>
-                      <Text
-                        className="font-bold font-serif text-center text-xl"
-                        mb={8}
-                      >
-                        {style === "default" && (
-                          <span className="text-2xl text-red-500 font-bold">
-                            {pdfTitle}
-                          </span>
-                        )}
-                        {style === "style1" && (
-                          <span className="text-2xl text-blue-500 italic">
-                            {pdfTitle}
-                          </span>
-                        )}
-                        {style === "style2" && (
-                          <span className="text-2xl text-green-500">
-                            {pdfTitle}
-                          </span>
-                        )}
-                        {style === "style3" && (
-                          <span className="text-2xl text-yellow-600 underline">
-                            {pdfTitle}
-                          </span>
-                        )}
-                      </Text>
+                      <div className="flex mt-4 items-center justify-center">
+                        <div className="flex items-center gap-2">
+                          {files && (
+                            <Image
+                              src={files ? URL.createObjectURL(files) : ""}
+                              alt="logo"
+                              className="object-contain"
+                              width={120}
+                              height={60}
+                            />
+                          )}
+                        </div>
+                      </div>
+
                       {state.map((item, index) => (
                         <div key={index} className="w-full">
                           <PrintSummary
                             stays={stays}
-                            pdfTitle={pdfTitle}
-                            style={style}
                             calculateStay={item}
                             updateTotals={updateTotals}
                             includeClientInCalculation={
@@ -390,7 +388,7 @@ export default function Calculate() {
                         {totalNonResidentSum && (
                           <div className="flex items-center justify-between">
                             <Text className="text-black text-base font-bold">
-                              GRAND NON-RESIDENT TOTAL
+                              Grand Non-resident Total
                             </Text>
                             <Text size="lg" weight={700}>
                               {totalNonResidentSum
@@ -402,7 +400,7 @@ export default function Calculate() {
                         {totalResidentSum && (
                           <div className="flex items-center justify-between">
                             <Text className="text-black text-base font-bold">
-                              GRAND RESIDENT TOTAL
+                              Grand Resident Total
                             </Text>
                             <Text size="lg" weight={700}>
                               {totalResidentSum

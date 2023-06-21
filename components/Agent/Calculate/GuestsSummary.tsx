@@ -35,7 +35,7 @@ export default function GuestsSummary({
           room.package.slice(1).toLowerCase()}
       </Text>
 
-      <div className="ml-1 mt-1 flex flex-col gap-1">
+      <div className="ml-1 mt-3 flex flex-col gap-1">
         {countResidentGuestTypes.map((guestType, index) => (
           <Flex key={index} align="center" justify="space-between">
             <Text className="text-gray-600" size="sm">
