@@ -58,21 +58,25 @@ function SelectedRoom({
         />
       )}
 
-      <div
-        onClick={() => {
-          deleteRoomMutation({
-            roomSlug: roomType.slug,
-            staySlug: staySlug,
-          });
-        }}
-        className="cursor-pointer"
-      >
-        <IconTrash
-          className="absolute right-0 z-20 top-0.5"
-          size="1.3rem"
-          color="red"
-        ></IconTrash>
-      </div>
+      {((roomType.room_resident_availabilities.length > 0 && !isNonResident) ||
+        (roomType.room_non_resident_availabilities.length > 0 &&
+          isNonResident)) && (
+        <div
+          onClick={() => {
+            deleteRoomMutation({
+              roomSlug: roomType.slug,
+              staySlug: staySlug,
+            });
+          }}
+          className="cursor-pointer"
+        >
+          <IconTrash
+            className="absolute right-0 z-20 top-0.5"
+            size="1.3rem"
+            color="red"
+          ></IconTrash>
+        </div>
+      )}
 
       {roomType.room_non_resident_availabilities.length > 0 &&
         isNonResident && (

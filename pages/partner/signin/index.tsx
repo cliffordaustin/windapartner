@@ -60,6 +60,7 @@ function PartnerSignin(props: PaperProps) {
     // check if form is valid
     if (type === "login" && form.isValid()) {
       try {
+        setLoading(true);
         const response = await axios.post(
           `${process.env.NEXT_PUBLIC_baseURL}/rest-auth/login/`,
           {
@@ -72,10 +73,12 @@ function PartnerSignin(props: PaperProps) {
         setLoginError(false);
         router.replace((router.query.redirect as string) || "/partner/lodge");
       } catch (error) {
+        setLoading(false);
         setLoginError(true);
       }
     } else if (type === "register" && form.isValid()) {
       try {
+        setLoading(true);
         const response = await axios.post(
           `${process.env.NEXT_PUBLIC_baseURL}/rest-auth/registration/`,
           {
@@ -91,7 +94,7 @@ function PartnerSignin(props: PaperProps) {
 
         router.replace((router.query.redirect as string) || "/partner/lodge");
       } catch (error) {
-        // console.log(error);
+        setLoading(false);
       }
     }
   };

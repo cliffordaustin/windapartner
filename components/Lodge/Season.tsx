@@ -1,6 +1,13 @@
 import { Context } from "@/context/LodgeDetailPage";
 import { Season } from "@/context/LodgeDetailPage";
-import { Accordion, Flex, NumberInput, Text, TextInput } from "@mantine/core";
+import {
+  Accordion,
+  Anchor,
+  Flex,
+  NumberInput,
+  Text,
+  TextInput,
+} from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import {
   IconCalendar,
@@ -84,26 +91,78 @@ function Season({ index, season, active }: SeasonPropTypes) {
       </Flex>
 
       <Accordion.Panel>
-        <DatePickerInput
-          type="range"
-          value={season.date}
-          onChange={(date) => {
+        <Text className="font-semibold" size={"sm"}>
+          Pick date range
+        </Text>
+
+        <Flex direction="column" gap={6}>
+          {season.date.map((date, dateIndex) => (
+            <Flex align="center" gap={2} key={dateIndex}>
+              <DatePickerInput
+                type="range"
+                value={date}
+                onChange={(date) => {
+                  const newPackages = [...state.packages];
+                  newPackages[active].seasons[index].date[dateIndex] = date;
+                  setState((prev) => ({ ...prev, packages: newPackages }));
+                }}
+                color="red"
+                placeholder="Select dates"
+                styles={{ input: { paddingTop: 13, paddingBottom: 13 } }}
+                labelProps={{ className: "font-semibold mb-1" }}
+                rightSection={<IconSelector className="text-gray-500" />}
+                className="max-w-fit min-w-[250px]"
+                minDate={new Date()}
+                icon={<IconCalendar className="text-gray-500" />}
+                numberOfColumns={2}
+                autoSave="true"
+              />
+
+              <IconX
+                size={20}
+                color="red"
+                className="cursor-pointer"
+                onClick={() => {
+                  if (dateIndex === 0) {
+                    // clear the date array of dateIndex
+                    const newPackages = [...state.packages];
+                    newPackages[active].seasons[index].date[dateIndex] = [
+                      null,
+                      null,
+                    ];
+                    setState((prev) => ({
+                      ...prev,
+                      packages: newPackages,
+                    }));
+                  } else {
+                    const newPackages = [...state.packages];
+                    newPackages[active].seasons[index].date.splice(
+                      dateIndex,
+                      1
+                    );
+                    setState((prev) => ({
+                      ...prev,
+                      packages: newPackages,
+                    }));
+                  }
+                }}
+              />
+            </Flex>
+          ))}
+        </Flex>
+
+        <Anchor
+          size="sm"
+          type="button"
+          color="blue"
+          onClick={() => {
             const newPackages = [...state.packages];
-            newPackages[active].seasons[index].date = date;
+            newPackages[active].seasons[index].date.push([null, null]);
             setState((prev) => ({ ...prev, packages: newPackages }));
           }}
-          color="red"
-          label="Pick date range"
-          placeholder="Select dates"
-          styles={{ input: { paddingTop: 13, paddingBottom: 13 } }}
-          labelProps={{ className: "font-semibold mb-1" }}
-          rightSection={<IconSelector className="text-gray-500" />}
-          className="max-w-fit min-w-[250px]"
-          minDate={new Date()}
-          icon={<IconCalendar className="text-gray-500" />}
-          numberOfColumns={2}
-          autoSave="true"
-        />
+        >
+          Add another date
+        </Anchor>
 
         <Flex mt={10} direction="column">
           <Flex className="w-full" direction="column" mt={10} gap={8}>

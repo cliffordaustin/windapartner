@@ -390,7 +390,7 @@ export default function Calculate() {
                         {totalNonResidentSum && (
                           <div className="flex items-center justify-between">
                             <Text className="text-black text-base font-bold">
-                              SUM OF NON-RESIDENT TOTAL
+                              GRAND NON-RESIDENT TOTAL
                             </Text>
                             <Text size="lg" weight={700}>
                               {totalNonResidentSum
@@ -402,7 +402,7 @@ export default function Calculate() {
                         {totalResidentSum && (
                           <div className="flex items-center justify-between">
                             <Text className="text-black text-base font-bold">
-                              SUM OF RESIDENT TOTAL
+                              GRAND RESIDENT TOTAL
                             </Text>
                             <Text size="lg" weight={700}>
                               {totalResidentSum

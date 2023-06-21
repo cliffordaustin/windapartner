@@ -118,7 +118,7 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
 
   const addSeason = () => {
     const newSeason: Season = {
-      date: [null, null],
+      date: [[null, null]],
       name: "Other season",
       guests: state.guests.map((guest) => ({ ...guest })),
     };
@@ -160,21 +160,21 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
     return hasPrice;
   };
 
-  const hasDateInSeason = (season: Season) => {
-    let hasDate = false;
-
-    if (season.date[0] && season.date[1]) hasDate = true;
-
-    return hasDate;
-  };
+  function hasDateInSeason(season: Season): boolean {
+    for (const [firstDate, secondDate] of season.date) {
+      if (!firstDate || !secondDate) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   const proceedSubmit = async () => {
     setLoadingProceed(true);
 
-    const allResidentData: ResidentGuestTypesData[][] = [];
-    const allNonResidentData: NonResidentGuestTypesData[][] = [];
-
     for (const pkg of state.packages) {
+      const allResidentData: ResidentGuestTypesData[][] = [];
+      const allNonResidentData: NonResidentGuestTypesData[][] = [];
       const response = addRoom(
         {
           name: state.name,
@@ -194,15 +194,17 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
 
         const allDates: string[] = [];
 
-        let currentDate = season.date[0];
-        let stopDate = season.date[1];
+        season.date.map((date) => {
+          let currentDate = date[0];
+          let stopDate = date[1];
 
-        if (currentDate && stopDate) {
-          while (currentDate <= stopDate) {
-            allDates.push(format(currentDate, "yyyy-MM-dd"));
-            currentDate = addDays(currentDate, 1);
+          if (currentDate && stopDate) {
+            while (currentDate <= stopDate) {
+              allDates.push(format(currentDate, "yyyy-MM-dd"));
+              currentDate = addDays(currentDate, 1);
+            }
           }
-        }
+        });
 
         allDates.map((date) => {
           const obj: ResidentGuestTypesData = {
@@ -263,32 +265,34 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
       }
     }
     router.reload();
-    setLoadingProceed(false);
   };
 
   const submit = async () => {
-    const allResidentData: ResidentGuestTypesData[][] = [];
-    const allNonResidentData: NonResidentGuestTypesData[][] = [];
     const submitSeasonDataError: SeasonDataErrorType[] = [];
 
     setSeasonDataError([]);
 
     for (const pkg of state.packages) {
+      const allResidentData: ResidentGuestTypesData[][] = [];
+      const allNonResidentData: NonResidentGuestTypesData[][] = [];
+
       for (const season of pkg.seasons) {
         const residentData: ResidentGuestTypesData[] = [];
         const nonResidentData: NonResidentGuestTypesData[] = [];
 
         const allDates: string[] = [];
 
-        let currentDate = season.date[0];
-        let stopDate = season.date[1];
+        season.date.map((date) => {
+          let currentDate = date[0];
+          let stopDate = date[1];
 
-        if (currentDate && stopDate) {
-          while (currentDate <= stopDate) {
-            allDates.push(format(currentDate, "yyyy-MM-dd"));
-            currentDate = addDays(currentDate, 1);
+          if (currentDate && stopDate) {
+            while (currentDate <= stopDate) {
+              allDates.push(format(currentDate, "yyyy-MM-dd"));
+              currentDate = addDays(currentDate, 1);
+            }
           }
-        }
+        });
 
         const hasPrice = hasPriceInSeason(season);
         const hasDate = hasDateInSeason(season);
@@ -379,9 +383,8 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
           allNonResidentData.push(nonResidentData);
         }
       }
-    }
-    if (submitSeasonDataError.length === 0) {
-      for (const pkg of state.packages) {
+
+      if (submitSeasonDataError.length === 0) {
         setLoading(true);
         let res: RoomReturnType | null = null;
 
@@ -423,11 +426,11 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
         }
       }
     }
+
     if (submitSeasonDataError.length > 0) {
       open();
     } else if (submitSeasonDataError.length === 0) {
       router.reload();
-      setLoading(false);
     }
   };
 

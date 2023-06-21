@@ -188,13 +188,13 @@ function AddRoomFirstPage() {
       name: "",
       seasons: [
         {
-          date: [null, null],
+          date: [[null, null]],
           name: "High Season",
           guests: state.guests,
         },
 
         {
-          date: [null, null],
+          date: [[null, null]],
           name: "Low Season",
           guests: state.guests,
         },

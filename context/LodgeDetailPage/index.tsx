@@ -8,7 +8,7 @@ export type Guest = {
 };
 
 export type Season = {
-  date: [Date | null, Date | null];
+  date: [[Date | null, Date | null]];
   name: string;
   guests: Guest[];
 };
@@ -49,7 +49,7 @@ export const ContextProvider = ({ children }: ContextProviderProps) => {
         name: "",
         seasons: [
           {
-            date: [null, null],
+            date: [[null, null]],
             name: "High Season",
             guests: [
               {
@@ -62,7 +62,7 @@ export const ContextProvider = ({ children }: ContextProviderProps) => {
           },
 
           {
-            date: [null, null],
+            date: [[null, null]],
             name: "Low Season",
             guests: [
               {
