@@ -272,28 +272,9 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
 
     setSeasonDataError([]);
 
+    // To perform checks
     for (const pkg of state.packages) {
-      const allResidentData: ResidentGuestTypesData[][] = [];
-      const allNonResidentData: NonResidentGuestTypesData[][] = [];
-
       for (const season of pkg.seasons) {
-        const residentData: ResidentGuestTypesData[] = [];
-        const nonResidentData: NonResidentGuestTypesData[] = [];
-
-        const allDates: string[] = [];
-
-        season.date.map((date) => {
-          let currentDate = date[0];
-          let stopDate = date[1];
-
-          if (currentDate && stopDate) {
-            while (currentDate <= stopDate) {
-              allDates.push(format(currentDate, "yyyy-MM-dd"));
-              currentDate = addDays(currentDate, 1);
-            }
-          }
-        });
-
         const hasPrice = hasPriceInSeason(season);
         const hasDate = hasDateInSeason(season);
 
@@ -345,8 +326,32 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
             </strong>`,
           });
         }
+      }
+    }
 
-        if (hasDate && hasPrice) {
+    if (submitSeasonDataError.length === 0) {
+      for (const pkg of state.packages) {
+        const allResidentData: ResidentGuestTypesData[][] = [];
+        const allNonResidentData: NonResidentGuestTypesData[][] = [];
+
+        for (const season of pkg.seasons) {
+          const residentData: ResidentGuestTypesData[] = [];
+          const nonResidentData: NonResidentGuestTypesData[] = [];
+
+          const allDates: string[] = [];
+
+          season.date.map((date) => {
+            let currentDate = date[0];
+            let stopDate = date[1];
+
+            if (currentDate && stopDate) {
+              while (currentDate <= stopDate) {
+                allDates.push(format(currentDate, "yyyy-MM-dd"));
+                currentDate = addDays(currentDate, 1);
+              }
+            }
+          });
+
           allDates.map((date) => {
             const obj: ResidentGuestTypesData = {
               date: date,
@@ -382,55 +387,52 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
           allResidentData.push(residentData);
           allNonResidentData.push(nonResidentData);
         }
-      }
 
-      if (submitSeasonDataError.length === 0) {
-        setLoading(true);
-        let res: RoomReturnType | null = null;
+        if (submitSeasonDataError.length === 0) {
+          setLoading(true);
+          let res: RoomReturnType | null = null;
 
-        const response = addRoom(
-          {
-            name: state.name,
-            capacity: state.adult_capacity,
-            childCapacity: state.child_capacity,
-            infantCapacity: state.infant_capacity,
-            roomPackage: pkg.name,
-          },
-          staySlug
-        );
-
-        res = await response;
-
-        for (const guest of allResidentData) {
-          await axios.post(
-            `${process.env.NEXT_PUBLIC_baseURL}/room-types/${res?.slug}/resident-availabilities/`,
-            guest,
+          const response = addRoom(
             {
-              headers: {
-                Authorization: "Token " + Cookies.get("token"),
-              },
-            }
+              name: state.name,
+              capacity: state.adult_capacity,
+              childCapacity: state.child_capacity,
+              infantCapacity: state.infant_capacity,
+              roomPackage: pkg.name,
+            },
+            staySlug
           );
-        }
 
-        for (const guest of allNonResidentData) {
-          await axios.post(
-            `${process.env.NEXT_PUBLIC_baseURL}/room-types/${res?.slug}/nonresident-availabilities/`,
-            guest,
-            {
-              headers: {
-                Authorization: "Token " + Cookies.get("token"),
-              },
-            }
-          );
+          res = await response;
+
+          for (const guest of allResidentData) {
+            await axios.post(
+              `${process.env.NEXT_PUBLIC_baseURL}/room-types/${res?.slug}/resident-availabilities/`,
+              guest,
+              {
+                headers: {
+                  Authorization: "Token " + Cookies.get("token"),
+                },
+              }
+            );
+          }
+
+          for (const guest of allNonResidentData) {
+            await axios.post(
+              `${process.env.NEXT_PUBLIC_baseURL}/room-types/${res?.slug}/nonresident-availabilities/`,
+              guest,
+              {
+                headers: {
+                  Authorization: "Token " + Cookies.get("token"),
+                },
+              }
+            );
+          }
         }
       }
-    }
-
-    if (submitSeasonDataError.length > 0) {
-      open();
-    } else if (submitSeasonDataError.length === 0) {
       router.reload();
+    } else if (submitSeasonDataError.length > 0) {
+      open();
     }
   };
 
