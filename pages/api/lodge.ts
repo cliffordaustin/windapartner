@@ -1,3 +1,4 @@
+import { RoomType } from "@/utils/types";
 import axios from "axios";
 import { format, addDays } from "date-fns";
 import Cookies from "js-cookie";
@@ -29,6 +30,8 @@ export type NonResidentGuestTypesData = {
 type DeleteRoomTypeProps = {
   roomSlug: string | null | undefined;
   staySlug: string | null | undefined;
+  roomType: RoomType;
+  isNonResident: boolean;
 };
 
 type RoomProps = {
@@ -69,13 +72,43 @@ export const addRoom = async (
 export const deleteRoom = async ({
   roomSlug,
   staySlug,
+  roomType,
+  isNonResident,
 }: DeleteRoomTypeProps) => {
-  await axios.delete(
-    `${process.env.NEXT_PUBLIC_baseURL}/stays/${staySlug}/room-types/${roomSlug}/`,
-    {
-      headers: {
-        Authorization: "Token " + Cookies.get("token"),
-      },
-    }
-  );
+  if (
+    roomType.room_non_resident_availabilities.length > 0 &&
+    roomType.room_resident_availabilities.length > 0 &&
+    isNonResident
+  ) {
+    await axios.delete(
+      `${process.env.NEXT_PUBLIC_baseURL}/room-types/${roomSlug}/delete-nonresident-availability/`,
+      {
+        headers: {
+          Authorization: "Token " + Cookies.get("token"),
+        },
+      }
+    );
+  } else if (
+    roomType.room_non_resident_availabilities.length > 0 &&
+    roomType.room_resident_availabilities.length > 0 &&
+    !isNonResident
+  ) {
+    await axios.delete(
+      `${process.env.NEXT_PUBLIC_baseURL}/room-types/${roomSlug}/delete-resident-availability/`,
+      {
+        headers: {
+          Authorization: "Token " + Cookies.get("token"),
+        },
+      }
+    );
+  } else {
+    await axios.delete(
+      `${process.env.NEXT_PUBLIC_baseURL}/stays/${staySlug}/room-types/${roomSlug}/`,
+      {
+        headers: {
+          Authorization: "Token " + Cookies.get("token"),
+        },
+      }
+    );
+  }
 };

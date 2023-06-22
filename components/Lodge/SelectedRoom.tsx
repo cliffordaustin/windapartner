@@ -66,12 +66,14 @@ function SelectedRoom({
             deleteRoomMutation({
               roomSlug: roomType.slug,
               staySlug: staySlug,
+              roomType: roomType,
+              isNonResident: isNonResident,
             });
           }}
           className="cursor-pointer"
         >
           <IconTrash
-            className="absolute right-0 z-20 top-0.5"
+            className="absolute right-2 z-20 top-0.5"
             size="1.3rem"
             color="red"
           ></IconTrash>
