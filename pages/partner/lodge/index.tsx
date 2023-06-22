@@ -82,7 +82,7 @@ function Lodge({}) {
     null,
   ]);
 
-  const [isNonResident, setIsNonResident] = React.useState(false);
+  const [isNonResident, setIsNonResident] = React.useState(true);
 
   const [opened, { open, close }] = useDisclosure(false);
 
