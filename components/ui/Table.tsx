@@ -42,7 +42,8 @@ function Table({ residentData, roomTypeName, residentGuestTypes }: TableProps) {
                   info.getValue();
                 const roomResidentGuestAvailability =
                   roomResidentGuestAvailabilities.find(
-                    (item) => item.name?.toLowerCase() === guestType
+                    (item) =>
+                      item.name?.toLowerCase().trim() === guestType?.trim()
                   );
                 return <span>KES{roomResidentGuestAvailability?.price}</span>;
               },

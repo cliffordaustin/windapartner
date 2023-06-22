@@ -206,35 +206,51 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
           }
         });
 
-        allDates.map((date) => {
-          const obj: ResidentGuestTypesData = {
-            date: date,
-            room_resident_guest_availabilities: season.guests.map((guest) => ({
-              name: guest.guestType,
-              description: guest.description,
-              season: season.name,
-              price: guest.residentPrice || 0,
-            })),
-          };
+        const sumOfResidentPrice = season.guests.reduce(
+          (acc, guest) => acc + (guest.residentPrice || 0),
+          0
+        );
 
-          residentData.push(obj);
-        });
+        const sumOfNonResidentPrice = season.guests.reduce(
+          (acc, guest) => acc + (guest.nonResidentPrice || 0),
+          0
+        );
 
-        allDates.map((date) => {
-          const obj: NonResidentGuestTypesData = {
-            date: date,
-            room_non_resident_guest_availabilities: season.guests.map(
-              (guest) => ({
-                name: guest.guestType,
-                description: guest.description,
-                season: season.name,
-                price: guest.nonResidentPrice || 0,
-              })
-            ),
-          };
+        if (sumOfResidentPrice > 0) {
+          allDates.map((date) => {
+            const obj: ResidentGuestTypesData = {
+              date: date,
+              room_resident_guest_availabilities: season.guests.map(
+                (guest) => ({
+                  name: guest.guestType,
+                  description: guest.description,
+                  season: season.name,
+                  price: guest.residentPrice || 0,
+                })
+              ),
+            };
 
-          nonResidentData.push(obj);
-        });
+            residentData.push(obj);
+          });
+        }
+
+        if (sumOfNonResidentPrice > 0) {
+          allDates.map((date) => {
+            const obj: NonResidentGuestTypesData = {
+              date: date,
+              room_non_resident_guest_availabilities: season.guests.map(
+                (guest) => ({
+                  name: guest.guestType,
+                  description: guest.description,
+                  season: season.name,
+                  price: guest.nonResidentPrice || 0,
+                })
+              ),
+            };
+
+            nonResidentData.push(obj);
+          });
+        }
 
         allResidentData.push(residentData);
         allNonResidentData.push(nonResidentData);
@@ -333,7 +349,7 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
       for (const pkg of state.packages) {
         const allResidentData: ResidentGuestTypesData[][] = [];
         const allNonResidentData: NonResidentGuestTypesData[][] = [];
-
+        setLoading(true);
         for (const season of pkg.seasons) {
           const residentData: ResidentGuestTypesData[] = [];
           const nonResidentData: NonResidentGuestTypesData[] = [];
@@ -352,82 +368,93 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
             }
           });
 
-          allDates.map((date) => {
-            const obj: ResidentGuestTypesData = {
-              date: date,
-              room_resident_guest_availabilities: season.guests.map(
-                (guest) => ({
-                  name: guest.guestType,
-                  description: guest.description,
-                  season: season.name,
-                  price: guest.residentPrice || 0,
-                })
-              ),
-            };
+          const sumOfResidentPrice = season.guests.reduce(
+            (acc, guest) => acc + (guest.residentPrice || 0),
+            0
+          );
 
-            residentData.push(obj);
-          });
+          const sumOfNonResidentPrice = season.guests.reduce(
+            (acc, guest) => acc + (guest.nonResidentPrice || 0),
+            0
+          );
 
-          allDates.map((date) => {
-            const obj: NonResidentGuestTypesData = {
-              date: date,
-              room_non_resident_guest_availabilities: season.guests.map(
-                (guest) => ({
-                  name: guest.guestType,
-                  description: guest.description,
-                  season: season.name,
-                  price: guest.nonResidentPrice || 0,
-                })
-              ),
-            };
+          if (sumOfResidentPrice > 0) {
+            allDates.map((date) => {
+              const obj: ResidentGuestTypesData = {
+                date: date,
+                room_resident_guest_availabilities: season.guests.map(
+                  (guest) => ({
+                    name: guest.guestType,
+                    description: guest.description,
+                    season: season.name,
+                    price: guest.residentPrice || 0,
+                  })
+                ),
+              };
 
-            nonResidentData.push(obj);
-          });
+              residentData.push(obj);
+            });
+          }
+
+          if (sumOfNonResidentPrice > 0) {
+            allDates.map((date) => {
+              const obj: NonResidentGuestTypesData = {
+                date: date,
+                room_non_resident_guest_availabilities: season.guests.map(
+                  (guest) => ({
+                    name: guest.guestType,
+                    description: guest.description,
+                    season: season.name,
+                    price: guest.nonResidentPrice || 0,
+                  })
+                ),
+              };
+
+              nonResidentData.push(obj);
+            });
+          }
 
           allResidentData.push(residentData);
           allNonResidentData.push(nonResidentData);
         }
 
-        if (submitSeasonDataError.length === 0) {
-          setLoading(true);
-          let res: RoomReturnType | null = null;
+        let res: RoomReturnType | null = null;
 
-          const response = addRoom(
+        const response = addRoom(
+          {
+            name: state.name,
+            capacity: state.adult_capacity,
+            childCapacity: state.child_capacity,
+            infantCapacity: state.infant_capacity,
+            roomPackage: pkg.name,
+          },
+          staySlug
+        );
+
+        res = await response;
+
+        for (const guest of allResidentData) {
+          await axios.post(
+            `${process.env.NEXT_PUBLIC_baseURL}/room-types/${res?.slug}/resident-availabilities/`,
+            guest,
             {
-              name: state.name,
-              capacity: state.adult_capacity,
-              childCapacity: state.child_capacity,
-              infantCapacity: state.infant_capacity,
-              roomPackage: pkg.name,
-            },
-            staySlug
+              headers: {
+                Authorization: "Token " + Cookies.get("token"),
+              },
+            }
           );
+        }
 
-          res = await response;
-
-          for (const guest of allResidentData) {
-            await axios.post(
-              `${process.env.NEXT_PUBLIC_baseURL}/room-types/${res?.slug}/resident-availabilities/`,
-              guest,
-              {
-                headers: {
-                  Authorization: "Token " + Cookies.get("token"),
-                },
-              }
-            );
-          }
-
-          for (const guest of allNonResidentData) {
-            await axios.post(
-              `${process.env.NEXT_PUBLIC_baseURL}/room-types/${res?.slug}/nonresident-availabilities/`,
-              guest,
-              {
-                headers: {
-                  Authorization: "Token " + Cookies.get("token"),
-                },
-              }
-            );
-          }
+        for (const guest of allNonResidentData) {
+          await axios.post(
+            `${process.env.NEXT_PUBLIC_baseURL}/room-types/${res?.slug}/nonresident-availabilities/`,
+            guest,
+            {
+              headers: {
+                Authorization: "Token " + Cookies.get("token"),
+              },
+            }
+          );
         }
       }
       router.reload();

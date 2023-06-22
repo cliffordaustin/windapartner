@@ -46,7 +46,8 @@ function NonResidentTable({
                   info.getValue();
                 const roomNonResidentGuestAvailability =
                   roomNonResidentGuestAvailabilities.find(
-                    (item) => item.name?.toLowerCase() === guestType
+                    (item) =>
+                      item.name?.toLowerCase().trim() === guestType?.trim()
                   );
                 return <span>${roomNonResidentGuestAvailability?.price}</span>;
               },
