@@ -8,7 +8,7 @@ export type Guest = {
 };
 
 export type Season = {
-  date: [[Date | null, Date | null]];
+  date: [Date | null, Date | null][];
   name: string;
   guests: Guest[];
 };
@@ -18,7 +18,7 @@ export type Package = {
   seasons: Season[];
 };
 
-type StateType = {
+export type StateType = {
   name: string;
   adult_capacity: number | "";
   child_capacity: number | "";
