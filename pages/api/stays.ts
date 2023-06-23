@@ -1,6 +1,11 @@
 import axios from "axios";
 import { RoomType, Stay } from "../../utils/types";
 
+type StayDetailProps = {
+  slug: string;
+  token: string | undefined;
+};
+
 export const getHighlightedStays = async (): Promise<Stay[]> => {
   const stays = await axios.get(
     `${process.env.NEXT_PUBLIC_baseURL}/highlighted-stays/`
@@ -44,6 +49,17 @@ export const getStayEmail = async (
   );
 
   return stay.data;
+};
+
+export const deleteStayEmail = async ({ slug, token }: StayDetailProps) => {
+  await axios.delete(
+    `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${slug}/`,
+    {
+      headers: {
+        Authorization: "Token " + token,
+      },
+    }
+  );
 };
 
 export const getAllStaysEmail = async (

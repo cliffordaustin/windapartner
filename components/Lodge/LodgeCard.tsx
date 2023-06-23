@@ -3,24 +3,42 @@ import { Stay } from "@/utils/types";
 import { Carousel } from "@mantine/carousel";
 import {
   Button,
+  Center,
   Container,
+  FileInput,
   Flex,
+  Group,
   Image,
+  Loader,
   Modal,
   Text,
+  TextInput,
   createStyles,
+  FileInputProps,
+  rem,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
   IconChevronLeft,
   IconChevronRight,
+  IconPencil,
+  IconPhoto,
   IconPlus,
+  IconTrash,
+  IconUpload,
 } from "@tabler/icons-react";
+import { useMutation, useQueryClient } from "react-query";
 import Link from "next/link";
 import React from "react";
 import { EmblaCarouselType } from "embla-carousel-react";
 import AddRoomFirstPage from "./AddRoomFirstPage";
 import AddRoomSecondPage from "./AddRoomSecondPage";
+import { deleteStayEmail } from "@/pages/api/stays";
+import Cookies from "js-cookie";
+import { useForm } from "@mantine/form";
+import axios from "axios";
+import { useRouter } from "next/router";
+import StayImages from "./StayImages";
 
 type LodgeProps = {
   stay: Stay;
@@ -48,6 +66,8 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
     return image.image;
   });
 
+  const router = useRouter();
+
   const isAdded = stayIds.includes(stay.id);
 
   function handleRemoveItemClick(id: number) {
@@ -71,11 +91,134 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
       JSON.stringify([...JSON.parse(storedItemIds || "[]"), id])
     );
   }
+
+  const queryClient = useQueryClient();
+
+  const token = Cookies.get("token");
   const [opened, { open, close }] = useDisclosure(false);
 
   const [embla, setEmbla] = React.useState<EmblaCarouselType | null>(null);
 
   const [currentSlideIndex, setCurrentSlideIndex] = React.useState(0);
+
+  // const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+  const [deleteModal, { open: openDeleteModal, close: closeDelteModal }] =
+    useDisclosure(false);
+
+  const [editModal, { open: openEditModal, close: closeEditModal }] =
+    useDisclosure(false);
+
+  const { mutateAsync: deleteProperty, isLoading: deleteLoading } = useMutation(
+    deleteStayEmail,
+    {
+      onSuccess: () => {
+        // refetch stays
+        queryClient.invalidateQueries("all-stay-email");
+        closeDelteModal();
+      },
+    }
+  );
+
+  type FormValues = {
+    property_name: string | undefined;
+    location: string | undefined;
+  };
+
+  const form = useForm<FormValues>({
+    initialValues: {
+      property_name: stay.property_name,
+      location: stay.location,
+    },
+  });
+
+  function Value({ file }: { file: File | null }) {
+    return (
+      <Center
+        inline
+        sx={(theme) => ({
+          backgroundColor:
+            theme.colorScheme === "dark"
+              ? theme.colors.dark[7]
+              : theme.colors.gray[1],
+          fontSize: theme.fontSizes.xs,
+          padding: `${rem(3)} ${rem(7)}`,
+          borderRadius: theme.radius.sm,
+        })}
+      >
+        <IconPhoto size={rem(14)} style={{ marginRight: rem(5) }} />
+        <span
+          style={{
+            whiteSpace: "nowrap",
+            textOverflow: "ellipsis",
+            overflow: "hidden",
+            maxWidth: rem(200),
+            display: "inline-block",
+          }}
+        >
+          {file?.name}
+        </span>
+      </Center>
+    );
+  }
+
+  const ValueComponent: FileInputProps["valueComponent"] = ({ value }) => {
+    if (Array.isArray(value)) {
+      return (
+        <Group spacing="sm" py="xs">
+          {value.map((file, index) => (
+            <Value file={file} key={index} />
+          ))}
+        </Group>
+      );
+    }
+
+    return <Value file={value} />;
+  };
+
+  const [files, setFiles] = React.useState<File[]>([]);
+
+  const [noFiles, setNoFiles] = React.useState(false);
+
+  const editProperty = async (values: FormValues) => {
+    await axios.patch(
+      `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${stay.slug}/`,
+      {
+        property_name: values.property_name,
+        name: values.property_name,
+        location: values.location,
+      },
+      {
+        headers: {
+          Authorization: `Token ${token}`,
+        },
+      }
+    );
+
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append("image", file);
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/create-image/`,
+        formData,
+        {
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        }
+      );
+    }
+  };
+
+  const { mutateAsync: edit, isLoading: editLoading } = useMutation(
+    editProperty,
+    {
+      onSuccess: () => {
+        // refetch stays
+        queryClient.invalidateQueries("all-stay-email");
+        router.reload();
+      },
+    }
+  );
 
   return (
     <div className="w-full rounded-md relative shadow border">
@@ -99,6 +242,21 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
         ))}
       </Carousel>
 
+      <div className="absolute flex items-center top-2 left-2 rounded-full bg-white">
+        <div
+          onClick={openDeleteModal}
+          className="p-1 flex cursor-pointer items-center justify-center rounded-full hover:bg-gray-100"
+        >
+          <IconTrash size={22} color="red"></IconTrash>
+        </div>
+        <div
+          onClick={openEditModal}
+          className="p-1 flex cursor-pointer items-center justify-center rounded-full hover:bg-gray-100"
+        >
+          <IconPencil size={22} color="blue"></IconPencil>
+        </div>
+      </div>
+
       <div className="p-2">
         <Text truncate weight={600} size="md">
           {stay.property_name}
@@ -118,6 +276,124 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
           Add rates
         </Button>
       </div>
+
+      <Modal
+        opened={editModal}
+        onClose={closeEditModal}
+        title={"Edit your property"}
+        classNames={{
+          title: "text-lg font-bold",
+          close: "text-black hover:text-gray-700 hover:bg-gray-200",
+          header: "bg-gray-100",
+        }}
+        transitionProps={{ transition: "fade", duration: 200 }}
+        closeButtonProps={{
+          style: {
+            width: 30,
+            height: 30,
+          },
+          iconSize: 20,
+        }}
+      >
+        <form
+          className="flex flex-col gap-1"
+          onSubmit={form.onSubmit((values) => edit(values))}
+        >
+          <TextInput
+            label="Property name"
+            placeholder="Enter property name"
+            value={form.values.property_name}
+            onChange={(event) =>
+              form.setFieldValue("property_name", event.currentTarget.value)
+            }
+            required
+          />
+
+          <TextInput
+            label="Location"
+            placeholder="Enter location"
+            value={form.values.location}
+            onChange={(event) =>
+              form.setFieldValue("location", event.currentTarget.value)
+            }
+            required
+          />
+
+          <Flex direction="column" mt={8} gap={3}>
+            {stay.stay_images.map((image, index) => (
+              <StayImages stay={stay} image={image} key={index}></StayImages>
+            ))}
+          </Flex>
+
+          <FileInput
+            label="Images"
+            placeholder="Select one or more images"
+            multiple
+            valueComponent={ValueComponent}
+            accept="image/png, image/jpeg, image/jpg"
+            icon={<IconUpload size={rem(14)} />}
+            error={noFiles ? "Please select at least one file" : ""}
+            onChange={(payload: File[]) => {
+              setNoFiles(false);
+              setFiles(payload);
+            }}
+          />
+
+          <Flex gap={8} justify="right" mt={6}>
+            <Button onClick={closeEditModal} variant="default">
+              Close
+            </Button>
+            <Button disabled={editLoading} type="submit">
+              Submit{" "}
+              {editLoading && <Loader size="xs" color="gray" ml={5}></Loader>}
+            </Button>
+          </Flex>
+        </form>
+      </Modal>
+
+      <Modal
+        opened={deleteModal}
+        onClose={closeDelteModal}
+        title={"Delete property"}
+        classNames={{
+          title: "text-xl font-bold",
+          close: "text-black hover:text-gray-700 hover:bg-gray-200",
+          header: "bg-gray-100",
+        }}
+        transitionProps={{ transition: "fade", duration: 200 }}
+        closeButtonProps={{
+          style: {
+            width: 30,
+            height: 30,
+          },
+          iconSize: 20,
+        }}
+      >
+        <p>
+          Are you sure you want to delete this property? All rates associated to
+          this property will also be deleted. This action cannot be undone.
+        </p>
+        <Flex justify="flex-end" mt={12} gap={6} align="center">
+          <Button onClick={closeDelteModal} variant="default">
+            Close
+          </Button>
+
+          <Button
+            onClick={() =>
+              deleteProperty({
+                slug: stay.slug,
+                token: token,
+              })
+            }
+            className="flex items-center"
+            disabled={deleteLoading}
+            color="red"
+          >
+            Proceed
+            {deleteLoading && <Loader size="xs" color="gray" ml={5}></Loader>}
+          </Button>
+        </Flex>
+      </Modal>
 
       <ContextProvider>
         <Modal
