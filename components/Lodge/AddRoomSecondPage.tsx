@@ -123,11 +123,27 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
       guests: state.guests.map((guest) => ({ ...guest })),
     };
 
-    const updatedPackages = state.packages.map((pkg) => {
-      return {
-        ...pkg,
-        seasons: [...pkg.seasons, newSeason],
-      };
+    // const updatedPackages = state.packages.map((pkg) => {
+    //   return {
+    //     ...pkg,
+    //     seasons: [...pkg.seasons, newSeason],
+    //   };
+    // });
+
+    // setState((prevState) => ({
+    //   ...prevState,
+    //   packages: updatedPackages,
+    // }));
+
+    // add new season to package
+    const updatedPackages = state.packages.map((pkg, index) => {
+      if (index === active) {
+        return {
+          ...pkg,
+          seasons: [...pkg.seasons, newSeason],
+        };
+      }
+      return pkg;
     });
 
     setState((prevState) => ({

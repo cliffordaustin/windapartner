@@ -168,17 +168,17 @@ function Season({ index, season, active }: SeasonPropTypes) {
                   e.stopPropagation();
                 }}
                 onChange={(e) => {
-                  // const newPackages = [...state.packages];
-                  // newPackages[active].seasons[index].name =
-                  //   e.currentTarget.value;
-                  // setState((prev) => ({ ...prev, packages: newPackages }));
+                  const newPackages = [...state.packages];
+                  newPackages[active].seasons[index].name =
+                    e.currentTarget.value;
+                  setState((prev) => ({ ...prev, packages: newPackages }));
 
-                  const newState = updateSeasonName(
-                    season.name,
-                    e.currentTarget.value,
-                    state
-                  );
-                  setState(newState);
+                  // const newState = updateSeasonName(
+                  //   season.name,
+                  //   e.currentTarget.value,
+                  //   state
+                  // );
+                  // setState(newState);
                 }}
               />
             )}
@@ -203,12 +203,12 @@ function Season({ index, season, active }: SeasonPropTypes) {
             color="red"
             className="cursor-pointer"
             onClick={() => {
-              // const newPackages = [...state.packages];
-              // newPackages[active].seasons.splice(index, 1);
-              // setState((prev) => ({ ...prev, packages: newPackages }));
+              const newPackages = [...state.packages];
+              newPackages[active].seasons.splice(index, 1);
+              setState((prev) => ({ ...prev, packages: newPackages }));
 
-              const newState = removeSeason(season.name, state);
-              setState(newState);
+              // const newState = removeSeason(season.name, state);
+              // setState(newState);
             }}
           />
         )}
@@ -226,17 +226,17 @@ function Season({ index, season, active }: SeasonPropTypes) {
                 type="range"
                 value={date}
                 onChange={(date) => {
-                  // const newPackages = [...state.packages];
-                  // newPackages[active].seasons[index].date[dateIndex] = date;
-                  // setState((prev) => ({ ...prev, packages: newPackages }));
+                  const newPackages = [...state.packages];
+                  newPackages[active].seasons[index].date[dateIndex] = date;
+                  setState((prev) => ({ ...prev, packages: newPackages }));
 
-                  const updatedState = updateSeasonDates(
-                    date,
-                    season.name,
-                    state,
-                    dateIndex
-                  );
-                  setState(updatedState);
+                  // const updatedState = updateSeasonDates(
+                  //   date,
+                  //   season.name,
+                  //   state,
+                  //   dateIndex
+                  // );
+                  // setState(updatedState);
                 }}
                 color="red"
                 placeholder="Select dates"
@@ -255,35 +255,35 @@ function Season({ index, season, active }: SeasonPropTypes) {
                 color="red"
                 className="cursor-pointer"
                 onClick={() => {
-                  // if (dateIndex === 0) {
-                  //   const newPackages = [...state.packages];
-                  //   newPackages[active].seasons[index].date[dateIndex] = [
-                  //     null,
-                  //     null,
-                  //   ];
-                  //   setState((prev) => ({
-                  //     ...prev,
-                  //     packages: newPackages,
-                  //   }));
-                  // } else {
-                  //   const newPackages = [...state.packages];
-                  //   newPackages[active].seasons[index].date.splice(
-                  //     dateIndex,
-                  //     1
-                  //   );
-                  //   setState((prev) => ({
-                  //     ...prev,
-                  //     packages: newPackages,
-                  //   }));
-                  // }
+                  if (dateIndex === 0) {
+                    const newPackages = [...state.packages];
+                    newPackages[active].seasons[index].date[dateIndex] = [
+                      null,
+                      null,
+                    ];
+                    setState((prev) => ({
+                      ...prev,
+                      packages: newPackages,
+                    }));
+                  } else {
+                    const newPackages = [...state.packages];
+                    newPackages[active].seasons[index].date.splice(
+                      dateIndex,
+                      1
+                    );
+                    setState((prev) => ({
+                      ...prev,
+                      packages: newPackages,
+                    }));
+                  }
 
-                  const updatedState = removeSeasonDates(
-                    season.name,
-                    state,
-                    dateIndex
-                  );
+                  // const updatedState = removeSeasonDates(
+                  //   season.name,
+                  //   state,
+                  //   dateIndex
+                  // );
 
-                  setState(updatedState);
+                  // setState(updatedState);
                 }}
               />
             </Flex>
@@ -295,16 +295,16 @@ function Season({ index, season, active }: SeasonPropTypes) {
           type="button"
           color="blue"
           onClick={() => {
-            // const newPackages = [...state.packages];
-            // newPackages[active].seasons[index].date.push([null, null]);
-            // setState((prev) => ({ ...prev, packages: newPackages }));
+            const newPackages = [...state.packages];
+            newPackages[active].seasons[index].date.push([null, null]);
+            setState((prev) => ({ ...prev, packages: newPackages }));
 
-            const updatedState = addSeasonDates(
-              [null, null],
-              season.name,
-              state
-            );
-            setState(updatedState);
+            // const updatedState = addSeasonDates(
+            //   [null, null],
+            //   season.name,
+            //   state
+            // );
+            // setState(updatedState);
           }}
         >
           Add another date
