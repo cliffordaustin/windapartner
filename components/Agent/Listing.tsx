@@ -141,7 +141,7 @@ export default function Listing({ stay }: ListingProps) {
       {isAdded ? (
         <Button
           onClick={() => handleRemoveItemClick(stay.id)}
-          className="w-[35px] p-0 bg-black hover:bg-black absolute left-3 bottom-[100px] h-[35px] flex items-center justify-center rounded-full"
+          className="w-[35px] p-0 bg-black hover:bg-black absolute left-3 bottom-[70px] h-[35px] flex items-center justify-center rounded-full"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -160,7 +160,7 @@ export default function Listing({ stay }: ListingProps) {
         <Button
           color="red"
           onClick={() => addListingToCalculate(stay.id)}
-          className="w-[35px] p-0 absolute left-3 bottom-[100px] h-[35px] flex items-center justify-center rounded-full"
+          className="w-[35px] p-0 absolute left-3 bottom-[70px] h-[35px] flex items-center justify-center rounded-full"
         >
           <IconPlus size="1.4rem" className="text-white" />
         </Button>

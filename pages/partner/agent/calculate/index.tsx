@@ -8,7 +8,7 @@ import Cookies from "js-cookie";
 import Navbar from "@/components/Agent/Navbar";
 import { useContext, useEffect, useRef, useState } from "react";
 import { Stay } from "@/utils/types";
-import { getPartnerStays } from "@/pages/api/stays";
+import { getDetailPartnerStays } from "@/pages/api/stays";
 import { useRouter } from "next/router";
 import {
   Alert,
@@ -74,7 +74,7 @@ export default function Calculate() {
 
   const { data: stays, isLoading: isStayLoading } = useQuery<Stay[]>(
     "partner-stay-ids",
-    () => getPartnerStays(router.query.location as string, stayIds),
+    () => getDetailPartnerStays(stayIds),
     { enabled: !!stayIds }
   );
 
