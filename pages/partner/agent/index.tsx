@@ -159,9 +159,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const token = getToken(context);
 
   try {
-    await queryClient.fetchQuery<UserTypes | null>("user", () =>
-      getUser(token)
-    );
+    // await queryClient.fetchQuery<UserTypes | null>("user", () =>
+    //   getUser(token)
+    // );
 
     await queryClient.fetchQuery<Stay[] | null>("partner-stays", () =>
       getPartnerStays(context.query.location as string, "")
@@ -173,14 +173,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       },
     };
   } catch (error) {
-    if (error instanceof AxiosError && error.response?.status === 401) {
-      return {
-        redirect: {
-          destination: "/login",
-          permanent: false,
-        },
-      };
-    }
+    // if (error instanceof AxiosError && error.response?.status === 401) {
+    //   return {
+    //     redirect: {
+    //       destination: "/login",
+    //       permanent: false,
+    //     },
+    //   };
+    // }
     return {
       props: {},
     };
