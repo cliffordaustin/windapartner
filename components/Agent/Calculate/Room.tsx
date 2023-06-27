@@ -50,36 +50,6 @@ export default function Room({ room, stay, index }: RoomProps) {
     packages: string[];
   };
 
-  const uniqueRooms: UniqueRoomsType[] = stay.room_types.reduce(
-    (accumulator: UniqueRoomsType[], current: RoomType) => {
-      const roomName = current.name?.toLowerCase();
-      const index = accumulator.findIndex(
-        (room) => room.name?.toLowerCase() === roomName
-      );
-      if (index >= 0) {
-        // If roomName already exists, add package to the existing room object
-        accumulator[index].packages.push(current.package);
-      } else {
-        // If roomName doesn't exist, create a new room object with the roomName and package
-        accumulator.push({ name: current.name, packages: [current.package] });
-      }
-      return accumulator;
-    },
-    []
-  );
-
-  function getPackagesForSelectedRoom(room: string): string[] {
-    const roomName = room.toLowerCase();
-    const packages: string[] = [];
-
-    for (const room of stay.room_types) {
-      if (room.name?.toLowerCase() === roomName) {
-        packages.push(room.package);
-      }
-    }
-    return packages;
-  }
-
   useEffect(() => {
     const packages = getPackagesForSelectedRoom(room.name);
     setSelectedPackages(packages);
@@ -409,10 +379,38 @@ export default function Room({ room, stay, index }: RoomProps) {
     { enabled: currentState?.date[0] && currentState.date[1] ? true : false }
   );
 
-  console.log(roomTypes);
-  console.log(new Date());
-  console.log(currentState?.date[0]);
-  console.log(currentState?.date[1]);
+  // console.log(roomTypes);
+  // console.log(new Date());
+  // console.log(currentState?.date[0]);
+  // console.log(currentState?.date[1]);
+
+  const uniqueRooms: UniqueRoomsType[] =
+    roomTypes?.reduce((accumulator: UniqueRoomsType[], current: RoomType) => {
+      const roomName = current.name?.toLowerCase();
+      const index = accumulator.findIndex(
+        (room) => room.name?.toLowerCase() === roomName
+      );
+      if (index >= 0) {
+        // If roomName already exists, add package to the existing room object
+        accumulator[index].packages.push(current.package);
+      } else {
+        // If roomName doesn't exist, create a new room object with the roomName and package
+        accumulator.push({ name: current.name, packages: [current.package] });
+      }
+      return accumulator;
+    }, []) || [];
+
+  function getPackagesForSelectedRoom(room: string): string[] {
+    const roomName = room.toLowerCase();
+    const packages: string[] = [];
+
+    for (const room of roomTypes || []) {
+      if (room.name?.toLowerCase() === roomName) {
+        packages.push(room.package);
+      }
+    }
+    return packages;
+  }
 
   const commonRoomResidentNamesWithDescription =
     pricing.findCommonRoomResidentNamesWithDescription(

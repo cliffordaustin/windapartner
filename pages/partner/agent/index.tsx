@@ -6,6 +6,7 @@ import {
   Skeleton,
   NavLink,
   Loader,
+  Pagination,
 } from "@mantine/core";
 import { getUser } from "../../api/user";
 import { GetServerSideProps } from "next";
@@ -17,7 +18,15 @@ import { dehydrate, QueryClient, useQuery } from "react-query";
 import Navbar from "@/components/Agent/Navbar";
 import { getPartnerStays } from "@/pages/api/stays";
 import { NextRouter, useRouter } from "next/router";
-import { IconInfoCircle, IconCalculator } from "@tabler/icons-react";
+import {
+  IconInfoCircle,
+  IconCalculator,
+  IconArrowRight,
+  IconArrowLeft,
+  IconArrowBarToLeft,
+  IconArrowBarToRight,
+  IconGripHorizontal,
+} from "@tabler/icons-react";
 import Listing from "@/components/Agent/Listing";
 import { Context } from "@/context/AgentPage";
 import { useContext, useEffect, useState } from "react";
@@ -133,6 +142,8 @@ export default function AgentPage() {
         }
       />
 
+      {/* <Pagination total={10} position="center" /> */}
+
       {/* {addedStays && addedStays.length > 0 && !isStayLoading && (
         <NavLink
           label={`Calculate pricing (${addedStays?.length} selected)`}
@@ -159,9 +170,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const token = getToken(context);
 
   try {
-    // await queryClient.fetchQuery<UserTypes | null>("user", () =>
-    //   getUser(token)
-    // );
+    await queryClient.fetchQuery<UserTypes | null>("user", () =>
+      getUser(token)
+    );
 
     await queryClient.fetchQuery<Stay[] | null>("partner-stays", () =>
       getPartnerStays(context.query.location as string, "")
@@ -173,14 +184,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       },
     };
   } catch (error) {
-    // if (error instanceof AxiosError && error.response?.status === 401) {
-    //   return {
-    //     redirect: {
-    //       destination: "/login",
-    //       permanent: false,
-    //     },
-    //   };
-    // }
+    if (error instanceof AxiosError && error.response?.status === 401) {
+      return {
+        redirect: {
+          destination: "/login",
+          permanent: false,
+        },
+      };
+    }
     return {
       props: {},
     };

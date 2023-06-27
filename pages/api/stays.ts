@@ -82,8 +82,6 @@ export const getRoomTypes = async (
   startDate: string | null | undefined,
   endDate: string | null | undefined
 ): Promise<RoomType[]> => {
-  const roomTypes = [];
-
   // subtract 1 day from end date
   if (endDate) {
     const date = new Date(endDate);
@@ -92,28 +90,34 @@ export const getRoomTypes = async (
   }
 
   if (startDate && endDate && stay) {
-    for (let roomType of stay.room_types) {
-      const room_resident = await axios.get(
-        `${process.env.NEXT_PUBLIC_baseURL}/room-types/${roomType.slug}/resident-availabilities/?start_date=${startDate}&end_date=${endDate}`
-      );
+    // for (let roomType of stay.room_types) {
+    //   const room_resident = await axios.get(
+    //     `${process.env.NEXT_PUBLIC_baseURL}/room-types/${roomType.slug}/resident-availabilities/?start_date=${startDate}&end_date=${endDate}`
+    //   );
 
-      const room_non_resident = await axios.get(
-        `${process.env.NEXT_PUBLIC_baseURL}/room-types/${roomType.slug}/nonresident-availabilities/?start_date=${startDate}&end_date=${endDate}`
-      );
+    //   const room_non_resident = await axios.get(
+    //     `${process.env.NEXT_PUBLIC_baseURL}/room-types/${roomType.slug}/nonresident-availabilities/?start_date=${startDate}&end_date=${endDate}`
+    //   );
 
-      roomTypes.push({
-        id: roomType.id,
-        slug: roomType.slug,
-        name: roomType.name,
-        capacity: roomType.capacity,
-        child_capacity: roomType.child_capacity,
-        infant_capacity: roomType.infant_capacity,
-        package: roomType.package,
-        room_resident_availabilities: room_resident.data.results,
-        room_non_resident_availabilities: room_non_resident.data.results,
-      });
-    }
+    //   roomTypes.push({
+    //     id: roomType.id,
+    //     slug: roomType.slug,
+    //     name: roomType.name,
+    //     capacity: roomType.capacity,
+    //     child_capacity: roomType.child_capacity,
+    //     infant_capacity: roomType.infant_capacity,
+    //     package: roomType.package,
+    //     room_resident_availabilities: room_resident.data.results,
+    //     room_non_resident_availabilities: room_non_resident.data.results,
+    //   });
+    // }
+
+    const room_types = await axios.get(
+      `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/room-types/?start_date=${startDate}&end_date=${endDate}`
+    );
+
+    return room_types.data.results;
   }
 
-  return roomTypes;
+  return [];
 };
