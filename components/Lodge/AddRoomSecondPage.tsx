@@ -541,7 +541,7 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
         </Flex>
       </Modal>
 
-      <Container className="w-[70%] h-screen overflow-y-scroll">
+      <Container className="w-[70%] overflow-y-scroll">
         <Accordion mb={10} defaultValue="0">
           {state.packages[active]?.seasons.map((season, index) => (
             <RoomSeason
@@ -553,16 +553,7 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
           ))}
         </Accordion>
         <Flex align="center" justify="space-between">
-          <Anchor
-            size="sm"
-            type="button"
-            color="blue"
-            onClick={() => {
-              addSeason();
-            }}
-          >
-            Add another season
-          </Anchor>
+          <div></div>
 
           <Button
             onClick={() => submit()}

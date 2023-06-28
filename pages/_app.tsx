@@ -11,7 +11,7 @@ import { ContextProvider as CalculateContextProvider } from "@/context/Calculate
 
 const open_sans = Open_Sans({
   subsets: ["latin"],
-  weight: ["500", "700", "800", "500", "600"],
+  weight: ["400", "700", "800", "500", "600"],
 });
 
 export default function App({ Component, pageProps }: AppProps) {

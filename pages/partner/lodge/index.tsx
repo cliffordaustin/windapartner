@@ -275,7 +275,7 @@ function Lodge({}) {
               <Button onClick={close} variant="default">
                 Close
               </Button>
-              <Button disabled={loading} type="submit">
+              <Button color="red" disabled={loading} type="submit">
                 Submit{" "}
                 {loading && <Loader size="xs" color="gray" ml={5}></Loader>}
               </Button>

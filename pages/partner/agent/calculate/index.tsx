@@ -385,7 +385,7 @@ export default function Calculate() {
                       <Divider></Divider>
 
                       <div className="px-4 flex flex-col gap-2 mt-4">
-                        {totalNonResidentSum && (
+                        {!!totalNonResidentSum && (
                           <div className="flex items-center justify-between">
                             <Text className="text-black text-base font-bold">
                               Grand Non-resident Total
@@ -397,7 +397,7 @@ export default function Calculate() {
                             </Text>
                           </div>
                         )}
-                        {totalResidentSum && (
+                        {!!totalResidentSum && (
                           <div className="flex items-center justify-between">
                             <Text className="text-black text-base font-bold">
                               Grand Resident Total

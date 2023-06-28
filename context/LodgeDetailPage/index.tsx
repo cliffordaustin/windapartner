@@ -25,6 +25,7 @@ export type StateType = {
   infant_capacity: number | "";
   packages: Package[];
   guests: Guest[];
+  seasons: Season[];
 };
 
 type ContextProviderProps = {
@@ -72,6 +73,33 @@ export const ContextProvider = ({ children }: ContextProviderProps) => {
                 nonResidentPrice: "",
               },
             ],
+          },
+        ],
+      },
+    ],
+    seasons: [
+      {
+        date: [[null, null]],
+        name: "High Season",
+        guests: [
+          {
+            guestType: "",
+            description: "",
+            residentPrice: "",
+            nonResidentPrice: "",
+          },
+        ],
+      },
+
+      {
+        date: [[null, null]],
+        name: "Low Season",
+        guests: [
+          {
+            guestType: "",
+            description: "",
+            residentPrice: "",
+            nonResidentPrice: "",
           },
         ],
       },
