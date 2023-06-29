@@ -64,7 +64,10 @@ export type Room = {
 export type ActivityFee = {
   id: number;
   name: string;
+  description?: string;
   price: number | "";
+  resident_price: number;
+  image?: string;
   priceType: "PER PERSON" | "WHOLE GROUP" | "PER PERSON PER NIGHT" | string;
 };
 

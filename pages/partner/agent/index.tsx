@@ -44,12 +44,12 @@ export default function AgentPage() {
     isLoading: isStayLoading,
     refetch,
   } = useQuery<Stay[]>("partner-stays", () =>
-    getPartnerStays(router.query.location as string, "")
+    getPartnerStays(router.query.search as string, "")
   );
 
   useEffect(() => {
     refetch();
-  }, [router.query.location]);
+  }, [router.query.search]);
 
   const { state, setState } = useContext(Context);
 

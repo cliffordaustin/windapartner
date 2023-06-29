@@ -9,7 +9,7 @@ type FeesSummaryProps = {
   summarizedCalculation?: boolean;
 };
 
-export default function ActivitiesSummary({
+export default function ActivitiesResidentSummary({
   activity,
   numberOfGuests,
   nights,
@@ -17,7 +17,7 @@ export default function ActivitiesSummary({
 }: FeesSummaryProps) {
   const activityArr = [activity];
 
-  const price = pricing.calculateActivityFees(
+  const price = pricing.calculateResidentActivityFees(
     activityArr,
     numberOfGuests,
     nights
@@ -32,7 +32,7 @@ export default function ActivitiesSummary({
           </Text>
           {!summarizedCalculation && (
             <Text size="sm" className="text-gray-600" weight={500}>
-              ${price.toLocaleString()}
+              KES{price.toLocaleString()}
             </Text>
           )}
         </div>

@@ -10,6 +10,7 @@ import Cookies from "js-cookie";
 import LodgeCard from "@/components/Lodge/LodgeCard";
 import { useRouter } from "next/router";
 import {
+  Accordion,
   Box,
   Button,
   Container,
@@ -60,13 +61,15 @@ function Lodge({}) {
   >([]);
 
   useEffect(() => {
-    const selected = stays?.map((stay) => {
+    let selected = stays?.map((stay) => {
       if (stayIds.includes(stay.id)) {
         return stay;
       } else {
         return;
       }
     });
+    // remove all undefined from the array
+    selected = selected?.filter((stay) => stay !== undefined);
     setSelectedStays(selected);
   }, [stayIds, stays]);
 
@@ -289,7 +292,7 @@ function Lodge({}) {
           lg={"auto"}
           md={"auto"}
         >
-          <Container className="border-l border-l-gray-300 border-solid border-y-0 border-r-0 sticky h-[calc(100vh-70px)] overflow-auto">
+          <Container className="border-l px-3 border-l-gray-300 border-solid border-y-0 border-r-0 h-[calc(100vh-70px)] overflow-y-scroll">
             <div className="py-4 items-center gap-4 flex justify-between border-solid border-x-0 border-t-0 border-b border-b-gray-300">
               <div></div>
               <DatePickerInput
@@ -322,15 +325,18 @@ function Lodge({}) {
               />
             </div>
 
-            <Container className="mt-4">
-              {selectedStays?.map((stay, index) => (
-                <SelectedStays
-                  isNonResident={isNonResident}
-                  key={index}
-                  stay={stay}
-                  date={date}
-                />
-              ))}
+            <Container className="mt-4 px-0">
+              <Accordion variant="contained" mb={10} defaultValue="0">
+                {selectedStays?.map((stay, index) => (
+                  <SelectedStays
+                    isNonResident={isNonResident}
+                    key={index}
+                    stay={stay}
+                    date={date}
+                    index={index}
+                  />
+                ))}
+              </Accordion>
             </Container>
           </Container>
           {/* <div className="absolute h-[25px] w-[25px] rounded-full z-10 top-[50%] left-[1px]">

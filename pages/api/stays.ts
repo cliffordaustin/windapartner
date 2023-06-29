@@ -1,9 +1,26 @@
 import axios from "axios";
-import { RoomType, Stay } from "../../utils/types";
+import {
+  ActivityFee,
+  OtherFeesNonResident,
+  OtherFeesResident,
+  RoomType,
+  Stay,
+} from "../../utils/types";
 
 type StayDetailProps = {
   slug: string;
   token: string | undefined;
+};
+
+export type ParkFee = {
+  id: number;
+  name: string | null;
+  resident_adult_price: number | null;
+  resident_teen_price: number | null;
+  resident_child_price: number | null;
+  non_resident_adult_price: number | null;
+  non_resident_teen_price: number | null;
+  non_resident_child_price: number | null;
 };
 
 export const getHighlightedStays = async (): Promise<Stay[]> => {
@@ -103,6 +120,34 @@ export const getRoomTypes = async (
     );
 
     return room_types.data.results;
+  }
+
+  return [];
+};
+
+export const getParkFees = async (
+  stay: Stay | undefined
+): Promise<ParkFee[]> => {
+  if (stay) {
+    const park_fees = await axios.get(
+      `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/${stay.slug}/park-fees/`
+    );
+
+    return park_fees.data.results;
+  }
+
+  return [];
+};
+
+export const getStayActivities = async (
+  stay: Stay | undefined
+): Promise<ActivityFee[]> => {
+  if (stay) {
+    const activities = await axios.get(
+      `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/${stay.slug}/activities/`
+    );
+
+    return activities.data.results;
   }
 
   return [];

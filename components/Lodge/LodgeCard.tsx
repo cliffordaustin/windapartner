@@ -269,7 +269,28 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
     useDisclosure(false);
 
   const [parkFeeLoading, setParkFeeLoading] = React.useState(false);
-  const addParkFees = async (values: ParkFeesValues) => {};
+  const addParkFees = async (values: ParkFeesValues) => {
+    setParkFeeLoading(true);
+    await axios.post(
+      `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/${stay.slug}/park-fees/`,
+      {
+        name: values.name,
+        resident_adult_price: Number(values.adultPrice),
+        resident_child_price: Number(values.childPrice),
+        resident_teen_price: Number(values.teenPrice),
+        non_resident_adult_price: Number(values.nonResidentAdultPrice),
+        non_resident_child_price: Number(values.nonResidentChildPrice),
+        non_resident_teen_price: Number(values.nonResidentTeenPrice),
+      },
+      {
+        headers: {
+          Authorization: `Token ${token}`,
+        },
+      }
+    );
+
+    router.reload();
+  };
 
   const [openActivityModal, { open: openActivity, close: closeActivity }] =
     useDisclosure(false);
@@ -280,7 +301,26 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
 
   const [activityLoading, setActivityLoading] = React.useState(false);
 
-  const addActivity = async (values: ActivityValues) => {};
+  const addActivity = async (values: ActivityValues) => {
+    setActivityLoading(true);
+    await axios.post(
+      `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/${stay.slug}/activities/`,
+      {
+        name: values.name,
+        description: values.description,
+        resident_price: Number(values.residentPrice),
+        price: Number(values.nonResidentPrice),
+        price_type: activityOption,
+      },
+      {
+        headers: {
+          Authorization: `Token ${token}`,
+        },
+      }
+    );
+
+    router.reload();
+  };
 
   const [
     openAddContractRateModal,
@@ -600,7 +640,6 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
           <Select
             label="Select the pricing type"
             placeholder="Select the pricing type"
-            clearable
             value={activityOption}
             onChange={(value) => setActivityOption(value)}
             data={[

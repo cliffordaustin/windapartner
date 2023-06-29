@@ -2876,6 +2876,34 @@ function calculateActivityFees(
   return totalActivityFees;
 }
 
+function calculateResidentActivityFees(
+  activityFee: ActivityFee[],
+  totalNumberOfGuests: number,
+  numberOfNights: number
+) {
+  let totalActivityFees = 0;
+  activityFee.forEach((activity) => {
+    switch (activity.priceType) {
+      case "PER PERSON":
+        totalActivityFees +=
+          Number(activity.resident_price) * totalNumberOfGuests;
+        break;
+      case "WHOLE GROUP":
+        totalActivityFees += Number(activity.resident_price);
+        break;
+      case "PER PERSON PER NIGHT":
+        totalActivityFees +=
+          Number(activity.resident_price) *
+          totalNumberOfGuests *
+          numberOfNights;
+        break;
+      default:
+        break;
+    }
+  });
+  return totalActivityFees;
+}
+
 function calculateExtraFees(
   extraFee: ExtraFee[],
   totalNumberOfGuests: number,
@@ -3529,6 +3557,7 @@ const pricing = {
   findUniqueFees,
   getResidentTotalPriceOtherFee,
   getNonResidentTotalPriceOtherFee,
+  calculateResidentActivityFees,
 
   findCommonRoomResidentNamesWithDescription,
   findCommonRoomNonResidentNamesWithDescription,

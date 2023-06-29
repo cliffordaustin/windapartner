@@ -19,6 +19,7 @@ import { useContext, useEffect, useRef, useState } from "react";
 import NonResidentGuestsSummary from "./NonResidentGuestsSummary";
 import NonResidentFeesSummary from "./NonResidentFeeSummary";
 import { format, differenceInCalendarDays } from "date-fns";
+import ActivitiesResidentSummary from "./ActivitiesResidentSummary";
 
 type TotalTypes = {
   id: number;
@@ -110,6 +111,12 @@ export default function PrintSummary({
     nights
   );
 
+  const activityResidentTotalPrice = pricing.calculateResidentActivityFees(
+    calculateStay.activityFee,
+    totalNumberOfGuests + totalNumberOfNonResidentGuests,
+    nights
+  );
+
   const residentTotalExtraFees = calculateStay.extraFee.filter(
     (item) => item.guestType === "Resident"
   );
@@ -180,7 +187,10 @@ export default function PrintSummary({
     : totalNonResidentPrice;
 
   let residentFullTotalPrice =
-    totalResidentPrice + totalResidentParkFees + totalResidentExtraFees;
+    totalResidentPrice +
+    totalResidentParkFees +
+    totalResidentExtraFees +
+    activityResidentTotalPrice;
 
   residentFullTotalPrice = includeClientInCalculation
     ? residentFullTotalPrice
@@ -188,12 +198,15 @@ export default function PrintSummary({
       totalResidentPrice * (Number(calculateStay.residentCommission) / 100) +
       totalResidentParkFees +
       totalResidentExtraFees +
-      totalResidentExtraFees * (Number(calculateStay.residentCommission) / 100);
+      totalResidentExtraFees *
+        (Number(calculateStay.residentCommission) / 100) +
+      activityResidentTotalPrice;
 
   let nonResidentFullTotalPrice =
     totalNonResidentPrice +
     totalNonResidentParkFees +
-    totalNonResidentExtraFees;
+    totalNonResidentExtraFees +
+    activityTotalPrice;
 
   nonResidentFullTotalPrice = includeClientInCalculation
     ? nonResidentFullTotalPrice
@@ -203,7 +216,8 @@ export default function PrintSummary({
       totalNonResidentParkFees +
       totalNonResidentExtraFees +
       totalNonResidentExtraFees *
-        (Number(calculateStay.nonResidentCommission) / 100);
+        (Number(calculateStay.nonResidentCommission) / 100) +
+      activityTotalPrice;
 
   useEffect(() => {
     updateTotals(calculateStay.id, residentFullTotalPrice, true);
@@ -393,6 +407,7 @@ export default function PrintSummary({
                           numberOfGuests={
                             totalNumberOfGuests + totalNumberOfNonResidentGuests
                           }
+                          summarizedCalculation={summarizedCalculation}
                           nights={nights}
                         ></ActivitiesSummary>
                       ))}
@@ -597,8 +612,8 @@ export default function PrintSummary({
 
                         {!summarizedCalculation && (
                           <Text size="sm" weight={600}>
-                            {activityTotalPrice
-                              ? `$ ${activityTotalPrice.toLocaleString()}`
+                            {activityResidentTotalPrice
+                              ? `$ ${activityResidentTotalPrice.toLocaleString()}`
                               : ""}
                           </Text>
                         )}
@@ -606,15 +621,16 @@ export default function PrintSummary({
 
                       <Flex direction="column" gap={2}>
                         {calculateStay.activityFee.map((activity, index) => (
-                          <ActivitiesSummary
+                          <ActivitiesResidentSummary
                             key={index}
                             activity={activity}
+                            summarizedCalculation={summarizedCalculation}
                             numberOfGuests={
                               totalNumberOfGuests +
                               totalNumberOfNonResidentGuests
                             }
                             nights={nights}
-                          ></ActivitiesSummary>
+                          ></ActivitiesResidentSummary>
                         ))}
                       </Flex>
                     </div>

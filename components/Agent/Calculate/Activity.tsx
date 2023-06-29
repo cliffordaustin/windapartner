@@ -25,6 +25,9 @@ export default function Activity({ activity, stay }: ActitivityProps) {
                 id: activity.id,
                 name: activity.name,
                 price: activity.price,
+                resident_price: activity.resident_price,
+                description: activity.description,
+                image: activity.image,
                 priceType: activity.price_type,
               },
             ],
@@ -71,7 +74,7 @@ export default function Activity({ activity, stay }: ActitivityProps) {
             </Text>
 
             <Text size="sm" weight={600} className="text-gray-800">
-              ${activity.price} (
+              ${activity.price} / KES{activity.resident_price} (
               {activity.price_type.charAt(0).toUpperCase() +
                 activity.price_type.slice(1).toLowerCase()}
               )

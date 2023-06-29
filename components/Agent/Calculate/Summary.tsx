@@ -19,6 +19,7 @@ import { useContext, useEffect, useState } from "react";
 import NonResidentGuestsSummary from "./NonResidentGuestsSummary";
 import NonResidentFeesSummary from "./NonResidentFeeSummary";
 import { format, differenceInCalendarDays } from "date-fns";
+import ActivitiesResidentSummary from "./ActivitiesResidentSummary";
 
 type SummaryProps = {
   calculateStay: StateType;
@@ -95,6 +96,12 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
     nights
   );
 
+  const activityResidentTotalPrice = pricing.calculateResidentActivityFees(
+    calculateStay.activityFee,
+    totalNumberOfGuests + totalNumberOfNonResidentGuests,
+    nights
+  );
+
   const residentTotalExtraFees = calculateStay.extraFee.filter(
     (item) => item.guestType === "Resident"
   );
@@ -148,7 +155,8 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
     totalResidentPrice * (Number(calculateStay.residentCommission) / 100) +
     totalResidentParkFees +
     totalResidentExtraFees +
-    totalResidentExtraFees * (Number(calculateStay.residentCommission) / 100);
+    totalResidentExtraFees * (Number(calculateStay.residentCommission) / 100) +
+    activityResidentTotalPrice;
 
   let nonResidentFullTotalPrice =
     totalNonResidentPrice +
@@ -157,7 +165,8 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
     totalNonResidentParkFees +
     totalNonResidentExtraFees +
     totalNonResidentExtraFees *
-      (Number(calculateStay.nonResidentCommission) / 100);
+      (Number(calculateStay.nonResidentCommission) / 100) +
+    activityTotalPrice;
 
   const residentExtraFees: ExtraFee[] = calculateStay.extraFee.filter(
     (item) => item.guestType === "Resident"
@@ -575,22 +584,22 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
                     </Text>
 
                     <Text size="sm" weight={600}>
-                      {activityTotalPrice
-                        ? `$ ${activityTotalPrice.toLocaleString()}`
+                      {activityResidentTotalPrice
+                        ? `KES ${activityResidentTotalPrice.toLocaleString()}`
                         : ""}
                     </Text>
                   </Flex>
 
                   <Flex direction="column" gap={2}>
                     {calculateStay.activityFee.map((activity, index) => (
-                      <ActivitiesSummary
+                      <ActivitiesResidentSummary
                         key={index}
                         activity={activity}
                         numberOfGuests={
                           totalNumberOfGuests + totalNumberOfNonResidentGuests
                         }
                         nights={nights}
-                      ></ActivitiesSummary>
+                      ></ActivitiesResidentSummary>
                     ))}
                   </Flex>
                 </div>

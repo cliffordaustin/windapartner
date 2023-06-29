@@ -9,6 +9,7 @@ export type ActivityFee = {
   name: string;
   description?: string;
   price: number;
+  resident_price: number;
   image?: string;
   price_type: "PER PERSON" | "WHOLE GROUP" | "PER PERSON PER NIGHT";
 };

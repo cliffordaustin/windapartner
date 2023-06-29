@@ -7,7 +7,8 @@ import {
   Room as StateRoomType,
   StateType,
 } from "@/context/CalculatePage";
-import { getRoomTypes } from "@/pages/api/stays";
+import { ParkFee as ParkFeeType } from "@/pages/api/stays";
+import { getParkFees, getRoomTypes } from "@/pages/api/stays";
 import pricing from "@/utils/calculation";
 import {
   OtherFeesNonResident,
@@ -281,18 +282,18 @@ export default function Room({ room, stay, index }: RoomProps) {
 
   const handleOtherFees = (
     e: React.ChangeEvent<HTMLInputElement>,
-    fee: OtherFees
+    fee: ParkFeeType
   ) => {
     if (e.target.checked) {
       const otherFee: OtherFees = {
         id: fee.id,
-        name: fee.name,
-        residentAdultPrice: fee.residentAdultPrice,
-        residentChildPrice: fee.residentChildPrice,
-        residentTeenPrice: fee.residentTeenPrice,
-        nonResidentAdultPrice: fee.nonResidentAdultPrice,
-        nonResidentChildPrice: fee.nonResidentChildPrice,
-        nonResidentTeenPrice: fee.nonResidentTeenPrice,
+        name: fee.name || "",
+        residentAdultPrice: Number(fee.resident_adult_price),
+        residentChildPrice: Number(fee.resident_child_price),
+        residentTeenPrice: Number(fee.resident_teen_price),
+        nonResidentAdultPrice: Number(fee.non_resident_adult_price),
+        nonResidentChildPrice: Number(fee.non_resident_child_price),
+        nonResidentTeenPrice: Number(fee.non_resident_teen_price),
       };
       setState(
         state.map((item) => {
@@ -933,7 +934,10 @@ export default function Room({ room, stay, index }: RoomProps) {
     );
   };
 
-  const otherFees = pricing.findMatchingFees(stay);
+  const { data: otherFees, isLoading: otherFeesLoading } = useQuery(
+    `park-fees-${stay?.slug}`,
+    () => getParkFees(stay)
+  );
 
   const [isRoomOpen, setIsRoomOpen] = useState(false);
   const [isPackageOpen, setIsPackageOpen] = useState(false);
@@ -1820,7 +1824,7 @@ export default function Room({ room, stay, index }: RoomProps) {
                 Park/conservancy fees
               </Text>
 
-              {otherFees.map((fee, index) => (
+              {otherFees?.map((fee, index) => (
                 <Flex
                   key={index}
                   justify={"space-between"}

@@ -3,7 +3,7 @@ import Link from "next/link";
 import UserDropdown from "../Homepage/UserDropdown";
 import { UserTypes } from "@/utils/types";
 import { Button, Container, Input, Tooltip } from "@mantine/core";
-import { IconSearch } from "@tabler/icons-react";
+import { IconSearch, IconX } from "@tabler/icons-react";
 import { useState } from "react";
 import { useRouter } from "next/router";
 
@@ -22,8 +22,10 @@ export default function Navbar({
   showAddProperty = false,
   openModal,
 }: NavbarProps) {
-  const [location, setLocation] = useState("");
   const router = useRouter();
+  const [location, setLocation] = useState(
+    (router.query.search as string) || ""
+  );
   const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
       search();
@@ -35,14 +37,14 @@ export default function Navbar({
       router.push({
         pathname: "/partner/agent",
         query: {
-          location: location,
+          search: location,
         },
       });
       return;
     } else {
       router.push({
         query: {
-          location: location,
+          search: location,
         },
       });
     }
@@ -82,13 +84,28 @@ export default function Navbar({
             onChange={(event) => setLocation(event.currentTarget.value)}
             onKeyDown={handleKeyPress}
             rightSection={
-              <div
-                onClick={() => {
-                  search();
-                }}
-                className="w-[30px] h-[30px] cursor-pointer flex items-center justify-center rounded-full bg-red-500"
-              >
-                <IconSearch size="1rem" className="text-white" />
+              <div className="flex items-center gap-2">
+                {router.query.search && location && (
+                  <div
+                    onClick={() => {
+                      setLocation("");
+                      router.push({
+                        pathname: "/partner/agent",
+                      });
+                    }}
+                    className="w-[15px] h-[15px] cursor-pointer flex items-center justify-center rounded-full bg-gray-800"
+                  >
+                    <IconX size="0.6rem" className="text-white" />
+                  </div>
+                )}
+                <div
+                  onClick={() => {
+                    search();
+                  }}
+                  className="w-[30px] h-[30px] cursor-pointer flex items-center justify-center rounded-full bg-red-500"
+                >
+                  <IconSearch size="1rem" className="text-white" />
+                </div>
               </div>
             }
           />
