@@ -846,7 +846,7 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
             bottom={0}
             right={0}
             w="100%"
-            className="w-full bg-gray-100 flex justify-between items-center text-right px-10"
+            className="w-[600px] bg-gray-100 flex justify-between items-center text-right px-10"
           >
             {currentSlideIndex === 0 && <div></div>}
             {currentSlideIndex === 1 && (
