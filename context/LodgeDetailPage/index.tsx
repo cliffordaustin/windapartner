@@ -15,6 +15,7 @@ export type Season = {
 
 export type Package = {
   name: string | null;
+  description: string;
   seasons: Season[];
 };
 
@@ -48,6 +49,7 @@ export const ContextProvider = ({ children }: ContextProviderProps) => {
     packages: [
       {
         name: "",
+        description: "",
         seasons: [
           {
             date: [[null, null]],

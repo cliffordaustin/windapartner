@@ -40,6 +40,7 @@ type RoomProps = {
   childCapacity: number | "";
   infantCapacity: number | "";
   roomPackage: string | null;
+  packageDescription: string;
 };
 
 export type RoomReturnType = {
@@ -47,7 +48,14 @@ export type RoomReturnType = {
 };
 
 export const addRoom = async (
-  { name, capacity, childCapacity, infantCapacity, roomPackage }: RoomProps,
+  {
+    name,
+    capacity,
+    childCapacity,
+    infantCapacity,
+    roomPackage,
+    packageDescription,
+  }: RoomProps,
   slug: string | null
 ): Promise<RoomReturnType | null> => {
   const response = await axios.post(
@@ -58,6 +66,7 @@ export const addRoom = async (
       child_capacity: childCapacity,
       infant_capacity: infantCapacity,
       package: roomPackage,
+      package_description: packageDescription,
     },
     {
       headers: {

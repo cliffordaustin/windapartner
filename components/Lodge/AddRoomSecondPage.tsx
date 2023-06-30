@@ -198,6 +198,7 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
           childCapacity: state.child_capacity,
           infantCapacity: state.infant_capacity,
           roomPackage: pkg.name,
+          packageDescription: pkg.description,
         },
         staySlug
       );
@@ -443,6 +444,7 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
             childCapacity: state.child_capacity,
             infantCapacity: state.infant_capacity,
             roomPackage: pkg.name,
+            packageDescription: pkg.description,
           },
           staySlug
         );

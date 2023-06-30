@@ -66,6 +66,7 @@ export function Stay({ stay, index }: StayProps) {
               nonResidentChild: 0,
               nonResidentInfant: 0,
               package: "",
+              packageDescription: "",
               residentParkFee: [],
               nonResidentParkFee: [],
               otherFees: [],

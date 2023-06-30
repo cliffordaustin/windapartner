@@ -108,6 +108,7 @@ export type RoomType = {
   child_capacity: number;
   infant_capacity: number;
   package: string;
+  package_description: string | null;
   room_resident_availabilities: RoomAvailabilityResident[];
   room_non_resident_availabilities: RoomAvailabilityNonResident[];
 };

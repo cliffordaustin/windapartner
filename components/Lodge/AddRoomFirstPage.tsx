@@ -13,6 +13,7 @@ import {
   Select,
   Text,
   TextInput,
+  Textarea,
 } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import { IconCalendar, IconSelector, IconX } from "@tabler/icons-react";
@@ -273,6 +274,7 @@ function AddRoomFirstPage() {
   const addPackage = () => {
     const newPackage: Package = {
       name: "",
+      description: "",
       seasons: state.seasons.map((season) => ({
         ...season,
       })),
@@ -583,8 +585,96 @@ function AddRoomFirstPage() {
               <Text weight={500} size="sm">
                 Packages
               </Text>
-              {state.packages.map((packageItem, index) => (
-                <Flex align="center" gap={5} key={index}>
+              <Accordion
+                onKeyUpCapture={(e) => {
+                  e.preventDefault();
+                }}
+                classNames={{
+                  control: "hover:bg-gray-50 h-[55px]",
+                }}
+                chevronPosition="left"
+                mb={10}
+                defaultValue="0"
+                variant="contained"
+              >
+                {state.packages.map((packageItem, index) => (
+                  <Accordion.Item value={index.toString()} key={index}>
+                    <Flex align="center" gap={5}>
+                      <Accordion.Control>
+                        <Select
+                          value={packageItem.name}
+                          onChange={(value) => {
+                            const newPackages = [...state.packages];
+                            newPackages[index].name = value;
+                            setState((prev) => ({
+                              ...prev,
+                              packages: newPackages,
+                            }));
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
+                          placeholder="Select one"
+                          className="w-full"
+                          data={[
+                            { value: "ALL INCLUSIVE", label: "All Inclusive" },
+                            { value: "FULL BOARD", label: "Full Board" },
+                            { value: "GAME PACKAGE", label: "Game Package" },
+                            { value: "HALF BOARD", label: "Half Board" },
+                            {
+                              value: "BED AND BREAKFAST",
+                              label: "Bed and Breakfast",
+                            },
+                          ]}
+                          radius="sm"
+                        />
+                      </Accordion.Control>
+                      <div
+                        onClick={() => {
+                          if (state.packages.length === 1) {
+                            // clear the name of the first package
+                            const newPackages = [...state.packages];
+                            newPackages[index].name = "";
+                            newPackages[index].description = "";
+                            setState((prev) => ({
+                              ...prev,
+                              packages: newPackages,
+                            }));
+                          } else {
+                            const newPackages = [...state.packages];
+                            newPackages.splice(index, 1);
+                            setState((prev) => ({
+                              ...prev,
+                              packages: newPackages,
+                            }));
+                          }
+                        }}
+                        className="w-7 h-7 flex mr-2 items-center hover:bg-gray-200 cursor-pointer justify-center bg-gray-100 rounded-md"
+                      >
+                        <IconX
+                          size={20}
+                          color="gray"
+                          className="cursor-pointer"
+                        />
+                      </div>
+                    </Flex>
+                    <Accordion.Panel>
+                      <Textarea
+                        placeholder="Describe the package"
+                        label="Description"
+                        value={packageItem.description}
+                        onChange={(event) => {
+                          const newPackages = [...state.packages];
+                          newPackages[index].description =
+                            event.currentTarget.value;
+                          setState((prev) => ({
+                            ...prev,
+                            packages: newPackages,
+                          }));
+                        }}
+                      />
+                    </Accordion.Panel>
+                    {/* <Flex align="center" gap={5} key={index}>
                   <Select
                     value={packageItem.name}
                     onChange={(value) => {
@@ -629,8 +719,10 @@ function AddRoomFirstPage() {
                   >
                     <IconX size={20} color="gray" className="cursor-pointer" />
                   </div>
-                </Flex>
-              ))}
+                </Flex> */}
+                  </Accordion.Item>
+                ))}
+              </Accordion>
               <Anchor
                 size="sm"
                 type="button"
@@ -723,6 +815,7 @@ function AddRoomFirstPage() {
               chevronPosition="left"
               mb={10}
               defaultValue="0"
+              variant="contained"
             >
               {state.seasons.map((season, index) => (
                 <Accordion.Item value={index.toString()} key={index}>
@@ -741,7 +834,10 @@ function AddRoomFirstPage() {
                           placeholder="eg. High Season"
                         />
                       </Accordion.Control>
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Box
+                        mr={3}
+                        sx={{ display: "flex", alignItems: "center" }}
+                      >
                         <ActionIcon
                           onClick={() => {
                             if (state.seasons.length === 1) {
@@ -751,6 +847,7 @@ function AddRoomFirstPage() {
                             }
                           }}
                           size="lg"
+                          className="hover:bg-gray-100"
                         >
                           <IconX
                             size={20}

@@ -42,7 +42,13 @@ const guestClassName =
   "h-[35px] hover:bg-red-500 cursor-pointer hover:border-red-500 hover:text-white transition-all duration-300 flex text-gray-600 items-center justify-center w-[35px] border border-solid border-gray-400 ";
 
 export default function Room({ room, stay, index }: RoomProps) {
-  const [selectedPackages, setSelectedPackages] = useState<string[]>([]);
+  type SelectedPackagesType = {
+    name: string;
+    description: string | null;
+  };
+  const [selectedPackages, setSelectedPackages] = useState<
+    SelectedPackagesType[]
+  >([]);
 
   const { state, setState } = useContext(Context);
 
@@ -401,13 +407,16 @@ export default function Room({ room, stay, index }: RoomProps) {
       return accumulator;
     }, []) || [];
 
-  function getPackagesForSelectedRoom(room: string): string[] {
+  function getPackagesForSelectedRoom(room: string): SelectedPackagesType[] {
     const roomName = room.toLowerCase();
-    const packages: string[] = [];
+    const packages: SelectedPackagesType[] = [];
 
     for (const room of roomTypes || []) {
       if (room.name?.toLowerCase() === roomName) {
-        packages.push(room.package);
+        packages.push({
+          name: room.package,
+          description: room.package_description,
+        });
       }
     }
     return packages;
@@ -1048,26 +1057,48 @@ export default function Room({ room, stay, index }: RoomProps) {
                 justify={"space-between"}
                 align={"center"}
                 onClick={() => {
-                  if (roomPackage === room.package) {
+                  if (roomPackage.name === room.package) {
                     deselectPackage();
                   } else {
-                    clickSelectPackage(roomPackage);
+                    clickSelectPackage(roomPackage.name);
                   }
                 }}
                 onMouseDown={() => {
                   setIsPackageOpen(false);
                 }}
                 className={
-                  "py-2 px-2 rounded-md mt-1 cursor-pointer " +
-                  (room.package === roomPackage
+                  "rounded-md mt-1 cursor-pointer " +
+                  (room.package === roomPackage.name
                     ? "bg-[#FA5252] text-white"
                     : "hover:bg-gray-100")
                 }
               >
-                <Text size="sm" weight={600}>
-                  {roomPackage.charAt(0).toUpperCase() +
-                    roomPackage.slice(1).toLowerCase()}
-                </Text>
+                {roomPackage.description ? (
+                  <Tooltip.Floating
+                    multiline
+                    width={300}
+                    color="white"
+                    position="bottom"
+                    className="text-gray-800 font-semibold border-gray-200 border border-solid"
+                    label={roomPackage.description}
+                  >
+                    <Text
+                      w="100%"
+                      className="py-2 px-2 "
+                      size="sm"
+                      weight={600}
+                    >
+                      {roomPackage.name.charAt(0).toUpperCase() +
+                        roomPackage.name.slice(1).toLowerCase()}
+                    </Text>
+                  </Tooltip.Floating>
+                ) : (
+                  <Text size="sm" weight={600}>
+                    {roomPackage.name.charAt(0).toUpperCase() +
+                      roomPackage.name.slice(1).toLowerCase()}
+                    fj
+                  </Text>
+                )}
               </Flex>
             ))}
           </Popover.Dropdown>
