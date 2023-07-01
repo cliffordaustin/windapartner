@@ -123,10 +123,10 @@ function Season({ index, season, active }: SeasonPropTypes) {
                 Description
               </Text>
               <Text w="50%" className="text-sm font-semibold">
-                Resident price(KES)
+                Non-resident price($)
               </Text>
               <Text w="50%" className="text-sm font-semibold">
-                Non-resident price($)
+                Resident price(KES)
               </Text>
             </Flex>
             {season.guests.map((guest, guestIndex) => (
@@ -140,23 +140,23 @@ function Season({ index, season, active }: SeasonPropTypes) {
                 </Text>
 
                 <NumberInput
-                  hideControls
-                  w="50%"
-                  placeholder="eg. 2000"
-                  value={guest.residentPrice}
-                  onChange={(value) => {
-                    updateResidentPrice(value, guestIndex, season.name);
-                  }}
-                  radius="sm"
-                />
-
-                <NumberInput
                   w="50%"
                   hideControls
                   placeholder="eg. 100"
                   value={guest.nonResidentPrice}
                   onChange={(value) => {
                     updateNonResidentPrice(value, guestIndex, season.name);
+                  }}
+                  radius="sm"
+                />
+
+                <NumberInput
+                  hideControls
+                  w="50%"
+                  placeholder="eg. 2000"
+                  value={guest.residentPrice}
+                  onChange={(value) => {
+                    updateResidentPrice(value, guestIndex, season.name);
                   }}
                   radius="sm"
                 />

@@ -611,9 +611,9 @@ function AddRoomFirstPage() {
                               packages: newPackages,
                             }));
                           }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                          }}
+                          // onClick={(e) => {
+                          //   e.stopPropagation();
+                          // }}
                           placeholder="Select one"
                           className="w-full"
                           data={[

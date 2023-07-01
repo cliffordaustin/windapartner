@@ -299,10 +299,7 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
     "PER PERSON"
   );
 
-  const [activityLoading, setActivityLoading] = React.useState(false);
-
-  const addActivity = async (values: ActivityValues) => {
-    setActivityLoading(true);
+  const addActivityFunc = async (values: ActivityValues) => {
     await axios.post(
       `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/${stay.slug}/activities/`,
       {
@@ -318,9 +315,16 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
         },
       }
     );
-
-    router.reload();
   };
+
+  const { mutateAsync: addActivity, isLoading: activityLoading } = useMutation(
+    addActivityFunc,
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(`activities-${stay?.slug}`);
+      },
+    }
+  );
 
   const [
     openAddContractRateModal,
