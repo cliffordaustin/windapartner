@@ -1096,7 +1096,6 @@ export default function Room({ room, stay, index }: RoomProps) {
                   <Text size="sm" weight={600}>
                     {roomPackage.name.charAt(0).toUpperCase() +
                       roomPackage.name.slice(1).toLowerCase()}
-                    fj
                   </Text>
                 )}
               </Flex>
