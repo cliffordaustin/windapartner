@@ -17,6 +17,7 @@ export type Package = {
   name: string | null;
   description: string;
   seasons: Season[];
+  isInput?: Boolean;
 };
 
 export type StateType = {
@@ -46,10 +47,12 @@ export const ContextProvider = ({ children }: ContextProviderProps) => {
     adult_capacity: "",
     child_capacity: "",
     infant_capacity: "",
+
     packages: [
       {
         name: "",
         description: "",
+        isInput: true,
         seasons: [
           {
             date: [[null, null]],

@@ -271,10 +271,11 @@ function AddRoomFirstPage() {
     }));
   };
 
-  const addPackage = () => {
+  const addPackage = (showInput: Boolean) => {
     const newPackage: Package = {
       name: "",
       description: "",
+      isInput: showInput,
       seasons: state.seasons.map((season) => ({
         ...season,
       })),
@@ -601,33 +602,55 @@ function AddRoomFirstPage() {
                   <Accordion.Item value={index.toString()} key={index}>
                     <Flex align="center" gap={5}>
                       <Accordion.Control>
-                        <Select
-                          value={packageItem.name}
-                          onChange={(value) => {
-                            const newPackages = [...state.packages];
-                            newPackages[index].name = value;
-                            setState((prev) => ({
-                              ...prev,
-                              packages: newPackages,
-                            }));
-                          }}
-                          // onClick={(e) => {
-                          //   e.stopPropagation();
-                          // }}
-                          placeholder="Select one"
-                          className="w-full"
-                          data={[
-                            { value: "ALL INCLUSIVE", label: "All Inclusive" },
-                            { value: "FULL BOARD", label: "Full Board" },
-                            { value: "GAME PACKAGE", label: "Game Package" },
-                            { value: "HALF BOARD", label: "Half Board" },
-                            {
-                              value: "BED AND BREAKFAST",
-                              label: "Bed and Breakfast",
-                            },
-                          ]}
-                          radius="sm"
-                        />
+                        {!packageItem.isInput && (
+                          <Select
+                            value={packageItem.name}
+                            onChange={(value) => {
+                              const newPackages = [...state.packages];
+                              newPackages[index].name = value;
+                              setState((prev) => ({
+                                ...prev,
+                                packages: newPackages,
+                              }));
+                            }}
+                            // onClick={(e) => {
+                            //   e.stopPropagation();
+                            // }}
+                            placeholder="Select one"
+                            className="w-full"
+                            data={[
+                              {
+                                value: "ALL INCLUSIVE",
+                                label: "All Inclusive",
+                              },
+                              { value: "FULL BOARD", label: "Full Board" },
+                              { value: "GAME PACKAGE", label: "Game Package" },
+                              { value: "HALF BOARD", label: "Half Board" },
+                              {
+                                value: "BED AND BREAKFAST",
+                                label: "Bed and Breakfast",
+                              },
+                            ]}
+                            radius="sm"
+                          />
+                        )}
+
+                        {packageItem.isInput && (
+                          <TextInput
+                            value={packageItem.name || ""}
+                            onChange={(event) => {
+                              const name = event.currentTarget.value;
+                              const newPackages = [...state.packages];
+                              newPackages[index].name = name;
+                              setState((prev) => ({
+                                ...prev,
+                                packages: newPackages,
+                              }));
+                            }}
+                            placeholder="eg. All Inclusive"
+                            radius="sm"
+                          />
+                        )}
                       </Accordion.Control>
                       <div
                         onClick={() => {
@@ -728,11 +751,36 @@ function AddRoomFirstPage() {
                 type="button"
                 color="blue"
                 onClick={() => {
-                  addPackage();
+                  addPackage(true);
                 }}
               >
                 Add another package
               </Anchor>
+              {/* <Flex gap={4}>
+                <Anchor
+                  size="sm"
+                  type="button"
+                  color="blue"
+                  onClick={() => {
+                    addPackage(true);
+                  }}
+                >
+                  Add another package
+                </Anchor>
+
+                <Divider orientation="vertical" />
+
+                <Anchor
+                  size="sm"
+                  type="button"
+                  color="black"
+                  onClick={() => {
+                    addPackage(true);
+                  }}
+                >
+                  Add other packages
+                </Anchor>
+              </Flex> */}
             </Flex>
           </Flex>
         </Container>

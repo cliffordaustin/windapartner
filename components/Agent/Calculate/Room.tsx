@@ -1093,7 +1093,7 @@ export default function Room({ room, stay, index }: RoomProps) {
                     </Text>
                   </Tooltip.Floating>
                 ) : (
-                  <Text size="sm" weight={600}>
+                  <Text className="py-2 px-2 " size="sm" weight={600}>
                     {roomPackage.name.charAt(0).toUpperCase() +
                       roomPackage.name.slice(1).toLowerCase()}
                   </Text>
