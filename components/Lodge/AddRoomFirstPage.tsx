@@ -872,9 +872,9 @@ function AddRoomFirstPage() {
                       <Accordion.Control>
                         <TextInput
                           value={season.name}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                          }}
+                          // onClick={(e) => {
+                          //   e.stopPropagation();
+                          // }}
                           onChange={(event) => {
                             updateSeasonName(event, index);
                           }}

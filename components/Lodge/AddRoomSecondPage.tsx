@@ -194,9 +194,9 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
       const response = addRoom(
         {
           name: state.name,
-          capacity: state.adult_capacity,
-          childCapacity: state.child_capacity,
-          infantCapacity: state.infant_capacity,
+          capacity: Number(state.adult_capacity),
+          childCapacity: Number(state.child_capacity),
+          infantCapacity: Number(state.infant_capacity),
           roomPackage: pkg.name,
           packageDescription: pkg.description,
         },
@@ -440,9 +440,9 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
         const response = addRoom(
           {
             name: state.name,
-            capacity: state.adult_capacity,
-            childCapacity: state.child_capacity,
-            infantCapacity: state.infant_capacity,
+            capacity: Number(state.adult_capacity),
+            childCapacity: Number(state.child_capacity),
+            infantCapacity: Number(state.infant_capacity),
             roomPackage: pkg.name,
             packageDescription: pkg.description,
           },
