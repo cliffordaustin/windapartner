@@ -130,19 +130,19 @@ function ParkFee({ fee, stay }: ParkFeeProps) {
             <Text className="text-sm text-gray-500 font-semibold">
               Adult:{" "}
               <span className="font-bold text-gray-800">
-                KES{fee.resident_adult_price} / ${fee.non_resident_adult_price}
+                ${fee.non_resident_adult_price} / KES{fee.resident_adult_price}
               </span>
             </Text>
             <Text className="text-sm text-gray-500 font-semibold">
               Teen:{" "}
               <span className="font-bold text-gray-800">
-                KES{fee.resident_teen_price} / ${fee.non_resident_teen_price}
+                ${fee.non_resident_teen_price} / KES{fee.resident_teen_price}
               </span>
             </Text>
             <Text className="text-sm text-gray-500 font-semibold">
               Child:{" "}
               <span className="font-bold text-gray-800">
-                KES{fee.resident_child_price} / ${fee.non_resident_child_price}
+                ${fee.non_resident_child_price} / KES{fee.resident_child_price}
               </span>
             </Text>
           </div>

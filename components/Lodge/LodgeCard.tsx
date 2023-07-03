@@ -484,31 +484,6 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
           />
 
           <NumberInput
-            label="Resident adult fee"
-            placeholder="Enter resident adult fee"
-            value={parkFeesForm.values.adultPrice}
-            onChange={(value) =>
-              parkFeesForm.setFieldValue("adultPrice", value)
-            }
-          />
-
-          <NumberInput
-            label="Resident teen fee"
-            placeholder="Enter resident teen fee"
-            value={parkFeesForm.values.teenPrice}
-            onChange={(value) => parkFeesForm.setFieldValue("teenPrice", value)}
-          />
-
-          <NumberInput
-            label="Resident child fee"
-            placeholder="Enter resident child fee"
-            value={parkFeesForm.values.childPrice}
-            onChange={(value) =>
-              parkFeesForm.setFieldValue("childPrice", value)
-            }
-          />
-
-          <NumberInput
             label="Non-resident adult fee"
             placeholder="Enter non-resident adult fee"
             value={parkFeesForm.values.nonResidentAdultPrice}
@@ -532,6 +507,31 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
             value={parkFeesForm.values.nonResidentChildPrice}
             onChange={(value) =>
               parkFeesForm.setFieldValue("nonResidentChildPrice", value)
+            }
+          />
+
+          <NumberInput
+            label="Resident adult fee"
+            placeholder="Enter resident adult fee"
+            value={parkFeesForm.values.adultPrice}
+            onChange={(value) =>
+              parkFeesForm.setFieldValue("adultPrice", value)
+            }
+          />
+
+          <NumberInput
+            label="Resident teen fee"
+            placeholder="Enter resident teen fee"
+            value={parkFeesForm.values.teenPrice}
+            onChange={(value) => parkFeesForm.setFieldValue("teenPrice", value)}
+          />
+
+          <NumberInput
+            label="Resident child fee"
+            placeholder="Enter resident child fee"
+            value={parkFeesForm.values.childPrice}
+            onChange={(value) =>
+              parkFeesForm.setFieldValue("childPrice", value)
             }
           />
 
@@ -655,20 +655,20 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
           />
 
           <NumberInput
-            label="Resident Activity Price"
-            placeholder="Enter resident activity price"
-            value={activityForm.values.residentPrice}
-            onChange={(value) =>
-              activityForm.setFieldValue("residentPrice", value)
-            }
-          />
-
-          <NumberInput
             label="Non-resident Activity Price"
             placeholder="Enter non-resident activity price"
             value={activityForm.values.nonResidentPrice}
             onChange={(value) =>
               activityForm.setFieldValue("nonResidentPrice", value)
+            }
+          />
+
+          <NumberInput
+            label="Resident Activity Price"
+            placeholder="Enter resident activity price"
+            value={activityForm.values.residentPrice}
+            onChange={(value) =>
+              activityForm.setFieldValue("residentPrice", value)
             }
           />
 

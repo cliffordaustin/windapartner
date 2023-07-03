@@ -129,7 +129,7 @@ function Activity({ fee, stay }: ParkFeeProps) {
           <div className="flex items-center flex-wrap mt-3 gap-2">
             <Text className="text-sm text-gray-500 font-semibold">
               <span className="font-bold text-gray-800">
-                KES{fee.resident_price} / ${fee.price}
+                ${fee.price} / KES{fee.resident_price}
               </span>
             </Text>
 
