@@ -1,4 +1,4 @@
-import { Context, Season } from "@/context/LodgeDetailPage";
+import { Context, Package, Season } from "@/context/LodgeDetailPage";
 import {
   Anchor,
   Container,
@@ -93,64 +93,34 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
   const { state, setState } = useContext(Context);
 
   const [active, setActive] = useState(0);
+  const [activeRoom, setActiveRoom] = useState(0);
 
   const { classes, cx } = useStyles();
 
   const router = useRouter();
 
-  const links = state.packages.map((item, index) => (
-    <Container
-      className={cx(classes.link, { [classes.linkActive]: index === active })}
-      key={index}
-      onClick={(event) => {
-        event.preventDefault();
-        setActive(index);
-      }}
-    >
-      <div className="flex flex-col gap-2">
-        <Text>{state.name}</Text>
-        <Text weight={600}>
-          {upperFirst(item.name?.toLocaleLowerCase() || "")}
-        </Text>
-      </div>
-    </Container>
-  ));
-
-  const addSeason = () => {
-    const newSeason: Season = {
-      date: [[null, null]],
-      name: "Other season",
-      guests: state.guests.map((guest) => ({ ...guest })),
-    };
-
-    // const updatedPackages = state.packages.map((pkg) => {
-    //   return {
-    //     ...pkg,
-    //     seasons: [...pkg.seasons, newSeason],
-    //   };
-    // });
-
-    // setState((prevState) => ({
-    //   ...prevState,
-    //   packages: updatedPackages,
-    // }));
-
-    // add new season to package
-    const updatedPackages = state.packages.map((pkg, index) => {
-      if (index === active) {
-        return {
-          ...pkg,
-          seasons: [...pkg.seasons, newSeason],
-        };
-      }
-      return pkg;
-    });
-
-    setState((prevState) => ({
-      ...prevState,
-      packages: updatedPackages,
-    }));
-  };
+  const links = state.rooms.map((room, roomIndex) =>
+    room.packages.map((item, index) => (
+      <Container
+        className={cx(classes.link, {
+          [classes.linkActive]: index === active && roomIndex === activeRoom,
+        })}
+        key={index}
+        onClick={(event) => {
+          event.preventDefault();
+          setActive(index);
+          setActiveRoom(roomIndex);
+        }}
+      >
+        <div className="flex flex-col gap-2">
+          <Text>{room.name}</Text>
+          <Text weight={600}>
+            {upperFirst(item.name?.toLocaleLowerCase() || "")}
+          </Text>
+        </div>
+      </Container>
+    ))
+  );
 
   const [loading, setLoading] = useState(false);
 
@@ -188,185 +158,24 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
   const proceedSubmit = async () => {
     setLoadingProceed(true);
 
-    for (const pkg of state.packages) {
-      const allResidentData: ResidentGuestTypesData[][] = [];
-      const allNonResidentData: NonResidentGuestTypesData[][] = [];
-      const response = addRoom(
-        {
-          name: state.name,
-          capacity: Number(state.adult_capacity),
-          childCapacity: Number(state.child_capacity),
-          infantCapacity: Number(state.infant_capacity),
-          roomPackage: pkg.name,
-          packageDescription: pkg.description,
-        },
-        staySlug
-      );
-
-      const res = await response;
-
-      for (const season of pkg.seasons) {
-        const residentData: ResidentGuestTypesData[] = [];
-        const nonResidentData: NonResidentGuestTypesData[] = [];
-
-        const allDates: string[] = [];
-
-        season.date.map((date) => {
-          let currentDate = date[0];
-          let stopDate = date[1];
-
-          if (currentDate && stopDate) {
-            while (currentDate <= stopDate) {
-              allDates.push(format(currentDate, "yyyy-MM-dd"));
-              currentDate = addDays(currentDate, 1);
-            }
-          }
-        });
-
-        const sumOfResidentPrice = season.guests.reduce(
-          (acc, guest) => acc + (guest.residentPrice || 0),
-          0
-        );
-
-        const sumOfNonResidentPrice = season.guests.reduce(
-          (acc, guest) => acc + (guest.nonResidentPrice || 0),
-          0
-        );
-
-        if (sumOfResidentPrice > 0) {
-          allDates.map((date) => {
-            const obj: ResidentGuestTypesData = {
-              date: date,
-              room_resident_guest_availabilities: season.guests.map(
-                (guest) => ({
-                  name: guest.guestType,
-                  description: guest.description,
-                  season: season.name,
-                  price: guest.residentPrice || 0,
-                })
-              ),
-            };
-
-            residentData.push(obj);
-          });
-        }
-
-        if (sumOfNonResidentPrice > 0) {
-          allDates.map((date) => {
-            const obj: NonResidentGuestTypesData = {
-              date: date,
-              room_non_resident_guest_availabilities: season.guests.map(
-                (guest) => ({
-                  name: guest.guestType,
-                  description: guest.description,
-                  season: season.name,
-                  price: guest.nonResidentPrice || 0,
-                })
-              ),
-            };
-
-            nonResidentData.push(obj);
-          });
-        }
-
-        allResidentData.push(residentData);
-        allNonResidentData.push(nonResidentData);
-      }
-
-      for (const guest of allResidentData) {
-        await axios.post(
-          `${process.env.NEXT_PUBLIC_baseURL}/room-types/${res?.slug}/resident-availabilities/`,
-          guest,
-          {
-            headers: {
-              Authorization: "Token " + Cookies.get("token"),
-            },
-          }
-        );
-      }
-
-      for (const guest of allNonResidentData) {
-        await axios.post(
-          `${process.env.NEXT_PUBLIC_baseURL}/room-types/${res?.slug}/nonresident-availabilities/`,
-          guest,
-          {
-            headers: {
-              Authorization: "Token " + Cookies.get("token"),
-            },
-          }
-        );
-      }
-    }
-    router.reload();
-  };
-
-  const submit = async () => {
-    const submitSeasonDataError: SeasonDataErrorType[] = [];
-
-    setSeasonDataError([]);
-
-    // To perform checks
-    for (const pkg of state.packages) {
-      for (const season of pkg.seasons) {
-        const hasPrice = hasPriceInSeason(season);
-        const hasDate = hasDateInSeason(season);
-
-        if (!hasPrice && hasDate) {
-          setSeasonDataError((prevState) => [
-            ...prevState,
-            {
-              title: `Date has been added to <strong>${pkg.name?.toLowerCase()}</strong> - <strong>${
-                season.name
-              }</strong> but no price has been added`,
-            },
-          ]);
-
-          submitSeasonDataError.push({
-            title: `Date has been added to <strong>${pkg.name}</strong> - <strong>${season.name}</strong> but no price has been added`,
-          });
-        }
-
-        if (hasPrice && !hasDate) {
-          setSeasonDataError((prevState) => [
-            ...prevState,
-            {
-              title: `Price has been added to <strong>${pkg.name?.toLowerCase()}</strong> - <strong>${
-                season.name
-              }</strong> but no date has been added`,
-            },
-          ]);
-
-          submitSeasonDataError.push({
-            title: `Price has been added to <strong>${pkg.name?.toLowerCase()}</strong> - <strong>${
-              season.name
-            }</strong> but no date has been added`,
-          });
-        }
-
-        if (!hasPrice && !hasDate) {
-          setSeasonDataError((prevState) => [
-            ...prevState,
-            {
-              title: `No date or price has been added to <strong>${pkg.name?.toLowerCase()}</strong> - <strong>
-              ${season.name}
-              </strong>`,
-            },
-          ]);
-
-          submitSeasonDataError.push({
-            title: `No date or price has been added to <strong>${pkg.name?.toLowerCase()}</strong> - <strong>
-            ${season.name}
-            </strong>`,
-          });
-        }
-      }
-    }
-
-    if (submitSeasonDataError.length === 0) {
-      for (const pkg of state.packages) {
+    for (const room of state.rooms) {
+      for (const pkg of room.packages) {
         const allResidentData: ResidentGuestTypesData[][] = [];
         const allNonResidentData: NonResidentGuestTypesData[][] = [];
-        setLoading(true);
+        const response = addRoom(
+          {
+            name: room.name,
+            capacity: Number(room.adult_capacity),
+            childCapacity: Number(room.child_capacity),
+            infantCapacity: Number(room.infant_capacity),
+            roomPackage: pkg.name,
+            packageDescription: pkg.description,
+          },
+          staySlug
+        );
+
+        const res = await response;
+
         for (const season of pkg.seasons) {
           const residentData: ResidentGuestTypesData[] = [];
           const nonResidentData: NonResidentGuestTypesData[] = [];
@@ -435,22 +244,6 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
           allNonResidentData.push(nonResidentData);
         }
 
-        let res: RoomReturnType | null = null;
-
-        const response = addRoom(
-          {
-            name: state.name,
-            capacity: Number(state.adult_capacity),
-            childCapacity: Number(state.child_capacity),
-            infantCapacity: Number(state.infant_capacity),
-            roomPackage: pkg.name,
-            packageDescription: pkg.description,
-          },
-          staySlug
-        );
-
-        res = await response;
-
         for (const guest of allResidentData) {
           await axios.post(
             `${process.env.NEXT_PUBLIC_baseURL}/room-types/${res?.slug}/resident-availabilities/`,
@@ -473,6 +266,189 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
               },
             }
           );
+        }
+      }
+    }
+    router.reload();
+  };
+
+  const submit = async () => {
+    const submitSeasonDataError: SeasonDataErrorType[] = [];
+
+    setSeasonDataError([]);
+
+    // To perform checks
+    for (const room of state.rooms) {
+      for (const pkg of room.packages) {
+        for (const season of pkg.seasons) {
+          const hasPrice = hasPriceInSeason(season);
+          const hasDate = hasDateInSeason(season);
+
+          if (!hasPrice && hasDate) {
+            setSeasonDataError((prevState): SeasonDataErrorType[] => [
+              ...prevState,
+              {
+                title: `Date has been added to <strong>${pkg.name?.toLowerCase()}</strong> - <strong>${
+                  season.name
+                }</strong> but no price has been added`,
+              },
+            ]);
+
+            submitSeasonDataError.push({
+              title: `Date has been added to <strong>${pkg.name}</strong> - <strong>${season.name}</strong> but no price has been added`,
+            });
+          }
+
+          if (hasPrice && !hasDate) {
+            setSeasonDataError((prevState): SeasonDataErrorType[] => [
+              ...prevState,
+              {
+                title: `Price has been added to <strong>${pkg.name?.toLowerCase()}</strong> - <strong>${
+                  season.name
+                }</strong> but no date has been added`,
+              },
+            ]);
+
+            submitSeasonDataError.push({
+              title: `Price has been added to <strong>${pkg.name?.toLowerCase()}</strong> - <strong>${
+                season.name
+              }</strong> but no date has been added`,
+            });
+          }
+
+          if (!hasPrice && !hasDate) {
+            setSeasonDataError((prevState): SeasonDataErrorType[] => [
+              ...prevState,
+              {
+                title: `No date or price has been added to <strong>${pkg.name?.toLowerCase()}</strong> - <strong>
+                ${season.name}
+                </strong>`,
+              },
+            ]);
+
+            submitSeasonDataError.push({
+              title: `No date or price has been added to <strong>${pkg.name?.toLowerCase()}</strong> - <strong>
+              ${season.name}
+              </strong>`,
+            });
+          }
+        }
+      }
+    }
+
+    if (submitSeasonDataError.length === 0) {
+      for (const room of state.rooms) {
+        for (const pkg of room.packages) {
+          const allResidentData: ResidentGuestTypesData[][] = [];
+          const allNonResidentData: NonResidentGuestTypesData[][] = [];
+          setLoading(true);
+          for (const season of pkg.seasons) {
+            const residentData: ResidentGuestTypesData[] = [];
+            const nonResidentData: NonResidentGuestTypesData[] = [];
+
+            const allDates: string[] = [];
+
+            season.date.map((date) => {
+              let currentDate = date[0];
+              let stopDate = date[1];
+
+              if (currentDate && stopDate) {
+                while (currentDate <= stopDate) {
+                  allDates.push(format(currentDate, "yyyy-MM-dd"));
+                  currentDate = addDays(currentDate, 1);
+                }
+              }
+            });
+
+            const sumOfResidentPrice = season.guests.reduce(
+              (acc, guest) => acc + (guest.residentPrice || 0),
+              0
+            );
+
+            const sumOfNonResidentPrice = season.guests.reduce(
+              (acc, guest) => acc + (guest.nonResidentPrice || 0),
+              0
+            );
+
+            if (sumOfResidentPrice > 0) {
+              allDates.map((date) => {
+                const obj: ResidentGuestTypesData = {
+                  date: date,
+                  room_resident_guest_availabilities: season.guests.map(
+                    (guest) => ({
+                      name: guest.guestType,
+                      description: guest.description,
+                      season: season.name,
+                      price: guest.residentPrice || 0,
+                    })
+                  ),
+                };
+
+                residentData.push(obj);
+              });
+            }
+
+            if (sumOfNonResidentPrice > 0) {
+              allDates.map((date) => {
+                const obj: NonResidentGuestTypesData = {
+                  date: date,
+                  room_non_resident_guest_availabilities: season.guests.map(
+                    (guest) => ({
+                      name: guest.guestType,
+                      description: guest.description,
+                      season: season.name,
+                      price: guest.nonResidentPrice || 0,
+                    })
+                  ),
+                };
+
+                nonResidentData.push(obj);
+              });
+            }
+
+            allResidentData.push(residentData);
+            allNonResidentData.push(nonResidentData);
+          }
+
+          let res: RoomReturnType | null = null;
+
+          const response = addRoom(
+            {
+              name: room.name,
+              capacity: Number(room.adult_capacity),
+              childCapacity: Number(room.child_capacity),
+              infantCapacity: Number(room.infant_capacity),
+              roomPackage: pkg.name,
+              packageDescription: pkg.description,
+            },
+            staySlug
+          );
+
+          res = await response;
+
+          for (const guest of allResidentData) {
+            await axios.post(
+              `${process.env.NEXT_PUBLIC_baseURL}/room-types/${res?.slug}/resident-availabilities/`,
+              guest,
+              {
+                headers: {
+                  Authorization: "Token " + Cookies.get("token"),
+                },
+              }
+            );
+          }
+
+          for (const guest of allNonResidentData) {
+            await axios.post(
+              `${process.env.NEXT_PUBLIC_baseURL}/room-types/${res?.slug}/nonresident-availabilities/`,
+              guest,
+              {
+                headers: {
+                  Authorization: "Token " + Cookies.get("token"),
+                },
+              }
+            );
+          }
         }
       }
       router.reload();
@@ -545,14 +521,17 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
 
       <Container className="w-[70%] overflow-y-scroll">
         <Accordion mb={10} defaultValue="0">
-          {state.packages[active]?.seasons.map((season, index) => (
-            <RoomSeason
-              key={index}
-              index={index}
-              active={active}
-              season={season}
-            ></RoomSeason>
-          ))}
+          {state.rooms[activeRoom].packages[active]?.seasons.map(
+            (season, index) => (
+              <RoomSeason
+                key={index}
+                seasonIndex={index}
+                active={active}
+                activeRoom={activeRoom}
+                season={season}
+              ></RoomSeason>
+            )
+          )}
         </Accordion>
         <Flex align="center" justify="space-between">
           <div></div>

@@ -20,12 +20,16 @@ export type Package = {
   isInput?: Boolean;
 };
 
-export type StateType = {
+export type RoomType = {
   name: string;
   adult_capacity: number | "";
   child_capacity: number | "";
   infant_capacity: number | "";
   packages: Package[];
+};
+
+export type StateType = {
+  rooms: RoomType[];
   guests: Guest[];
   seasons: Season[];
 };
@@ -43,39 +47,43 @@ export const Context = createContext<ContextType>({} as ContextType);
 
 export const ContextProvider = ({ children }: ContextProviderProps) => {
   const [state, setState] = useState<StateType>({
-    name: "",
-    adult_capacity: "",
-    child_capacity: "",
-    infant_capacity: "",
-
-    packages: [
+    rooms: [
       {
         name: "",
-        description: "",
-        isInput: true,
-        seasons: [
-          {
-            date: [[null, null]],
-            name: "High Season",
-            guests: [
-              {
-                guestType: "",
-                description: "",
-                residentPrice: "",
-                nonResidentPrice: "",
-              },
-            ],
-          },
+        adult_capacity: "",
+        child_capacity: "",
+        infant_capacity: "",
 
+        packages: [
           {
-            date: [[null, null]],
-            name: "Low Season",
-            guests: [
+            name: "",
+            description: "",
+            isInput: true,
+            seasons: [
               {
-                guestType: "",
-                description: "",
-                residentPrice: "",
-                nonResidentPrice: "",
+                date: [[null, null]],
+                name: "High Season",
+                guests: [
+                  {
+                    guestType: "",
+                    description: "",
+                    residentPrice: "",
+                    nonResidentPrice: "",
+                  },
+                ],
+              },
+
+              {
+                date: [[null, null]],
+                name: "Low Season",
+                guests: [
+                  {
+                    guestType: "",
+                    description: "",
+                    residentPrice: "",
+                    nonResidentPrice: "",
+                  },
+                ],
               },
             ],
           },

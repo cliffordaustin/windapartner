@@ -1,4 +1,11 @@
-import { Context, Guest, Package, Season } from "@/context/LodgeDetailPage";
+import {
+  Context,
+  Guest,
+  Package,
+  RoomType,
+  Season,
+  StateType,
+} from "@/context/LodgeDetailPage";
 import {
   Accordion,
   AccordionControlProps,
@@ -26,14 +33,14 @@ function AddRoomFirstPage() {
     event: React.ChangeEvent<HTMLInputElement>,
     index: number
   ) => {
-    const updatedGuests = [...state.guests];
+    const updatedGuests: Guest[] = [...state.guests];
     updatedGuests[index] = {
       ...updatedGuests[index],
       guestType: event.target.value,
     };
 
-    const updateSeasons = state.seasons.map((season) => {
-      const updatedGuests = season.guests.map((g, i) => {
+    const updateSeasons: Season[] = state.seasons.map((season) => {
+      const updatedGuests: Guest[] = season.guests.map((g, i) => {
         if (i === index) {
           return {
             ...g,
@@ -49,50 +56,59 @@ function AddRoomFirstPage() {
       };
     });
 
-    const updatedPackages = state.packages.map((pkg) => {
-      const updatedSeasons = pkg.seasons.map((season) => {
-        const updatedGuests = season.guests.map((g, i) => {
-          if (i === index) {
-            return {
-              ...g,
-              guestType: event.target.value,
-            };
-          }
-          return g;
+    const updatedRooms: RoomType[] = state.rooms.map((room) => {
+      const updatedPackages: Package[] = room.packages.map((pkg) => {
+        const updatedSeasons: Season[] = pkg.seasons.map((season) => {
+          const updatedGuests: Guest[] = season.guests.map((g, i) => {
+            if (i === index) {
+              return {
+                ...g,
+                guestType: event.target.value,
+              };
+            }
+            return g;
+          });
+
+          return {
+            ...season,
+            guests: updatedGuests,
+          };
         });
 
         return {
-          ...season,
-          guests: updatedGuests,
+          ...pkg,
+          seasons: updatedSeasons,
         };
       });
 
       return {
-        ...pkg,
-        seasons: updatedSeasons,
+        ...room,
+        packages: updatedPackages,
       };
     });
 
-    setState((prevState) => ({
-      ...prevState,
-      guests: updatedGuests,
-      seasons: updateSeasons,
-      packages: updatedPackages,
-    }));
+    setState(
+      (prevState): StateType => ({
+        ...prevState,
+        guests: updatedGuests,
+        seasons: updateSeasons,
+        rooms: updatedRooms,
+      })
+    );
   };
 
   const updateGuestDescription = (
     event: React.ChangeEvent<HTMLInputElement>,
     index: number
   ) => {
-    const updatedGuests = [...state.guests];
+    const updatedGuests: Guest[] = [...state.guests];
     updatedGuests[index] = {
       ...updatedGuests[index],
       description: event.target.value,
     };
 
-    const updateSeasons = state.seasons.map((season) => {
-      const updatedGuests = season.guests.map((g, i) => {
+    const updateSeasons: Season[] = state.seasons.map((season) => {
+      const updatedGuests: Guest[] = season.guests.map((g, i) => {
         if (i === index) {
           return {
             ...g,
@@ -108,36 +124,45 @@ function AddRoomFirstPage() {
       };
     });
 
-    const updatedPackages = state.packages.map((pkg) => {
-      const updatedSeasons = pkg.seasons.map((season) => {
-        const updatedGuests = season.guests.map((g, i) => {
-          if (i === index) {
-            return {
-              ...g,
-              description: event.target.value,
-            };
-          }
-          return g;
+    const updatedRooms: RoomType[] = state.rooms.map((room) => {
+      const updatedPackages: Package[] = room.packages.map((pkg) => {
+        const updatedSeasons: Season[] = pkg.seasons.map((season) => {
+          const updatedGuests: Guest[] = season.guests.map((g, i) => {
+            if (i === index) {
+              return {
+                ...g,
+                description: event.target.value,
+              };
+            }
+            return g;
+          });
+
+          return {
+            ...season,
+            guests: updatedGuests,
+          };
         });
 
         return {
-          ...season,
-          guests: updatedGuests,
+          ...pkg,
+          seasons: updatedSeasons,
         };
       });
 
       return {
-        ...pkg,
-        seasons: updatedSeasons,
+        ...room,
+        packages: updatedPackages,
       };
     });
 
-    setState((prevState) => ({
-      ...prevState,
-      guests: updatedGuests,
-      seasons: updateSeasons,
-      packages: updatedPackages,
-    }));
+    setState(
+      (prevState): StateType => ({
+        ...prevState,
+        guests: updatedGuests,
+        seasons: updateSeasons,
+        rooms: updatedRooms,
+      })
+    );
   };
 
   const addGuest = () => {
@@ -148,43 +173,50 @@ function AddRoomFirstPage() {
       nonResidentPrice: "",
     };
 
-    const updatedGuests = [...state.guests, newGuest];
+    const updatedGuests: Guest[] = [...state.guests, newGuest];
 
-    const updatedSeasons = state.seasons.map((season) => {
+    const updatedSeasons: Season[] = state.seasons.map((season) => {
       return {
         ...season,
         guests: [...season.guests, newGuest],
       };
     });
 
-    const updatedPackages = state.packages.map((pkg) => {
-      const updatedSeasons = pkg.seasons.map((season) => {
+    const updatedRooms: RoomType[] = state.rooms.map((room) => {
+      const updatedPackages: Package[] = room.packages.map((pkg) => {
         return {
-          ...season,
-          guests: [...season.guests, newGuest],
+          ...pkg,
+          seasons: pkg.seasons.map((season) => {
+            return {
+              ...season,
+              guests: [...season.guests, newGuest],
+            };
+          }),
         };
       });
 
       return {
-        ...pkg,
-        seasons: updatedSeasons,
+        ...room,
+        packages: updatedPackages,
       };
     });
 
-    setState((prevState) => ({
-      ...prevState,
-      guests: updatedGuests,
-      seasons: updatedSeasons,
-      packages: updatedPackages,
-    }));
+    setState(
+      (prevState): StateType => ({
+        ...prevState,
+        guests: updatedGuests,
+        seasons: updatedSeasons,
+        rooms: updatedRooms,
+      })
+    );
   };
 
   const clearGuestsForZeroIndex = (index: number) => {
-    const newGuests = [...state.guests];
+    const newGuests: Guest[] = [...state.guests];
     newGuests[index].guestType = "";
     newGuests[index].description = "";
 
-    const updateSeason = state.seasons.map((season) => {
+    const updateSeason: Season[] = state.seasons.map((season) => {
       const updatedGuests = season.guests.map((g, i) => {
         if (i === index) {
           return {
@@ -202,44 +234,55 @@ function AddRoomFirstPage() {
       };
     });
 
-    const newPackages = state.packages.map((pkg) => {
-      const newSeasons = pkg.seasons.map((season) => {
-        const newGuests = season.guests.map((g, i) => {
-          if (i === index) {
-            return {
-              ...g,
-              guestType: "",
-              description: "",
-            };
-          }
-          return g;
+    const updatedRooms: RoomType[] = state.rooms.map((room) => {
+      const updatedPackages: Package[] = room.packages.map((pkg) => {
+        const updatedSeasons: Season[] = pkg.seasons.map((season) => {
+          const updatedGuests: Guest[] = season.guests.map((g, i) => {
+            if (i === index) {
+              return {
+                ...g,
+                guestType: "",
+                description: "",
+              };
+            }
+            return g;
+          });
+
+          return {
+            ...season,
+            guests: updatedGuests,
+          };
         });
 
         return {
-          ...season,
-          guests: newGuests,
+          ...pkg,
+          seasons: updatedSeasons,
         };
       });
 
       return {
-        ...pkg,
-        seasons: newSeasons,
+        ...room,
+        packages: updatedPackages,
       };
     });
 
-    setState((prev) => ({
-      ...prev,
-      packages: newPackages,
-      seasons: updateSeason,
-      guests: newGuests,
-    }));
+    setState(
+      (prev): StateType => ({
+        ...prev,
+        rooms: updatedRooms,
+        seasons: updateSeason,
+        guests: newGuests,
+      })
+    );
   };
 
   const removeGuest = (index: number) => {
-    const newGuests = state.guests.filter((_, i) => i !== index);
+    const newGuests: Guest[] = state.guests.filter((_, i) => i !== index);
 
-    const updateSeason = state.seasons.map((season) => {
-      const updatedGuests = season.guests.filter((_, i) => i !== index);
+    const updateSeason: Season[] = state.seasons.map((season) => {
+      const updatedGuests: Guest[] = season.guests.filter(
+        (_, i) => i !== index
+      );
 
       return {
         ...season,
@@ -247,31 +290,42 @@ function AddRoomFirstPage() {
       };
     });
 
-    const newPackages = state.packages.map((pkg) => {
-      const newSeasons = pkg.seasons.map((season) => {
-        const newGuests = season.guests.filter((_, i) => i !== index);
+    const updatedRooms: RoomType[] = state.rooms.map((room) => {
+      const updatedPackages: Package[] = room.packages.map((pkg) => {
+        const updatedSeasons: Season[] = pkg.seasons.map((season) => {
+          const updatedGuests: Guest[] = season.guests.filter(
+            (_, i) => i !== index
+          );
+
+          return {
+            ...season,
+            guests: updatedGuests,
+          };
+        });
 
         return {
-          ...season,
-          guests: newGuests,
+          ...pkg,
+          seasons: updatedSeasons,
         };
       });
 
       return {
-        ...pkg,
-        seasons: newSeasons,
+        ...room,
+        packages: updatedPackages,
       };
     });
 
-    setState((prev) => ({
-      ...prev,
-      packages: newPackages,
-      seasons: updateSeason,
-      guests: newGuests,
-    }));
+    setState(
+      (prev): StateType => ({
+        ...prev,
+        rooms: updatedRooms,
+        seasons: updateSeason,
+        guests: newGuests,
+      })
+    );
   };
 
-  const addPackage = (showInput: Boolean) => {
+  const addPackage = (showInput: Boolean, roomIndex: number) => {
     const newPackage: Package = {
       name: "",
       description: "",
@@ -281,43 +335,64 @@ function AddRoomFirstPage() {
       })),
     };
 
-    setState((prev) => ({
-      ...prev,
-      packages: [...prev.packages, newPackage],
-    }));
+    const updatedRooms: RoomType[] = state.rooms.map((room, index) => {
+      if (index === roomIndex) {
+        return {
+          ...room,
+          packages: [...room.packages, newPackage],
+        };
+      }
+      return room;
+    });
+
+    setState(
+      (prev): StateType => ({
+        ...prev,
+        rooms: updatedRooms,
+      })
+    );
   };
 
   const updateSeasonName = (
     event: React.ChangeEvent<HTMLInputElement>,
     index: number
   ) => {
-    const updatedSeasons = [...state.seasons];
+    const updatedSeasons: Season[] = [...state.seasons];
     updatedSeasons[index] = {
       ...updatedSeasons[index],
       name: event.target.value,
     };
-    const updatedPackages = state.packages.map((pkg) => {
-      const updatedSeasons = pkg.seasons.map((season, i) => {
-        if (index === i) {
-          return {
-            ...season,
-            name: event.target.value,
-          };
-        }
-        return season;
+    const updatedRooms: RoomType[] = state.rooms.map((room) => {
+      const updatedPackages: Package[] = room.packages.map((pkg) => {
+        const updatedSeasons: Season[] = pkg.seasons.map((season, i) => {
+          if (index === i) {
+            return {
+              ...season,
+              name: event.target.value,
+            };
+          }
+          return season;
+        });
+
+        return {
+          ...pkg,
+          seasons: updatedSeasons,
+        };
       });
 
       return {
-        ...pkg,
-        seasons: updatedSeasons,
+        ...room,
+        packages: updatedPackages,
       };
     });
 
-    setState((prev) => ({
-      ...prev,
-      seasons: updatedSeasons,
-      packages: updatedPackages,
-    }));
+    setState(
+      (prev): StateType => ({
+        ...prev,
+        seasons: updatedSeasons,
+        rooms: updatedRooms,
+      })
+    );
   };
 
   const updateSeasonDate = (
@@ -325,7 +400,7 @@ function AddRoomFirstPage() {
     index: number,
     dateIndex: number
   ) => {
-    const updatedSeasons = [...state.seasons];
+    const updatedSeasons: Season[] = [...state.seasons];
     updatedSeasons[index] = {
       ...updatedSeasons[index],
       date: updatedSeasons[index].date.map((d, i) => {
@@ -336,50 +411,236 @@ function AddRoomFirstPage() {
       }),
     };
 
-    const updatedPackages = state.packages.map((pkg) => {
-      const updatedSeasons = pkg.seasons.map((season, i) => {
-        if (index === i) {
-          return {
-            ...season,
-            date: season.date.map((d, i) => {
-              if (i === dateIndex) {
-                return date;
-              }
-              return d;
-            }),
-          };
-        }
-        return season;
+    const updatedRooms: RoomType[] = state.rooms.map((room) => {
+      const updatedPackages: Package[] = room.packages.map((pkg) => {
+        const updatedSeasons: Season[] = pkg.seasons.map((season, i) => {
+          if (index === i) {
+            return {
+              ...season,
+              date: season.date.map((d, i) => {
+                if (i === dateIndex) {
+                  return date;
+                }
+                return d;
+              }),
+            };
+          }
+          return season;
+        });
+
+        return {
+          ...pkg,
+          seasons: updatedSeasons,
+        };
       });
 
       return {
-        ...pkg,
-        seasons: updatedSeasons,
+        ...room,
+        packages: updatedPackages,
       };
     });
 
-    setState((prev) => ({
-      ...prev,
-      seasons: updatedSeasons,
-      packages: updatedPackages,
-    }));
+    setState(
+      (prev): StateType => ({
+        ...prev,
+        seasons: updatedSeasons,
+        rooms: updatedRooms,
+      })
+    );
   };
 
   const clearSeasonDate = (index: number, dateIndex: number) => {
     // if dateIndex is 0, set the date to [null, null], else remove the date
-    const seletedSeason = state.seasons[index];
+    const seletedSeason: Season = state.seasons[index];
     if (seletedSeason.date.length === 1) {
-      const updatedSeasons = [...state.seasons];
+      const updatedSeasons: Season[] = [...state.seasons];
       updatedSeasons[index] = {
         ...updatedSeasons[index],
         date: [[null, null]],
       };
 
-      const updatedPackages = state.packages.map((pkg) => {
+      const updatedRooms: RoomType[] = state.rooms.map((room) => {
+        const updatedPackages: Package[] = room.packages.map((pkg) => {
+          const updatedSeasons: Season[] = pkg.seasons.map((season, i) => {
+            if (index === i) {
+              return {
+                ...season,
+                date: [[null, null]],
+              };
+            }
+            return season;
+          });
+
+          return {
+            ...pkg,
+            seasons: updatedSeasons,
+          };
+        });
+
+        return {
+          ...room,
+          packages: updatedPackages,
+        };
+      });
+
+      setState(
+        (prev): StateType => ({
+          ...prev,
+          seasons: updatedSeasons,
+          rooms: updatedRooms,
+        })
+      );
+    } else {
+      const updatedSeasons = [...state.seasons];
+      updatedSeasons[index] = {
+        ...updatedSeasons[index],
+        date: updatedSeasons[index].date.filter((_, i) => i !== dateIndex),
+      };
+
+      const updatedRooms: RoomType[] = state.rooms.map((room) => {
+        const updatedPackages: Package[] = room.packages.map((pkg) => {
+          const updatedSeasons: Season[] = pkg.seasons.map((season, i) => {
+            if (index === i) {
+              return {
+                ...season,
+                date: season.date.filter((_, i) => i !== dateIndex),
+              };
+            }
+            return season;
+          });
+
+          return {
+            ...pkg,
+            seasons: updatedSeasons,
+          };
+        });
+
+        return {
+          ...room,
+          packages: updatedPackages,
+        };
+      });
+
+      setState(
+        (prev): StateType => ({
+          ...prev,
+          seasons: updatedSeasons,
+          rooms: updatedRooms,
+        })
+      );
+    }
+  };
+
+  const addSeasonDate = (index: number) => {
+    const updatedSeasons: Season[] = [...state.seasons];
+    updatedSeasons[index] = {
+      ...updatedSeasons[index],
+      date: [...updatedSeasons[index].date, [null, null]],
+    };
+
+    const updatedRooms: RoomType[] = state.rooms.map((room) => {
+      const updatedPackages: Package[] = room.packages.map((pkg) => {
         const updatedSeasons: Season[] = pkg.seasons.map((season, i) => {
           if (index === i) {
             return {
               ...season,
+              date: [...season.date, [null, null]],
+            };
+          }
+          return season;
+        });
+
+        return {
+          ...pkg,
+          seasons: updatedSeasons,
+        };
+      });
+
+      return {
+        ...room,
+        packages: updatedPackages,
+      };
+    });
+
+    setState(
+      (prev): StateType => ({
+        ...prev,
+        seasons: updatedSeasons,
+        rooms: updatedRooms,
+      })
+    );
+  };
+
+  const addSeason = () => {
+    const newSeason: Season = {
+      name: "",
+      date: [[null, null]],
+      guests: state.guests.map((guest) => ({ ...guest })),
+    };
+
+    const updatedRooms: RoomType[] = state.rooms.map((room) => {
+      const updatedPackages: Package[] = room.packages.map((pkg) => {
+        return {
+          ...pkg,
+          seasons: [...pkg.seasons, newSeason],
+        };
+      });
+
+      return {
+        ...room,
+        packages: updatedPackages,
+      };
+    });
+
+    setState(
+      (prev): StateType => ({
+        ...prev,
+        seasons: [...prev.seasons, newSeason],
+        rooms: updatedRooms,
+      })
+    );
+  };
+
+  const removeSeason = (index: number) => {
+    const updatedSeasons = state.seasons.filter((_, i) => i !== index);
+    const updatedRooms: RoomType[] = state.rooms.map((room) => {
+      const updatedPackages: Package[] = room.packages.map((pkg) => {
+        return {
+          ...pkg,
+          seasons: pkg.seasons.filter((_, i) => i !== index),
+        };
+      });
+
+      return {
+        ...room,
+        packages: updatedPackages,
+      };
+    });
+
+    setState(
+      (prev): StateType => ({
+        ...prev,
+        seasons: updatedSeasons,
+        rooms: updatedRooms,
+      })
+    );
+  };
+
+  const clearSeasonsForZeroIndex = (index: number) => {
+    const updatedSeasons = [...state.seasons];
+    updatedSeasons[index] = {
+      ...updatedSeasons[index],
+      name: "",
+      date: [[null, null]],
+    };
+
+    const updatedRooms: RoomType[] = state.rooms.map((room) => {
+      const updatedPackages: Package[] = room.packages.map((pkg) => {
+        const updatedSeasons: Season[] = pkg.seasons.map((season, i) => {
+          if (index === i) {
+            return {
+              ...season,
+              name: "",
               date: [[null, null]],
             };
           }
@@ -392,318 +653,355 @@ function AddRoomFirstPage() {
         };
       });
 
-      setState((prev) => ({
+      return {
+        ...room,
+        packages: updatedPackages,
+      };
+    });
+
+    setState(
+      (prev): StateType => ({
         ...prev,
         seasons: updatedSeasons,
-        packages: updatedPackages,
-      }));
-    } else {
-      const updatedSeasons = [...state.seasons];
-      updatedSeasons[index] = {
-        ...updatedSeasons[index],
-        date: updatedSeasons[index].date.filter((_, i) => i !== dateIndex),
-      };
+        rooms: updatedRooms,
+      })
+    );
+  };
 
-      const updatedPackages = state.packages.map((pkg) => {
-        const updatedSeasons: Season[] = pkg.seasons.map((season, i) => {
-          if (index === i) {
-            return {
-              ...season,
-              date: season.date.filter((_, i) => i !== dateIndex),
-            };
-          }
-          return season;
-        });
+  const addRoom = () => {
+    const newRoom: RoomType = {
+      name: "",
+      adult_capacity: "",
+      child_capacity: "",
+      infant_capacity: "",
 
-        return {
-          ...pkg,
-          seasons: updatedSeasons,
-        };
-      });
+      packages: [
+        {
+          name: "",
+          description: "",
+          isInput: true,
+          seasons: state.seasons.map((season) => ({
+            ...season,
+          })),
+        },
+      ],
+    };
 
-      setState((prev) => ({
+    setState(
+      (prev): StateType => ({
         ...prev,
-        seasons: updatedSeasons,
-        packages: updatedPackages,
-      }));
-    }
+        rooms: [...prev.rooms, newRoom],
+      })
+    );
   };
 
-  const addSeasonDate = (index: number) => {
-    const updatedSeasons = [...state.seasons];
-    updatedSeasons[index] = {
-      ...updatedSeasons[index],
-      date: [...updatedSeasons[index].date, [null, null]],
-    };
-
-    const updatedPackages = state.packages.map((pkg) => {
-      const updatedSeasons: Season[] = pkg.seasons.map((season, i) => {
-        if (index === i) {
-          return {
-            ...season,
-            date: [...season.date, [null, null]],
-          };
-        }
-        return season;
-      });
-
-      return {
-        ...pkg,
-        seasons: updatedSeasons,
-      };
-    });
-
-    setState((prev) => ({
-      ...prev,
-      seasons: updatedSeasons,
-      packages: updatedPackages,
-    }));
-  };
-
-  const addSeason = () => {
-    const newSeason: Season = {
-      name: "",
-      date: [[null, null]],
-      guests: state.guests.map((guest) => ({ ...guest })),
-    };
-
-    const updatedPackages = state.packages.map((pkg) => {
-      return {
-        ...pkg,
-        seasons: [...pkg.seasons, newSeason],
-      };
-    });
-
-    setState((prev) => ({
-      ...prev,
-      seasons: [...prev.seasons, newSeason],
-      packages: updatedPackages,
-    }));
-  };
-
-  const removeSeason = (index: number) => {
-    const updatedSeasons = state.seasons.filter((_, i) => i !== index);
-    const updatedPackages = state.packages.map((pkg) => {
-      return {
-        ...pkg,
-        seasons: pkg.seasons.filter((_, i) => i !== index),
-      };
-    });
-
-    setState((prev) => ({
-      ...prev,
-      seasons: updatedSeasons,
-      packages: updatedPackages,
-    }));
-  };
-
-  const clearSeasonsForZeroIndex = (index: number) => {
-    const updatedSeasons = [...state.seasons];
-    updatedSeasons[index] = {
-      ...updatedSeasons[index],
-      name: "",
-      date: [[null, null]],
-    };
-
-    const updatedPackages = state.packages.map((pkg) => {
-      const updatedSeasons: Season[] = pkg.seasons.map((season, i) => {
-        if (index === i) {
-          return {
-            ...season,
+  const removeRoom = (index: number) => {
+    let updatedRooms: RoomType[] = [];
+    if (state.rooms.length === 1) {
+      // clear room data
+      updatedRooms = [...state.rooms];
+      updatedRooms[index] = {
+        ...updatedRooms[index],
+        name: "",
+        adult_capacity: "",
+        child_capacity: "",
+        infant_capacity: "",
+        packages: [
+          {
             name: "",
-            date: [[null, null]],
-          };
-        }
-        return season;
-      });
-
-      return {
-        ...pkg,
-        seasons: updatedSeasons,
+            description: "",
+            isInput: true,
+            seasons: state.seasons.map((season) => ({
+              ...season,
+            })),
+          },
+        ],
       };
-    });
+    } else {
+      updatedRooms = state.rooms.filter((_, i) => i !== index);
+    }
 
-    setState((prev) => ({
-      ...prev,
-      seasons: updatedSeasons,
-      packages: updatedPackages,
-    }));
+    setState(
+      (prev): StateType => ({
+        ...prev,
+        rooms: updatedRooms,
+      })
+    );
   };
   return (
     <Flex w={900} gap={35} mt={12} mx="auto">
       <ScrollArea className="w-[40%] h-[80vh]" type="never">
         <Container>
           <Text weight={700} size="md">
-            Room
+            Rooms
           </Text>
 
-          <Flex direction="column" mt={10} gap={4}>
-            <TextInput
-              label="Room name"
-              placeholder="eg. Standard Room"
-              value={state.name}
-              onChange={(event) => {
-                const name = event.currentTarget.value;
-                setState((prev) => ({
-                  ...prev,
-                  name: name,
-                }));
-              }}
-              radius="sm"
-            />
-
-            <NumberInput
-              label="Adult capacity"
-              placeholder="eg. 2"
-              value={state.adult_capacity}
-              onChange={(value) =>
-                setState((prev) => ({ ...prev, adult_capacity: value }))
-              }
-              radius="sm"
-            />
-
-            <NumberInput
-              label="Child capacity"
-              placeholder="eg. 1"
-              value={state.child_capacity}
-              onChange={(value) =>
-                setState((prev) => ({ ...prev, child_capacity: value }))
-              }
-              radius="sm"
-            />
-
-            <NumberInput
-              label="Infant capacity"
-              placeholder="eg. 1"
-              value={state.infant_capacity}
-              onChange={(value) =>
-                setState((prev) => ({ ...prev, infant_capacity: value }))
-              }
-              radius="sm"
-            />
-
-            <Flex direction="column" gap={6}>
-              <Text weight={500} size="sm">
-                Packages
-              </Text>
-              <Accordion
-                onKeyUpCapture={(e) => {
-                  e.preventDefault();
+          {state.rooms.map((room, roomIndex) => (
+            <Flex key={roomIndex} direction="column" mt={10} gap={4}>
+              <TextInput
+                label="Room name"
+                placeholder="eg. Standard Room"
+                value={room.name}
+                onChange={(event) => {
+                  const name = event.currentTarget.value;
+                  setState(
+                    (prev): StateType => ({
+                      ...prev,
+                      rooms: prev.rooms.map((room, i) => {
+                        if (i === roomIndex) {
+                          return {
+                            ...room,
+                            name,
+                          };
+                        }
+                        return room;
+                      }),
+                    })
+                  );
                 }}
-                classNames={{
-                  control: "hover:bg-gray-50 h-[55px]",
-                }}
-                chevronPosition="left"
-                mb={10}
-                defaultValue="0"
-                variant="contained"
-              >
-                {state.packages.map((packageItem, index) => (
-                  <Accordion.Item value={index.toString()} key={index}>
-                    <Flex align="center" gap={5}>
-                      <Accordion.Control>
-                        {!packageItem.isInput && (
-                          <Select
-                            value={packageItem.name}
-                            onChange={(value) => {
-                              const newPackages = [...state.packages];
-                              newPackages[index].name = value;
-                              setState((prev) => ({
-                                ...prev,
-                                packages: newPackages,
-                              }));
-                            }}
-                            // onClick={(e) => {
-                            //   e.stopPropagation();
-                            // }}
-                            placeholder="Select one"
-                            className="w-full"
-                            data={[
-                              {
-                                value: "ALL INCLUSIVE",
-                                label: "All Inclusive",
-                              },
-                              { value: "FULL BOARD", label: "Full Board" },
-                              { value: "GAME PACKAGE", label: "Game Package" },
-                              { value: "HALF BOARD", label: "Half Board" },
-                              {
-                                value: "BED AND BREAKFAST",
-                                label: "Bed and Breakfast",
-                              },
-                            ]}
-                            radius="sm"
-                          />
-                        )}
+                radius="sm"
+              />
 
-                        {packageItem.isInput && (
-                          <TextInput
-                            value={packageItem.name || ""}
-                            onChange={(event) => {
-                              const name = event.currentTarget.value;
-                              const newPackages = [...state.packages];
-                              newPackages[index].name = name;
-                              setState((prev) => ({
-                                ...prev,
-                                packages: newPackages,
-                              }));
-                            }}
-                            placeholder="eg. All Inclusive"
-                            radius="sm"
+              <NumberInput
+                label="Adult capacity"
+                placeholder="eg. 2"
+                value={room.adult_capacity}
+                onChange={(value) =>
+                  setState(
+                    (prev): StateType => ({
+                      ...prev,
+                      rooms: prev.rooms.map((room, i) => {
+                        if (i === roomIndex) {
+                          return {
+                            ...room,
+                            adult_capacity: value,
+                          };
+                        }
+                        return room;
+                      }),
+                    })
+                  )
+                }
+                radius="sm"
+              />
+
+              <NumberInput
+                label="Child capacity"
+                placeholder="eg. 1"
+                value={room.child_capacity}
+                onChange={(value) =>
+                  setState(
+                    (prev): StateType => ({
+                      ...prev,
+                      rooms: prev.rooms.map((room, i) => {
+                        if (i === roomIndex) {
+                          return {
+                            ...room,
+                            child_capacity: value,
+                          };
+                        }
+                        return room;
+                      }),
+                    })
+                  )
+                }
+                radius="sm"
+              />
+
+              <NumberInput
+                label="Infant capacity"
+                placeholder="eg. 1"
+                value={room.infant_capacity}
+                onChange={(value) =>
+                  setState(
+                    (prev): StateType => ({
+                      ...prev,
+                      rooms: prev.rooms.map((room, i) => {
+                        if (i === roomIndex) {
+                          return {
+                            ...room,
+                            infant_capacity: value,
+                          };
+                        }
+                        return room;
+                      }),
+                    })
+                  )
+                }
+                radius="sm"
+              />
+
+              <Flex direction="column" gap={6}>
+                <Text weight={500} size="sm">
+                  Packages
+                </Text>
+                <Accordion
+                  onKeyUpCapture={(e) => {
+                    e.preventDefault();
+                  }}
+                  classNames={{
+                    control: "hover:bg-gray-50 h-[55px]",
+                  }}
+                  chevronPosition="left"
+                  mb={10}
+                  variant="contained"
+                >
+                  {room.packages.map((packageItem, index) => (
+                    <Accordion.Item value={index.toString()} key={index}>
+                      <Flex align="center" gap={5}>
+                        <Accordion.Control>
+                          {!packageItem.isInput && (
+                            <Select
+                              value={packageItem.name}
+                              onChange={(value) => {
+                                const newPackages = [...room.packages];
+                                newPackages[index].name = value;
+                                setState(
+                                  (prev): StateType => ({
+                                    ...prev,
+                                    rooms: prev.rooms.map((room, i) => {
+                                      if (i === roomIndex) {
+                                        return {
+                                          ...room,
+                                          packages: newPackages,
+                                        };
+                                      }
+                                      return room;
+                                    }),
+                                  })
+                                );
+                              }}
+                              placeholder="Select one"
+                              className="w-full"
+                              data={[
+                                {
+                                  value: "ALL INCLUSIVE",
+                                  label: "All Inclusive",
+                                },
+                                { value: "FULL BOARD", label: "Full Board" },
+                                {
+                                  value: "GAME PACKAGE",
+                                  label: "Game Package",
+                                },
+                                { value: "HALF BOARD", label: "Half Board" },
+                                {
+                                  value: "BED AND BREAKFAST",
+                                  label: "Bed and Breakfast",
+                                },
+                              ]}
+                              radius="sm"
+                            />
+                          )}
+
+                          {packageItem.isInput && (
+                            <TextInput
+                              value={packageItem.name || ""}
+                              onChange={(event) => {
+                                const name = event.currentTarget.value;
+                                const newPackages = [...room.packages];
+                                newPackages[index].name = name;
+                                setState(
+                                  (prev): StateType => ({
+                                    ...prev,
+                                    rooms: prev.rooms.map((room, i) => {
+                                      if (i === roomIndex) {
+                                        return {
+                                          ...room,
+                                          packages: newPackages,
+                                        };
+                                      }
+                                      return room;
+                                    }),
+                                  })
+                                );
+                              }}
+                              placeholder="eg. All Inclusive"
+                              radius="sm"
+                            />
+                          )}
+                        </Accordion.Control>
+                        <div
+                          onClick={() => {
+                            if (room.packages.length === 1) {
+                              // clear the name of the first package
+                              const newPackages = [...room.packages];
+                              newPackages[index].name = "";
+                              newPackages[index].description = "";
+                              setState(
+                                (prev): StateType => ({
+                                  ...prev,
+                                  rooms: prev.rooms.map((room, i) => {
+                                    if (i === roomIndex) {
+                                      return {
+                                        ...room,
+                                        packages: newPackages,
+                                      };
+                                    }
+                                    return room;
+                                  }),
+                                })
+                              );
+                            } else {
+                              const newPackages = [...room.packages];
+                              newPackages.splice(index, 1);
+                              setState(
+                                (prev): StateType => ({
+                                  ...prev,
+                                  rooms: prev.rooms.map((room, i) => {
+                                    if (i === roomIndex) {
+                                      return {
+                                        ...room,
+                                        packages: newPackages,
+                                      };
+                                    }
+                                    return room;
+                                  }),
+                                })
+                              );
+                            }
+                          }}
+                          className="w-7 h-7 flex mr-2 items-center hover:bg-gray-200 cursor-pointer justify-center bg-gray-100 rounded-md"
+                        >
+                          <IconX
+                            size={20}
+                            color="gray"
+                            className="cursor-pointer"
                           />
-                        )}
-                      </Accordion.Control>
-                      <div
-                        onClick={() => {
-                          if (state.packages.length === 1) {
-                            // clear the name of the first package
-                            const newPackages = [...state.packages];
-                            newPackages[index].name = "";
-                            newPackages[index].description = "";
-                            setState((prev) => ({
-                              ...prev,
-                              packages: newPackages,
-                            }));
-                          } else {
-                            const newPackages = [...state.packages];
-                            newPackages.splice(index, 1);
-                            setState((prev) => ({
-                              ...prev,
-                              packages: newPackages,
-                            }));
-                          }
-                        }}
-                        className="w-7 h-7 flex mr-2 items-center hover:bg-gray-200 cursor-pointer justify-center bg-gray-100 rounded-md"
-                      >
-                        <IconX
-                          size={20}
-                          color="gray"
-                          className="cursor-pointer"
+                        </div>
+                      </Flex>
+                      <Accordion.Panel>
+                        <Textarea
+                          placeholder="Describe the package"
+                          label="Description"
+                          value={packageItem.description}
+                          onChange={(event) => {
+                            const newPackages = [...room.packages];
+                            newPackages[index].description =
+                              event.currentTarget.value;
+                            setState(
+                              (prev): StateType => ({
+                                ...prev,
+                                rooms: prev.rooms.map((room, i) => {
+                                  if (i === roomIndex) {
+                                    return {
+                                      ...room,
+                                      packages: newPackages,
+                                    };
+                                  }
+                                  return room;
+                                }),
+                              })
+                            );
+                          }}
                         />
-                      </div>
-                    </Flex>
-                    <Accordion.Panel>
-                      <Textarea
-                        placeholder="Describe the package"
-                        label="Description"
-                        value={packageItem.description}
-                        onChange={(event) => {
-                          const newPackages = [...state.packages];
-                          newPackages[index].description =
-                            event.currentTarget.value;
-                          setState((prev) => ({
-                            ...prev,
-                            packages: newPackages,
-                          }));
-                        }}
-                      />
-                    </Accordion.Panel>
-                    {/* <Flex align="center" gap={5} key={index}>
+                      </Accordion.Panel>
+                      {/* <Flex align="center" gap={5} key={index}>
                   <Select
                     value={packageItem.name}
                     onChange={(value) => {
                       const newPackages = [...state.packages];
                       newPackages[index].name = value;
-                      setState((prev) => ({ ...prev, packages: newPackages }));
+                      setState((prev): StateType => ({ ...prev, packages: newPackages }));
                     }}
                     placeholder="Select one"
                     className="w-full"
@@ -743,46 +1041,50 @@ function AddRoomFirstPage() {
                     <IconX size={20} color="gray" className="cursor-pointer" />
                   </div>
                 </Flex> */}
-                  </Accordion.Item>
-                ))}
-              </Accordion>
-              <Anchor
-                size="sm"
-                type="button"
-                color="blue"
-                onClick={() => {
-                  addPackage(true);
-                }}
-              >
-                Add another package
-              </Anchor>
-              {/* <Flex gap={4}>
-                <Anchor
-                  size="sm"
-                  type="button"
-                  color="blue"
-                  onClick={() => {
-                    addPackage(true);
-                  }}
-                >
-                  Add another package
-                </Anchor>
+                    </Accordion.Item>
+                  ))}
+                </Accordion>
 
-                <Divider orientation="vertical" />
+                <Flex align="center" gap={8}>
+                  <Anchor
+                    size="sm"
+                    type="button"
+                    color="blue"
+                    onClick={() => {
+                      addPackage(true, roomIndex);
+                    }}
+                  >
+                    Add another package
+                  </Anchor>
 
-                <Anchor
-                  size="sm"
-                  type="button"
-                  color="black"
-                  onClick={() => {
-                    addPackage(true);
-                  }}
-                >
-                  Add other packages
-                </Anchor>
-              </Flex> */}
+                  <Divider orientation="vertical" />
+
+                  <Anchor
+                    size="sm"
+                    type="button"
+                    color="red"
+                    onClick={() => {
+                      removeRoom(roomIndex);
+                    }}
+                  >
+                    Remove room
+                  </Anchor>
+                </Flex>
+              </Flex>
             </Flex>
-          </Flex>
+          ))}
+
+          <Anchor
+            size="sm"
+            type="button"
+            mt={12}
+            color="blue"
+            onClick={() => {
+              addRoom();
+            }}
+          >
+            Add another room
+          </Anchor>
         </Container>
       </ScrollArea>
 

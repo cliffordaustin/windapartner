@@ -20,12 +20,13 @@ import { format } from "date-fns";
 import React, { useContext } from "react";
 
 type SeasonPropTypes = {
-  index: number;
+  seasonIndex: number;
   season: Season;
   active: number;
+  activeRoom: number;
 };
 
-function Season({ index, season, active }: SeasonPropTypes) {
+function Season({ seasonIndex, season, active, activeRoom }: SeasonPropTypes) {
   const { state, setState } = useContext(Context);
 
   const updateResidentPrice = (
@@ -33,26 +34,30 @@ function Season({ index, season, active }: SeasonPropTypes) {
     guestIndex: number,
     seasonName: string
   ) => {
-    const updatedPackages = state.packages.map((pkg) => {
-      const updatedSeasons: Season[] = pkg.seasons.map((season) => {
-        if (
-          season.name === seasonName &&
-          state.packages[active].name === pkg.name
-        ) {
-          const updatedGuests = season.guests.map((guest, index) => {
-            if (index === guestIndex) {
-              return { ...guest, residentPrice: value };
-            }
-            return guest;
-          });
-          return { ...season, guests: updatedGuests };
-        }
-        return season;
+    const updatedRooms = state.rooms.map((room) => {
+      const updatedPackages = room.packages.map((pkg) => {
+        const updatedSeasons: Season[] = pkg.seasons.map((season) => {
+          if (
+            season.name === seasonName &&
+            state.rooms.indexOf(room) === activeRoom &&
+            room.packages.indexOf(pkg) === active
+          ) {
+            const updatedGuests = season.guests.map((guest, index) => {
+              if (index === guestIndex) {
+                return { ...guest, residentPrice: value };
+              }
+              return guest;
+            });
+            return { ...season, guests: updatedGuests };
+          }
+          return season;
+        });
+        return { ...pkg, seasons: updatedSeasons };
       });
-      return { ...pkg, seasons: updatedSeasons };
+      return { ...room, packages: updatedPackages };
     });
 
-    setState({ ...state, packages: updatedPackages });
+    setState({ ...state, rooms: updatedRooms });
   };
 
   const updateNonResidentPrice = (
@@ -60,30 +65,34 @@ function Season({ index, season, active }: SeasonPropTypes) {
     guestIndex: number,
     seasonName: string
   ) => {
-    const updatedPackages = state.packages.map((pkg) => {
-      const updatedSeasons: Season[] = pkg.seasons.map((season) => {
-        if (
-          season.name === seasonName &&
-          state.packages[active].name === pkg.name
-        ) {
-          const updatedGuests = season.guests.map((guest, index) => {
-            if (index === guestIndex) {
-              return { ...guest, nonResidentPrice: value };
-            }
-            return guest;
-          });
-          return { ...season, guests: updatedGuests };
-        }
-        return season;
+    const updatedRooms = state.rooms.map((room) => {
+      const updatedPackages = room.packages.map((pkg) => {
+        const updatedSeasons: Season[] = pkg.seasons.map((season) => {
+          if (
+            season.name === seasonName &&
+            state.rooms.indexOf(room) === activeRoom &&
+            room.packages.indexOf(pkg) === active
+          ) {
+            const updatedGuests = season.guests.map((guest, index) => {
+              if (index === guestIndex) {
+                return { ...guest, nonResidentPrice: value };
+              }
+              return guest;
+            });
+            return { ...season, guests: updatedGuests };
+          }
+          return season;
+        });
+        return { ...pkg, seasons: updatedSeasons };
       });
-      return { ...pkg, seasons: updatedSeasons };
+      return { ...room, packages: updatedPackages };
     });
 
-    setState({ ...state, packages: updatedPackages });
+    setState({ ...state, rooms: updatedRooms });
   };
 
   return (
-    <Accordion.Item value={index.toString()}>
+    <Accordion.Item value={seasonIndex.toString()}>
       <Flex align="center">
         <Accordion.Control>
           <Flex gap={4} align="center">
