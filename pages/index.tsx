@@ -3,7 +3,6 @@ import { getUser } from "./api/user";
 import { GetServerSideProps } from "next";
 import { UserTypes } from "@/utils/types";
 import Head from "next/head";
-import Navbar from "@/components/Homepage/Navbar";
 import Image from "next/image";
 import { Source_Sans_Pro } from "next/font/google";
 import getToken from "@/utils/getToken";
