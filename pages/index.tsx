@@ -42,16 +42,6 @@ export default function Home() {
       </Head>
 
       <div className="w-full flex flex-col items-center home-gradient h-[300px] md:h-[350px] lg:h-[500px] !relative">
-        {/* <Image
-          className={"w-full object-cover "}
-          fill
-          src="/images/image-main.jpg"
-          unoptimized={true}
-          sizes="380"
-          alt="Image of samburu man looking at a vast landscape"
-          priority
-        /> */}
-
         <div className="absolute top-10 left-6">
           <Link href="/">
             <div className="relative w-28 h-9 cursor-pointer">
