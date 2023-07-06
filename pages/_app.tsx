@@ -8,6 +8,7 @@ import { NavigationProgress, nprogress } from "@mantine/nprogress";
 import { useRouter } from "next/router";
 import { ContextProvider as AgentContextProvider } from "@/context/AgentPage";
 import { ContextProvider as CalculateContextProvider } from "@/context/CalculatePage";
+import { Notifications } from "@mantine/notifications";
 
 const open_sans = Open_Sans({
   subsets: ["latin"],
@@ -45,7 +46,8 @@ export default function App({ Component, pageProps }: AppProps) {
         fontFamily: open_sans.style.fontFamily,
       }}
     >
-      <NavigationProgress />
+      <NavigationProgress color="red" />
+      <Notifications />
       <QueryClientProvider client={queryClient}>
         <Hydrate state={pageProps.dehydratedState}>
           <AgentContextProvider>

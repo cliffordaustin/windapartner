@@ -25,6 +25,15 @@
   filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#F83D5C", endColorstr="#FD4B2F", GradientType=1 );
 }
 
+.home-gradient {
+  background: rgb(11, 139, 158);
+  background: linear-gradient(
+    135deg,
+    rgba(11, 139, 158, 1) 0%,
+    rgba(255, 255, 255, 1) 100%
+  );
+}
+
 .swiper-button-prev,
 .swiper-button-next {
   top: 45%;
