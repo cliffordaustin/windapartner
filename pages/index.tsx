@@ -1,7 +1,3 @@
-import { dehydrate, QueryClient, useQuery } from "react-query";
-import { getUser } from "./api/user";
-import { GetServerSideProps } from "next";
-import { UserTypes } from "@/utils/types";
 import Head from "next/head";
 import Image from "next/image";
 import { Source_Sans_Pro } from "next/font/google";
@@ -19,12 +15,6 @@ const sans = Source_Sans_Pro({
 });
 
 export default function Home() {
-  const token = Cookies.get("token");
-
-  const { data: user } = useQuery<UserTypes | null>("user", () =>
-    getUser(token)
-  );
-
   const { scrollIntoView, targetRef } = useScrollIntoView<HTMLDivElement>({
     offset: 60,
   });
@@ -73,6 +63,13 @@ export default function Home() {
             >
               Safari Pricer
             </Text>
+            <Text
+              className={
+                "mb-2 text-2xl self-baseline sm:text-xl md:text-2xl xl:text-2xl text-white "
+              }
+            >
+              Revolutionizing Travel Pricing in Africa.
+            </Text>
 
             <Button
               className="!rounded-full mt-4 self-baseline"
@@ -108,33 +105,3 @@ export default function Home() {
     </div>
   );
 }
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const queryClient = new QueryClient();
-
-  const token = getToken(context);
-
-  try {
-    await queryClient.fetchQuery<UserTypes | null>("user", () =>
-      getUser(token)
-    );
-
-    return {
-      props: {
-        dehydratedState: dehydrate(queryClient),
-      },
-    };
-  } catch (error) {
-    if (error instanceof AxiosError && error.response?.status === 401) {
-      return {
-        redirect: {
-          destination: "/login",
-          permanent: false,
-        },
-      };
-    }
-    return {
-      props: {},
-    };
-  }
-};
