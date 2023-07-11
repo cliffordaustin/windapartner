@@ -39,9 +39,9 @@ import { add } from "date-fns";
 export default function AgentPage() {
   const token = Cookies.get("token");
   const router: NextRouter = useRouter();
-  const { data: user } = useQuery<UserTypes | null>("user", () =>
-    getUser(token)
-  );
+  // const { data: user } = useQuery<UserTypes | null>("user", () =>
+  //   getUser(token)
+  // );
 
   const {
     data: stays,
@@ -96,7 +96,7 @@ export default function AgentPage() {
   return (
     <div className="">
       <div className="border-b border-x-0 border-t-0 border-solid border-b-gray-200">
-        <Navbar user={user}></Navbar>
+        <Navbar></Navbar>
       </div>
 
       {addedStays && addedStays.length > 0 && !isLoading && (
@@ -199,9 +199,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const token = getToken(context);
 
   try {
-    await queryClient.fetchQuery<UserTypes | null>("user", () =>
-      getUser(token)
-    );
+    // await queryClient.fetchQuery<UserTypes | null>("user", () =>
+    //   getUser(token)
+    // );
 
     await queryClient.fetchQuery<Stay[] | null>("partner-stays", () =>
       getPartnerStays(context.query.location as string, "")
