@@ -55,9 +55,9 @@ export default function Calculate() {
 
   const [summarizedCalculation, setSummarizedCalculation] = useState(false);
 
-  const { data: user } = useQuery<UserTypes | null>("user", () =>
-    getUser(token)
-  );
+  // const { data: user } = useQuery<UserTypes | null>("user", () =>
+  //   getUser(token)
+  // );
 
   const [queryClient] = useState(() => new QueryClient());
 
@@ -227,7 +227,7 @@ export default function Calculate() {
   return (
     <div>
       <div className="border-b sticky top-0 z-10 bg-white left-0 right-0 border-x-0 border-t-0 border-solid border-b-gray-200">
-        <Navbar calculatePage={true} user={user}></Navbar>
+        <Navbar calculatePage={true}></Navbar>
       </div>
 
       {!isStayLoading && (
@@ -591,9 +591,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const token = getToken(context);
 
   try {
-    await queryClient.fetchQuery<UserTypes | null>("user", () =>
-      getUser(token)
-    );
+    // await queryClient.fetchQuery<UserTypes | null>("user", () =>
+    //   getUser(token)
+    // );
 
     return {
       props: {
