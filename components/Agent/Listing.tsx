@@ -19,17 +19,17 @@ const useStyles = createStyles(() => ({
 }));
 
 type ListingProps = {
-  stay: Stay | undefined;
+  stay: Stay;
 };
 
 export default function Listing({ stay }: ListingProps) {
   const { classes } = useStyles();
 
-  const images = stay?.stay_images?.sort(
+  const images = stay.stay_images.sort(
     (x, y) => Number(y.main) - Number(x.main)
   );
 
-  const arrImages = images?.map((image) => {
+  const arrImages = images.map((image) => {
     return image.image;
   });
 
@@ -98,7 +98,7 @@ export default function Listing({ stay }: ListingProps) {
   //     });
   // }
 
-  const isAdded = state.stayIds.includes(stay?.id || 0);
+  const isAdded = state.stayIds.includes(stay.id);
 
   function handleRemoveItemClick(id: number) {
     setState((prev) => ({
@@ -124,24 +124,23 @@ export default function Listing({ stay }: ListingProps) {
         // className="rounded-xl relative"
         classNames={classes}
       >
-        {arrImages &&
-          arrImages.map((image, index) => (
-            <Carousel.Slide w={"100%"} h={220} key={index}>
-              <Image
-                src={image}
-                className={
-                  isAdded ? "opacity-70 rounded-lg" : " w-full rounded-lg"
-                }
-                alt={"Images of " + (stay?.property_name || stay?.name)}
-                fill
-              />
-            </Carousel.Slide>
-          ))}
+        {arrImages.map((image, index) => (
+          <Carousel.Slide w={"100%"} h={220} key={index}>
+            <Image
+              src={image}
+              className={
+                isAdded ? "opacity-70 rounded-lg" : " w-full rounded-lg"
+              }
+              alt={"Images of " + (stay.property_name || stay.name)}
+              fill
+            />
+          </Carousel.Slide>
+        ))}
       </Carousel>
 
       {isAdded ? (
         <Button
-          onClick={() => handleRemoveItemClick(stay?.id || 0)}
+          onClick={() => handleRemoveItemClick(stay.id)}
           className="w-[35px] p-0 bg-black hover:bg-black absolute left-3 bottom-[70px] h-[35px] flex items-center justify-center rounded-full"
         >
           <svg
@@ -160,7 +159,7 @@ export default function Listing({ stay }: ListingProps) {
       ) : (
         <Button
           color="red"
-          onClick={() => addListingToCalculate(stay?.id || 0)}
+          onClick={() => addListingToCalculate(stay.id)}
           className="w-[35px] p-0 absolute left-3 bottom-[70px] h-[35px] flex items-center justify-center rounded-full"
         >
           <IconPlus size="1.4rem" className="text-white" />
@@ -169,11 +168,11 @@ export default function Listing({ stay }: ListingProps) {
 
       <div className="mt-2">
         <Text truncate weight={600} size="md">
-          {stay?.property_name}
+          {stay.property_name}
         </Text>
 
         <Text size="sm" className="text-gray-600">
-          {stay?.location}
+          {stay.location}
         </Text>
       </div>
     </div>
