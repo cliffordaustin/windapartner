@@ -1,4 +1,5 @@
 import Navbar from "@/components/Agent/Navbar";
+import AboutRoomEdit from "@/components/Lodge/AbooutRoomEdit";
 import ActivityEdit from "@/components/Lodge/ActivityEdit";
 import ParkFeesEdit from "@/components/Lodge/ParkFeesEdit";
 import RoomNonResidentPriceEdit from "@/components/Lodge/RoomNonResidentPriceEdit";
@@ -106,21 +107,20 @@ function LodgeDetail() {
 
           {active === 1 && (
             <RoomResidentPriceEdit
-              roomTypes={roomTypes}
+              stay={stay}
               date={date}
             ></RoomResidentPriceEdit>
           )}
 
           {active === 2 && (
-            <RoomNonResidentPriceEdit
-              roomTypes={roomTypes}
-              date={date}
-            ></RoomNonResidentPriceEdit>
+            <RoomNonResidentPriceEdit date={date}></RoomNonResidentPriceEdit>
           )}
 
           {active === 3 && <ActivityEdit stay={stay}></ActivityEdit>}
 
           {active === 4 && <ParkFeesEdit stay={stay}></ParkFeesEdit>}
+
+          {active === 5 && <AboutRoomEdit stay={stay}></AboutRoomEdit>}
         </Container>
       </Flex>
     </div>
