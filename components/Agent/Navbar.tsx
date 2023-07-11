@@ -3,15 +3,24 @@ import Link from "next/link";
 import UserDropdown from "../Homepage/UserDropdown";
 import { UserTypes } from "@/utils/types";
 import { Button, Container, Input, Tooltip } from "@mantine/core";
-import { IconSearch, IconX } from "@tabler/icons-react";
+import {
+  IconCalendar,
+  IconSearch,
+  IconSelector,
+  IconX,
+} from "@tabler/icons-react";
 import { useState } from "react";
 import { useRouter } from "next/router";
+import { DatePickerInput } from "@mantine/dates";
 
 type NavbarProps = {
   user?: UserTypes | null;
   calculatePage?: boolean;
   includeSearch?: boolean;
   showAddProperty?: boolean;
+  includeDateSearch?: boolean;
+  date?: [Date | null, Date | null];
+  setDate?: (date: [Date | null, Date | null]) => void;
   openModal?: () => void;
 };
 
@@ -20,6 +29,9 @@ export default function Navbar({
   calculatePage = false,
   includeSearch = true,
   showAddProperty = false,
+  includeDateSearch = false,
+  date,
+  setDate,
   openModal,
 }: NavbarProps) {
   const router = useRouter();
@@ -110,6 +122,26 @@ export default function Navbar({
             }
           />
         </div>
+      )}
+
+      {includeDateSearch && date && setDate && (
+        <DatePickerInput
+          type="range"
+          value={date}
+          onChange={(date) => {
+            setDate(date);
+          }}
+          color="red"
+          placeholder="Select dates"
+          styles={{ input: { paddingTop: 13, paddingBottom: 13 } }}
+          labelProps={{ className: "font-semibold mb-1" }}
+          rightSection={<IconSelector className="text-gray-500" />}
+          className="w-[400px]"
+          minDate={new Date()}
+          icon={<IconCalendar className="text-gray-500" />}
+          numberOfColumns={2}
+          autoSave="true"
+        />
       )}
 
       <div className="flex items-center gap-4">

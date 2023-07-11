@@ -905,6 +905,9 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
         <Button
           color="red"
           onClick={() => addListingToCalculate(stay.id)}
+          // onClick={() => {
+          //   router.push(`/partner/lodge/${stay.slug}`);
+          // }}
           className="w-[30px] p-0 absolute left-1 bottom-[100px] h-[30px] flex items-center justify-center rounded-full"
         >
           <IconPlus size="1.4rem" className="text-white" />

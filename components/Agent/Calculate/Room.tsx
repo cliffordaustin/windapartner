@@ -72,220 +72,6 @@ export default function Room({ room, stay, index }: RoomProps) {
     | "nonResidentChild"
     | "nonResidentInfant";
 
-  const addGuest = (type: GuestType) => {
-    setState(
-      state.map((item) => {
-        if (item.id === stay.id) {
-          return {
-            ...item,
-            rooms: item.rooms.map((item) => {
-              if (room.id === item.id) {
-                return {
-                  ...item,
-                  residentAdult:
-                    type === "residentAdult"
-                      ? room.residentAdult + 1
-                      : room.residentAdult,
-                  residentChild:
-                    type === "residentChild"
-                      ? room.residentChild + 1
-                      : room.residentChild,
-                  residentInfant:
-                    type === "residentInfant"
-                      ? room.residentInfant + 1
-                      : room.residentInfant,
-                  nonResidentAdult:
-                    type === "nonResidentAdult"
-                      ? room.nonResidentAdult + 1
-                      : room.nonResidentAdult,
-                  nonResidentChild:
-                    type === "nonResidentChild"
-                      ? room.nonResidentChild + 1
-                      : room.nonResidentChild,
-                  nonResidentInfant:
-                    type === "nonResidentInfant"
-                      ? room.nonResidentInfant + 1
-                      : room.nonResidentInfant,
-                };
-              }
-              return item;
-            }),
-          };
-        }
-        return item;
-      })
-    );
-  };
-
-  const removeGuest = (type: GuestType) => {
-    setState(
-      state.map((item) => {
-        if (item.id === stay.id) {
-          return {
-            ...item,
-            rooms: item.rooms.map((item) => {
-              if (room.id === item.id) {
-                return {
-                  ...item,
-                  residentAdult:
-                    type === "residentAdult"
-                      ? room.residentAdult > 0
-                        ? room.residentAdult - 1
-                        : 0
-                      : room.residentAdult,
-                  residentChild:
-                    type === "residentChild"
-                      ? room.residentChild > 0
-                        ? room.residentChild - 1
-                        : 0
-                      : room.residentChild,
-                  residentInfant:
-                    type === "residentInfant"
-                      ? room.residentInfant > 0
-                        ? room.residentInfant - 1
-                        : 0
-                      : room.residentInfant,
-                  nonResidentAdult:
-                    type === "nonResidentAdult"
-                      ? room.nonResidentAdult > 0
-                        ? room.nonResidentAdult - 1
-                        : 0
-                      : room.nonResidentAdult,
-                  nonResidentChild:
-                    type === "nonResidentChild"
-                      ? room.nonResidentChild > 0
-                        ? room.nonResidentChild - 1
-                        : 0
-                      : room.nonResidentChild,
-                  nonResidentInfant:
-                    type === "nonResidentInfant"
-                      ? room.nonResidentInfant > 0
-                        ? room.nonResidentInfant - 1
-                        : 0
-                      : room.nonResidentInfant,
-                };
-              }
-              return item;
-            }),
-          };
-        }
-        return item;
-      })
-    );
-  };
-
-  const handleResidentFees = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    fee: OtherFeesResident
-  ) => {
-    if (e.target.checked) {
-      const otherFee: ParkFee = {
-        id: fee.id,
-        name: fee.name,
-        price: fee.price,
-        feeType: fee.resident_fee_type,
-        guestType: fee.guest_type,
-      };
-      setState(
-        state.map((item) => {
-          if (item.id === stay.id) {
-            return {
-              ...item,
-              rooms: item.rooms.map((item) => {
-                if (item.id === room.id) {
-                  return {
-                    ...item,
-                    residentParkFee: [...item.residentParkFee, otherFee],
-                  };
-                }
-                return item;
-              }),
-            };
-          }
-          return item;
-        })
-      );
-    } else {
-      setState(
-        state.map((item) => {
-          if (item.id === stay.id) {
-            return {
-              ...item,
-              rooms: item.rooms.map((item) => {
-                if (item.id === room.id) {
-                  return {
-                    ...item,
-                    residentParkFee: item.residentParkFee.filter(
-                      (item) => item.id !== fee.id
-                    ),
-                  };
-                }
-                return item;
-              }),
-            };
-          }
-          return item;
-        })
-      );
-    }
-  };
-
-  const handleNonResidentFees = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    fee: OtherFeesNonResident
-  ) => {
-    if (e.target.checked) {
-      const otherFee: ParkFee = {
-        id: fee.id,
-        name: fee.name,
-        price: fee.price,
-        feeType: fee.nonresident_fee_type,
-        guestType: fee.guest_type,
-      };
-      setState(
-        state.map((item) => {
-          if (item.id === stay.id) {
-            return {
-              ...item,
-              rooms: item.rooms.map((item) => {
-                if (item.id === room.id) {
-                  return {
-                    ...item,
-                    nonResidentParkFee: [...item.nonResidentParkFee, otherFee],
-                  };
-                }
-                return item;
-              }),
-            };
-          }
-          return item;
-        })
-      );
-    } else {
-      setState(
-        state.map((item) => {
-          if (item.id === stay.id) {
-            return {
-              ...item,
-              rooms: item.rooms.map((item) => {
-                if (item.id === room.id) {
-                  return {
-                    ...item,
-                    nonResidentParkFee: item.nonResidentParkFee.filter(
-                      (item) => item.id !== fee.id
-                    ),
-                  };
-                }
-                return item;
-              }),
-            };
-          }
-          return item;
-        })
-      );
-    }
-  };
-
   const handleOtherFees = (
     e: React.ChangeEvent<HTMLInputElement>,
     fee: ParkFeeType
@@ -345,14 +131,6 @@ export default function Room({ room, stay, index }: RoomProps) {
     }
   };
 
-  const totalGuests =
-    room.residentAdult +
-    room.residentChild +
-    room.residentInfant +
-    room.nonResidentAdult +
-    room.nonResidentChild +
-    room.nonResidentInfant;
-
   const numberOfSelectedFees = room.otherFees.length;
 
   const removeRoom = () => {
@@ -395,7 +173,7 @@ export default function Room({ room, stay, index }: RoomProps) {
     roomTypes?.reduce((accumulator: UniqueRoomsType[], current: RoomType) => {
       const roomName = current.name?.toLowerCase();
       const index = accumulator.findIndex(
-        (room) => room.name?.toLowerCase() === roomName
+        (room) => room.name?.toLowerCase().trim() === roomName?.trim()
       );
       if (index >= 0) {
         // If roomName already exists, add package to the existing room object
@@ -408,7 +186,7 @@ export default function Room({ room, stay, index }: RoomProps) {
     }, []) || [];
 
   function getPackagesForSelectedRoom(room: string): SelectedPackagesType[] {
-    const roomName = room.toLowerCase();
+    const roomName = room.toLowerCase()?.trim();
     const packages: SelectedPackagesType[] = [];
 
     for (const room of roomTypes || []) {

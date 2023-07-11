@@ -47,6 +47,8 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
     calculateStay.date[0] && calculateStay.date[1]
       ? differenceInCalendarDays(calculateStay.date[1], calculateStay.date[0])
       : 1;
+  // to include the last day, add 1
+  const days = nights + 1;
 
   const totalNumberOfGuests = calculateStay.rooms.reduce((acc, room) => {
     const countResidentGuestTypes = pricing.countResidentGuestTypesWithPrice(
@@ -82,13 +84,13 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
     calculateStay.rooms
   );
 
-  totalResidentParkFees = totalResidentParkFees * nights;
+  totalResidentParkFees = totalResidentParkFees * days;
 
   let totalNonResidentParkFees = pricing.getTotalNonResidentParkFees(
     calculateStay.rooms
   );
 
-  totalNonResidentParkFees = totalNonResidentParkFees * nights;
+  totalNonResidentParkFees = totalNonResidentParkFees * days;
 
   const activityTotalPrice = pricing.calculateActivityFees(
     calculateStay.activityFee,
@@ -109,8 +111,6 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
   const nonResidentTotalExtraFees = calculateStay.extraFee.filter(
     (item) => item.guestType === "Non-resident"
   );
-
-  const feePrice = pricing.calculateRoomFees(calculateStay.rooms, nights);
 
   const totalResidentExtraFees = pricing.calculateExtraFees(
     residentTotalExtraFees,
@@ -330,7 +330,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
                   <Flex direction="column" gap={2}>
                     <NonResidentFeesSummary
                       rooms={calculateStay.rooms}
-                      nights={nights}
+                      nights={days}
                     ></NonResidentFeesSummary>
                   </Flex>
                 </div>
@@ -566,7 +566,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
                   <Flex direction="column" gap={2}>
                     <FeesSummary
                       rooms={calculateStay.rooms}
-                      nights={nights}
+                      nights={days}
                     ></FeesSummary>
                   </Flex>
                 </div>

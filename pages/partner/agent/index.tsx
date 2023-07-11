@@ -7,6 +7,7 @@ import {
   NavLink,
   Loader,
   Pagination,
+  ScrollArea,
 } from "@mantine/core";
 import { getUser } from "../../api/user";
 import { GetServerSideProps } from "next";
@@ -16,7 +17,7 @@ import { AxiosError } from "axios";
 import getToken from "@/utils/getToken";
 import { dehydrate, QueryClient, useQuery } from "react-query";
 import Navbar from "@/components/Agent/Navbar";
-import { getPartnerStays } from "@/pages/api/stays";
+import { getDetailPartnerStays, getPartnerStays } from "@/pages/api/stays";
 import { NextRouter, useRouter } from "next/router";
 import {
   IconInfoCircle,
@@ -31,6 +32,9 @@ import Listing from "@/components/Agent/Listing";
 import { Context } from "@/context/AgentPage";
 import { useContext, useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import UserSelectedStays from "@/components/Agent/UserSelectedStays";
+import { add } from "date-fns";
 
 export default function AgentPage() {
   const token = Cookies.get("token");
@@ -69,18 +73,18 @@ export default function AgentPage() {
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // useEffect(() => {
-  //   setIsLoading(true);
-  //   const getStay = getPartnerStays(router.query.location as string, stayIds);
-  //   getStay
-  //     .then((res) => {
-  //       setAddedStays(res);
-  //       setIsLoading(false);
-  //     })
-  //     .catch((err) => {
-  //       setIsLoading(false);
-  //     });
-  // }, [stayIds]);
+  useEffect(() => {
+    setIsLoading(true);
+    const getStay = getDetailPartnerStays(stayIds);
+    getStay
+      .then((res) => {
+        setAddedStays(res);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        setIsLoading(false);
+      });
+  }, [stayIds]);
 
   useEffect(() => {
     const storedItemIds = localStorage.getItem("stayIds");
@@ -94,6 +98,31 @@ export default function AgentPage() {
       <div className="border-b border-x-0 border-t-0 border-solid border-b-gray-200">
         <Navbar user={user}></Navbar>
       </div>
+
+      {addedStays && addedStays.length > 0 && !isLoading && (
+        <div className="sticky bg-white z-40 top-0 left-0 right-0">
+          <ScrollArea>
+            <div className="border-b sticky top-0 left-0 right-0 border-t-0 flex items-center gap-4 border-solid border-x-0 border-gray-200 py-4 px-6">
+              {addedStays?.map((stay, index) => (
+                <UserSelectedStays stay={stay} key={index}></UserSelectedStays>
+              ))}
+            </div>
+          </ScrollArea>
+        </div>
+      )}
+
+      {addedStays && addedStays.length > 0 && isLoading && (
+        <div className="sticky bg-white z-40 top-0 left-0 right-0">
+          <ScrollArea>
+            <div className="border-b sticky top-0 left-0 right-0 border-t-0 flex items-center gap-4 border-solid border-x-0 border-gray-200 py-4 px-6">
+              <Skeleton height={40} w={"150px"} radius="md" />
+              <Skeleton height={40} w={"150px"} radius="md" />
+              <Skeleton height={40} w={"150px"} radius="md" />
+              <Skeleton height={40} w={"150px"} radius="md" />
+            </div>
+          </ScrollArea>
+        </div>
+      )}
 
       <div className="md:px-12 max-w-[1440px] mx-auto px-6">
         <Flex gap="xs" align="center" wrap="wrap" className="mt-2">
@@ -111,7 +140,7 @@ export default function AgentPage() {
           {!isStayLoading &&
             stays?.map((stay, index) => (
               <Grid.Col xl={2.7} lg={3} md={4} sm={6} xs={6} key={index}>
-                <Listing stay={stay} key={index}></Listing>
+                <Listing stay={stay}></Listing>
               </Grid.Col>
             ))}
 
@@ -128,10 +157,10 @@ export default function AgentPage() {
       </div>
 
       <NavLink
-        label={`Calculate pricing (${state.stayIds.length} selected)`}
+        label={`Calculate pricing (${addedStays.length} selected)`}
         component="a"
         href="/partner/agent/calculate"
-        disabled={state.stayIds.length === 0}
+        disabled={state.stayIds.length === 0 || isLoading}
         className="fixed w-fit flex items-center justify-center rounded-3xl px-4 text-white z-10 bg-[#000] hover:bg-[#333] font-semibold bottom-10 left-[40%]"
         icon={
           isLoading ? (

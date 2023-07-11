@@ -152,3 +152,32 @@ export const getStayActivities = async (
 
   return [];
 };
+
+export const getRoomTypeList = async (
+  stay: Stay | undefined
+): Promise<RoomType[]> => {
+  if (stay) {
+    const room_types = await axios.get(
+      `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/room-detail-types/`
+    );
+
+    return room_types.data.results;
+  }
+
+  return [];
+};
+
+export const getRoomTypeDetail = async (
+  stay: Stay | undefined,
+  slug: string
+): Promise<RoomType[]> => {
+  if (stay) {
+    const room_types = await axios.get(
+      `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/room-detail-types/${slug}/`
+    );
+
+    return room_types.data.results;
+  }
+
+  return [];
+};

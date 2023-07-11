@@ -20,7 +20,7 @@ export default function Home() {
   });
 
   return (
-    <div className="overflow-x-hidden">
+    <div className="">
       <Head>
         <title>Winda | Safari Pricer</title>
         <meta
@@ -30,8 +30,8 @@ export default function Home() {
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />
       </Head>
 
-      <div className="w-full flex flex-col items-center home-gradient h-[300px] md:h-[350px] lg:h-[500px] !relative">
-        <div className="absolute top-10 left-6">
+      <div className="w-full flex flex-col items-center home-gradient h-[350px] md:h-[350px] lg:h-[500px] !relative">
+        <div className="absolute top-5 md:top-10 left-6">
           <Link href="/">
             <div className="relative w-28 h-9 cursor-pointer">
               <Image
@@ -49,13 +49,13 @@ export default function Home() {
 
         <Flex
           h="100%"
-          w="90%"
+          w="100%"
           px={25}
           gap={24}
           align="center"
           justify="space-center"
         >
-          <div className="absolute lg:static bottom-12 flex w-full lg:w-[50%] flex-col">
+          <div className="absolute lg:static bottom-10 flex w-full lg:w-[50%] flex-col">
             <Text
               className={
                 "font-black mb-2 uppercase text-4xl self-baseline sm:text-3xl md:text-7xl xl:text-7xl text-white "
@@ -65,7 +65,7 @@ export default function Home() {
             </Text>
             <Text
               className={
-                "mb-2 text-2xl self-baseline sm:text-xl md:text-2xl xl:text-2xl text-white "
+                "mb-2 text-xl pr-12 sm:text-xl md:text-2xl xl:text-2xl text-white "
               }
             >
               Revolutionizing Travel Pricing in Africa.

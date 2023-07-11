@@ -21,6 +21,7 @@ import {
   Loader,
   Modal,
   rem,
+  ScrollArea,
   Select,
   Tabs,
   Text,
@@ -237,15 +238,19 @@ export default function Calculate() {
               defaultValue={stays?.length > 0 ? stays[0].slug : ""}
               className="w-[64%] mb-4"
             >
-              <Tabs.List>
-                {stays?.map((stay, index) => (
-                  <Tabs.Tab value={stay.slug} key={index}>
-                    {stay.property_name}
-                  </Tabs.Tab>
-                ))}
+              <ScrollArea>
+                <div className="flex h-[40px] w-full ">
+                  <Tabs.List className="!flex-none ">
+                    {stays?.map((stay, index) => (
+                      <Tabs.Tab value={stay.slug} key={index}>
+                        {stay.property_name}
+                      </Tabs.Tab>
+                    ))}
 
-                {/* <Tabs.Tab value="summary">Summary</Tabs.Tab> */}
-              </Tabs.List>
+                    {/* <Tabs.Tab value="summary">Summary</Tabs.Tab> */}
+                  </Tabs.List>
+                </div>
+              </ScrollArea>
 
               <div className="w-full mt-4 flex flex-col gap-4">
                 {stays?.map((stay, index) => (

@@ -1,5 +1,5 @@
 import { Carousel } from "@mantine/carousel";
-import { Button, Image, Text, Card } from "@mantine/core";
+import { Button, Text, Card } from "@mantine/core";
 import { Stay } from "../../utils/types";
 import { createStyles } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
@@ -7,6 +7,7 @@ import { useState, useEffect, useContext } from "react";
 import { Context } from "@/context/AgentPage";
 import axios from "axios";
 import Cookies from "js-cookie";
+import Image from "next/image";
 
 const useStyles = createStyles(() => ({
   control: {
@@ -124,15 +125,14 @@ export default function Listing({ stay }: ListingProps) {
         classNames={classes}
       >
         {arrImages.map((image, index) => (
-          <Carousel.Slide w={"100%"} key={index}>
+          <Carousel.Slide w={"100%"} h={220} key={index}>
             <Image
-              w={"100%"}
-              fit="cover"
-              height={220}
-              radius="md"
               src={image}
-              className={isAdded ? "opacity-70" : " w-full"}
+              className={
+                isAdded ? "opacity-70 rounded-lg" : " w-full rounded-lg"
+              }
               alt={"Images of " + (stay.property_name || stay.name)}
+              fill
             />
           </Carousel.Slide>
         ))}

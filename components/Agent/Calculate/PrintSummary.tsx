@@ -63,6 +63,8 @@ export default function PrintSummary({
       ? differenceInCalendarDays(calculateStay.date[1], calculateStay.date[0])
       : 1;
 
+  const days = nights + 1;
+
   const totalNumberOfGuests = calculateStay.rooms.reduce((acc, room) => {
     const countResidentGuestTypes = pricing.countResidentGuestTypesWithPrice(
       room.residentGuests,
@@ -97,13 +99,13 @@ export default function PrintSummary({
     calculateStay.rooms
   );
 
-  totalResidentParkFees = totalResidentParkFees * nights;
+  totalResidentParkFees = totalResidentParkFees * days;
 
   let totalNonResidentParkFees = pricing.getTotalNonResidentParkFees(
     calculateStay.rooms
   );
 
-  totalNonResidentParkFees = totalNonResidentParkFees * nights;
+  totalNonResidentParkFees = totalNonResidentParkFees * days;
 
   const activityTotalPrice = pricing.calculateActivityFees(
     calculateStay.activityFee,
@@ -374,7 +376,7 @@ export default function PrintSummary({
                       <NonResidentFeesSummary
                         summarizedCalculation={summarizedCalculation}
                         rooms={calculateStay.rooms}
-                        nights={nights}
+                        nights={days}
                       ></NonResidentFeesSummary>
                     </Flex>
                   </div>
@@ -594,7 +596,7 @@ export default function PrintSummary({
                         <FeesSummary
                           rooms={calculateStay.rooms}
                           summarizedCalculation={summarizedCalculation}
-                          nights={nights}
+                          nights={days}
                         ></FeesSummary>
                       </Flex>
                     </div>
