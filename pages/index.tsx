@@ -20,7 +20,7 @@ export default function Home() {
   });
 
   return (
-    <div className="">
+    <div className="overflow-x-hidden">
       <Head>
         <title>Winda | Safari Pricer</title>
         <meta
