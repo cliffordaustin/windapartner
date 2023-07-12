@@ -230,7 +230,6 @@ export default function Calculate() {
     (a, b) => a + Number(b.total),
     0
   );
-  console.log(stayIds);
 
   function handleRemoveItemClick(id: number) {
     const filterStayIds = stayIds?.split(",").filter((stayId) => {
