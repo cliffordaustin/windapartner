@@ -20,6 +20,7 @@ import NonResidentGuestsSummary from "./NonResidentGuestsSummary";
 import NonResidentFeesSummary from "./NonResidentFeeSummary";
 import { format, differenceInCalendarDays } from "date-fns";
 import ActivitiesResidentSummary from "./ActivitiesResidentSummary";
+import { Mixpanel } from "@/utils/mixpanelconfig";
 
 type SummaryProps = {
   calculateStay: StateType;
@@ -187,7 +188,14 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
       }
     >
       <Tabs.List className="fixed w-[30%] bg-white" grow>
-        <Tabs.Tab value="non-resident">
+        <Tabs.Tab
+          onClick={() => {
+            Mixpanel.track("User switched to the non-resident tab", {
+              property: currentStay?.property_name,
+            });
+          }}
+          value="non-resident"
+        >
           <div className="flex items-center justify-center gap-2">
             <span>Non-resident</span>
             {totalNumberOfNonResidentGuests > 0 && (
@@ -198,7 +206,14 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
           </div>
         </Tabs.Tab>
 
-        <Tabs.Tab value="resident">
+        <Tabs.Tab
+          onClick={() => {
+            Mixpanel.track("User switched to the resident tab", {
+              property: currentStay?.property_name,
+            });
+          }}
+          value="resident"
+        >
           <div className="flex items-center justify-center gap-2">
             <span>Resident</span>
             {totalNumberOfGuests > 0 && (

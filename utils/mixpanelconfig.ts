@@ -8,7 +8,7 @@ mixpanel.init(process.env.NEXT_PUBLIC_MIXPANEL_TOKEN || "", {
 });
 
 // change to production before deploying
-let env_check = process.env.NODE_ENV === "production";
+let env_check = process.env.NODE_ENV === "development";
 
 let actions = {
   identify: (id: string) => {
@@ -17,7 +17,7 @@ let actions = {
   alias: (id: string) => {
     if (env_check) mixpanel.alias(id);
   },
-  track: (name: string, props: Dict) => {
+  track: (name: string, props?: Dict) => {
     if (env_check) mixpanel.track(name, props);
   },
   people: {

@@ -109,13 +109,13 @@ export default function PrintSummary({
 
   const activityTotalPrice = pricing.calculateActivityFees(
     calculateStay.activityFee,
-    totalNumberOfGuests + totalNumberOfNonResidentGuests,
+    totalNumberOfNonResidentGuests,
     nights
   );
 
   const activityResidentTotalPrice = pricing.calculateResidentActivityFees(
     calculateStay.activityFee,
-    totalNumberOfGuests + totalNumberOfNonResidentGuests,
+    totalNumberOfGuests,
     nights
   );
 

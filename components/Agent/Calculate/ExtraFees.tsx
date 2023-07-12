@@ -1,4 +1,5 @@
 import { Context, ExtraFee, StateType } from "@/context/CalculatePage";
+import { Mixpanel } from "@/utils/mixpanelconfig";
 import { Stay } from "@/utils/types";
 import {
   Flex,
@@ -305,6 +306,14 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
               onChange={(event) => {
                 handleFeeNameChange(event);
               }}
+              onBlur={() => {
+                if (fee.name) {
+                  Mixpanel.track("User entered an extra fee name", {
+                    property: stay.property_name,
+                    extra_fee: fee.name,
+                  });
+                }
+              }}
             ></TextInput>
           </Flex>
 
@@ -351,6 +360,10 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
                     handleGuestTypeDeselect();
                   } else {
                     handleGuestTypeChange(guestType);
+                    Mixpanel.track("User selected an extra fee guest type", {
+                      property: stay.property_name,
+                      guest_type: fee.guestType,
+                    });
                   }
                 }}
                 onMouseDown={() => {
@@ -416,6 +429,10 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
                     handlePricingTypeDeselect();
                   } else {
                     handlePricingTypeChange(pricingType);
+                    Mixpanel.track("User selected an extra fee pricing type", {
+                      property: stay.property_name,
+                      pricing_type: fee.pricingType,
+                    });
                   }
                 }}
                 onMouseDown={() => {
@@ -452,6 +469,14 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
               value={fee.price}
               classNames={{
                 input: "border-none px-0 !py-0 focus:ring-0 focus:outline-none",
+              }}
+              onBlur={() => {
+                if (fee.price) {
+                  Mixpanel.track("User entered an extra fee price", {
+                    property: stay.property_name,
+                    extra_fee_prce: fee.price,
+                  });
+                }
               }}
               icon={
                 fee.guestType === "Resident" && fee.price

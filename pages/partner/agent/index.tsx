@@ -35,6 +35,7 @@ import Link from "next/link";
 import Image from "next/image";
 import UserSelectedStays from "@/components/Agent/UserSelectedStays";
 import { add } from "date-fns";
+import { Mixpanel } from "@/utils/mixpanelconfig";
 
 export default function AgentPage() {
   const token = Cookies.get("token");
@@ -160,6 +161,9 @@ export default function AgentPage() {
         label={`Calculate pricing (${addedStays.length} selected)`}
         component="a"
         href="/partner/agent/calculate"
+        onClick={() => {
+          Mixpanel.track("User moved to the calculate page");
+        }}
         disabled={state.stayIds.length === 0 || isLoading}
         className="fixed w-fit flex items-center justify-center rounded-3xl px-4 text-white z-10 bg-[#000] hover:bg-[#333] font-semibold bottom-10 left-[40%]"
         icon={

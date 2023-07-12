@@ -31,6 +31,7 @@ import { useContext, useEffect, useState } from "react";
 import { useQuery } from "react-query";
 import { v4 as uuidv4 } from "uuid";
 import { parse, format, add } from "date-fns";
+import { Mixpanel } from "@/utils/mixpanelconfig";
 
 type RoomProps = {
   room: StateRoomType;
@@ -774,6 +775,10 @@ export default function Room({ room, stay, index }: RoomProps) {
                     deselectRoom();
                   } else {
                     clickSelectRoom(selectRoom);
+                    Mixpanel.track("User selected a room", {
+                      property: stay.property_name,
+                      room: selectRoom.name,
+                    });
                   }
                 }}
                 onMouseDown={() => {
@@ -839,6 +844,11 @@ export default function Room({ room, stay, index }: RoomProps) {
                     deselectPackage();
                   } else {
                     clickSelectPackage(roomPackage.name);
+
+                    Mixpanel.track("User selected a package", {
+                      property: stay.property_name,
+                      room_package: roomPackage.name,
+                    });
                   }
                 }}
                 onMouseDown={() => {
@@ -967,6 +977,10 @@ export default function Room({ room, stay, index }: RoomProps) {
                                   deselectNonResidentGuest(guest);
                                 } else {
                                   clickSelectNonResidentGuest(guest, guestType);
+                                  Mixpanel.track("User selected a guest", {
+                                    property: stay.property_name,
+                                    guest: guestType,
+                                  });
                                 }
                               }}
                               key={index}
@@ -1072,6 +1086,13 @@ export default function Room({ room, stay, index }: RoomProps) {
                                         }
                                         return item;
                                       })
+                                    );
+                                    Mixpanel.track(
+                                      "User selected a guest type",
+                                      {
+                                        property: stay.property_name,
+                                        guest_type: guestType?.name,
+                                      }
                                     );
                                   }}
                                   key={index}
@@ -1645,6 +1666,12 @@ export default function Room({ room, stay, index }: RoomProps) {
                     checked={
                       !!room.otherFees.find((item) => item.id === fee.id)
                     }
+                    onClick={() => {
+                      Mixpanel.track("User selected a fee", {
+                        property: stay.property_name,
+                        fee: fee.name,
+                      });
+                    }}
                     onChange={(event) => {
                       handleOtherFees(event, fee);
                     }}

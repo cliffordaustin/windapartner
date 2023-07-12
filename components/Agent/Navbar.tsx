@@ -12,6 +12,7 @@ import {
 import { useState } from "react";
 import { useRouter } from "next/router";
 import { DatePickerInput } from "@mantine/dates";
+import { Mixpanel } from "@/utils/mixpanelconfig";
 
 type NavbarProps = {
   user?: UserTypes | null;
@@ -45,6 +46,9 @@ export default function Navbar({
   };
 
   const search = () => {
+    Mixpanel.track("User interated with the search bar", {
+      search_term: location,
+    });
     if (calculatePage) {
       router.push({
         pathname: "/partner/agent",

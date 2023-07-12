@@ -1,4 +1,5 @@
 import { Context } from "@/context/CalculatePage";
+import { Mixpanel } from "@/utils/mixpanelconfig";
 import { ActivityFee, Stay } from "@/utils/types";
 import { Image, Switch, Text } from "@mantine/core";
 import { useContext } from "react";
@@ -87,6 +88,12 @@ export default function Activity({ activity, stay }: ActitivityProps) {
             handleSwitch(event);
           }}
           color="red"
+          onClick={() => {
+            Mixpanel.track("User selected an activity", {
+              property: stay.property_name,
+              activity: activity.name,
+            });
+          }}
           checked={
             !!currentStay?.activityFee?.find((item) => item.id === activity.id)
           }

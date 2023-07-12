@@ -45,6 +45,7 @@ function UserSelectedStays({ stay }: ListingProps) {
             src={arrImages[0]}
             className="w-full h-full"
             fill
+            sizes="100%"
           />
         )}
       </div>

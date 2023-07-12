@@ -8,6 +8,7 @@ import { Context } from "@/context/AgentPage";
 import axios from "axios";
 import Cookies from "js-cookie";
 import Image from "next/image";
+import { Mixpanel } from "@/utils/mixpanelconfig";
 
 const useStyles = createStyles(() => ({
   control: {
@@ -72,6 +73,9 @@ export default function Listing({ stay }: ListingProps) {
   // }
 
   function addListingToCalculate(id: number) {
+    Mixpanel.track("Added a listing to calculate ", {
+      property: stay.property_name,
+    });
     setState((prev) => ({ ...prev, stayIds: [...prev.stayIds, id] }));
     const storedItemIds = localStorage.getItem("stayIds");
     localStorage.setItem(
@@ -101,6 +105,9 @@ export default function Listing({ stay }: ListingProps) {
   const isAdded = state.stayIds.includes(stay.id);
 
   function handleRemoveItemClick(id: number) {
+    Mixpanel.track("Removed a listing from calculate ", {
+      property: stay.property_name,
+    });
     setState((prev) => ({
       ...prev,
       stayIds: prev.stayIds.filter((stayId) => stayId !== id),
@@ -132,6 +139,7 @@ export default function Listing({ stay }: ListingProps) {
                 isAdded ? "opacity-70 rounded-lg" : " w-full rounded-lg"
               }
               alt={"Images of " + (stay.property_name || stay.name)}
+              sizes="100%"
               fill
             />
           </Carousel.Slide>

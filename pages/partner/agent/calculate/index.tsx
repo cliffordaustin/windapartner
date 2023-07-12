@@ -11,6 +11,7 @@ import { Stay } from "@/utils/types";
 import { getDetailPartnerStays } from "@/pages/api/stays";
 import { useRouter } from "next/router";
 import {
+  ActionIcon,
   Alert,
   Anchor,
   Button,
@@ -37,6 +38,7 @@ import {
   IconCalculator,
   IconGraph,
   IconUpload,
+  IconX,
 } from "@tabler/icons-react";
 import Summary from "@/components/Agent/Calculate/Summary";
 import { useReactToPrint } from "react-to-print";
@@ -45,6 +47,7 @@ import { saveAs } from "file-saver";
 import { useDisclosure } from "@mantine/hooks";
 import PrintSummary from "@/components/Agent/Calculate/PrintSummary";
 import Image from "next/image";
+import { Mixpanel } from "@/utils/mixpanelconfig";
 
 export default function Calculate() {
   const token = Cookies.get("token");
@@ -71,9 +74,13 @@ export default function Calculate() {
     if (ids) {
       setStayIds(newIds);
     }
-  }, []);
+  }, [stayIds]);
 
-  const { data: stays, isLoading: isStayLoading } = useQuery<Stay[]>(
+  const {
+    data: stays,
+    isLoading: isStayLoading,
+    refetch,
+  } = useQuery<Stay[]>(
     "partner-stay-ids",
     () => getDetailPartnerStays(stayIds),
     { enabled: !!stayIds }
@@ -223,6 +230,26 @@ export default function Calculate() {
     (a, b) => a + Number(b.total),
     0
   );
+  console.log(stayIds);
+
+  function handleRemoveItemClick(id: number) {
+    const filterStayIds = stayIds?.split(",").filter((stayId) => {
+      return stayId !== String(id);
+    });
+
+    setStayIds(filterStayIds?.join(","));
+
+    const storedItemIds = localStorage.getItem("stayIds");
+    localStorage.setItem(
+      "stayIds",
+      JSON.stringify(
+        JSON.parse(storedItemIds || "[]").filter(
+          (stayId: number) => stayId !== id
+        )
+      )
+    );
+    refetch();
+  }
 
   return (
     <div>
@@ -239,11 +266,35 @@ export default function Calculate() {
               className="w-[64%] mb-4"
             >
               <ScrollArea>
-                <div className="flex h-[40px] w-full ">
+                <div className="flex w-full ">
                   <Tabs.List className="!flex-none ">
                     {stays?.map((stay, index) => (
-                      <Tabs.Tab value={stay.slug} key={index}>
-                        {stay.property_name}
+                      <Tabs.Tab
+                        onClick={() => {
+                          Mixpanel.track("Switched to a different tab", {
+                            property: stay.property_name,
+                          });
+                        }}
+                        value={stay.slug}
+                        key={index}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <span>{stay.property_name}</span>
+
+                          {/* <ActionIcon
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveItemClick(stay.id);
+                              Mixpanel.track("User removed property from tab", {
+                                property: stay.property_name,
+                              });
+                            }}
+                            size="sm"
+                            className="hover:bg-gray-200"
+                          >
+                            <IconX></IconX>
+                          </ActionIcon> */}
+                        </div>
                       </Tabs.Tab>
                     ))}
 
@@ -293,6 +344,9 @@ export default function Calculate() {
                           event.currentTarget.checked
                         )
                       }
+                      onClick={() => {
+                        Mixpanel.track("User selected itemized quote");
+                      }}
                     ></Checkbox>
 
                     <Checkbox
@@ -303,6 +357,9 @@ export default function Calculate() {
                       onChange={(event) =>
                         setSummarizedCalculation(event.currentTarget.checked)
                       }
+                      onClick={() => {
+                        Mixpanel.track("User selected summarized quote");
+                      }}
                     ></Checkbox>
 
                     <Divider my="xs" label="STYLE" labelPosition="center" />
@@ -350,6 +407,7 @@ export default function Calculate() {
                     <Button
                       onClick={() => {
                         handlePrint();
+                        Mixpanel.track("User printed quotation!!!");
                       }}
                       pos={"absolute"}
                       right={0}
@@ -420,6 +478,7 @@ export default function Calculate() {
                     <Button
                       onClick={() => {
                         handlePrint();
+                        Mixpanel.track("User printed quotation!!!");
                       }}
                       mt={12}
                       pos={"absolute"}
@@ -535,7 +594,10 @@ export default function Calculate() {
 
                 <Flex mt={18} className="w-full" gap={10}>
                   <Button
-                    onClick={open}
+                    onClick={() => {
+                      open();
+                      Mixpanel.track("User clicked on print quote");
+                    }}
                     className="flex w-full justify-center items-center font-semibold p-2 rounded-md cursor-pointer"
                     size="sm"
                     color="red"
@@ -557,6 +619,9 @@ export default function Calculate() {
                               item.lodge_price_data_pdf,
                               item.property_name
                             );
+                            Mixpanel.track("User checked contract rates", {
+                              property: item.property_name,
+                            });
                           }}
                           className="flex w-full justify-center items-center gap-8 font-semibold p-2 rounded-md cursor-pointer"
                           size="sm"

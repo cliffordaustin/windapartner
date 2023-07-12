@@ -29,6 +29,8 @@ import { RoomType, Stay } from "@/utils/types";
 import Room from "./Room";
 import { v4 as uuidv4 } from "uuid";
 import Activity from "./Activity";
+import { Mixpanel } from "@/utils/mixpanelconfig";
+import { format } from "date-fns";
 
 type StayProps = {
   stay: Stay;
@@ -157,6 +159,13 @@ export function Stay({ stay, index }: StayProps) {
               }
             });
             setState(updatedItems);
+            if (date[0] && date[1]) {
+              Mixpanel.track("User picked a date range", {
+                property: stay.property_name,
+                from_date: format(date[0], "yyyy-MM-dd"),
+                to_date: format(date[1], "yyyy-MM-dd"),
+              });
+            }
           }}
           color="red"
           label="Pick date range"
@@ -178,6 +187,9 @@ export function Stay({ stay, index }: StayProps) {
         <Flex
           onClick={() => {
             addRoom();
+            Mixpanel.track("User added a room", {
+              property: stay.property_name,
+            });
           }}
           className="cursor-pointer w-fit"
           mt={12}
@@ -262,6 +274,14 @@ export function Stay({ stay, index }: StayProps) {
             labelProps={{ className: "font-semibold mb-1" }}
             maw={300}
             icon={<IconPercentage className="text-gray-500" />}
+            onBlur={() => {
+              if (nonResidentCommission) {
+                Mixpanel.track("User entered non-resident commission", {
+                  property: stay.property_name,
+                  non_resident_commission: nonResidentCommission,
+                });
+              }
+            }}
           />
 
           <NumberInput
@@ -284,6 +304,14 @@ export function Stay({ stay, index }: StayProps) {
             labelProps={{ className: "font-semibold mb-1" }}
             maw={300}
             icon={<IconPercentage className="text-gray-500" />}
+            onBlur={() => {
+              if (residentCommission) {
+                Mixpanel.track("User entered resident commission", {
+                  property: stay.property_name,
+                  resident_commission: residentCommission,
+                });
+              }
+            }}
           />
         </Flex>
       </div>
