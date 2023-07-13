@@ -614,13 +614,13 @@ export default function Calculate() {
                       {item.lodge_price_data_pdf && (
                         <Button
                           onClick={() => {
+                            Mixpanel.track("User checked contract rates", {
+                              property: item.property_name,
+                            });
                             handleDownloadClick(
                               item.lodge_price_data_pdf,
                               item.property_name
                             );
-                            Mixpanel.track("User checked contract rates", {
-                              property: item.property_name,
-                            });
                           }}
                           className="flex w-full justify-center items-center gap-8 font-semibold p-2 rounded-md cursor-pointer"
                           size="sm"
