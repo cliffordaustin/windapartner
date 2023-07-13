@@ -4,7 +4,7 @@ import ActivityEdit from "@/components/Lodge/ActivityEdit";
 import ParkFeesEdit from "@/components/Lodge/ParkFeesEdit";
 import RoomNonResidentPriceEdit from "@/components/Lodge/RoomNonResidentPriceEdit";
 import RoomPackagesEdit from "@/components/Lodge/RoomPackagesEdit";
-import RoomResidentPriceEdit from "@/components/Lodge/RoomResidentPriceEdit";
+import PriceEdit from "@/components/Lodge/PriceEdit";
 import { getRoomTypeList, getStayEmail } from "@/pages/api/stays";
 import { getUser } from "@/pages/api/user";
 import getToken from "@/utils/getToken";
@@ -105,12 +105,7 @@ function LodgeDetail() {
             ></RoomPackagesEdit>
           )}
 
-          {active === 1 && (
-            <RoomResidentPriceEdit
-              stay={stay}
-              date={date}
-            ></RoomResidentPriceEdit>
-          )}
+          {active === 1 && <PriceEdit date={date} stay={stay}></PriceEdit>}
 
           {active === 2 && (
             <RoomNonResidentPriceEdit date={date}></RoomNonResidentPriceEdit>
