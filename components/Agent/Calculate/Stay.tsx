@@ -193,9 +193,6 @@ export function Stay({ stay, index }: StayProps) {
         <Flex
           onClick={() => {
             addRoom();
-            Mixpanel.track("User added a room", {
-              property: stay.property_name,
-            });
           }}
           className="cursor-pointer w-fit"
           mt={12}
