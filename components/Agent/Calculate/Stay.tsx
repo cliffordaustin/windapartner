@@ -97,6 +97,9 @@ export function Stay({ stay, index }: StayProps) {
       return item;
     });
     setState(updatedItems);
+    Mixpanel.track("User added a room to calculate", {
+      property: stay.property_name,
+    });
   };
 
   const addFee = () => {
@@ -119,6 +122,9 @@ export function Stay({ stay, index }: StayProps) {
       return item;
     });
     setState(updatedItems);
+    Mixpanel.track("User added a fee to calculate", {
+      property: stay.property_name,
+    });
   };
 
   return (
