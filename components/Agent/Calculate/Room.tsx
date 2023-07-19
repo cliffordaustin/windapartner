@@ -781,7 +781,7 @@ export default function Room({ room, stay, index }: RoomProps) {
                     });
                   }
                 }}
-                onMouseDown={() => {
+                onMouseUp={() => {
                   setIsRoomOpen(false);
                 }}
                 className={
@@ -851,7 +851,7 @@ export default function Room({ room, stay, index }: RoomProps) {
                     });
                   }
                 }}
-                onMouseDown={() => {
+                onMouseUp={() => {
                   setIsPackageOpen(false);
                 }}
                 className={

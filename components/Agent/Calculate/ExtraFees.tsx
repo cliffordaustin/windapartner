@@ -366,7 +366,7 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
                     });
                   }
                 }}
-                onMouseDown={() => {
+                onMouseUp={() => {
                   setOpened(false);
                 }}
                 className={
@@ -435,7 +435,7 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
                     });
                   }
                 }}
-                onMouseDown={() => {
+                onMouseUp={() => {
                   setPricingTypeOpened(false);
                 }}
                 className={
