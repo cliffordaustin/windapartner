@@ -2,12 +2,16 @@ import Navbar from "@/components/Agent/Navbar";
 import AboutRoomEdit from "@/components/Lodge/AbooutRoomEdit";
 import ActivityEdit from "@/components/Lodge/ActivityEdit";
 import ParkFeesEdit from "@/components/Lodge/ParkFeesEdit";
-import RoomNonResidentPriceEdit from "@/components/Lodge/RoomNonResidentPriceEdit";
 import RoomPackagesEdit from "@/components/Lodge/RoomPackagesEdit";
 import PriceEdit from "@/components/Lodge/PriceEdit";
-import { getRoomTypeList, getStayEmail } from "@/pages/api/stays";
+import {
+  RoomTypeDetail,
+  getRoomTypeList,
+  getStayEmail,
+} from "@/pages/api/stays";
 import { getUser } from "@/pages/api/user";
 import getToken from "@/utils/getToken";
+import { ContextProvider } from "@/context/LodgeDetailPage";
 import { RoomType, Stay, UserTypes } from "@/utils/types";
 import { Box, Container, Divider, Flex, NavLink, Text } from "@mantine/core";
 import {
@@ -36,10 +40,6 @@ function LodgeDetail() {
     getStayEmail(router.query.slug as string, token)
   );
 
-  const { data: roomTypes } = useQuery<RoomType[]>("stay-room-types", () =>
-    getRoomTypeList(stay)
-  );
-
   const [active, setActive] = useState(0);
 
   const [date, setDate] = useState<[Date | null, Date | null]>([
@@ -49,8 +49,7 @@ function LodgeDetail() {
 
   const data = [
     { icon: IconBed, label: "Rooms and packages" },
-    { icon: IconHomeDollar, label: "Resident prices" },
-    { icon: IconGlobe, label: "Non-resident prices" },
+    { icon: IconHomeDollar, label: "prices" },
     { icon: IconRun, label: "Activities" },
     { icon: IconBed, label: "Park fees" },
     { icon: IconInfoCircle, label: "About" },
@@ -70,7 +69,7 @@ function LodgeDetail() {
 
   return (
     <div>
-      <div className="border-b border-x-0 border-t-0 border-solid border-b-gray-200">
+      <div className="border-b fixed bg-white z-20 w-full left-0 right-0 top-0 border-x-0 border-t-0 border-solid border-b-gray-200">
         <Navbar
           openModal={() => {
             open();
@@ -84,39 +83,33 @@ function LodgeDetail() {
         ></Navbar>
       </div>
 
-      <Flex>
-        <div>
-          {/* <Text truncate w={230} mt={12} className="px-4">
-            {stay?.property_name}
-          </Text>
-
-          <Divider my={12} /> */}
-
+      <Flex className="mt-20">
+        <div className="fixed left-0">
           <Box w={220} mt={12} miw={230}>
             {items}
           </Box>
         </div>
+        <ContextProvider>
+          <div className="w-full bg-red-500">
+            <Container
+              w={1000}
+              className="px-12 absolute right-0 mt-6"
+              mx="auto"
+            >
+              {active === 0 && (
+                <RoomPackagesEdit date={date} stay={stay}></RoomPackagesEdit>
+              )}
 
-        <Container w={1000} className="px-12 mt-6" mx="auto">
-          {active === 0 && (
-            <RoomPackagesEdit
-              roomTypes={roomTypes}
-              date={date}
-            ></RoomPackagesEdit>
-          )}
+              {active === 1 && <PriceEdit date={date} stay={stay}></PriceEdit>}
 
-          {active === 1 && <PriceEdit date={date} stay={stay}></PriceEdit>}
+              {active === 2 && <ActivityEdit stay={stay}></ActivityEdit>}
 
-          {active === 2 && (
-            <RoomNonResidentPriceEdit date={date}></RoomNonResidentPriceEdit>
-          )}
+              {active === 3 && <ParkFeesEdit stay={stay}></ParkFeesEdit>}
 
-          {active === 3 && <ActivityEdit stay={stay}></ActivityEdit>}
-
-          {active === 4 && <ParkFeesEdit stay={stay}></ParkFeesEdit>}
-
-          {active === 5 && <AboutRoomEdit stay={stay}></AboutRoomEdit>}
-        </Container>
+              {active === 4 && <AboutRoomEdit stay={stay}></AboutRoomEdit>}
+            </Container>
+          </div>
+        </ContextProvider>
       </Flex>
     </div>
   );
