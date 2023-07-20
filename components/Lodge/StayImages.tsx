@@ -40,7 +40,7 @@ function StayImages({ stay, image }: StayImagesProps) {
     {
       onSuccess: () => {
         // refetch stays
-        queryClient.invalidateQueries("all-stay-email");
+        queryClient.invalidateQueries("stay-email");
       },
     }
   );
@@ -66,11 +66,10 @@ function StayImages({ stay, image }: StayImagesProps) {
         size="xs"
         color="red"
         variant="light"
-        disabled={deleteImageLoading}
+        loading={deleteImageLoading}
         onClick={() => delImage(image.id)}
       >
         Delete
-        {deleteImageLoading && <Loader size="xs" color="gray" ml={5}></Loader>}
       </Button>
     </Flex>
   );

@@ -3,7 +3,13 @@ import { GetServerSideProps } from "next";
 import { Stay, UserTypes } from "@/utils/types";
 import axios, { AxiosError } from "axios";
 import getToken from "@/utils/getToken";
-import { dehydrate, QueryClient, useQuery } from "react-query";
+import {
+  dehydrate,
+  QueryClient,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "react-query";
 import { getAllStaysEmail } from "@/pages/api/stays";
 import { getUser } from "@/pages/api/user";
 import Cookies from "js-cookie";
@@ -190,6 +196,7 @@ function Lodge({}) {
       router.reload();
     }
   };
+
   return (
     <div className="overflow-x-hidden">
       <div className="border-b border-x-0 border-t-0 border-solid border-b-gray-200">
@@ -200,93 +207,94 @@ function Lodge({}) {
           includeSearch={false}
           user={user}
           showAddProperty={true}
+          navBarLogoLink="/partner/lodge"
         ></Navbar>
       </div>
-      <Grid className="" gutter="xl">
-        <Grid.Col xl={6} lg={6} md={6}>
-          <Grid px={18} py={10} mt={8} gutter={"sm"} className="">
-            {stays?.map((stay, index) => (
-              <Grid.Col xl={3} lg={4} md={6} sm={6} xs={6} key={index}>
-                <LodgeCard
-                  stayIds={stayIds}
-                  setStayIds={setStayIds}
-                  stay={stay}
-                />
-              </Grid.Col>
-            ))}
-          </Grid>
-        </Grid.Col>
 
-        <Modal
-          opened={opened}
-          onClose={close}
-          title={"Add your property"}
-          classNames={{
-            title: "text-lg font-bold",
-            close: "text-black hover:text-gray-700 hover:bg-gray-200",
-            header: "bg-gray-100",
-          }}
-          transitionProps={{ transition: "fade", duration: 200 }}
-          closeButtonProps={{
-            style: {
-              width: 30,
-              height: 30,
-            },
-            iconSize: 20,
-          }}
+      <div className="max-w-[1500px] mx-auto">
+        <Grid px={32} py={10} mt={8} gutter={"sm"} className="w-full">
+          {stays?.map((stay, index) => (
+            <Grid.Col xl={2} lg={2} md={4} sm={6} xs={6} key={index}>
+              <LodgeCard
+                stayIds={stayIds}
+                setStayIds={setStayIds}
+                stay={stay}
+              />
+            </Grid.Col>
+          ))}
+        </Grid>
+      </div>
+
+      <Modal
+        opened={opened}
+        onClose={close}
+        title={"Add your property"}
+        classNames={{
+          title: "text-lg font-bold",
+          close: "text-black hover:text-gray-700 hover:bg-gray-200",
+          header: "bg-gray-100",
+        }}
+        transitionProps={{ transition: "fade", duration: 200 }}
+        closeButtonProps={{
+          style: {
+            width: 30,
+            height: 30,
+          },
+          iconSize: 20,
+        }}
+      >
+        <form
+          className="flex flex-col gap-1"
+          onSubmit={form.onSubmit((values) => submit(values))}
         >
-          <form
-            className="flex flex-col gap-1"
-            onSubmit={form.onSubmit((values) => submit(values))}
-          >
-            <TextInput
-              label="Property name"
-              placeholder="Enter property name"
-              value={form.values.property_name}
-              onChange={(event) =>
-                form.setFieldValue("property_name", event.currentTarget.value)
-              }
-              required
-            />
+          <TextInput
+            label="Property name"
+            placeholder="Enter property name"
+            value={form.values.property_name}
+            onChange={(event) =>
+              form.setFieldValue("property_name", event.currentTarget.value)
+            }
+            required
+          />
 
-            <TextInput
-              label="Location"
-              placeholder="Enter location"
-              value={form.values.location}
-              onChange={(event) =>
-                form.setFieldValue("location", event.currentTarget.value)
-              }
-              required
-            />
+          <TextInput
+            label="Location"
+            placeholder="Enter location"
+            value={form.values.location}
+            onChange={(event) =>
+              form.setFieldValue("location", event.currentTarget.value)
+            }
+            required
+          />
 
-            <FileInput
-              label="Images"
-              placeholder="Select one or more images"
-              multiple
-              valueComponent={ValueComponent}
-              accept="image/png, image/jpeg, image/jpg"
-              icon={<IconUpload size={rem(14)} />}
-              error={noFiles ? "Please select at least one file" : ""}
-              onChange={(payload: File[]) => {
-                setNoFiles(false);
-                setFiles(payload);
-              }}
-              required
-            />
+          <FileInput
+            label="Images"
+            placeholder="Select one or more images"
+            multiple
+            valueComponent={ValueComponent}
+            accept="image/png, image/jpeg, image/jpg"
+            icon={<IconUpload size={rem(14)} />}
+            error={noFiles ? "Please select at least one file" : ""}
+            onChange={(payload: File[]) => {
+              setNoFiles(false);
+              setFiles(payload);
+            }}
+            required
+          />
 
-            <Flex gap={8} justify="right" mt={6}>
-              <Button onClick={close} variant="default">
-                Close
-              </Button>
-              <Button color="red" disabled={loading} type="submit">
-                Submit{" "}
-                {loading && <Loader size="xs" color="gray" ml={5}></Loader>}
-              </Button>
-            </Flex>
-          </form>
-        </Modal>
+          <Flex gap={8} justify="right" mt={6}>
+            <Button onClick={close} variant="default">
+              Close
+            </Button>
+            <Button color="red" disabled={loading} type="submit">
+              Submit{" "}
+              {loading && <Loader size="xs" color="gray" ml={5}></Loader>}
+            </Button>
+          </Flex>
+        </form>
+      </Modal>
 
-        <Grid.Col
+      {/* <Grid.Col
           xl={"auto"}
           className="relative h-[calc(100vh-60px)]"
           lg={"auto"}
@@ -339,13 +347,7 @@ function Lodge({}) {
               </Accordion>
             </Container>
           </Container>
-          {/* <div className="absolute h-[25px] w-[25px] rounded-full z-10 top-[50%] left-[1px]">
-            <div className="h-[25px] cursor-pointer w-[25px] fixed bg-black rounded-full z-10 flex items-center justify-center">
-              <IconChevronLeft size={20} className="mr-[2px]" color="white" />
-            </div>
-          </div> */}
-        </Grid.Col>
-      </Grid>
+        </Grid.Col> */}
     </div>
   );
 }

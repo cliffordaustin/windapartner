@@ -5,13 +5,9 @@ import React from "react";
 
 type RRoomNonResidentPriceEditProps = {
   date: [Date | null, Date | null];
-  roomTypes: RoomType[] | undefined;
 };
 
-function RoomNonResidentPriceEdit({
-  date,
-  roomTypes,
-}: RRoomNonResidentPriceEditProps) {
+function RoomNonResidentPriceEdit({ date }: RRoomNonResidentPriceEditProps) {
   return (
     <div className="border border-solid w-full border-gray-200 rounded-xl p-5">
       <Text className="font-semibold" size="lg">

@@ -533,7 +533,7 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
             )
           )}
         </Accordion>
-        <Flex align="center" justify="space-between">
+        <Flex align="center" className="mb-6" justify="space-between">
           <div></div>
 
           <Button

@@ -12,6 +12,17 @@ type StayDetailProps = {
   token: string | undefined;
 };
 
+export type RoomTypeDetail = {
+  id: number;
+  slug?: string | undefined;
+  name?: string | undefined;
+  capacity: number;
+  child_capacity: number;
+  infant_capacity: number;
+  package: string;
+  package_description: string | null;
+};
+
 export type ParkFee = {
   id: number;
   name: string | null;
@@ -108,11 +119,6 @@ export const getRoomTypes = async (
   endDate: string | null | undefined
 ): Promise<RoomType[]> => {
   // subtract 1 day from end date
-  if (endDate) {
-    const date = new Date(endDate);
-    date.setDate(date.getDate() - 1);
-    endDate = date.toISOString().split("T")[0];
-  }
 
   if (startDate && endDate && stay) {
     const room_types = await axios.get(
@@ -155,7 +161,7 @@ export const getStayActivities = async (
 
 export const getRoomTypeList = async (
   stay: Stay | undefined
-): Promise<RoomType[]> => {
+): Promise<RoomTypeDetail[]> => {
   if (stay) {
     const room_types = await axios.get(
       `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/room-detail-types/`
@@ -170,14 +176,12 @@ export const getRoomTypeList = async (
 export const getRoomTypeDetail = async (
   stay: Stay | undefined,
   slug: string
-): Promise<RoomType[]> => {
+): Promise<RoomTypeDetail | undefined> => {
   if (stay) {
     const room_types = await axios.get(
       `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/room-detail-types/${slug}/`
     );
 
-    return room_types.data.results;
+    return room_types.data;
   }
-
-  return [];
 };

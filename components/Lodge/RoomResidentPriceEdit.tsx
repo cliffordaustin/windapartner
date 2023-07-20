@@ -1,17 +1,28 @@
-import { RoomType } from "@/utils/types";
-import { Text } from "@mantine/core";
+import { getRoomTypes } from "@/pages/api/stays";
+import { RoomType, Stay } from "@/utils/types";
+import { Loader, Text } from "@mantine/core";
 import { format } from "date-fns";
 import React from "react";
+import { useQuery } from "react-query";
+import SelectedResidentPriceTable from "./SelectedResidentPriceTable";
 
 type RoomResidentPriceEditProps = {
   date: [Date | null, Date | null];
-  roomTypes: RoomType[] | undefined;
+  stay: Stay | undefined;
 };
 
-function RoomResidentPriceEdit({
-  date,
-  roomTypes,
-}: RoomResidentPriceEditProps) {
+function RoomResidentPriceEdit({ date, stay }: RoomResidentPriceEditProps) {
+  const queryStr = stay ? stay.slug : "room-type";
+  const { data: roomTypes, isLoading: roomTypesLoading } = useQuery(
+    queryStr,
+    () =>
+      getRoomTypes(
+        stay,
+        format(date[0] || new Date(), "yyyy-MM-dd"),
+        format(date[1] || new Date(), "yyyy-MM-dd")
+      ),
+    { enabled: date[0] && date[1] ? true : false }
+  );
   return (
     <div className="border border-solid w-full border-gray-200 rounded-xl p-5">
       <Text className="font-semibold" size="lg">
@@ -30,6 +41,24 @@ function RoomResidentPriceEdit({
             Please select a date range to view the rooms and packages
           </Text>
         ))}
+
+      <div className="mt-6">
+        {!roomTypesLoading &&
+          date[0] &&
+          date[1] &&
+          roomTypes?.map((roomType, index) => (
+            <SelectedResidentPriceTable
+              staySlug={stay?.slug}
+              key={index}
+              roomType={roomType}
+            />
+          ))}
+        {roomTypesLoading && date[0] && date[1] && (
+          <div className="absolute top-[50%] left-[50%] -translate-x-2/4">
+            <Loader color="red" />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

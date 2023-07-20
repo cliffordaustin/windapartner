@@ -385,7 +385,7 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
         ))}
       </Carousel>
 
-      <div className="absolute flex items-center top-2 left-2 rounded-full bg-white">
+      {/* <div className="absolute flex items-center top-2 left-2 rounded-full bg-white">
         <div
           onClick={openDeleteModal}
           className="p-1 flex cursor-pointer items-center justify-center rounded-full hover:bg-gray-100"
@@ -398,7 +398,7 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
         >
           <IconPencil size={22} color="blue"></IconPencil>
         </div>
-      </div>
+      </div> */}
 
       <div className="p-2">
         <Text truncate weight={600} size="md">
@@ -409,13 +409,16 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
           {stay.location}
         </Text>
 
-        <Box sx={{ display: "flex", gap: 6, alignItems: "center" }}>
+        {/* <Box sx={{ display: "flex", gap: 6, alignItems: "center" }}>
           <Button
             size="xs"
             color="red"
             variant="light"
             className="w-full mt-1 !py-2"
-            onClick={open}
+            // onClick={open}
+            onClick={() => {
+              router.push(`/partner/lodge/${stay.slug}`);
+            }}
           >
             Add rates
           </Button>
@@ -448,7 +451,17 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
               </Menu.Item>
             </Menu.Dropdown>
           </Menu>
-        </Box>
+        </Box> */}
+        <Link href={`/partner/lodge/${stay.slug}`}>
+          <Button
+            size="xs"
+            color="red"
+            variant="light"
+            className="w-full mt-1 !py-2"
+          >
+            Manage property
+          </Button>
+        </Link>
       </div>
 
       <Modal
@@ -883,7 +896,7 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
         </Modal>
       </ContextProvider>
 
-      {isAdded ? (
+      {/* {isAdded ? (
         <Button
           onClick={() => handleRemoveItemClick(stay.id)}
           className="w-[30px] p-0 bg-black hover:bg-black absolute left-1 bottom-[100px] h-[30px] flex items-center justify-center rounded-full"
@@ -904,15 +917,15 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
       ) : (
         <Button
           color="red"
-          onClick={() => addListingToCalculate(stay.id)}
-          // onClick={() => {
-          //   router.push(`/partner/lodge/${stay.slug}`);
-          // }}
+          // onClick={() => addListingToCalculate(stay.id)}
+          onClick={() => {
+            router.push(`/partner/lodge/${stay.slug}`);
+          }}
           className="w-[30px] p-0 absolute left-1 bottom-[100px] h-[30px] flex items-center justify-center rounded-full"
         >
           <IconPlus size="1.4rem" className="text-white" />
         </Button>
-      )}
+      )} */}
     </div>
   );
 }

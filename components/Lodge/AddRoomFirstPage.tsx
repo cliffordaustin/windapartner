@@ -26,7 +26,11 @@ import { DatePickerInput } from "@mantine/dates";
 import { IconCalendar, IconSelector, IconX } from "@tabler/icons-react";
 import React, { useContext } from "react";
 
-function AddRoomFirstPage() {
+type AddRoomFirstPageProps = {
+  showRoomsOptions?: boolean;
+};
+
+function AddRoomFirstPage({ showRoomsOptions = true }: AddRoomFirstPageProps) {
   const { state, setState } = useContext(Context);
 
   const updateGuestType = (
@@ -732,104 +736,120 @@ function AddRoomFirstPage() {
     <Flex w={900} gap={35} mt={12} mx="auto">
       <ScrollArea className="w-[40%] h-[80vh]" type="never">
         <Container>
-          <Text weight={700} size="md">
-            Rooms
-          </Text>
+          {showRoomsOptions && (
+            <Text weight={700} size="md">
+              Rooms
+            </Text>
+          )}
 
           {state.rooms.map((room, roomIndex) => (
             <Flex key={roomIndex} direction="column" mt={10} gap={4}>
-              <TextInput
-                label="Room name"
-                placeholder="eg. Standard Room"
-                value={room.name}
-                onChange={(event) => {
-                  const name = event.currentTarget.value;
-                  setState(
-                    (prev): StateType => ({
-                      ...prev,
-                      rooms: prev.rooms.map((room, i) => {
-                        if (i === roomIndex) {
-                          return {
-                            ...room,
-                            name,
-                          };
-                        }
-                        return room;
-                      }),
-                    })
-                  );
-                }}
-                radius="sm"
-              />
+              {showRoomsOptions && (
+                <>
+                  <TextInput
+                    label="Room name"
+                    placeholder="eg. Standard Room"
+                    value={room.name}
+                    onChange={(event) => {
+                      const name = event.currentTarget.value;
+                      setState(
+                        (prev): StateType => ({
+                          ...prev,
+                          rooms: prev.rooms.map((room, i) => {
+                            if (i === roomIndex) {
+                              return {
+                                ...room,
+                                name,
+                              };
+                            }
+                            return room;
+                          }),
+                        })
+                      );
+                    }}
+                    radius="sm"
+                  />
 
-              <NumberInput
-                label="Adult capacity"
-                placeholder="eg. 2"
-                value={room.adult_capacity}
-                onChange={(value) =>
-                  setState(
-                    (prev): StateType => ({
-                      ...prev,
-                      rooms: prev.rooms.map((room, i) => {
-                        if (i === roomIndex) {
-                          return {
-                            ...room,
-                            adult_capacity: value,
-                          };
-                        }
-                        return room;
-                      }),
-                    })
-                  )
-                }
-                radius="sm"
-              />
+                  <NumberInput
+                    label="Adult capacity"
+                    placeholder="eg. 2"
+                    value={room.adult_capacity}
+                    onChange={(value) =>
+                      setState(
+                        (prev): StateType => ({
+                          ...prev,
+                          rooms: prev.rooms.map((room, i) => {
+                            if (i === roomIndex) {
+                              return {
+                                ...room,
+                                adult_capacity: value,
+                              };
+                            }
+                            return room;
+                          }),
+                        })
+                      )
+                    }
+                    radius="sm"
+                  />
 
-              <NumberInput
-                label="Child capacity"
-                placeholder="eg. 1"
-                value={room.child_capacity}
-                onChange={(value) =>
-                  setState(
-                    (prev): StateType => ({
-                      ...prev,
-                      rooms: prev.rooms.map((room, i) => {
-                        if (i === roomIndex) {
-                          return {
-                            ...room,
-                            child_capacity: value,
-                          };
-                        }
-                        return room;
-                      }),
-                    })
-                  )
-                }
-                radius="sm"
-              />
+                  <NumberInput
+                    label="Child capacity"
+                    placeholder="eg. 1"
+                    value={room.child_capacity}
+                    onChange={(value) =>
+                      setState(
+                        (prev): StateType => ({
+                          ...prev,
+                          rooms: prev.rooms.map((room, i) => {
+                            if (i === roomIndex) {
+                              return {
+                                ...room,
+                                child_capacity: value,
+                              };
+                            }
+                            return room;
+                          }),
+                        })
+                      )
+                    }
+                    radius="sm"
+                  />
 
-              <NumberInput
-                label="Infant capacity"
-                placeholder="eg. 1"
-                value={room.infant_capacity}
-                onChange={(value) =>
-                  setState(
-                    (prev): StateType => ({
-                      ...prev,
-                      rooms: prev.rooms.map((room, i) => {
-                        if (i === roomIndex) {
-                          return {
-                            ...room,
-                            infant_capacity: value,
-                          };
-                        }
-                        return room;
-                      }),
-                    })
-                  )
-                }
-                radius="sm"
-              />
+                  <NumberInput
+                    label="Infant capacity"
+                    placeholder="eg. 1"
+                    value={room.infant_capacity}
+                    onChange={(value) =>
+                      setState(
+                        (prev): StateType => ({
+                          ...prev,
+                          rooms: prev.rooms.map((room, i) => {
+                            if (i === roomIndex) {
+                              return {
+                                ...room,
+                                infant_capacity: value,
+                              };
+                            }
+                            return room;
+                          }),
+                        })
+                      )
+                    }
+                    radius="sm"
+                  />
+                </>
+              )}
+
+              {!showRoomsOptions && (
+                <Text className="mb-4">
+                  <span className="font-semibold">{room.name} - </span>
+                  <span className="text-sm text-gray-600">
+                    {room.adult_capacity} Adult, {room.child_capacity} Child,{" "}
+                    {room.infant_capacity} Infant
+                  </span>
+                </Text>
+              )}
 
               <Flex direction="column" gap={6}>
                 <Text weight={500} size="sm">
@@ -1057,34 +1077,38 @@ function AddRoomFirstPage() {
                     Add another package
                   </Anchor>
 
-                  <Divider orientation="vertical" />
+                  {showRoomsOptions && <Divider orientation="vertical" />}
 
-                  <Anchor
-                    size="sm"
-                    type="button"
-                    color="red"
-                    onClick={() => {
-                      removeRoom(roomIndex);
-                    }}
-                  >
-                    Remove room
-                  </Anchor>
+                  {showRoomsOptions && (
+                    <Anchor
+                      size="sm"
+                      type="button"
+                      color="red"
+                      onClick={() => {
+                        removeRoom(roomIndex);
+                      }}
+                    >
+                      Remove room
+                    </Anchor>
+                  )}
                 </Flex>
               </Flex>
             </Flex>
           ))}
 
-          <Anchor
-            size="sm"
-            type="button"
-            mt={12}
-            color="blue"
-            onClick={() => {
-              addRoom();
-            }}
-          >
-            Add another room
-          </Anchor>
+          {showRoomsOptions && (
+            <Anchor
+              size="sm"
+              type="button"
+              mt={12}
+              color="blue"
+              onClick={() => {
+                addRoom();
+              }}
+            >
+              Add another room
+            </Anchor>
+          )}
         </Container>
       </ScrollArea>
 

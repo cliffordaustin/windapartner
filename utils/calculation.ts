@@ -181,7 +181,8 @@ const nonResidentPrice = (
 const findCommonRoomResidentNamesWithDescription = (
   name: string | undefined,
   packageName: string | undefined,
-  packages: RoomType[] | undefined
+  packages: RoomType[] | undefined,
+  allNames: boolean = false
 ): ({ name?: string; description?: string } | undefined)[] => {
   if (packages && name && packageName) {
     const filteredPackage = packages.find(
@@ -212,7 +213,8 @@ const findCommonRoomResidentNamesWithDescription = (
           !nameSet.has(nameObj.name) &&
           (nameObj.price ||
             nameObj.name?.toLowerCase().trim() === "infant" ||
-            nameObj.name?.toLowerCase().trim() === "infants")
+            nameObj.name?.toLowerCase().trim() === "infants" ||
+            allNames)
         ) {
           nameSet.add(nameObj.name);
           commonNames.push(nameObj);
@@ -228,7 +230,8 @@ const findCommonRoomResidentNamesWithDescription = (
 const findCommonRoomNonResidentNamesWithDescription = (
   name: string | undefined,
   packageName: string | undefined,
-  packages: RoomType[] | undefined
+  packages: RoomType[] | undefined,
+  allNames: boolean = false
 ): ({ name?: string; description?: string } | undefined)[] => {
   if (packages && name && packageName) {
     const filteredPackage = packages.find(
@@ -259,7 +262,8 @@ const findCommonRoomNonResidentNamesWithDescription = (
           !nameSet.has(nameObj.name) &&
           (nameObj.price ||
             nameObj.name?.toLowerCase().trim() === "infant" ||
-            nameObj.name?.toLowerCase().trim() === "infants")
+            nameObj.name?.toLowerCase().trim() === "infants" ||
+            allNames)
         ) {
           nameSet.add(nameObj.name);
           commonNames.push(nameObj);
