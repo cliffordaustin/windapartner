@@ -243,9 +243,9 @@ function PriceEdit({ date, stay }: PriceEditProps) {
                     clickSelectRoom(selectRoom.name);
                   }
                 }}
-                onMouseDown={() => {
-                  setIsRoomOpen(false);
-                }}
+                // onMouseDown={() => {
+                //   setIsRoomOpen(false);
+                // }}
                 className={
                   "py-2 px-2 rounded-md mt-1 cursor-pointer " +
                   (selectRoom.name === selectedRoom
@@ -308,9 +308,9 @@ function PriceEdit({ date, stay }: PriceEditProps) {
                     clickSelectPackage(roomPackage.name);
                   }
                 }}
-                onMouseDown={() => {
-                  setIsPackageOpen(false);
-                }}
+                // onMouseDown={() => {
+                //   setIsPackageOpen(false);
+                // }}
                 className={
                   "rounded-md mt-1 cursor-pointer " +
                   (selectedPackage === roomPackage.name

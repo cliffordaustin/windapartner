@@ -366,9 +366,9 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
                     });
                   }
                 }}
-                onMouseUp={() => {
-                  setOpened(false);
-                }}
+                // onMouseUp={() => {
+                //   setOpened(false);
+                // }}
                 className={
                   "py-2 px-2 rounded-md mt-1 cursor-pointer " +
                   (fee.guestType === guestType
@@ -435,9 +435,9 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
                     });
                   }
                 }}
-                onMouseUp={() => {
-                  setPricingTypeOpened(false);
-                }}
+                // onMouseUp={() => {
+                //   setPricingTypeOpened(false);
+                // }}
                 className={
                   "py-2 px-2 rounded-md mt-1 cursor-pointer " +
                   (fee.pricingType === pricingType

@@ -781,9 +781,9 @@ export default function Room({ room, stay, index }: RoomProps) {
                     });
                   }
                 }}
-                onMouseUp={() => {
-                  setIsRoomOpen(false);
-                }}
+                // onMouseUp={() => {
+                //   setIsRoomOpen(false);
+                // }}
                 className={
                   "py-2 px-2 rounded-md mt-1 cursor-pointer " +
                   (selectRoom.name === room.name
@@ -851,9 +851,9 @@ export default function Room({ room, stay, index }: RoomProps) {
                     });
                   }
                 }}
-                onMouseUp={() => {
-                  setIsPackageOpen(false);
-                }}
+                // onMouseUp={() => {
+                //   setIsPackageOpen(false);
+                // }}
                 className={
                   "rounded-md mt-1 cursor-pointer " +
                   (room.package === roomPackage.name

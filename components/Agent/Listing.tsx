@@ -132,7 +132,12 @@ export default function Listing({ stay }: ListingProps) {
         classNames={classes}
       >
         {arrImages.map((image, index) => (
-          <Carousel.Slide w={"100%"} h={220} key={index}>
+          <Carousel.Slide
+            className="bg-gray-200 rounded-lg blur-xl"
+            w={"100%"}
+            h={220}
+            key={index}
+          >
             <Image
               src={image}
               className={
@@ -140,6 +145,7 @@ export default function Listing({ stay }: ListingProps) {
               }
               alt={"Images of " + (stay.property_name || stay.name)}
               sizes="100%"
+              priority
               fill
             />
           </Carousel.Slide>

@@ -105,7 +105,10 @@ export default function AgentPage() {
           <ScrollArea>
             <div className="border-b sticky top-0 left-0 right-0 border-t-0 flex items-center gap-4 border-solid border-x-0 border-gray-200 py-4 px-6">
               {addedStays?.map((stay, index) => (
-                <UserSelectedStays stay={stay} key={index}></UserSelectedStays>
+                <UserSelectedStays
+                  stay={stay}
+                  key={stay.id}
+                ></UserSelectedStays>
               ))}
             </div>
           </ScrollArea>
@@ -140,7 +143,7 @@ export default function AgentPage() {
         <Grid gutter={"xl"} className="mt-5">
           {!isStayLoading &&
             stays?.map((stay, index) => (
-              <Grid.Col xl={2.7} lg={3} md={4} sm={6} xs={6} key={index}>
+              <Grid.Col xl={2.7} lg={3} md={4} sm={6} xs={6} key={stay.id}>
                 <Listing stay={stay}></Listing>
               </Grid.Col>
             ))}
@@ -162,8 +165,23 @@ export default function AgentPage() {
           Mixpanel.track("User moved to the calculate page");
         }}
       >
-        <NavLink
-          label={`Calculate pricing (${addedStays.length} selected)`}
+        <Link href="/partner/agent/calculate">
+          <Button
+            leftIcon={
+              isLoading ? (
+                <Loader size="sm" color="white" />
+              ) : (
+                <IconCalculator size="1.4rem" className="text-white ml-1" />
+              )
+            }
+            disabled={state.stayIds.length === 0 || isLoading}
+            className="fixed w-fit flex items-center justify-center rounded-3xl px-4 text-white z-10 bg-[#000] hover:bg-[#333] font-semibold bottom-10 left-[40%]"
+          >
+            Calculate pricing ({addedStays.length} selected)
+          </Button>
+        </Link>
+        {/* <NavLink
+          label={``}
           component="a"
           href="/partner/agent/calculate"
           disabled={state.stayIds.length === 0 || isLoading}
@@ -175,7 +193,7 @@ export default function AgentPage() {
               <IconCalculator size="1.4rem" className="text-white ml-1" />
             )
           }
-        />
+        /> */}
       </div>
 
       {/* <Pagination total={10} position="center" /> */}
@@ -210,9 +228,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     //   getUser(token)
     // );
 
-    await queryClient.fetchQuery<Stay[] | null>("partner-stays", () =>
-      getPartnerStays(context.query.location as string, "")
-    );
+    // await queryClient.fetchQuery<Stay[] | null>("partner-stays", () =>
+    //   getPartnerStays(context.query.location as string, "")
+    // );
 
     return {
       props: {
