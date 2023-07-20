@@ -127,6 +127,66 @@ export function Stay({ stay, index }: StayProps) {
     });
   };
 
+  useEffect(() => {
+    const item: StateType = {
+      id: stay.id,
+      slug: stay.slug,
+      date: [null, null],
+      name: stay.property_name || stay.name,
+      rooms: [
+        {
+          id: uuidv4(),
+          name: "",
+          residentAdult: 0,
+          residentChild: 0,
+          residentInfant: 0,
+          nonResidentAdult: 0,
+          nonResidentChild: 0,
+          nonResidentInfant: 0,
+          residentGuests: [
+            {
+              id: uuidv4(),
+              resident: "",
+              guestType: "",
+              numberOfGuests: 0,
+              description: "",
+            },
+          ],
+          nonResidentGuests: [
+            {
+              id: uuidv4(),
+              nonResident: "",
+              numberOfGuests: 0,
+              guestType: "",
+              description: "",
+            },
+          ],
+          package: "",
+          residentParkFee: [],
+          nonResidentParkFee: [],
+          otherFees: [],
+        },
+      ],
+      residentCommission: "",
+      nonResidentCommission: "",
+      activityFee: [],
+      extraFee: [
+        {
+          id: uuidv4(),
+          name: "",
+          price: "",
+          pricingType: "",
+          guestType: "",
+        },
+      ],
+    };
+
+    // add the item to the state if it doesn't exist
+    if (!state.find((item) => item.id === stay.id)) {
+      setState([...state, item]);
+    }
+  }, [setState, state, stay]);
+
   return (
     <div>
       {/* <Flex gap={4} mb={8} align={"center"}>

@@ -6,7 +6,7 @@ import { AxiosError } from "axios";
 import { dehydrate, QueryClient, useQuery } from "react-query";
 import Cookies from "js-cookie";
 import Navbar from "@/components/Agent/Navbar";
-import { useContext, useEffect, useRef, useState } from "react";
+import { use, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Stay } from "@/utils/types";
 import { getDetailPartnerStays } from "@/pages/api/stays";
 import { useRouter } from "next/router";
@@ -68,6 +68,8 @@ export default function Calculate() {
 
   const { state, setState } = useContext(Context);
 
+  const dynamicRoute = useRouter().asPath;
+
   useEffect(() => {
     const ids = localStorage.getItem("stayIds");
     const newIds = ids?.replace(/[\[\]']+/g, "");
@@ -86,66 +88,186 @@ export default function Calculate() {
     { enabled: !!stayIds }
   );
 
-  useEffect(() => {
-    if (stays && state.length === 0) {
-      const items: StateType[] = Array.from(
-        { length: stays.length },
-        (_, i) => ({
-          id: stays[i].id,
-          slug: stays[i].slug,
-          date: [null, null],
-          name: stays[i].property_name || stays[i].name,
-          rooms: [
-            {
-              id: uuidv4(),
-              name: "",
-              residentAdult: 0,
-              residentChild: 0,
-              residentInfant: 0,
-              nonResidentAdult: 0,
-              nonResidentChild: 0,
-              nonResidentInfant: 0,
-              residentGuests: [
-                {
-                  id: uuidv4(),
-                  resident: "",
-                  guestType: "",
-                  numberOfGuests: 0,
-                  description: "",
-                },
-              ],
-              nonResidentGuests: [
-                {
-                  id: uuidv4(),
-                  nonResident: "",
-                  numberOfGuests: 0,
-                  guestType: "",
-                  description: "",
-                },
-              ],
-              package: "",
-              residentParkFee: [],
-              nonResidentParkFee: [],
-              otherFees: [],
-            },
-          ],
-          residentCommission: "",
-          nonResidentCommission: "",
-          activityFee: [],
-          extraFee: [
-            {
-              id: uuidv4(),
-              name: "",
-              price: "",
-              pricingType: "",
-              guestType: "",
-            },
-          ],
-        })
-      );
-      setState(items);
-    }
-  }, [stays, setState]);
+  // const initialItems: StateType[] = stays
+  //   ? Array.from({ length: stays.length }, (_, i) => ({
+  //       id: stays[i].id,
+  //       slug: stays[i].slug,
+  //       date: [null, null],
+  //       name: stays[i].property_name || stays[i].name,
+  //       rooms: [
+  //         {
+  //           id: uuidv4(),
+  //           name: "",
+  //           residentAdult: 0,
+  //           residentChild: 0,
+  //           residentInfant: 0,
+  //           nonResidentAdult: 0,
+  //           nonResidentChild: 0,
+  //           nonResidentInfant: 0,
+  //           residentGuests: [
+  //             {
+  //               id: uuidv4(),
+  //               resident: "",
+  //               guestType: "",
+  //               numberOfGuests: 0,
+  //               description: "",
+  //             },
+  //           ],
+  //           nonResidentGuests: [
+  //             {
+  //               id: uuidv4(),
+  //               nonResident: "",
+  //               numberOfGuests: 0,
+  //               guestType: "",
+  //               description: "",
+  //             },
+  //           ],
+  //           package: "",
+  //           residentParkFee: [],
+  //           nonResidentParkFee: [],
+  //           otherFees: [],
+  //         },
+  //       ],
+  //       residentCommission: "",
+  //       nonResidentCommission: "",
+  //       activityFee: [],
+  //       extraFee: [
+  //         {
+  //           id: uuidv4(),
+  //           name: "",
+  //           price: "",
+  //           pricingType: "",
+  //           guestType: "",
+  //         },
+  //       ],
+  //     }))
+  //   : [];
+
+  // setState((prev) => [...prev, ...initialItems]);
+
+  // console.log(initialItems);
+
+  // const initialItems: StateType[] = useMemo(
+  //   (): StateType[] =>
+  //     stays
+  //       ? Array.from({ length: stays.length }, (_, i) => ({
+  //           id: stays[i].id,
+  //           slug: stays[i].slug,
+  //           date: [null, null],
+  //           name: stays[i].property_name || stays[i].name,
+  //           rooms: [
+  //             {
+  //               id: uuidv4(),
+  //               name: "",
+  //               residentAdult: 0,
+  //               residentChild: 0,
+  //               residentInfant: 0,
+  //               nonResidentAdult: 0,
+  //               nonResidentChild: 0,
+  //               nonResidentInfant: 0,
+  //               residentGuests: [
+  //                 {
+  //                   id: uuidv4(),
+  //                   resident: "",
+  //                   guestType: "",
+  //                   numberOfGuests: 0,
+  //                   description: "",
+  //                 },
+  //               ],
+  //               nonResidentGuests: [
+  //                 {
+  //                   id: uuidv4(),
+  //                   nonResident: "",
+  //                   numberOfGuests: 0,
+  //                   guestType: "",
+  //                   description: "",
+  //                 },
+  //               ],
+  //               package: "",
+  //               residentParkFee: [],
+  //               nonResidentParkFee: [],
+  //               otherFees: [],
+  //             },
+  //           ],
+  //           residentCommission: "",
+  //           nonResidentCommission: "",
+  //           activityFee: [],
+  //           extraFee: [
+  //             {
+  //               id: uuidv4(),
+  //               name: "",
+  //               price: "",
+  //               pricingType: "",
+  //               guestType: "",
+  //             },
+  //           ],
+  //         }))
+  //       : [],
+  //   [stays]
+  // );
+
+  // setState(initialItems);
+
+  // useEffect(() => {
+  //   if (stays) {
+  //     const items: StateType[] = Array.from(
+  //       { length: stays.length },
+  //       (_, i) => ({
+  //         id: stays[i].id,
+  //         slug: stays[i].slug,
+  //         date: [null, null],
+  //         name: stays[i].property_name || stays[i].name,
+  //         rooms: [
+  //           {
+  //             id: uuidv4(),
+  //             name: "",
+  //             residentAdult: 0,
+  //             residentChild: 0,
+  //             residentInfant: 0,
+  //             nonResidentAdult: 0,
+  //             nonResidentChild: 0,
+  //             nonResidentInfant: 0,
+  //             residentGuests: [
+  //               {
+  //                 id: uuidv4(),
+  //                 resident: "",
+  //                 guestType: "",
+  //                 numberOfGuests: 0,
+  //                 description: "",
+  //               },
+  //             ],
+  //             nonResidentGuests: [
+  //               {
+  //                 id: uuidv4(),
+  //                 nonResident: "",
+  //                 numberOfGuests: 0,
+  //                 guestType: "",
+  //                 description: "",
+  //               },
+  //             ],
+  //             package: "",
+  //             residentParkFee: [],
+  //             nonResidentParkFee: [],
+  //             otherFees: [],
+  //           },
+  //         ],
+  //         residentCommission: "",
+  //         nonResidentCommission: "",
+  //         activityFee: [],
+  //         extraFee: [
+  //           {
+  //             id: uuidv4(),
+  //             name: "",
+  //             price: "",
+  //             pricingType: "",
+  //             guestType: "",
+  //           },
+  //         ],
+  //       })
+  //     );
+  //     setState(items);
+  //   }
+  // }, [stays, setState, dynamicRoute]);
 
   type TotalTypes = {
     id: number;
@@ -261,8 +383,9 @@ export default function Calculate() {
           {stays && (
             <Tabs
               color="red"
-              defaultValue={stays?.length > 0 ? stays[0].slug : ""}
+              defaultValue={stays[0].slug}
               className="w-[64%] mb-4"
+              keepMounted={false}
             >
               <ScrollArea>
                 <div className="flex w-full ">

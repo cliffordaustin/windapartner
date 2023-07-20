@@ -165,21 +165,23 @@ export default function AgentPage() {
           Mixpanel.track("User moved to the calculate page");
         }}
       >
-        <Link href="/partner/agent/calculate">
-          <Button
-            leftIcon={
-              isLoading ? (
-                <Loader size="sm" color="white" />
-              ) : (
-                <IconCalculator size="1.4rem" className="text-white ml-1" />
-              )
-            }
-            disabled={state.stayIds.length === 0 || isLoading}
-            className="fixed w-fit flex items-center justify-center rounded-3xl px-4 text-white z-10 bg-[#000] hover:bg-[#333] font-semibold bottom-10 left-[40%]"
-          >
-            Calculate pricing ({addedStays.length} selected)
-          </Button>
-        </Link>
+        <Button
+          leftIcon={
+            isLoading ? (
+              <Loader size="sm" color="white" />
+            ) : (
+              <IconCalculator size="1.4rem" className="text-white ml-1" />
+            )
+          }
+          onClick={() => {
+            router.push("/partner/agent/calculate");
+          }}
+          disabled={state.stayIds.length === 0 || isLoading}
+          className="fixed w-fit flex items-center justify-center rounded-3xl px-4 text-white z-10 bg-[#000] hover:bg-[#333] font-semibold bottom-10 left-[40%]"
+        >
+          Calculate pricing ({addedStays.length} selected)
+        </Button>
+
         {/* <NavLink
           label={``}
           component="a"
