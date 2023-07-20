@@ -136,7 +136,7 @@ function RoomPackagesEdit({ date, stay }: RoomPackagesEditProps) {
     uniqueRooms = uniqueRooms.sort((a, b) => a.id - b.id);
 
     return uniqueRooms;
-  }, [roomTypeList]);
+  }, [getGuestTypes, roomTypeList]);
 
   const [addRoomModal, { open: openAddRoomModal, close: closeAddRoomModal }] =
     useDisclosure(false);
@@ -165,12 +165,12 @@ function RoomPackagesEdit({ date, stay }: RoomPackagesEditProps) {
         </Button>
       </Flex>
 
-      {date[0] && date[1] && (
+      {/* {date[0] && date[1] && (
         <Text className="text-gray-600" size="sm">
           Data being shown is based on {format(date[0] as Date, "dd MMM yyyy")}{" "}
           to {format(new Date(date[1]) as Date, "dd MMM yyyy")}
         </Text>
-      )}
+      )} */}
 
       {!date[0] ||
         (!date[1] && (

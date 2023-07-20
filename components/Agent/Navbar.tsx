@@ -22,6 +22,7 @@ type NavbarProps = {
   date?: [Date | null, Date | null];
   setDate?: (date: [Date | null, Date | null]) => void;
   openModal?: () => void;
+  navBarLogoLink?: string;
 };
 
 export default function Navbar({
@@ -33,6 +34,7 @@ export default function Navbar({
   date,
   setDate,
   openModal,
+  navBarLogoLink = "/partner/agent",
 }: NavbarProps) {
   const router = useRouter();
   const [location, setLocation] = useState(
@@ -63,7 +65,7 @@ export default function Navbar({
   };
   return (
     <div className="flex items-center border-b justify-between sm:px-8 px-6 md:px-6 lg:px-12 h-[80px]">
-      <Link href="/partner/agent">
+      <Link href={navBarLogoLink}>
         <div className="relative w-28 h-9 cursor-pointer">
           <Image
             alt="Winda logo"

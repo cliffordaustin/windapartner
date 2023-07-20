@@ -13,7 +13,16 @@ import { getUser } from "@/pages/api/user";
 import getToken from "@/utils/getToken";
 import { ContextProvider } from "@/context/LodgeDetailPage";
 import { RoomType, Stay, UserTypes } from "@/utils/types";
-import { Box, Container, Divider, Flex, NavLink, Text } from "@mantine/core";
+import {
+  Box,
+  Button,
+  Container,
+  Divider,
+  Flex,
+  Modal,
+  NavLink,
+  Text,
+} from "@mantine/core";
 import {
   IconBed,
   IconGlobe,
@@ -26,7 +35,15 @@ import Cookies from "js-cookie";
 import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
-import { QueryClient, dehydrate, useQuery } from "react-query";
+import {
+  QueryClient,
+  dehydrate,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "react-query";
+import { deleteStayEmail } from "@/pages/api/stays";
+import { useDisclosure } from "@mantine/hooks";
 
 function LodgeDetail() {
   const token = Cookies.get("token");
@@ -67,6 +84,22 @@ function LodgeDetail() {
     />
   ));
 
+  const queryClient = useQueryClient();
+
+  const [deleteModal, { open: openDeleteModal, close: closeDelteModal }] =
+    useDisclosure(false);
+
+  const { mutateAsync: deleteProperty, isLoading: deleteLoading } = useMutation(
+    deleteStayEmail,
+    {
+      onSuccess: () => {
+        // refetch stays
+        queryClient.invalidateQueries("all-stay-email");
+        router.push("/partner/lodge");
+      },
+    }
+  );
+
   return (
     <div>
       <div className="border-b fixed bg-white z-20 w-full left-0 right-0 top-0 border-x-0 border-t-0 border-solid border-b-gray-200">
@@ -80,14 +113,74 @@ function LodgeDetail() {
           date={date}
           setDate={setDate}
           includeDateSearch={true}
+          navBarLogoLink="/partner/lodge"
         ></Navbar>
       </div>
 
+      <Modal
+        opened={deleteModal}
+        onClose={closeDelteModal}
+        title={"Delete property"}
+        classNames={{
+          title: "text-xl font-bold",
+          close: "text-black hover:text-gray-700 hover:bg-gray-200",
+          header: "bg-gray-100",
+        }}
+        transitionProps={{ transition: "fade", duration: 200 }}
+        closeButtonProps={{
+          style: {
+            width: 30,
+            height: 30,
+          },
+          iconSize: 20,
+        }}
+      >
+        <p>
+          Are you sure you want to delete this property? All rates associated to
+          this property will also be deleted. This action cannot be undone.
+        </p>
+        <Flex justify="flex-end" mt={12} gap={6} align="center">
+          <Button onClick={closeDelteModal} variant="default">
+            Close
+          </Button>
+
+          <Button
+            onClick={() => {
+              if (stay) {
+                deleteProperty({
+                  slug: stay.slug,
+                  token: token,
+                });
+              }
+            }}
+            className="flex items-center"
+            loading={deleteLoading}
+            color="red"
+          >
+            Proceed
+          </Button>
+        </Flex>
+      </Modal>
+
       <Flex className="mt-20">
-        <div className="fixed left-0">
+        <div className="fixed overflow-y-scroll w-fit left-0">
           <Box w={220} mt={12} miw={230}>
             {items}
           </Box>
+
+          <Divider my={6}></Divider>
+
+          <div className="px-4">
+            <Button
+              size="xs"
+              color="red"
+              variant="outline"
+              onClick={openDeleteModal}
+              className="w-full mt-1 !py-2"
+            >
+              Delete property
+            </Button>
+          </div>
         </div>
         <ContextProvider>
           <div className="w-full bg-red-500">
@@ -138,7 +231,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     } else {
       return {
         redirect: {
-          destination: `/partner/signin?redirect=/partner/lodge/`,
+          destination: `/partner/signin?redirect=/partner/lodge/${context.query.slug}`,
           permanent: false,
         },
       };
@@ -147,7 +240,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     if (error instanceof AxiosError && error.response?.status === 401) {
       return {
         redirect: {
-          destination: `/partner/signin?redirect=/partner/lodge/`,
+          destination: `/partner/signin?redirect=/partner/lodge/${context.query.slug}`,
           permanent: false,
         },
       };

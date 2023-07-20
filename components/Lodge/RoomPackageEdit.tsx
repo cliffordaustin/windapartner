@@ -16,7 +16,7 @@ import { useDisclosure } from "@mantine/hooks";
 import axios from "axios";
 import { EmblaCarouselType } from "embla-carousel-react";
 import Cookies from "js-cookie";
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { useMutation, useQueryClient } from "react-query";
 import AddRoomFirstPage from "./AddRoomFirstPage";
 import AddRoomSecondPage from "./AddRoomSecondPage";
@@ -60,6 +60,11 @@ function RoomPackageEdit({ index, room, stay }: RoomPackageEditProps) {
   const [packages, setPackages] = React.useState<PackageType[] | undefined>(
     room.packages
   );
+
+  useEffect(() => {
+    setPackages(room.packages);
+  }, [room]);
+
   const [adultCapacity, setAdultCapacity] = React.useState<
     number | undefined | ""
   >(room.adult_capacity);
@@ -96,6 +101,36 @@ function RoomPackageEdit({ index, room, stay }: RoomPackageEditProps) {
     }
   };
 
+  const deleteRoom = async () => {
+    if (stay) {
+      for (const packageItem of packages || []) {
+        await axios.delete(
+          `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/room-detail-types/${packageItem.id}/`,
+          {
+            headers: {
+              Authorization: `Token ${token}`,
+            },
+          }
+        );
+      }
+    }
+  };
+
+  const deletePackage = async (id: number) => {
+    if (stay) {
+      await axios.delete(
+        `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/room-detail-types/${id}/`,
+        {
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        }
+      );
+    }
+  };
+
+  const [deletePackageId, setDeletePackageId] = React.useState<number | null>();
+
   const queryStr = stay ? stay.slug : "room-type";
 
   const { mutateAsync: submitMutation, isLoading: submitLoading } = useMutation(
@@ -107,6 +142,25 @@ function RoomPackageEdit({ index, room, stay }: RoomPackageEditProps) {
       },
     }
   );
+
+  const { mutateAsync: deleteMutation, isLoading: deleteLoading } = useMutation(
+    deleteRoom,
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(queryStr);
+      },
+    }
+  );
+
+  const {
+    mutateAsync: deletePackageMutation,
+    isLoading: deletePackageLoading,
+  } = useMutation(deletePackage, {
+    onSuccess: () => {
+      queryClient.invalidateQueries(queryStr);
+    },
+  });
+
   const [embla, setEmbla] = React.useState<EmblaCarouselType | null>(null);
   const [currentSlideIndex, setCurrentSlideIndex] = React.useState(0);
 
@@ -394,11 +448,13 @@ function RoomPackageEdit({ index, room, stay }: RoomPackageEditProps) {
               <Button
                 onClick={(e) => {
                   e.stopPropagation();
+                  deleteMutation();
                 }}
                 color="red"
                 variant="subtle"
                 className="px-1"
                 size="xs"
+                loading={deleteLoading}
               >
                 Delete
               </Button>
@@ -410,19 +466,43 @@ function RoomPackageEdit({ index, room, stay }: RoomPackageEditProps) {
             <Text w={150} className="text-gray-600" size="sm">
               Packages
             </Text>
-            <Flex gap={8} direction="column">
+            <Flex gap={8} className="w-full" direction="column">
               {room.packages.map((packageItem, index) => (
-                <Text key={index} transform="capitalize" size="md">
-                  <span>
-                    {packageItem.name.charAt(0).toUpperCase() +
-                      packageItem.name.slice(1).toLowerCase()}{" "}
-                  </span>
-                  {packageItem.description && (
-                    <span className="text-sm text-gray-600">
-                      - {packageItem.description}
+                <Flex
+                  className="w-[90%]"
+                  align="center"
+                  justify="space-between"
+                  key={index}
+                >
+                  <Text transform="capitalize" size="md">
+                    <span className="font-medium">
+                      {packageItem.name.charAt(0).toUpperCase() +
+                        packageItem.name.slice(1).toLowerCase()}{" "}
                     </span>
-                  )}
-                </Text>
+                    {packageItem.description && (
+                      <span className="text-sm text-gray-600">
+                        - {packageItem.description}
+                      </span>
+                    )}
+                  </Text>
+
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deletePackageMutation(packageItem.id);
+                      setDeletePackageId(packageItem.id);
+                    }}
+                    color="red"
+                    variant="subtle"
+                    className="px-1"
+                    size="xs"
+                    loading={
+                      deletePackageLoading && deletePackageId === packageItem.id
+                    }
+                  >
+                    Delete
+                  </Button>
+                </Flex>
               ))}
             </Flex>
           </div>
