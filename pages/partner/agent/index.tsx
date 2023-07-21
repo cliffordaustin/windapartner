@@ -17,7 +17,11 @@ import { AxiosError } from "axios";
 import getToken from "@/utils/getToken";
 import { dehydrate, QueryClient, useQuery } from "react-query";
 import Navbar from "@/components/Agent/Navbar";
-import { getDetailPartnerStays, getPartnerStays } from "@/pages/api/stays";
+import {
+  getDetailPartnerStays,
+  getPartnerStays,
+  getPartnerStaysType,
+} from "@/pages/api/stays";
 import { NextRouter, useRouter } from "next/router";
 import {
   IconInfoCircle,
@@ -45,16 +49,19 @@ export default function AgentPage() {
   // );
 
   const {
-    data: stays,
+    data: stayList,
     isLoading: isStayLoading,
     refetch,
-  } = useQuery<Stay[]>("partner-stays", () =>
-    getPartnerStays(router.query.search as string, "")
+  } = useQuery<getPartnerStaysType>("partner-stays", () =>
+    getPartnerStays(
+      router.query.search as string,
+      Number(router.query.page || 1)
+    )
   );
 
   useEffect(() => {
     refetch();
-  }, [router.query.search]);
+  }, [router.query.search, router.query.page]);
 
   const { state, setState } = useContext(Context);
 
@@ -101,17 +108,43 @@ export default function AgentPage() {
       </div>
 
       {addedStays && addedStays.length > 0 && !isLoading && (
-        <div className="sticky bg-white z-40 top-0 left-0 right-0">
-          <ScrollArea>
-            <div className="border-b sticky top-0 left-0 right-0 border-t-0 flex items-center gap-4 border-solid border-x-0 border-gray-200 py-4 px-6">
-              {addedStays?.map((stay, index) => (
-                <UserSelectedStays
-                  stay={stay}
-                  key={stay.id}
-                ></UserSelectedStays>
-              ))}
+        <div className="sticky flex border-b border-solid border-x-0 border-t-0 border-gray-200 top-0 z-40 left-0 right-0">
+          <div className="w-[calc(100vw-230px)]">
+            <ScrollArea>
+              <div className="sticky top-0 left-0 right-0 flex items-center gap-4 h-[70px] px-6">
+                {addedStays?.map((stay, index) => (
+                  <UserSelectedStays
+                    stay={stay}
+                    key={stay.id}
+                  ></UserSelectedStays>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
+          <div className="w-[230px] flex items-center justify-center absolute right-0 h-full px-8">
+            <div
+              onClick={() => {
+                Mixpanel.track("User moved to the calculate page");
+              }}
+            >
+              <Button
+                leftIcon={
+                  isLoading ? (
+                    <Loader size="sm" color="white" />
+                  ) : (
+                    <IconCalculator size="1.4rem" className="text-white ml-1" />
+                  )
+                }
+                onClick={() => {
+                  router.push("/partner/agent/calculate");
+                }}
+                disabled={state.stayIds.length === 0 || isLoading}
+                className="w-fit flex items-center justify-center rounded-lg px-4 text-white z-10 bg-[#000] hover:bg-[#333] font-semibold"
+              >
+                Calculate pricing
+              </Button>
             </div>
-          </ScrollArea>
+          </div>
         </div>
       )}
 
@@ -142,7 +175,7 @@ export default function AgentPage() {
 
         <Grid gutter={"xl"} className="mt-5">
           {!isStayLoading &&
-            stays?.map((stay, index) => (
+            stayList?.results.map((stay, index) => (
               <Grid.Col xl={2.7} lg={3} md={4} sm={6} xs={6} key={stay.id}>
                 <Listing stay={stay}></Listing>
               </Grid.Col>
@@ -160,45 +193,21 @@ export default function AgentPage() {
         </Grid>
       </div>
 
-      <div
-        onClick={() => {
-          Mixpanel.track("User moved to the calculate page");
-        }}
-      >
-        <Button
-          leftIcon={
-            isLoading ? (
-              <Loader size="sm" color="white" />
-            ) : (
-              <IconCalculator size="1.4rem" className="text-white ml-1" />
-            )
-          }
-          onClick={() => {
-            router.push("/partner/agent/calculate");
+      {stayList && stayList.total_pages > 1 && (
+        <Pagination
+          radius="lg"
+          color="red"
+          mb={12}
+          total={stayList.total_pages}
+          position="center"
+          value={Number(router.query.page || 1)}
+          onChange={(page) => {
+            router.push(
+              `/partner/agent?page=${page}&search=${router.query.search || ""}`
+            );
           }}
-          disabled={state.stayIds.length === 0 || isLoading}
-          className="fixed w-fit flex items-center justify-center rounded-3xl px-4 text-white z-10 bg-[#000] hover:bg-[#333] font-semibold bottom-10 left-[40%]"
-        >
-          Calculate pricing ({addedStays.length} selected)
-        </Button>
-
-        {/* <NavLink
-          label={``}
-          component="a"
-          href="/partner/agent/calculate"
-          disabled={state.stayIds.length === 0 || isLoading}
-          className="fixed w-fit flex items-center justify-center rounded-3xl px-4 text-white z-10 bg-[#000] hover:bg-[#333] font-semibold bottom-10 left-[40%]"
-          icon={
-            isLoading ? (
-              <Loader size="sm" color="white" />
-            ) : (
-              <IconCalculator size="1.4rem" className="text-white ml-1" />
-            )
-          }
-        /> */}
-      </div>
-
-      {/* <Pagination total={10} position="center" /> */}
+        />
+      )}
 
       {/* {addedStays && addedStays.length > 0 && !isStayLoading && (
         <NavLink

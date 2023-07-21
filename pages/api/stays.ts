@@ -34,6 +34,15 @@ export type ParkFee = {
   non_resident_child_price: number | null;
 };
 
+export type getPartnerStaysType = {
+  results: Stay[];
+  count: number;
+  page_size: number;
+  next: string | null;
+  previous: string | null;
+  total_pages: number;
+};
+
 export const getHighlightedStays = async (): Promise<Stay[]> => {
   const stays = await axios.get(
     `${process.env.NEXT_PUBLIC_baseURL}/highlighted-stays/`
@@ -44,13 +53,22 @@ export const getHighlightedStays = async (): Promise<Stay[]> => {
 
 export const getPartnerStays = async (
   location: string | undefined,
-  listIds: string | undefined
-): Promise<Stay[]> => {
+  page: number | undefined
+): Promise<getPartnerStaysType> => {
   const stays = await axios.get(
-    `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/?search=${location || ""}`
+    `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/?search=${
+      location || ""
+    }&page=${page || 1}`
   );
 
-  return stays.data.results;
+  return {
+    results: stays.data.results,
+    count: stays.data.count,
+    page_size: stays.data.page_size,
+    next: stays.data.next,
+    previous: stays.data.previous,
+    total_pages: stays.data.total_pages,
+  };
 };
 
 export const getDetailPartnerStays = async (
