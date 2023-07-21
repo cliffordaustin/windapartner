@@ -68,6 +68,7 @@ export function Stay({ stay, index }: StayProps) {
               nonResidentChild: 0,
               nonResidentInfant: 0,
               package: "",
+              package_description: "",
               packageDescription: "",
               residentParkFee: [],
               nonResidentParkFee: [],
@@ -162,6 +163,7 @@ export function Stay({ stay, index }: StayProps) {
             },
           ],
           package: "",
+          package_description: "",
           residentParkFee: [],
           nonResidentParkFee: [],
           otherFees: [],
@@ -270,7 +272,7 @@ export function Stay({ stay, index }: StayProps) {
             <Divider mt={16} mb={16} />
 
             <Text size="md" weight={600}>
-              Activities
+              Activities/Extras
             </Text>
           </>
         )}

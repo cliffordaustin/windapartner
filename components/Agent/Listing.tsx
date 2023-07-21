@@ -77,11 +77,9 @@ export default function Listing({ stay }: ListingProps) {
       property: stay.property_name,
     });
     setState((prev) => ({ ...prev, stayIds: [...prev.stayIds, id] }));
-    const storedItemIds = localStorage.getItem("stayIds");
-    localStorage.setItem(
-      "stayIds",
-      JSON.stringify([...JSON.parse(storedItemIds || "[]"), id])
-    );
+    let storedItemIds = localStorage.getItem("stayIds");
+    storedItemIds = JSON.stringify([...JSON.parse(storedItemIds || "[]"), id]);
+    localStorage.setItem("stayIds", storedItemIds);
   }
 
   // function addListingToCalculate(id: number) {

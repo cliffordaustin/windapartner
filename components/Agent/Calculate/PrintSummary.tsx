@@ -389,7 +389,7 @@ export default function PrintSummary({
                   <div className="flex py-5 border-t border-b-0 border-x-0 border-solid border-gray-200 flex-col gap-2">
                     <Flex justify="space-between" align="center">
                       <Text size="sm" weight={700}>
-                        Activities
+                        Activities/Extras
                       </Text>
 
                       {!summarizedCalculation && (
@@ -609,7 +609,7 @@ export default function PrintSummary({
                     <div className="flex py-5 border-t border-b-0 border-x-0 border-solid border-gray-200 flex-col gap-2">
                       <Flex justify="space-between" align="center">
                         <Text size="sm" weight={700}>
-                          Activities
+                          Activities/Extras
                         </Text>
 
                         {!summarizedCalculation && (

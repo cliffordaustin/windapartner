@@ -166,6 +166,18 @@ export default function AgentPage() {
           </Text>
         </Flex>
 
+        {router.query.search && stayList && stayList.results.length === 0 && (
+          <div className="flex ml-6 items-center gap-2 mt-4">
+            <Text size="lg" className="text-gray-600">
+              No results found for{" "}
+              <span className="font-semibold">{router.query.search}</span>
+            </Text>
+            <Link className="text-blue-500" href="/partner/agent">
+              clear search
+            </Link>
+          </div>
+        )}
+
         <Grid gutter={"xl"} className="mt-5">
           {!isStayLoading &&
             stayList?.results.map((stay, index) => (

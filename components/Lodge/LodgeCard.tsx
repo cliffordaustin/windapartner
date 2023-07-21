@@ -613,7 +613,7 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
       <Modal
         opened={openActivityModal}
         onClose={closeActivity}
-        title={"Activities"}
+        title={"Activities/Extras"}
         classNames={{
           title: "text-lg font-bold",
           close: "text-black hover:text-gray-700 hover:bg-gray-200",

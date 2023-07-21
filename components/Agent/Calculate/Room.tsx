@@ -56,6 +56,9 @@ export default function Room({ room, stay, index }: RoomProps) {
   type UniqueRoomsType = {
     name?: string;
     packages: string[];
+    adult_capacity: number;
+    child_capacity: number;
+    infant_capacity: number;
   };
 
   useEffect(() => {
@@ -181,7 +184,13 @@ export default function Room({ room, stay, index }: RoomProps) {
         accumulator[index].packages.push(current.package);
       } else {
         // If roomName doesn't exist, create a new room object with the roomName and package
-        accumulator.push({ name: current.name, packages: [current.package] });
+        accumulator.push({
+          name: current.name,
+          adult_capacity: current.capacity,
+          child_capacity: current.child_capacity,
+          infant_capacity: current.infant_capacity,
+          packages: [current.package],
+        });
       }
       return accumulator;
     }, []) || [];
@@ -388,7 +397,7 @@ export default function Room({ room, stay, index }: RoomProps) {
     );
   };
 
-  const clickSelectPackage = (selectPackage: string) => {
+  const clickSelectPackage = (selectPackage: string, description: string) => {
     setState(
       state.map((item) => {
         if (item.id === stay.id) {
@@ -399,6 +408,7 @@ export default function Room({ room, stay, index }: RoomProps) {
                 return {
                   ...item,
                   package: selectPackage,
+                  package_description: description,
                   residentGuests: [
                     {
                       id: uuidv4(),
@@ -766,35 +776,96 @@ export default function Room({ room, stay, index }: RoomProps) {
 
           <Popover.Dropdown className="px-3">
             {uniqueRooms.map((selectRoom, index) => (
-              <Flex
-                key={index}
-                justify={"space-between"}
-                align={"center"}
-                onClick={() => {
-                  if (selectRoom.name === room.name) {
-                    deselectRoom();
-                  } else {
-                    clickSelectRoom(selectRoom);
-                    Mixpanel.track("User selected a room", {
-                      property: stay.property_name,
-                      room: selectRoom.name,
-                    });
-                  }
-                }}
-                // onMouseUp={() => {
-                //   setIsRoomOpen(false);
-                // }}
-                className={
-                  "py-2 px-2 rounded-md mt-1 cursor-pointer " +
-                  (selectRoom.name === room.name
-                    ? "bg-[#FA5252] text-white"
-                    : "hover:bg-gray-100")
-                }
-              >
-                <Text size="sm" weight={600}>
-                  {selectRoom.name}
-                </Text>
-              </Flex>
+              <div key={index}>
+                {selectRoom.adult_capacity ||
+                selectRoom.child_capacity ||
+                selectRoom.infant_capacity ? (
+                  <Tooltip.Floating
+                    multiline
+                    width={220}
+                    color="white"
+                    position="bottom"
+                    className="text-gray-800 font-semibold border-gray-200 border border-solid"
+                    label={
+                      <div className="flex flex-col gap-2">
+                        {selectRoom.adult_capacity && (
+                          <Text size="sm" weight={600}>
+                            Adult Capacity: {selectRoom.adult_capacity}
+                          </Text>
+                        )}
+                        {selectRoom.child_capacity && (
+                          <Text size="sm" weight={600}>
+                            Child Capacity: {selectRoom.child_capacity}
+                          </Text>
+                        )}
+                        {selectRoom.infant_capacity && (
+                          <Text size="sm" weight={600}>
+                            Infant Capacity: {selectRoom.infant_capacity}
+                          </Text>
+                        )}
+                      </div>
+                    }
+                  >
+                    <Flex
+                      justify={"space-between"}
+                      align={"center"}
+                      onClick={() => {
+                        if (selectRoom.name === room.name) {
+                          deselectRoom();
+                        } else {
+                          clickSelectRoom(selectRoom);
+                          Mixpanel.track("User selected a room", {
+                            property: stay.property_name,
+                            room: selectRoom.name,
+                          });
+                        }
+                      }}
+                      // onMouseUp={() => {
+                      //   setIsRoomOpen(false);
+                      // }}
+                      className={
+                        "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                        (selectRoom.name === room.name
+                          ? "bg-[#FA5252] text-white"
+                          : "hover:bg-gray-100")
+                      }
+                    >
+                      <Text size="sm" weight={600}>
+                        {selectRoom.name}
+                      </Text>
+                    </Flex>
+                  </Tooltip.Floating>
+                ) : (
+                  <Flex
+                    justify={"space-between"}
+                    align={"center"}
+                    onClick={() => {
+                      if (selectRoom.name === room.name) {
+                        deselectRoom();
+                      } else {
+                        clickSelectRoom(selectRoom);
+                        Mixpanel.track("User selected a room", {
+                          property: stay.property_name,
+                          room: selectRoom.name,
+                        });
+                      }
+                    }}
+                    // onMouseUp={() => {
+                    //   setIsRoomOpen(false);
+                    // }}
+                    className={
+                      "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                      (selectRoom.name === room.name
+                        ? "bg-[#FA5252] text-white"
+                        : "hover:bg-gray-100")
+                    }
+                  >
+                    <Text size="sm" weight={600}>
+                      {selectRoom.name}
+                    </Text>
+                  </Flex>
+                )}
+              </div>
             ))}
           </Popover.Dropdown>
         </Popover>
@@ -843,7 +914,10 @@ export default function Room({ room, stay, index }: RoomProps) {
                   if (roomPackage.name === room.package) {
                     deselectPackage();
                   } else {
-                    clickSelectPackage(roomPackage.name);
+                    clickSelectPackage(
+                      roomPackage.name,
+                      roomPackage.description || ""
+                    );
 
                     Mixpanel.track("User selected a package", {
                       property: stay.property_name,
@@ -1010,37 +1084,50 @@ export default function Room({ room, stay, index }: RoomProps) {
                         withArrow
                         shadow="md"
                       >
-                        <Popover.Target>
-                          <Flex
-                            justify={"space-between"}
-                            align={"center"}
-                            className="px-2 py-1 cursor-pointer border rounded-md border-solid w-[48%] border-gray-300"
-                          >
-                            <Flex direction="column" gap={4}>
-                              <Text
-                                size="xs"
-                                weight={600}
-                                className="text-gray-500"
-                              >
-                                Guest type
-                              </Text>
-                              <div className="w-[140px] overflow-hidden">
+                        <Tooltip.Floating
+                          multiline
+                          width={220}
+                          color="white"
+                          position="bottom"
+                          className="text-gray-800 font-semibold border-gray-200 border border-solid"
+                          label={
+                            guest.guestType
+                              ? guest.guestType
+                              : "Select a guest type"
+                          }
+                        >
+                          <Popover.Target>
+                            <Flex
+                              justify={"space-between"}
+                              align={"center"}
+                              className="px-2 py-1 cursor-pointer border rounded-md border-solid w-[48%] border-gray-300"
+                            >
+                              <Flex direction="column" gap={4}>
                                 <Text
-                                  transform="capitalize"
-                                  size="sm"
-                                  truncate
+                                  size="xs"
                                   weight={600}
+                                  className="text-gray-500"
                                 >
-                                  {guest.guestType
-                                    ? guest.guestType
-                                    : "Select guest type"}
+                                  Guest type
                                 </Text>
-                              </div>
-                            </Flex>
+                                <div className="w-[140px] overflow-hidden">
+                                  <Text
+                                    transform="capitalize"
+                                    size="sm"
+                                    truncate
+                                    weight={600}
+                                  >
+                                    {guest.guestType
+                                      ? guest.guestType
+                                      : "Select guest type"}
+                                  </Text>
+                                </div>
+                              </Flex>
 
-                            <IconSelector className="text-gray-500"></IconSelector>
-                          </Flex>
-                        </Popover.Target>
+                              <IconSelector className="text-gray-500"></IconSelector>
+                            </Flex>
+                          </Popover.Target>
+                        </Tooltip.Floating>
 
                         <Popover.Dropdown className="px-0 py-2">
                           <ScrollArea.Autosize

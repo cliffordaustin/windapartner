@@ -359,7 +359,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
                   <Divider size="xs" mt={8}></Divider>
                   <Flex justify="space-between" align="center">
                     <Text size="sm" weight={700}>
-                      Activities
+                      Activities/Extras
                     </Text>
 
                     <Text size="sm" weight={600}>
@@ -595,7 +595,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
                   <Divider size="xs" mt={8}></Divider>
                   <Flex justify="space-between" align="center">
                     <Text size="sm" weight={700}>
-                      Activities
+                      Activities/Extras
                     </Text>
 
                     <Text size="sm" weight={600}>

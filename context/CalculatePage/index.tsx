@@ -56,6 +56,7 @@ export type Room = {
   residentGuests: ResidentGuests[];
   nonResidentGuests: NonResidentGuests[];
   package: string;
+  package_description: string;
   otherFees: OtherFees[];
   residentParkFee: ParkFee[];
   nonResidentParkFee: ParkFee[];

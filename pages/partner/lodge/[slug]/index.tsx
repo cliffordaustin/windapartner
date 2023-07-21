@@ -67,7 +67,7 @@ function LodgeDetail() {
   const data = [
     { icon: IconBed, label: "Rooms and packages" },
     { icon: IconHomeDollar, label: "prices" },
-    { icon: IconRun, label: "Activities" },
+    { icon: IconRun, label: "Activities/Extras" },
     { icon: IconBed, label: "Park fees" },
     { icon: IconInfoCircle, label: "About" },
   ];

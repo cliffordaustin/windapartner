@@ -90,7 +90,7 @@ function ActivityEdit({ stay }: ActivityEditProps) {
     <div className="border border-solid w-full border-gray-200 rounded-xl p-5">
       <Flex justify="space-between" align="center">
         <Text className="font-semibold" size="lg">
-          Activities
+          Activities/Extras
         </Text>
 
         <Button
@@ -108,7 +108,7 @@ function ActivityEdit({ stay }: ActivityEditProps) {
       <Modal
         opened={openActivityModal}
         onClose={closeActivity}
-        title={"Activities"}
+        title={"Activities/Extras"}
         classNames={{
           title: "text-lg font-bold",
           close: "text-black hover:text-gray-700 hover:bg-gray-200",
