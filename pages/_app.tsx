@@ -9,7 +9,10 @@ import { useRouter } from "next/router";
 import { ContextProvider as AgentContextProvider } from "@/context/AgentPage";
 import { ContextProvider as CalculateContextProvider } from "@/context/CalculatePage";
 import { Notifications } from "@mantine/notifications";
+import Router from "next/router";
 import ReactGA from "react-ga4";
+import NProgress from "nprogress";
+import "nprogress/nprogress.css";
 
 const open_sans = Open_Sans({
   subsets: ["latin"],
@@ -29,28 +32,19 @@ if (
   }
 }
 
+NProgress.configure({
+  minimum: 0.3,
+  easing: "ease",
+  speed: 800,
+  showSpinner: false,
+});
+
+Router.events.on("routeChangeStart", () => NProgress.start());
+Router.events.on("routeChangeComplete", () => NProgress.done());
+Router.events.on("routeChangeError", () => NProgress.done());
+
 export default function App({ Component, pageProps }: AppProps) {
-  // This ensures that data is not shared
-  // between different users and requests
   const [queryClient] = useState(() => new QueryClient());
-
-  const router = useRouter();
-
-  useEffect(() => {
-    const handleStart = (url: string) =>
-      url !== router.asPath && nprogress.start();
-    const handleComplete = () => nprogress.complete();
-
-    router.events.on("routeChangeStart", handleStart);
-    router.events.on("routeChangeComplete", handleComplete);
-    router.events.on("routeChangeError", handleComplete);
-
-    return () => {
-      router.events.off("routeChangeStart", handleStart);
-      router.events.off("routeChangeComplete", handleComplete);
-      router.events.off("routeChangeError", handleComplete);
-    };
-  }, [router.asPath]);
 
   return (
     <MantineProvider
@@ -60,7 +54,6 @@ export default function App({ Component, pageProps }: AppProps) {
         fontFamily: open_sans.style.fontFamily,
       }}
     >
-      <NavigationProgress color="red" />
       <Notifications />
       <QueryClientProvider client={queryClient}>
         <Hydrate state={pageProps.dehydratedState}>

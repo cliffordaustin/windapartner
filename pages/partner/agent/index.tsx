@@ -122,22 +122,21 @@ export default function AgentPage() {
             </ScrollArea>
           </div>
           <div className="w-[230px] flex items-center justify-center absolute right-0 h-full px-8">
-            <Button
-              leftIcon={
-                isLoading ? (
-                  <Loader size="sm" color="white" />
-                ) : (
-                  <IconCalculator size="1.4rem" className="text-white ml-1" />
-                )
-              }
-              onClick={() => {
-                router.push("/partner/agent/calculate");
-              }}
-              disabled={state.stayIds.length === 0 || isLoading}
-              className="w-fit flex items-center justify-center rounded-lg px-4 text-white z-10 bg-[#000] hover:bg-[#333] font-semibold"
-            >
-              Calculate pricing
-            </Button>
+            <Link className="no-underline" href="/partner/agent/calculate">
+              <Button
+                leftIcon={
+                  isLoading ? (
+                    <Loader size="sm" color="white" />
+                  ) : (
+                    <IconCalculator size="1.4rem" className="text-white ml-1" />
+                  )
+                }
+                disabled={state.stayIds.length === 0 || isLoading}
+                className="w-fit flex  items-center justify-center rounded-lg px-4 text-white z-10 bg-[#000] hover:bg-[#333] font-semibold"
+              >
+                Calculate pricing
+              </Button>
+            </Link>
           </div>
         </div>
       )}

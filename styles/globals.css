@@ -1,6 +1,10 @@
 @tailwind components;
 @tailwind utilities;
 
+#nprogress .bar {
+  @apply !bg-red-400 !h-[5px];
+}
+
 .gradient-red {
   background: rgb(246, 36, 71);
 
