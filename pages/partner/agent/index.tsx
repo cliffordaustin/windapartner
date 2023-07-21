@@ -108,7 +108,7 @@ export default function AgentPage() {
       </div>
 
       {addedStays && addedStays.length > 0 && !isLoading && (
-        <div className="sticky flex border-b border-solid border-x-0 border-t-0 border-gray-200 top-0 z-40 left-0 right-0">
+        <div className="sticky flex bg-white border-b border-solid border-x-0 border-t-0 border-gray-200 top-0 z-40 left-0 right-0">
           <div className="w-[calc(100vw-230px)]">
             <ScrollArea>
               <div className="sticky top-0 left-0 right-0 flex items-center gap-4 h-[70px] px-6">
