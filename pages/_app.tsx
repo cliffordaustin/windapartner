@@ -20,7 +20,6 @@ const open_sans = Open_Sans({
 //   process.env.NODE_ENV === "production" &&
 //   process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID
 // ) {
-//   console.log("init");
 //   ReactGA.initialize(process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID);
 //   if (process.browser) {
 //     ReactGA.send({
