@@ -122,28 +122,22 @@ export default function AgentPage() {
             </ScrollArea>
           </div>
           <div className="w-[230px] flex items-center justify-center absolute right-0 h-full px-8">
-            <div
+            <Button
+              leftIcon={
+                isLoading ? (
+                  <Loader size="sm" color="white" />
+                ) : (
+                  <IconCalculator size="1.4rem" className="text-white ml-1" />
+                )
+              }
               onClick={() => {
-                Mixpanel.track("User moved to the calculate page");
+                router.push("/partner/agent/calculate");
               }}
+              disabled={state.stayIds.length === 0 || isLoading}
+              className="w-fit flex items-center justify-center rounded-lg px-4 text-white z-10 bg-[#000] hover:bg-[#333] font-semibold"
             >
-              <Button
-                leftIcon={
-                  isLoading ? (
-                    <Loader size="sm" color="white" />
-                  ) : (
-                    <IconCalculator size="1.4rem" className="text-white ml-1" />
-                  )
-                }
-                onClick={() => {
-                  router.push("/partner/agent/calculate");
-                }}
-                disabled={state.stayIds.length === 0 || isLoading}
-                className="w-fit flex items-center justify-center rounded-lg px-4 text-white z-10 bg-[#000] hover:bg-[#333] font-semibold"
-              >
-                Calculate pricing
-              </Button>
-            </div>
+              Calculate pricing
+            </Button>
           </div>
         </div>
       )}
@@ -197,7 +191,7 @@ export default function AgentPage() {
         <Pagination
           radius="lg"
           color="red"
-          mb={12}
+          className="my-8"
           total={stayList.total_pages}
           position="center"
           value={Number(router.query.page || 1)}
