@@ -9,25 +9,25 @@ import { useRouter } from "next/router";
 import { ContextProvider as AgentContextProvider } from "@/context/AgentPage";
 import { ContextProvider as CalculateContextProvider } from "@/context/CalculatePage";
 import { Notifications } from "@mantine/notifications";
-// import ReactGA from "react-ga4";
+import ReactGA from "react-ga4";
 
 const open_sans = Open_Sans({
   subsets: ["latin"],
   weight: ["400", "700", "800", "500", "600"],
 });
 
-// if (
-//   process.env.NODE_ENV === "production" &&
-//   process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID
-// ) {
-//   ReactGA.initialize(process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID);
-//   if (process.browser) {
-//     ReactGA.send({
-//       hitType: "pageview",
-//       page: window.location.pathname,
-//     });
-//   }
-// }
+if (
+  process.env.NODE_ENV === "production" &&
+  process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID
+) {
+  ReactGA.initialize(process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID);
+  if (process.browser) {
+    ReactGA.send({
+      hitType: "pageview",
+      page: window.location.pathname,
+    });
+  }
+}
 
 export default function App({ Component, pageProps }: AppProps) {
   // This ensures that data is not shared
