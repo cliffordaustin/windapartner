@@ -71,7 +71,6 @@ function PartnerSignin(props: PaperProps) {
 
         Cookies.set("token", response.data.key);
         setLoginError(false);
-        setLoading(false);
         router.replace((router.query.redirect as string) || "/partner/lodge");
       } catch (error) {
         setLoading(false);
@@ -87,7 +86,7 @@ function PartnerSignin(props: PaperProps) {
             email: form.values.email,
             password1: form.values.password,
             password2: form.values.password,
-            is_partner: true,
+            is_agent: true,
           }
         );
 

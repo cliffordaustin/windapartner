@@ -1,4 +1,4 @@
-import { Stay } from "@/utils/types";
+import { LodgeStay } from "@/utils/types";
 import {
   Button,
   Center,
@@ -19,7 +19,7 @@ import axios from "axios";
 import StayImages from "./StayImages";
 
 type RoomResidentPriceEditProps = {
-  stay: Stay | undefined;
+  stay: LodgeStay | undefined;
 };
 
 function AboutRoomEdit({ stay }: RoomResidentPriceEditProps) {

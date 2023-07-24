@@ -1,4 +1,4 @@
-import { RoomType, Stay } from "@/utils/types";
+import { RoomType, LodgeStay } from "@/utils/types";
 import {
   Accordion,
   Button,
@@ -23,7 +23,7 @@ import { ContextProvider } from "@/context/LodgeDetailPage";
 
 type RoomPackagesEditProps = {
   date: [Date | null, Date | null];
-  stay: Stay | undefined;
+  stay: LodgeStay | undefined;
 };
 
 type GuestType = { name: string; description?: string };

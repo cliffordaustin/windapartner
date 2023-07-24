@@ -58,9 +58,9 @@ export default function Calculate() {
 
   const [summarizedCalculation, setSummarizedCalculation] = useState(false);
 
-  // const { data: user } = useQuery<UserTypes | null>("user", () =>
-  //   getUser(token)
-  // );
+  const { data: user } = useQuery<UserTypes | null>("user", () =>
+    getUser(token)
+  );
 
   const [queryClient] = useState(() => new QueryClient());
 
@@ -84,7 +84,7 @@ export default function Calculate() {
     refetch,
   } = useQuery<Stay[]>(
     "partner-stay-ids",
-    () => getDetailPartnerStays(stayIds),
+    () => getDetailPartnerStays(stayIds, token),
     { enabled: !!stayIds }
   );
 
@@ -375,12 +375,12 @@ export default function Calculate() {
   return (
     <div>
       <div className="border-b sticky top-0 z-10 bg-white left-0 right-0 border-x-0 border-t-0 border-solid border-b-gray-200">
-        <Navbar calculatePage={true}></Navbar>
+        <Navbar user={user} calculatePage={true}></Navbar>
       </div>
 
       {!isStayLoading && (
         <div className="md:px-12 relative max-w-[1440px] mx-auto px-6 mt-4">
-          {stays && (
+          {stays && stays.length > 0 && (
             <Tabs
               color="red"
               defaultValue={stays[0].slug}
@@ -778,20 +778,29 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const token = getToken(context);
 
   try {
-    // await queryClient.fetchQuery<UserTypes | null>("user", () =>
-    //   getUser(token)
-    // );
+    const user = await queryClient.fetchQuery<UserTypes | null>("user", () =>
+      getUser(token)
+    );
 
-    return {
-      props: {
-        dehydratedState: dehydrate(queryClient),
-      },
-    };
+    if (user?.is_agent) {
+      return {
+        props: {
+          dehydratedState: dehydrate(queryClient),
+        },
+      };
+    } else {
+      return {
+        redirect: {
+          destination: `/partner/signin/agent?redirect=/partner/agent/calculate`,
+          permanent: false,
+        },
+      };
+    }
   } catch (error) {
     if (error instanceof AxiosError && error.response?.status === 401) {
       return {
         redirect: {
-          destination: "/login",
+          destination: `/partner/signin/agent?redirect=/partner/agent/calculate`,
           permanent: false,
         },
       };

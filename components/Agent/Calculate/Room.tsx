@@ -14,7 +14,7 @@ import {
   OtherFeesNonResident,
   OtherFeesResident,
   RoomType,
-  Stay,
+  AgentStay,
 } from "@/utils/types";
 import {
   Flex,
@@ -35,7 +35,7 @@ import { Mixpanel } from "@/utils/mixpanelconfig";
 
 type RoomProps = {
   room: StateRoomType;
-  stay: Stay;
+  stay: AgentStay;
   index: number;
 };
 

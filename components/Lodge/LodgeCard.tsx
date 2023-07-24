@@ -1,5 +1,5 @@
 import { ContextProvider } from "@/context/LodgeDetailPage";
-import { Stay } from "@/utils/types";
+import { LodgeStay } from "@/utils/types";
 import { Carousel } from "@mantine/carousel";
 import {
   Button,
@@ -22,12 +22,14 @@ import {
   Menu,
   NumberInput,
   Select,
+  Tooltip,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
   IconChevronLeft,
   IconChevronRight,
   IconDots,
+  IconInfoCircle,
   IconPencil,
   IconPhoto,
   IconPlus,
@@ -48,7 +50,7 @@ import { useRouter } from "next/router";
 import StayImages from "./StayImages";
 
 type LodgeProps = {
-  stay: Stay;
+  stay: LodgeStay;
   setStayIds: React.Dispatch<React.SetStateAction<number[]>>;
   stayIds: number[];
 };
@@ -367,7 +369,7 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
     <div className="w-full rounded-md relative shadow border">
       <Carousel
         classNames={classes}
-        className="rounded-md"
+        className="rounded-md relative"
         w={"100%"}
         color="red"
       >
@@ -379,11 +381,23 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
               height={120}
               className="overflow-hidden rounded-t-lg"
               src={image}
-              alt={"Images of " + (stay.property_name || stay.name)}
+              alt={"Images of " + stay.property_name}
             />
           </Carousel.Slide>
         ))}
       </Carousel>
+
+      <Tooltip
+        label={`
+      ${stay.number_of_agents} agent(s) have access to this property
+      `}
+        position="bottom"
+        withArrow
+      >
+        <div className="absolute top-[95px] w-[20px] h-[20px] cursor-pointer rounded-full flex items-center justify-center bottom-2 left-1.5 bg-gray-200">
+          <IconInfoCircle size={20} color="gray"></IconInfoCircle>
+        </div>
+      </Tooltip>
 
       {/* <div className="absolute flex items-center top-2 left-2 rounded-full bg-white">
         <div

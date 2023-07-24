@@ -5,6 +5,8 @@ import {
   OtherFeesResident,
   RoomType,
   Stay,
+  LodgeStay,
+  AgentStay,
 } from "../../utils/types";
 
 type StayDetailProps = {
@@ -43,6 +45,14 @@ export type getPartnerStaysType = {
   total_pages: number;
 };
 
+export type AgentType = {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  profile_pic: string | null;
+};
+
 export const getHighlightedStays = async (): Promise<Stay[]> => {
   const stays = await axios.get(
     `${process.env.NEXT_PUBLIC_baseURL}/highlighted-stays/`
@@ -53,12 +63,18 @@ export const getHighlightedStays = async (): Promise<Stay[]> => {
 
 export const getPartnerStays = async (
   location: string | undefined,
-  page: number | undefined
+  page: number | undefined,
+  token: string | undefined
 ): Promise<getPartnerStaysType> => {
   const stays = await axios.get(
     `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/?search=${
       location || ""
-    }&page=${page || 1}`
+    }&page=${page || 1}`,
+    {
+      headers: {
+        Authorization: "Token " + token,
+      },
+    }
   );
 
   return {
@@ -72,10 +88,16 @@ export const getPartnerStays = async (
 };
 
 export const getDetailPartnerStays = async (
-  listIds: string | undefined
+  listIds: string | undefined,
+  token: string | undefined
 ): Promise<Stay[]> => {
   const stays = await axios.get(
-    `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/${listIds || ""}/`
+    `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/${listIds || ""}/`,
+    {
+      headers: {
+        Authorization: "Token " + token,
+      },
+    }
   );
 
   return stays.data.results;
@@ -92,7 +114,7 @@ export const getStayDetail = async (slug: string): Promise<Stay> => {
 export const getStayEmail = async (
   slug: string,
   token: string | undefined
-): Promise<Stay> => {
+): Promise<LodgeStay> => {
   const stay = await axios.get(
     `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${slug}/`,
     {
@@ -118,7 +140,7 @@ export const deleteStayEmail = async ({ slug, token }: StayDetailProps) => {
 
 export const getAllStaysEmail = async (
   token: string | undefined
-): Promise<Stay[]> => {
+): Promise<LodgeStay[]> => {
   const stay = await axios.get(
     `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/`,
     {
@@ -131,8 +153,39 @@ export const getAllStaysEmail = async (
   return stay.data.results;
 };
 
+export const getAllAgents = async (
+  token: string | undefined
+): Promise<AgentType[]> => {
+  const agents = await axios.get(`${process.env.NEXT_PUBLIC_baseURL}/agents/`, {
+    headers: {
+      Authorization: "Token " + token,
+    },
+  });
+
+  return agents.data;
+};
+
+export const getStayAgents = async (
+  token: string | undefined,
+  stay: LodgeStay | undefined
+): Promise<AgentType[]> => {
+  if (stay) {
+    const agents = await axios.get(
+      `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${stay.slug}/agents/`,
+      {
+        headers: {
+          Authorization: "Token " + token,
+        },
+      }
+    );
+
+    return agents.data.results;
+  }
+  return [];
+};
+
 export const getRoomTypes = async (
-  stay: Stay | undefined,
+  stay: LodgeStay | AgentStay | undefined,
   startDate: string | null | undefined,
   endDate: string | null | undefined
 ): Promise<RoomType[]> => {
@@ -150,7 +203,7 @@ export const getRoomTypes = async (
 };
 
 export const getParkFees = async (
-  stay: Stay | undefined
+  stay: LodgeStay | AgentStay | undefined
 ): Promise<ParkFee[]> => {
   if (stay) {
     const park_fees = await axios.get(
@@ -164,7 +217,7 @@ export const getParkFees = async (
 };
 
 export const getStayActivities = async (
-  stay: Stay | undefined
+  stay: LodgeStay | AgentStay | undefined
 ): Promise<ActivityFee[]> => {
   if (stay) {
     const activities = await axios.get(

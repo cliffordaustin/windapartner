@@ -12,7 +12,7 @@ import {
 import { getUser } from "@/pages/api/user";
 import getToken from "@/utils/getToken";
 import { ContextProvider } from "@/context/LodgeDetailPage";
-import { RoomType, Stay, UserTypes } from "@/utils/types";
+import { RoomType, LodgeStay, UserTypes } from "@/utils/types";
 import {
   Box,
   Button,
@@ -28,7 +28,9 @@ import {
   IconGlobe,
   IconHomeDollar,
   IconInfoCircle,
+  IconLockAccess,
   IconRun,
+  IconSquare,
 } from "@tabler/icons-react";
 import { AxiosError } from "axios";
 import Cookies from "js-cookie";
@@ -44,6 +46,7 @@ import {
 } from "react-query";
 import { deleteStayEmail } from "@/pages/api/stays";
 import { useDisclosure } from "@mantine/hooks";
+import Access from "@/components/Lodge/Access";
 
 function LodgeDetail() {
   const token = Cookies.get("token");
@@ -53,7 +56,7 @@ function LodgeDetail() {
     getUser(token)
   );
 
-  const { data: stay } = useQuery<Stay>("stay-email", () =>
+  const { data: stay } = useQuery<LodgeStay>("stay-email", () =>
     getStayEmail(router.query.slug as string, token)
   );
 
@@ -68,7 +71,8 @@ function LodgeDetail() {
     { icon: IconBed, label: "Rooms and packages" },
     { icon: IconHomeDollar, label: "prices" },
     { icon: IconRun, label: "Activities/Extras" },
-    { icon: IconBed, label: "Park fees" },
+    { icon: IconSquare, label: "Park fees" },
+    { icon: IconLockAccess, label: "Agent access" },
     { icon: IconInfoCircle, label: "About" },
   ];
 
@@ -199,7 +203,9 @@ function LodgeDetail() {
 
               {active === 3 && <ParkFeesEdit stay={stay}></ParkFeesEdit>}
 
-              {active === 4 && <AboutRoomEdit stay={stay}></AboutRoomEdit>}
+              {active === 4 && <Access stay={stay}></Access>}
+
+              {active === 5 && <AboutRoomEdit stay={stay}></AboutRoomEdit>}
             </Container>
           </div>
         </ContextProvider>
@@ -219,7 +225,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     );
 
     if (user?.is_partner) {
-      await queryClient.fetchQuery<Stay | null>("stay-email", () =>
+      await queryClient.fetchQuery<LodgeStay | null>("stay-email", () =>
         getStayEmail(context.query.slug as string, token)
       );
 

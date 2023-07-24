@@ -1,13 +1,13 @@
 import { Context } from "@/context/CalculatePage";
 import { Mixpanel } from "@/utils/mixpanelconfig";
-import { ActivityFee, Stay } from "@/utils/types";
+import { ActivityFee, AgentStay } from "@/utils/types";
 import { Image, Switch, Text } from "@mantine/core";
 import { useContext } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 type ActitivityProps = {
   activity: ActivityFee;
-  stay: Stay;
+  stay: AgentStay;
 };
 
 export default function Activity({ activity, stay }: ActitivityProps) {

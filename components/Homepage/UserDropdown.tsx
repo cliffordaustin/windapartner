@@ -8,6 +8,7 @@ import {
   IconNews,
   IconInfoCircle,
 } from "@tabler/icons-react";
+import { useRouter } from "next/router";
 
 type UserDropdownProps = {
   user?: UserTypes | null;
@@ -15,6 +16,7 @@ type UserDropdownProps = {
 
 export default function UserDropdown({ user }: UserDropdownProps) {
   const fullName = (user?.first_name || "") + " " + (user?.last_name || "");
+  const router = useRouter();
   return (
     <>
       <Popover width={250} position="bottom-end" withArrow shadow="md">
@@ -111,7 +113,7 @@ export default function UserDropdown({ user }: UserDropdownProps) {
             <NavLink
               label="Logout"
               component="a"
-              href="/logout"
+              href={`/logout?redirect=${router.asPath}`}
               icon={<IconLogout size="1rem" stroke={1.5} />}
             />
           )}

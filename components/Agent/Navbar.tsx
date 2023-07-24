@@ -19,10 +19,12 @@ type NavbarProps = {
   calculatePage?: boolean;
   includeSearch?: boolean;
   showAddProperty?: boolean;
+  showGrantAccess?: boolean;
   includeDateSearch?: boolean;
   date?: [Date | null, Date | null];
   setDate?: (date: [Date | null, Date | null]) => void;
   openModal?: () => void;
+  grantAccessModal?: () => void;
   navBarLogoLink?: string;
 };
 
@@ -31,10 +33,12 @@ export default function Navbar({
   calculatePage = false,
   includeSearch = true,
   showAddProperty = false,
+  showGrantAccess = false,
   includeDateSearch = false,
   date,
   setDate,
   openModal,
+  grantAccessModal,
   navBarLogoLink = "/partner/agent",
 }: NavbarProps) {
   const router = useRouter();
@@ -154,6 +158,12 @@ export default function Navbar({
         {showAddProperty && (
           <Button color="red" onClick={openModal}>
             Add your property
+          </Button>
+        )}
+
+        {showGrantAccess && (
+          <Button color="blue" onClick={grantAccessModal}>
+            Grant access
           </Button>
         )}
         <UserDropdown user={user}></UserDropdown>

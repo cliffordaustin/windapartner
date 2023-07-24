@@ -1,4 +1,8 @@
-import { RoomAvailabilityResidentGuest, RoomType, Stay } from "@/utils/types";
+import {
+  RoomAvailabilityResidentGuest,
+  RoomType,
+  LodgeStay,
+} from "@/utils/types";
 import { Button, Flex, NumberInput, Radio, TextInput } from "@mantine/core";
 import axios, { AxiosResponse } from "axios";
 import { format } from "date-fns";
@@ -21,7 +25,7 @@ type BulkEditProps = {
   setSelectedNonResidentGuestType: React.Dispatch<
     React.SetStateAction<SelectedGuestType | undefined>
   >;
-  stay: Stay | undefined;
+  stay: LodgeStay | undefined;
   closeModal: () => void;
 };
 

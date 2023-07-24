@@ -25,7 +25,7 @@ import { useContext, useEffect, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import Activities from "./Activities";
 import ExtraFees from "./ExtraFees";
-import { RoomType, Stay } from "@/utils/types";
+import { RoomType, AgentStay } from "@/utils/types";
 import Room from "./Room";
 import { v4 as uuidv4 } from "uuid";
 import Activity from "./Activity";
@@ -33,7 +33,7 @@ import { Mixpanel } from "@/utils/mixpanelconfig";
 import { format } from "date-fns";
 
 type StayProps = {
-  stay: Stay;
+  stay: AgentStay;
   index: number;
 };
 
@@ -133,7 +133,7 @@ export function Stay({ stay, index }: StayProps) {
       id: stay.id,
       slug: stay.slug,
       date: [null, null],
-      name: stay.property_name || stay.name,
+      name: stay.property_name,
       rooms: [
         {
           id: uuidv4(),

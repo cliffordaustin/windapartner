@@ -1,6 +1,6 @@
 import { Context, ExtraFee, StateType } from "@/context/CalculatePage";
 import { Mixpanel } from "@/utils/mixpanelconfig";
-import { Stay } from "@/utils/types";
+import { AgentStay } from "@/utils/types";
 import {
   Flex,
   Input,
@@ -16,7 +16,7 @@ import { v4 as uuidv4 } from "uuid";
 
 type ExtraFeesProps = {
   fee: ExtraFee;
-  stay: Stay;
+  stay: AgentStay;
   index: number;
 };
 

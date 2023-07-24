@@ -44,9 +44,6 @@ import { Mixpanel } from "@/utils/mixpanelconfig";
 export default function AgentPage() {
   const token = Cookies.get("token");
   const router: NextRouter = useRouter();
-  // const { data: user } = useQuery<UserTypes | null>("user", () =>
-  //   getUser(token)
-  // );
 
   const {
     data: stayList,
@@ -55,8 +52,13 @@ export default function AgentPage() {
   } = useQuery<getPartnerStaysType>("partner-stays", () =>
     getPartnerStays(
       router.query.search as string,
-      Number(router.query.page || 1)
+      Number(router.query.page || 1),
+      token
     )
+  );
+
+  const { data: user } = useQuery<UserTypes | null>("user", () =>
+    getUser(token)
   );
 
   useEffect(() => {
@@ -83,7 +85,7 @@ export default function AgentPage() {
 
   useEffect(() => {
     setIsLoading(true);
-    const getStay = getDetailPartnerStays(stayIds);
+    const getStay = getDetailPartnerStays(stayIds, token);
     getStay
       .then((res) => {
         setAddedStays(res);
@@ -104,7 +106,7 @@ export default function AgentPage() {
   return (
     <div className="">
       <div className="border-b border-x-0 border-t-0 border-solid border-b-gray-200">
-        <Navbar></Navbar>
+        <Navbar user={user}></Navbar>
       </div>
 
       {addedStays && addedStays.length > 0 && !isLoading && (
@@ -240,24 +242,29 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const token = getToken(context);
 
   try {
-    // await queryClient.fetchQuery<UserTypes | null>("user", () =>
-    //   getUser(token)
-    // );
+    const user = await queryClient.fetchQuery<UserTypes | null>("user", () =>
+      getUser(token)
+    );
 
-    // await queryClient.fetchQuery<Stay[] | null>("partner-stays", () =>
-    //   getPartnerStays(context.query.location as string, "")
-    // );
-
-    return {
-      props: {
-        dehydratedState: dehydrate(queryClient),
-      },
-    };
+    if (user?.is_agent) {
+      return {
+        props: {
+          dehydratedState: dehydrate(queryClient),
+        },
+      };
+    } else {
+      return {
+        redirect: {
+          destination: `/partner/signin/agent?redirect=/partner/agent/`,
+          permanent: false,
+        },
+      };
+    }
   } catch (error) {
     if (error instanceof AxiosError && error.response?.status === 401) {
       return {
         redirect: {
-          destination: "/login",
+          destination: `/partner/signin/agent?redirect=/partner/agent/`,
           permanent: false,
         },
       };

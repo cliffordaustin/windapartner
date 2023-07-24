@@ -1,5 +1,5 @@
 import { Context, ContextProvider, StateType } from "@/context/LodgeDetailPage";
-import { RoomType, Stay } from "@/utils/types";
+import { RoomType, LodgeStay } from "@/utils/types";
 import { Carousel } from "@mantine/carousel";
 import {
   Accordion,
@@ -42,7 +42,7 @@ type UniqueRoomsType = {
 type RoomPackageEditProps = {
   index: number;
   room: UniqueRoomsType;
-  stay: Stay | undefined;
+  stay: LodgeStay | undefined;
 };
 
 function RoomPackageEdit({ index, room, stay }: RoomPackageEditProps) {

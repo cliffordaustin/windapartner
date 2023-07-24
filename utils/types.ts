@@ -113,6 +113,30 @@ export type RoomType = {
   room_non_resident_availabilities: RoomAvailabilityNonResident[];
 };
 
+export interface LodgeStay {
+  id: number;
+  slug: string;
+  property_name?: string;
+  location?: string;
+  stay_images: stayImages[];
+  contact_email?: string;
+  lodge_price_data_pdf?: string;
+  number_of_agents: number;
+}
+
+export interface AgentStay {
+  id: number;
+  slug: string;
+  property_name?: string;
+  location?: string;
+  stay_images: stayImages[];
+  contact_email?: string;
+  lodge_price_data_pdf?: string;
+  activity_fees: ActivityFee[];
+  other_fees_resident: OtherFeesResident[];
+  other_fees_non_resident: OtherFeesNonResident[];
+}
+
 export interface Stay {
   id: number;
   name: string;
@@ -198,5 +222,6 @@ export interface UserTypes {
   profile_pic?: string;
   avatar_url?: string;
   is_partner: boolean;
+  is_agent: boolean;
   email: string;
 }

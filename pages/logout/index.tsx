@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import Head from "next/head";
 import axios, { AxiosError } from "axios";
 import Cookies from "js-cookie";
+import { GetServerSideProps, GetStaticProps } from "next";
 
 function LogoutPage() {
   const router = useRouter();
@@ -19,18 +20,18 @@ function LogoutPage() {
         }
       );
       Cookies.remove("token");
-      router.push("/partner/lodge");
+      router.replace((router.query.redirect as string) || "/partner/agent");
     } catch (error) {
       if (error instanceof AxiosError && error.response?.status === 401) {
         Cookies.remove("token");
-        router.push("/partner/lodge");
+        router.replace((router.query.redirect as string) || "/partner/agent");
       }
     }
   };
 
   useEffect(() => {
     logout();
-  }, []);
+  }, [router.query.redirect]);
   return (
     <div>
       <Head>
