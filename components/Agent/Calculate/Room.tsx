@@ -788,17 +788,17 @@ export default function Room({ room, stay, index }: RoomProps) {
                     className="text-gray-800 font-semibold border-gray-200 border border-solid"
                     label={
                       <div className="flex flex-col gap-2">
-                        {selectRoom.adult_capacity && (
+                        {!!selectRoom.adult_capacity && (
                           <Text size="sm" weight={600}>
                             Adult Capacity: {selectRoom.adult_capacity}
                           </Text>
                         )}
-                        {selectRoom.child_capacity && (
+                        {!!selectRoom.child_capacity && (
                           <Text size="sm" weight={600}>
                             Child Capacity: {selectRoom.child_capacity}
                           </Text>
                         )}
-                        {selectRoom.infant_capacity && (
+                        {!!selectRoom.infant_capacity && (
                           <Text size="sm" weight={600}>
                             Infant Capacity: {selectRoom.infant_capacity}
                           </Text>
