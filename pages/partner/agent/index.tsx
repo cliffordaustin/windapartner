@@ -155,16 +155,18 @@ export default function AgentPage() {
       )}
 
       <div className="md:px-12 max-w-[1440px] mx-auto px-6">
-        <Flex gap="xs" align="center" wrap="wrap" className="mt-2">
-          <IconInfoCircle
-            className="text-gray-600"
-            size="1.3rem"
-            stroke={1.5}
-          />
-          <Text className="text-gray-600">
-            Click on the plus button on a lodge to calculate pricing
-          </Text>
-        </Flex>
+        {!router.query.search && stayList && stayList.results.length > 0 && (
+          <Flex gap="xs" align="center" wrap="wrap" className="mt-2">
+            <IconInfoCircle
+              className="text-gray-600"
+              size="1.3rem"
+              stroke={1.5}
+            />
+            <Text className="text-gray-600">
+              Click on the plus button on a lodge to calculate pricing
+            </Text>
+          </Flex>
+        )}
 
         {router.query.search && stayList && stayList.results.length === 0 && (
           <div className="flex ml-6 items-center gap-2 mt-4">
