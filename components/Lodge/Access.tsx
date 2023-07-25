@@ -39,7 +39,7 @@ function Access({ stay }: AccessPropTypes) {
         ...agents.map((agent) => {
           return {
             image: agent.profile_pic,
-            label: `${agent.first_name} ${agent.last_name}`,
+            label: `${agent.first_name || ""} ${agent.last_name || ""}`,
             value: `${agent.id}`,
             description: agent.email,
           };
@@ -172,7 +172,9 @@ function Access({ stay }: AccessPropTypes) {
               <Avatar radius="xl" src={agent.profile_pic} />
 
               <div>
-                <Text>{agent.first_name + " " + agent.last_name}</Text>
+                <Text>
+                  {(agent.first_name || "") + " " + (agent.last_name || "")}
+                </Text>
                 <Text size="xs" color="dimmed">
                   {agent.email}
                 </Text>

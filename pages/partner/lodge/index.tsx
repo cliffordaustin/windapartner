@@ -215,7 +215,7 @@ function Lodge({}) {
         ...agents.map((agent) => {
           return {
             image: agent.profile_pic,
-            label: `${agent.first_name} ${agent.last_name}`,
+            label: `${agent.first_name || ""} ${agent.last_name || ""}`,
             value: `${agent.id}`,
             description: agent.email,
           };

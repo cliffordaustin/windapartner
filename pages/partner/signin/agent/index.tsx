@@ -82,7 +82,7 @@ function PartnerSignin(props: PaperProps) {
         const response = await axios.post(
           `${process.env.NEXT_PUBLIC_baseURL}/rest-auth/registration/`,
           {
-            name: form.values.name,
+            first_name: form.values.name,
             email: form.values.email,
             password1: form.values.password,
             password2: form.values.password,
