@@ -935,31 +935,10 @@ export default function Room({ room, stay, index }: RoomProps) {
                     : "hover:bg-gray-100")
                 }
               >
-                {roomPackage.description ? (
-                  <Tooltip.Floating
-                    multiline
-                    width={300}
-                    color="white"
-                    position="bottom"
-                    className="text-gray-800 font-semibold border-gray-200 border border-solid"
-                    label={roomPackage.description}
-                  >
-                    <Text
-                      w="100%"
-                      className="py-2 px-2 "
-                      size="sm"
-                      weight={600}
-                    >
-                      {roomPackage.name.charAt(0).toUpperCase() +
-                        roomPackage.name.slice(1).toLowerCase()}
-                    </Text>
-                  </Tooltip.Floating>
-                ) : (
-                  <Text className="py-2 px-2 " size="sm" weight={600}>
-                    {roomPackage.name.charAt(0).toUpperCase() +
-                      roomPackage.name.slice(1).toLowerCase()}
-                  </Text>
-                )}
+                <Text className="py-2 px-2 " size="sm" weight={600}>
+                  {roomPackage.name.charAt(0).toUpperCase() +
+                    roomPackage.name.slice(1).toLowerCase()}
+                </Text>
               </Flex>
             ))}
           </Popover.Dropdown>

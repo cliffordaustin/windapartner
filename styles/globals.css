@@ -5,6 +5,10 @@
   @apply !bg-red-400 !h-[5px];
 }
 
+@page {
+  margin: 0cm !important;
+}
+
 .gradient-red {
   background: rgb(246, 36, 71);
 

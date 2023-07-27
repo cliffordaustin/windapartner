@@ -3,6 +3,7 @@ import { RoomType, Stay } from "@/utils/types";
 import { Carousel } from "@mantine/carousel";
 import {
   Accordion,
+  Anchor,
   Button,
   Container,
   Flex,
@@ -129,7 +130,9 @@ function RoomPackageEdit({ index, room, stay }: RoomPackageEditProps) {
     }
   };
 
-  const [deletePackageId, setDeletePackageId] = React.useState<number | null>();
+  const [selectedPackageId, setSelectedPackageId] = React.useState<
+    number | null
+  >();
 
   const queryStr = stay ? stay.slug : "room-type";
 
@@ -208,6 +211,8 @@ function RoomPackageEdit({ index, room, stay }: RoomPackageEditProps) {
       })
     );
   };
+
+  const [showMoreText, setShowMoreText] = React.useState<boolean>(false);
   return (
     <>
       <Modal
@@ -472,36 +477,63 @@ function RoomPackageEdit({ index, room, stay }: RoomPackageEditProps) {
                   className="w-[90%]"
                   align="center"
                   justify="space-between"
-                  key={index}
+                  key={packageItem.id}
                 >
-                  <Text transform="capitalize" size="md">
-                    <span className="font-medium">
-                      {packageItem.name.charAt(0).toUpperCase() +
-                        packageItem.name.slice(1).toLowerCase()}{" "}
-                    </span>
-                    {packageItem.description && (
-                      <span className="text-sm text-gray-600">
-                        - {packageItem.description}
-                      </span>
-                    )}
-                  </Text>
+                  <Flex w="100%" direction="column" gap={4}>
+                    <Flex w="100%" justify="space-between" align="center">
+                      <Text transform="capitalize" size="md">
+                        <span className="font-medium">
+                          {packageItem.name.charAt(0).toUpperCase() +
+                            packageItem.name.slice(1).toLowerCase()}{" "}
+                        </span>
+                      </Text>
 
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deletePackageMutation(packageItem.id);
-                      setDeletePackageId(packageItem.id);
-                    }}
-                    color="red"
-                    variant="subtle"
-                    className="px-1"
-                    size="xs"
-                    loading={
-                      deletePackageLoading && deletePackageId === packageItem.id
-                    }
-                  >
-                    Delete
-                  </Button>
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deletePackageMutation(packageItem.id);
+                          setSelectedPackageId(packageItem.id);
+                        }}
+                        color="red"
+                        variant="subtle"
+                        className="px-1"
+                        size="xs"
+                        loading={
+                          deletePackageLoading &&
+                          selectedPackageId === packageItem.id
+                        }
+                      >
+                        Delete
+                      </Button>
+                    </Flex>
+
+                    {/* <p>lorem</p> */}
+
+                    {packageItem.description && (
+                      <Flex direction="column" gap={2}>
+                        <Text className="text-sm ml-1 whitespace-pre-wrap text-gray-600">
+                          {showMoreText && selectedPackageId === packageItem.id
+                            ? packageItem.description
+                            : `${packageItem.description.slice(0, 420)}...`}
+                        </Text>
+
+                        {packageItem.description.length >= 420 && (
+                          <Anchor
+                            onClick={() => {
+                              setSelectedPackageId(packageItem.id);
+                              setShowMoreText(!showMoreText);
+                            }}
+                            size="sm"
+                          >
+                            {showMoreText &&
+                            selectedPackageId === packageItem.id
+                              ? "Show less"
+                              : "Show more"}
+                          </Anchor>
+                        )}
+                      </Flex>
+                    )}
+                  </Flex>
                 </Flex>
               ))}
             </Flex>

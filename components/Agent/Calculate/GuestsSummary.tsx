@@ -1,7 +1,7 @@
 import { Context, GuestTotal, Room } from "@/context/CalculatePage";
 import pricing from "@/utils/calculation";
 import { RoomType } from "@/utils/types";
-import { Flex, Text } from "@mantine/core";
+import { Divider, Flex, Text } from "@mantine/core";
 import { IconInfoCircle } from "@tabler/icons-react";
 import { useContext, useEffect } from "react";
 
@@ -40,12 +40,13 @@ export default function GuestsSummary({
         countResidentGuestTypes.length > 0 &&
         (summarizedCalculation || includeClientInCalculation) && (
           <Flex my={6} align="center" gap={5}>
-            <IconInfoCircle size={16} color="gray"></IconInfoCircle>{" "}
-            <Text size="sm" className="text-gray-600">
-              <span>{room.package_description}</span>
+            <Text size="sm" className="text-gray-600 whitespace-pre-wrap">
+              {room.package_description}
             </Text>
           </Flex>
         )}
+
+      <Divider className="my-4" />
 
       <div className="ml-1 mt-3 flex flex-col gap-1">
         {countResidentGuestTypes.map((guestType, index) => (
