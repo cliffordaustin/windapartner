@@ -1,5 +1,5 @@
 import { UserTypes } from "@/utils/types";
-import { Popover, NavLink, Avatar, Divider } from "@mantine/core";
+import { Popover, NavLink, Avatar, Divider, Text, Button } from "@mantine/core";
 import {
   IconUserCheck,
   IconUserPlus,
@@ -8,6 +8,7 @@ import {
   IconNews,
   IconInfoCircle,
 } from "@tabler/icons-react";
+import Cookies from "js-cookie";
 import { useRouter } from "next/router";
 
 type UserDropdownProps = {
@@ -111,9 +112,12 @@ export default function UserDropdown({ user }: UserDropdownProps) {
 
           {user && (
             <NavLink
+              onClick={() => {
+                Cookies.remove("token");
+                router.reload();
+              }}
               label="Logout"
-              component="a"
-              href={`/logout?redirect=${router.asPath}`}
+              component="div"
               icon={<IconLogout size="1rem" stroke={1.5} />}
             />
           )}
