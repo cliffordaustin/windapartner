@@ -4,7 +4,7 @@ import type { AppProps } from "next/app";
 import { Open_Sans } from "next/font/google";
 import { QueryClient, QueryClientProvider, Hydrate } from "react-query";
 import { MantineProvider } from "@mantine/core";
-import { NavigationProgress, nprogress } from "@mantine/nprogress";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import { useRouter } from "next/router";
 import { ContextProvider as AgentContextProvider } from "@/context/AgentPage";
 import { ContextProvider as CalculateContextProvider } from "@/context/CalculatePage";
@@ -47,25 +47,29 @@ export default function App({ Component, pageProps }: AppProps) {
   const [queryClient] = useState(() => new QueryClient());
 
   return (
-    <MantineProvider
-      withGlobalStyles
-      withNormalizeCSS
-      theme={{
-        fontFamily: open_sans.style.fontFamily,
-      }}
+    <GoogleOAuthProvider
+      clientId={process.env.NEXT_PUBLIC_GOOGLE_SOCAIL_AUTH_CLIENT_ID || ""}
     >
-      <Notifications />
-      <QueryClientProvider client={queryClient}>
-        <Hydrate state={pageProps.dehydratedState}>
-          <AgentContextProvider>
-            <CalculateContextProvider>
-              <main className={open_sans.className}>
-                <Component {...pageProps} />
-              </main>
-            </CalculateContextProvider>
-          </AgentContextProvider>
-        </Hydrate>
-      </QueryClientProvider>
-    </MantineProvider>
+      <MantineProvider
+        withGlobalStyles
+        withNormalizeCSS
+        theme={{
+          fontFamily: open_sans.style.fontFamily,
+        }}
+      >
+        <Notifications />
+        <QueryClientProvider client={queryClient}>
+          <Hydrate state={pageProps.dehydratedState}>
+            <AgentContextProvider>
+              <CalculateContextProvider>
+                <main className={open_sans.className}>
+                  <Component {...pageProps} />
+                </main>
+              </CalculateContextProvider>
+            </AgentContextProvider>
+          </Hydrate>
+        </QueryClientProvider>
+      </MantineProvider>
+    </GoogleOAuthProvider>
   );
 }

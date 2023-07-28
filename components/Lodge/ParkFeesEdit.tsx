@@ -1,5 +1,5 @@
 import { getParkFees } from "@/pages/api/stays";
-import { Stay } from "@/utils/types";
+import { LodgeStay } from "@/utils/types";
 import {
   Button,
   Container,
@@ -19,7 +19,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 type ParkFeesEditProps = {
-  stay: Stay | undefined;
+  stay: LodgeStay | undefined;
 };
 
 function ParkFeesEdit({ stay }: ParkFeesEditProps) {

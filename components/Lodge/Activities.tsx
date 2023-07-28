@@ -1,12 +1,12 @@
 import { getStayActivities } from "@/pages/api/stays";
-import { Stay } from "@/utils/types";
+import { LodgeStay } from "@/utils/types";
 import React from "react";
 import { useQuery } from "react-query";
 import { Divider, Text } from "@mantine/core";
 import Activity from "./Activity";
 
 type ParkFeesProps = {
-  stay: Stay | undefined;
+  stay: LodgeStay | undefined;
 };
 
 function Activities({ stay }: ParkFeesProps) {

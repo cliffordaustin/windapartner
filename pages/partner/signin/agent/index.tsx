@@ -21,6 +21,7 @@ import Cookies from "js-cookie";
 import { useRouter } from "next/router";
 import { useGoogleLogin } from "@react-oauth/google";
 import { signinWithGoogle } from "@/utils/auth";
+import { IconBrandGoogle } from "@tabler/icons-react";
 
 const getCharacterValidationError = (str: string) => {
   return `Your password must have at least 1 ${str} character`;
@@ -46,7 +47,6 @@ function PartnerSignin(props: PaperProps) {
             .matches(/[0-9]/, getCharacterValidationError("digit"))
             .matches(/[a-z]/, getCharacterValidationError("lowercase"))
             .matches(/[A-Z]/, getCharacterValidationError("uppercase")),
-
     retypePassword:
       type === "login"
         ? Yup.string()
@@ -79,8 +79,7 @@ function PartnerSignin(props: PaperProps) {
 
         Cookies.set("token", response.data.key);
         setLoginError(false);
-        setLoading(false);
-        router.replace((router.query.redirect as string) || "/partner/lodge");
+        router.replace((router.query.redirect as string) || "/partner/agent");
       } catch (error) {
         setLoading(false);
         setLoginError(true);
@@ -95,7 +94,7 @@ function PartnerSignin(props: PaperProps) {
             email: form.values.email,
             password1: form.values.password,
             password2: form.values.retypePassword,
-            is_partner: true,
+            is_agent: true,
           }
         );
 
@@ -116,8 +115,8 @@ function PartnerSignin(props: PaperProps) {
   const googleSocialLogin = useGoogleLogin({
     onSuccess: async (user) => {
       setGoogleLoading(true);
-      await signinWithGoogle(user.access_token, false);
-      router.push((router.query.redirect as string) || "/partner/lodge");
+      await signinWithGoogle(user.access_token);
+      router.push((router.query.redirect as string) || "/partner/agent");
     },
     onError: (error) => {
       setGoogleLoading(false);
@@ -266,19 +265,21 @@ function PartnerSignin(props: PaperProps) {
         Continue with Google
       </Button>
 
-      {/* <Anchor
-        component="button"
-        type="button"
-        color="dimmed"
-        onClick={() => {
-          router.push("/accounts/password-reset");
-        }}
-        size="xs"
-        mt={6}
-        className="text-center"
-      >
-        Forgot password?
-      </Anchor> */}
+      {/* <div className="flex items-center justify-center">
+        <Anchor
+          component="button"
+          type="button"
+          color="dimmed"
+          onClick={() => {
+            router.push("/accounts/password-reset");
+          }}
+          size="xs"
+          mt={6}
+          className="text-center"
+        >
+          Forgot password?
+        </Anchor>
+      </div> */}
     </Paper>
   );
 }

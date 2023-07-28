@@ -1,6 +1,6 @@
 import { getRoomTypes } from "@/pages/api/stays";
 import pricing from "@/utils/calculation";
-import { RoomType, Stay } from "@/utils/types";
+import { RoomType, LodgeStay } from "@/utils/types";
 import {
   Button,
   Container,
@@ -26,7 +26,7 @@ import ResidentBulkEdit from "./ResidentBulkEdit";
 
 type PriceEditProps = {
   date: [Date | null, Date | null];
-  stay: Stay | undefined;
+  stay: LodgeStay | undefined;
 };
 
 type UniqueRoomsType = {

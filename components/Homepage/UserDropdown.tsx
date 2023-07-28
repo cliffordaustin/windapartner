@@ -1,5 +1,5 @@
 import { UserTypes } from "@/utils/types";
-import { Popover, NavLink, Avatar, Divider } from "@mantine/core";
+import { Popover, NavLink, Avatar, Divider, Text, Button } from "@mantine/core";
 import {
   IconUserCheck,
   IconUserPlus,
@@ -8,6 +8,9 @@ import {
   IconNews,
   IconInfoCircle,
 } from "@tabler/icons-react";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { useRouter } from "next/router";
 
 type UserDropdownProps = {
   user?: UserTypes | null;
@@ -15,6 +18,7 @@ type UserDropdownProps = {
 
 export default function UserDropdown({ user }: UserDropdownProps) {
   const fullName = (user?.first_name || "") + " " + (user?.last_name || "");
+  const router = useRouter();
   return (
     <>
       <Popover width={250} position="bottom-end" withArrow shadow="md">
@@ -83,7 +87,7 @@ export default function UserDropdown({ user }: UserDropdownProps) {
             </>
           )}
           {!user && <Divider size="xs" />}
-          <NavLink
+          {/* <NavLink
             label="About us"
             component="a"
             href="/about-us"
@@ -94,9 +98,9 @@ export default function UserDropdown({ user }: UserDropdownProps) {
             component="a"
             href="/blogs"
             icon={<IconNews size="1rem" stroke={1.5} />}
-          />
+          /> */}
 
-          {user && <Divider size="xs" />}
+          {/* {user && <Divider size="xs" />} */}
 
           {user && (
             <NavLink
@@ -109,9 +113,21 @@ export default function UserDropdown({ user }: UserDropdownProps) {
 
           {user && (
             <NavLink
+              onClick={async () => {
+                await axios.post(
+                  `${process.env.NEXT_PUBLIC_baseURL}/rest-auth/logout/`,
+                  "",
+                  {
+                    headers: {
+                      Authorization: "Token " + Cookies.get("token"),
+                    },
+                  }
+                );
+                Cookies.remove("token");
+                router.reload();
+              }}
               label="Logout"
-              component="a"
-              href="/logout"
+              component="div"
               icon={<IconLogout size="1rem" stroke={1.5} />}
             />
           )}

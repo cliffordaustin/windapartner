@@ -1,4 +1,4 @@
-import { Stay, stayImages } from "@/utils/types";
+import { LodgeStay, stayImages } from "@/utils/types";
 import { Button, Flex, Loader, Text } from "@mantine/core";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -7,7 +7,7 @@ import React from "react";
 import { useMutation, useQueryClient } from "react-query";
 
 type StayImagesProps = {
-  stay: Stay;
+  stay: LodgeStay;
   image: stayImages;
 };
 

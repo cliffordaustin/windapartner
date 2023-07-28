@@ -6,7 +6,7 @@ import {
 } from "@/context/CalculatePage";
 import { getRoomTypes } from "@/pages/api/stays";
 import pricing, { countRoomTypes } from "@/utils/calculation";
-import { Stay } from "@/utils/types";
+import { AgentStay } from "@/utils/types";
 import { Button, Divider, Flex, Tabs, Text } from "@mantine/core";
 import { IconCalculator, IconCalendarEvent } from "@tabler/icons-react";
 import moment from "moment";
@@ -28,7 +28,7 @@ type TotalTypes = {
 
 type SummaryProps = {
   calculateStay: StateType;
-  stays?: Stay[];
+  stays?: AgentStay[];
   includeClientInCalculation: boolean;
   summarizedCalculation: boolean;
   updateTotals: (id: number, total: number, isResident: boolean) => void;

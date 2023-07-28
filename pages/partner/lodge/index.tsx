@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React, { forwardRef, useEffect, useState } from "react";
 import { GetServerSideProps } from "next";
-import { Stay, UserTypes } from "@/utils/types";
+import { LodgeStay, UserTypes } from "@/utils/types";
 import axios, { AxiosError } from "axios";
 import getToken from "@/utils/getToken";
 import {
@@ -10,26 +10,29 @@ import {
   useQuery,
   useQueryClient,
 } from "react-query";
-import { getAllStaysEmail } from "@/pages/api/stays";
+import { AgentType, getAllAgents, getAllStaysEmail } from "@/pages/api/stays";
 import { getUser } from "@/pages/api/user";
 import Cookies from "js-cookie";
 import LodgeCard from "@/components/Lodge/LodgeCard";
 import { useRouter } from "next/router";
 import {
   Accordion,
+  Avatar,
   Box,
   Button,
+  Checkbox,
   Container,
   Divider,
   Flex,
   Grid,
   Loader,
   Modal,
+  MultiSelect,
   Switch,
   Text,
   TextInput,
 } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useListState } from "@mantine/hooks";
 import AddRoomFirstPage from "@/components/Lodge/AddRoomFirstPage";
 import { ContextProvider } from "@/context/LodgeDetailPage";
 import {
@@ -44,7 +47,6 @@ import AddRoomSecondPage from "@/components/Lodge/AddRoomSecondPage";
 import { EmblaCarouselType } from "embla-carousel-react";
 import Navbar from "@/components/Agent/Navbar";
 import { DatePickerInput } from "@mantine/dates";
-import SelectedStays from "@/components/Lodge/SelectedStays";
 import { useForm } from "@mantine/form";
 import { FileInput, FileInputProps, Group, Center, rem } from "@mantine/core";
 import { IconPhoto } from "@tabler/icons-react";
@@ -55,45 +57,23 @@ function Lodge({}) {
   const { data: user } = useQuery<UserTypes | null>("user", () =>
     getUser(token)
   );
-  const { data: stays, isLoading: isStayLoading } = useQuery<Stay[]>(
+  const { data: stays, isLoading: isStayLoading } = useQuery<LodgeStay[]>(
     "all-stay-email",
     () => getAllStaysEmail(token)
   );
 
+  const { data: agents, isLoading: isAgentLoading } = useQuery<AgentType[]>(
+    "all-agents",
+    () => getAllAgents(token)
+  );
+
   const [stayIds, setStayIds] = React.useState<number[]>([]);
 
-  const [selectedStays, setSelectedStays] = React.useState<
-    (Stay | undefined)[] | undefined
-  >([]);
-
-  useEffect(() => {
-    let selected = stays?.map((stay) => {
-      if (stayIds.includes(stay.id)) {
-        return stay;
-      } else {
-        return;
-      }
-    });
-    // remove all undefined from the array
-    selected = selected?.filter((stay) => stay !== undefined);
-    setSelectedStays(selected);
-  }, [stayIds, stays]);
-
-  useEffect(() => {
-    const storedItemIds = localStorage.getItem("lodge-stay-ids");
-    if (storedItemIds) {
-      setStayIds(JSON.parse(storedItemIds));
-    }
-  }, []);
-
-  const [date, setDate] = React.useState<[Date | null, Date | null]>([
-    null,
-    null,
-  ]);
-
-  const [isNonResident, setIsNonResident] = React.useState(true);
-
   const [opened, { open, close }] = useDisclosure(false);
+  const [
+    grantAccessModal,
+    { open: openGrantAccessModal, close: closeGrantAccessModal },
+  ] = useDisclosure(false);
 
   function Value({ file }: { file: File | null }) {
     return (
@@ -157,6 +137,8 @@ function Lodge({}) {
 
   const [loading, setLoading] = React.useState(false);
 
+  const [agentIds, setAgentIds] = React.useState<number[]>([]);
+
   const submit = async (values: FormValues) => {
     if (files.length === 0) {
       setNoFiles(true);
@@ -197,6 +179,101 @@ function Lodge({}) {
     }
   };
 
+  const initialValues = stays
+    ? [
+        ...stays.map((stay) => {
+          return {
+            key: stay.id,
+            label: stay.property_name,
+            slug: stay.slug,
+            checked: false,
+          };
+        }),
+      ]
+    : [];
+
+  const [values, handlers] = useListState(initialValues);
+
+  const allChecked = values.every((value) => value.checked);
+  const indeterminate = values.some((value) => value.checked) && !allChecked;
+
+  const items = values.map((value, index) => (
+    <Checkbox
+      mt="xs"
+      ml={33}
+      label={value.label}
+      key={value.key}
+      checked={value.checked}
+      onChange={(event) =>
+        handlers.setItemProp(index, "checked", event.currentTarget.checked)
+      }
+    />
+  ));
+
+  const agentsData = agents
+    ? [
+        ...agents.map((agent) => {
+          return {
+            image: agent.profile_pic,
+            label: `${agent.first_name || ""} ${agent.last_name || ""}`,
+            value: `${agent.id}`,
+            description: agent.email,
+          };
+        }),
+      ]
+    : [];
+
+  interface ItemProps extends React.ComponentPropsWithoutRef<"div"> {
+    image: string;
+    label: string;
+    description: string;
+  }
+
+  const SelectItem = forwardRef<HTMLDivElement, ItemProps>(
+    ({ image, label, description, ...others }: ItemProps, ref) => (
+      <div ref={ref} {...others}>
+        <Group noWrap>
+          <Avatar radius="xl" src={image} />
+
+          <div>
+            <Text>{label}</Text>
+            <Text size="xs" color="dimmed">
+              {description}
+            </Text>
+          </div>
+        </Group>
+      </div>
+    )
+  );
+
+  SelectItem.displayName = "SelectItem";
+
+  const grantAccess = async () => {
+    for (const agentId of agentIds) {
+      const selected = values.filter((value) => value.checked);
+      for (const stay of selected) {
+        await axios.patch(
+          `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/update-agents/`,
+          {
+            agent_id: agentId,
+          },
+          {
+            headers: {
+              Authorization: `Token ${token}`,
+            },
+          }
+        );
+      }
+    }
+  };
+
+  const { mutateAsync: grantAccessMutation, isLoading: grantAccessLoading } =
+    useMutation(grantAccess, {
+      onSuccess: () => {
+        closeGrantAccessModal();
+      },
+    });
+
   return (
     <div className="overflow-x-hidden">
       <div className="border-b border-x-0 border-t-0 border-solid border-b-gray-200">
@@ -204,9 +281,13 @@ function Lodge({}) {
           openModal={() => {
             open();
           }}
+          grantAccessModal={() => {
+            openGrantAccessModal();
+          }}
           includeSearch={false}
           user={user}
           showAddProperty={true}
+          showGrantAccess={true}
           navBarLogoLink="/partner/lodge"
         ></Navbar>
       </div>
@@ -224,6 +305,74 @@ function Lodge({}) {
           ))}
         </Grid>
       </div>
+
+      <Modal
+        opened={grantAccessModal}
+        onClose={closeGrantAccessModal}
+        title={"Grant agent access to your properties"}
+        classNames={{
+          title: "text-lg font-bold",
+          close: "text-black hover:text-gray-700 hover:bg-gray-200",
+          header: "bg-gray-100",
+        }}
+        transitionProps={{ transition: "fade", duration: 200 }}
+        size="lg"
+        closeButtonProps={{
+          style: {
+            width: 30,
+            height: 30,
+          },
+          iconSize: 20,
+        }}
+      >
+        <MultiSelect
+          label="Select agents"
+          placeholder="Select one or more agents"
+          itemComponent={SelectItem}
+          data={agentsData}
+          mt={6}
+          searchable
+          nothingFound="No agents found"
+          maxDropdownHeight={400}
+          filter={(value, selected, item) =>
+            !selected &&
+            (item.label?.toLowerCase().includes(value.toLowerCase().trim()) ||
+              item.description
+                .toLowerCase()
+                .includes(value.toLowerCase().trim()))
+          }
+          onChange={(values) => {
+            setAgentIds(values.map((value) => Number(value)));
+          }}
+        />
+
+        <div className="mt-4">
+          <Checkbox
+            checked={allChecked}
+            indeterminate={indeterminate}
+            label="Select all"
+            transitionDuration={0}
+            onChange={() =>
+              handlers.setState((current) =>
+                current.map((value) => ({ ...value, checked: !allChecked }))
+              )
+            }
+          />
+          {items}
+        </div>
+
+        <Flex gap={8} justify="right" mt={10}>
+          <Button
+            onClick={() => {
+              grantAccessMutation();
+            }}
+            loading={grantAccessLoading}
+            color="red"
+          >
+            Grant access
+          </Button>
+        </Flex>
+      </Modal>
 
       <Modal
         opened={opened}
@@ -293,61 +442,6 @@ function Lodge({}) {
           </Flex>
         </form>
       </Modal>
-
-      {/* <Grid.Col
-          xl={"auto"}
-          className="relative h-[calc(100vh-60px)]"
-          lg={"auto"}
-          md={"auto"}
-        >
-          <Container className="border-l px-3 border-l-gray-300 border-solid border-y-0 border-r-0 h-[calc(100vh-70px)] overflow-y-scroll">
-            <div className="py-4 items-center gap-4 flex justify-between border-solid border-x-0 border-t-0 border-b border-b-gray-300">
-              <div></div>
-              <DatePickerInput
-                type="range"
-                value={date}
-                onChange={(date) => {
-                  setDate(date);
-                }}
-                color="red"
-                label="Select date range"
-                placeholder="Select dates"
-                styles={{ input: { paddingTop: 13, paddingBottom: 13 } }}
-                labelProps={{ className: "font-semibold mb-1" }}
-                rightSection={<IconSelector className="text-gray-500" />}
-                className="max-w-fit min-w-[300px]"
-                minDate={new Date()}
-                icon={<IconCalendar className="text-gray-500" />}
-                numberOfColumns={2}
-                autoSave="true"
-              />
-
-              <Switch
-                label="Non-resident prices"
-                color="red"
-                mt={25}
-                checked={isNonResident}
-                onChange={(event) =>
-                  setIsNonResident(event.currentTarget.checked)
-                }
-              />
-            </div>
-
-            <Container className="mt-4 px-0">
-              <Accordion variant="contained" mb={10} defaultValue="0">
-                {selectedStays?.map((stay, index) => (
-                  <SelectedStays
-                    isNonResident={isNonResident}
-                    key={index}
-                    stay={stay}
-                    date={date}
-                    index={index}
-                  />
-                ))}
-              </Accordion>
-            </Container>
-          </Container>
-        </Grid.Col> */}
     </div>
   );
 }
@@ -363,7 +457,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     );
 
     if (user?.is_partner) {
-      await queryClient.fetchQuery<Stay[] | null>("all-stay-email", () =>
+      await queryClient.fetchQuery<LodgeStay[] | null>("all-stay-email", () =>
         getAllStaysEmail(token)
       );
 

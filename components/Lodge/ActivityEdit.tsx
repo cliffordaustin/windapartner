@@ -1,5 +1,5 @@
 import { getStayActivities } from "@/pages/api/stays";
-import { Stay } from "@/utils/types";
+import { LodgeStay } from "@/utils/types";
 import {
   Button,
   Container,
@@ -20,7 +20,7 @@ import Cookies from "js-cookie";
 import { useForm } from "@mantine/form";
 
 type ActivityEditProps = {
-  stay: Stay | undefined;
+  stay: LodgeStay | undefined;
 };
 
 function ActivityEdit({ stay }: ActivityEditProps) {

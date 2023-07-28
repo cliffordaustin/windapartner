@@ -1,4 +1,4 @@
-import { RoomAvailabilityResidentGuest, Stay } from "@/utils/types";
+import { RoomAvailabilityResidentGuest, LodgeStay } from "@/utils/types";
 import { Button, Grid, Input, NumberInput, Popover, Text } from "@mantine/core";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -9,7 +9,7 @@ type NonResidentPriceEditProps = {
   guestType: string;
   date: string;
   nonResidentGuests: RoomAvailabilityResidentGuest[];
-  stay: Stay | undefined;
+  stay: LodgeStay | undefined;
 };
 
 function NonResidentPriceEdit({

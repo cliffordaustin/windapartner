@@ -6,7 +6,7 @@ import {
 } from "@/context/CalculatePage";
 import { getRoomTypes } from "@/pages/api/stays";
 import pricing, { countRoomTypes } from "@/utils/calculation";
-import { Stay } from "@/utils/types";
+import { AgentStay } from "@/utils/types";
 import { Divider, Flex, Tabs, Text } from "@mantine/core";
 import { IconCalculator, IconCalendarEvent } from "@tabler/icons-react";
 import moment from "moment";
@@ -24,7 +24,7 @@ import { Mixpanel } from "@/utils/mixpanelconfig";
 
 type SummaryProps = {
   calculateStay: StateType;
-  stays?: Stay[];
+  stays?: AgentStay[];
 };
 
 export default function Summary({ calculateStay, stays }: SummaryProps) {

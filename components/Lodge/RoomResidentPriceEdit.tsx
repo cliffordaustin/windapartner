@@ -1,5 +1,5 @@
 import { getRoomTypes } from "@/pages/api/stays";
-import { RoomType, Stay } from "@/utils/types";
+import { RoomType, AgentStay } from "@/utils/types";
 import { Loader, Text } from "@mantine/core";
 import { format } from "date-fns";
 import React from "react";
@@ -8,7 +8,7 @@ import SelectedResidentPriceTable from "./SelectedResidentPriceTable";
 
 type RoomResidentPriceEditProps = {
   date: [Date | null, Date | null];
-  stay: Stay | undefined;
+  stay: AgentStay | undefined;
 };
 
 function RoomResidentPriceEdit({ date, stay }: RoomResidentPriceEditProps) {

@@ -1,4 +1,4 @@
-import { ActivityFee, Stay } from "@/utils/types";
+import { ActivityFee, LodgeStay } from "@/utils/types";
 import {
   Button,
   Flex,
@@ -19,7 +19,7 @@ import { useMutation, useQueryClient } from "react-query";
 
 type ParkFeeProps = {
   fee: ActivityFee;
-  stay: Stay | undefined;
+  stay: LodgeStay | undefined;
 };
 
 function Activity({ fee, stay }: ParkFeeProps) {

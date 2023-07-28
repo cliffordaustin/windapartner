@@ -1,5 +1,5 @@
 import { ParkFee } from "@/pages/api/stays";
-import { Stay } from "@/utils/types";
+import { LodgeStay } from "@/utils/types";
 import {
   Button,
   Flex,
@@ -20,7 +20,7 @@ import { useMutation, useQueryClient } from "react-query";
 
 type ParkFeeProps = {
   fee: ParkFee;
-  stay: Stay | undefined;
+  stay: LodgeStay | undefined;
 };
 
 function ParkFee({ fee, stay }: ParkFeeProps) {
