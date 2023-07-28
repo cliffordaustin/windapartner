@@ -4,11 +4,7 @@ import ActivityEdit from "@/components/Lodge/ActivityEdit";
 import ParkFeesEdit from "@/components/Lodge/ParkFeesEdit";
 import RoomPackagesEdit from "@/components/Lodge/RoomPackagesEdit";
 import PriceEdit from "@/components/Lodge/PriceEdit";
-import {
-  RoomTypeDetail,
-  getRoomTypeList,
-  getStayEmail,
-} from "@/pages/api/stays";
+import { getStayEmail } from "@/pages/api/stays";
 import { getUser } from "@/pages/api/user";
 import getToken from "@/utils/getToken";
 import { ContextProvider } from "@/context/LodgeDetailPage";
