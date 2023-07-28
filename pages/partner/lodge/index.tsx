@@ -3,13 +3,7 @@ import { GetServerSideProps } from "next";
 import { LodgeStay, UserTypes } from "@/utils/types";
 import axios, { AxiosError } from "axios";
 import getToken from "@/utils/getToken";
-import {
-  dehydrate,
-  QueryClient,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "react-query";
+import { dehydrate, QueryClient, useMutation, useQuery } from "react-query";
 import { AgentType, getAllAgents, getAllStaysEmail } from "@/pages/api/stays";
 import { getUser } from "@/pages/api/user";
 import Cookies from "js-cookie";
@@ -21,8 +15,6 @@ import {
   Box,
   Button,
   Checkbox,
-  Container,
-  Divider,
   Flex,
   Grid,
   Loader,
