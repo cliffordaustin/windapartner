@@ -47,6 +47,10 @@ function PartnerSignin(props: PaperProps) {
             .matches(/[0-9]/, getCharacterValidationError("digit"))
             .matches(/[a-z]/, getCharacterValidationError("lowercase"))
             .matches(/[A-Z]/, getCharacterValidationError("uppercase")),
+    retypePassword:
+      type === "login"
+        ? Yup.string()
+        : Yup.string().oneOf([Yup.ref("password"), ""], "Passwords must match"),
   });
 
   const form = useForm({
@@ -54,6 +58,7 @@ function PartnerSignin(props: PaperProps) {
       email: "",
       name: "",
       password: "",
+      retypePassword: "",
     },
 
     validate: yupResolver(schema),
@@ -88,7 +93,7 @@ function PartnerSignin(props: PaperProps) {
             first_name: form.values.name,
             email: form.values.email,
             password1: form.values.password,
-            password2: form.values.password,
+            password2: form.values.retypePassword,
             is_agent: true,
           }
         );
@@ -140,7 +145,7 @@ function PartnerSignin(props: PaperProps) {
       </Text>
 
       <form onSubmit={form.onSubmit(() => {})}>
-        <Stack>
+        <Stack spacing={4}>
           {type === "register" && (
             <TextInput
               label="Partner's name"
@@ -176,6 +181,20 @@ function PartnerSignin(props: PaperProps) {
             error={form.errors.password}
             radius="md"
           />
+
+          {type === "register" && (
+            <PasswordInput
+              required
+              label="Re-type new password"
+              placeholder="Re-type new password"
+              value={form.values.retypePassword}
+              onChange={(event) =>
+                form.setFieldValue("retypePassword", event.currentTarget.value)
+              }
+              error={form.errors.retypePassword}
+              radius="md"
+            />
+          )}
         </Stack>
 
         <Group position="apart" mt="xl">
@@ -245,6 +264,22 @@ function PartnerSignin(props: PaperProps) {
       >
         Continue with Google
       </Button>
+
+      {/* <div className="flex items-center justify-center">
+        <Anchor
+          component="button"
+          type="button"
+          color="dimmed"
+          onClick={() => {
+            router.push("/accounts/password-reset");
+          }}
+          size="xs"
+          mt={6}
+          className="text-center"
+        >
+          Forgot password?
+        </Anchor>
+      </div> */}
     </Paper>
   );
 }

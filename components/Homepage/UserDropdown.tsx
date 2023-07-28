@@ -8,6 +8,7 @@ import {
   IconNews,
   IconInfoCircle,
 } from "@tabler/icons-react";
+import axios from "axios";
 import Cookies from "js-cookie";
 import { useRouter } from "next/router";
 
@@ -86,7 +87,7 @@ export default function UserDropdown({ user }: UserDropdownProps) {
             </>
           )}
           {!user && <Divider size="xs" />}
-          <NavLink
+          {/* <NavLink
             label="About us"
             component="a"
             href="/about-us"
@@ -97,9 +98,9 @@ export default function UserDropdown({ user }: UserDropdownProps) {
             component="a"
             href="/blogs"
             icon={<IconNews size="1rem" stroke={1.5} />}
-          />
+          /> */}
 
-          {user && <Divider size="xs" />}
+          {/* {user && <Divider size="xs" />} */}
 
           {user && (
             <NavLink
@@ -112,7 +113,16 @@ export default function UserDropdown({ user }: UserDropdownProps) {
 
           {user && (
             <NavLink
-              onClick={() => {
+              onClick={async () => {
+                await axios.post(
+                  `${process.env.NEXT_PUBLIC_baseURL}/rest-auth/logout/`,
+                  "",
+                  {
+                    headers: {
+                      Authorization: "Token " + Cookies.get("token"),
+                    },
+                  }
+                );
                 Cookies.remove("token");
                 router.reload();
               }}
