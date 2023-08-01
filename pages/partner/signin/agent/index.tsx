@@ -16,12 +16,14 @@ import {
   Stack,
   Loader,
 } from "@mantine/core";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import Cookies from "js-cookie";
 import { useRouter } from "next/router";
 import { useGoogleLogin } from "@react-oauth/google";
 import { signinWithGoogle } from "@/utils/auth";
 import { IconBrandGoogle } from "@tabler/icons-react";
+import { notifications } from "@mantine/notifications";
+import Link from "next/link";
 
 const getCharacterValidationError = (str: string) => {
   return `Your password must have at least 1 ${str} character`;
@@ -32,6 +34,8 @@ function PartnerSignin(props: PaperProps) {
   const [isLoading, setLoading] = React.useState(false);
 
   const [loginError, setLoginError] = React.useState(false);
+
+  const [notAnAgentError, setNotAnAgentError] = React.useState(false);
 
   const router = useRouter();
 
@@ -70,19 +74,27 @@ function PartnerSignin(props: PaperProps) {
       try {
         setLoading(true);
         const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_baseURL}/rest-auth/login/`,
+          `${process.env.NEXT_PUBLIC_baseURL}/custom/login/`,
           {
             email: form.values.email,
             password: form.values.password,
+            is_agent: true,
           }
         );
 
         Cookies.set("token", response.data.key);
         setLoginError(false);
+        setNotAnAgentError(false);
         router.replace((router.query.redirect as string) || "/partner/agent");
       } catch (error) {
         setLoading(false);
-        setLoginError(true);
+        if (error instanceof AxiosError) {
+          if (!error.response?.data?.is_agent) {
+            setNotAnAgentError(true);
+          } else {
+            setLoginError(true);
+          }
+        }
       }
     } else if (type === "register" && form.isValid()) {
       try {
@@ -106,6 +118,11 @@ function PartnerSignin(props: PaperProps) {
         });
       } catch (error) {
         setLoading(false);
+        if (error instanceof AxiosError) {
+          if (error.response?.data?.email?.length > 0) {
+            form.setErrors({ email: error.response?.data?.email[0] });
+          }
+        }
       }
     }
   };
@@ -120,6 +137,10 @@ function PartnerSignin(props: PaperProps) {
     },
     onError: (error) => {
       setGoogleLoading(false);
+      notifications.show({
+        title: "Error",
+        message: "Something went wrong",
+      });
     },
   });
 
@@ -137,6 +158,16 @@ function PartnerSignin(props: PaperProps) {
         <div className="text-white sticky top-0 z-40 right-0 w-full mb-4 text-sm py-3 rounded-lg text-center px-4 bg-red-500 font-bold">
           We couldn’t find an account matching the email or password you
           entered. Please check your email or password and try again.
+        </div>
+      ) : null}
+
+      {notAnAgentError ? (
+        <div className="text-white sticky top-0 z-40 right-0 w-full mb-4 text-sm py-3 rounded-lg text-center px-4 bg-red-500 font-bold">
+          User is not an agent. Please register as an agent. Go to the{" "}
+          <Link className="text-white" href={`/partner/signin`}>
+            property login page
+          </Link>{" "}
+          if you are trying to login as a property owner.
         </div>
       ) : null}
 
@@ -166,7 +197,7 @@ function PartnerSignin(props: PaperProps) {
             onChange={(event) =>
               form.setFieldValue("email", event.currentTarget.value)
             }
-            error={form.errors.email && "Invalid email"}
+            error={form.errors.email}
             radius="md"
           />
 

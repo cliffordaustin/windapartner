@@ -29,7 +29,7 @@ function VerificationLogin({
     <>
       {!error && (
         <div className="relative">
-          <div className="w-full font-bold bg-green-400 text-center py-2 px-2 text-white">
+          <div className="w-full font-bold bg-[#0A1A44] text-center py-2 px-2 text-white">
             Your email has been confirmed.
           </div>
         </div>
