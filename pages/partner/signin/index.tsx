@@ -39,14 +39,15 @@ function PartnerSignin(props: PaperProps) {
     email: Yup.string().email("Invalid email"),
     password:
       type === "login"
-        ? Yup.string()
+        ? Yup.string().required("Password is required")
         : Yup.string()
             // check minimum characters
             .min(8, "Password must have at least 8 characters")
             // different error messages for different requirements
             .matches(/[0-9]/, getCharacterValidationError("digit"))
             .matches(/[a-z]/, getCharacterValidationError("lowercase"))
-            .matches(/[A-Z]/, getCharacterValidationError("uppercase")),
+            .matches(/[A-Z]/, getCharacterValidationError("uppercase"))
+            .required("Password is required"),
 
     retypePassword:
       type === "login"
