@@ -86,7 +86,7 @@ function Main({ targetRef }: MainProps) {
                   "mb-2 text-xl pr-12 sm:text-xl md:text-2xl xl:text-2xl text-black "
                 }
               >
-                Manage travel agents and your contract rates in central
+                Manage travel agents and your contract rates in a central
                 database.
               </Text>
             </div>
