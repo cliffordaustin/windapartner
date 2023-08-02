@@ -74,11 +74,12 @@ function PropertySignin({ name, email }: PropertySigninTypes) {
 
   const submit = async () => {
     // check if form is valid
+    setLoginError(false);
+    setNotAPartnerError(false);
     if (type === "login" && form.isValid()) {
       try {
         setLoading(true);
-        setLoginError(false);
-        setNotAPartnerError(false);
+
         const response = await axios.post(
           `${process.env.NEXT_PUBLIC_baseURL}/custom/login/`,
           {

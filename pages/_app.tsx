@@ -13,6 +13,7 @@ import Router from "next/router";
 import ReactGA from "react-ga4";
 import NProgress from "nprogress";
 import "nprogress/nprogress.css";
+import Head from "next/head";
 
 const open_sans = Open_Sans({
   subsets: ["latin"],
@@ -50,6 +51,9 @@ export default function App({ Component, pageProps }: AppProps) {
     <GoogleOAuthProvider
       clientId={process.env.NEXT_PUBLIC_GOOGLE_SOCAIL_AUTH_CLIENT_ID || ""}
     >
+      <Head>
+        <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+      </Head>
       <MantineProvider
         withGlobalStyles
         withNormalizeCSS

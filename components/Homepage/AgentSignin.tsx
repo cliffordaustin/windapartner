@@ -75,12 +75,13 @@ function AgentSignin({ name, email }: AgentSigninProps) {
   });
 
   const submit = async () => {
+    setLoginError(false);
+    setNotAnAgentError(false);
     // check if form is valid
     if (type === "login" && form.isValid()) {
       try {
         setLoading(true);
-        setLoginError(false);
-        setNotAnAgentError(false);
+
         const response = await axios.post(
           `${process.env.NEXT_PUBLIC_baseURL}/custom/login/`,
           {

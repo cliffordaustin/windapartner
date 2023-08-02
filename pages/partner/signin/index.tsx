@@ -67,12 +67,13 @@ function PartnerSignin(props: PaperProps) {
   });
 
   const submit = async () => {
+    setLoginError(false);
+    setNotAPartnerError(false);
     // check if form is valid
     if (type === "login" && form.isValid()) {
       try {
         setLoading(true);
-        setLoginError(false);
-        setNotAPartnerError(false);
+
         const response = await axios.post(
           `${process.env.NEXT_PUBLIC_baseURL}/custom/login/`,
           {
