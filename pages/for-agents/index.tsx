@@ -44,7 +44,7 @@ function ForAgents() {
           <div className="flex items-center gap-4">
             <div className="flex flex-col items-center gap-1">
               <Link
-                className="text-white hover:text-white no-underline"
+                className="text-white font-bold opacity-80 hover:opacity-100 no-underline"
                 href="/"
               >
                 For Properties
@@ -53,7 +53,10 @@ function ForAgents() {
             </div>
 
             <div className="flex flex-col items-center gap-1">
-              <Link className="text-white no-underline" href="/for-agents">
+              <Link
+                className="text-white font-bold no-underline"
+                href="/for-agents"
+              >
                 For Agents
               </Link>
               <div className="h-[1.5px] w-[16px] bg-white"></div>
@@ -106,7 +109,7 @@ function ForAgents() {
               <Image
                 className={"w-full "}
                 fill
-                src="/images/home/laptop.png"
+                src="/images/home/laptop-white.png"
                 alt=""
                 priority
               />
@@ -115,7 +118,7 @@ function ForAgents() {
         </Flex>
       </div>
 
-      <div className="bg-[#f5f3f4]">
+      <div className="">
         <AgentMain targetRef={targetRef}></AgentMain>
       </div>
     </div>
