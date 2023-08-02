@@ -16,13 +16,13 @@ import Image from "next/image";
 import React from "react";
 import { notifications } from "@mantine/notifications";
 import { useDisclosure } from "@mantine/hooks";
-import PropertySignin from "./PropertySignin";
+import AgentSignin from "./AgentSignin";
 
 type MainProps = {
   targetRef: React.MutableRefObject<HTMLDivElement | null>;
 };
 
-function Main({ targetRef }: MainProps) {
+function AgentMain({ targetRef }: MainProps) {
   const form = useForm({
     initialValues: {
       email: "",
@@ -47,21 +47,23 @@ function Main({ targetRef }: MainProps) {
               "mb-2 text-xl pr-12 sm:text-xl md:text-2xl xl:text-2xl text-black "
             }
           >
-            Manage travel agents and your contract rates in central database.
+            No more manually referencing contract rates. Automatically pull
+            rates directly from properties and calculate trip costs across
+            different locations in minutes.
           </Text>
         </div>
 
-        <div className="h-[280px] w-[760px] relative bg-white">
+        <div className="h-[290px] w-[1760px] relative bg-white">
           <video
             muted
             controls
-            width="320"
-            height="240"
+            // width="320"
+            // height="240"
             className="w-full h-full absolute inset-0"
             id="video"
           >
             <source
-              src="https://winda-guide.s3.eu-west-2.amazonaws.com/video/Property+Screen+recording+2023-08-01+5.10.04+PM.webm"
+              src="https://winda-guide.s3.eu-west-2.amazonaws.com/video/Travel+Agent+Screen+recording+2023-08-01+5.04.48+PM.webm"
               type="video/webm"
               width={700}
             ></source>
@@ -117,14 +119,14 @@ function Main({ targetRef }: MainProps) {
         className="!w-[500px]"
       >
         <div className="flex flex-col justify-center gap-4">
-          <PropertySignin
+          <AgentSignin
             name={form.values.name}
             email={form.values.email}
-          ></PropertySignin>
+          ></AgentSignin>
         </div>
       </Modal>
     </div>
   );
 }
 
-export default Main;
+export default AgentMain;

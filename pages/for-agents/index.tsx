@@ -8,21 +8,16 @@ import Main from "@/components/Homepage/Main";
 import { Button, Flex, Text } from "@mantine/core";
 import Link from "next/link";
 import { useScrollIntoView } from "@mantine/hooks";
+import AgentMain from "@/components/Homepage/AgentMain";
 
-const sans = Source_Sans_Pro({
-  weight: ["900"],
-  subsets: ["latin"],
-});
-
-export default function Home() {
+function ForAgents() {
   const { scrollIntoView, targetRef } = useScrollIntoView<HTMLDivElement>({
     offset: 60,
   });
-
   return (
     <div className="overflow-x-hidden">
       <Head>
-        <title>Winda | Safari Pricer For Properties</title>
+        <title>Winda | Safari Pricer For Agents</title>
         <meta
           name="description"
           content="Search, discover, and book your travel needs in Kenya, all in one place. Try it now."
@@ -48,20 +43,20 @@ export default function Home() {
 
           <div className="flex items-center gap-4">
             <div className="flex flex-col items-center gap-1">
-              <Link className="text-black no-underline" href="/">
+              <Link
+                className="text-gray-600 hover:text-black no-underline"
+                href="/"
+              >
                 For Properties
               </Link>
-              <div className="h-[1.5px] w-[16px] bg-black"></div>
+              <div></div>
             </div>
 
             <div className="flex flex-col items-center gap-1">
-              <Link
-                className="text-gray-600 hover:text-black no-underline"
-                href="/for-agents"
-              >
+              <Link className="text-black no-underline" href="/for-agents">
                 For Agents
               </Link>
-              <div></div>
+              <div className="h-[1.5px] w-[16px] bg-black"></div>
             </div>
           </div>
 
@@ -89,8 +84,8 @@ export default function Home() {
                 "mb-2 text-xl pr-12 sm:text-xl md:text-2xl xl:text-2xl text-black "
               }
             >
-              Introducing Safari Pricer: An integrated pricing and payment
-              platform for the travel industry in Africa.
+              Calculate complex trips across multiple suppliers and destinations
+              in minutes
             </Text>
 
             <Button
@@ -121,8 +116,10 @@ export default function Home() {
       </div>
 
       <div className="bg-[#f5f3f4]">
-        <Main targetRef={targetRef}></Main>
+        <AgentMain targetRef={targetRef}></AgentMain>
       </div>
     </div>
   );
 }
+
+export default ForAgents;
