@@ -8,21 +8,16 @@ import Main from "@/components/Homepage/Main";
 import { Button, Flex, Text } from "@mantine/core";
 import Link from "next/link";
 import { useScrollIntoView } from "@mantine/hooks";
+import AgentMain from "@/components/Homepage/AgentMain";
 
-const sans = Source_Sans_Pro({
-  weight: ["900"],
-  subsets: ["latin"],
-});
-
-export default function Home() {
+function ForAgents() {
   const { scrollIntoView, targetRef } = useScrollIntoView<HTMLDivElement>({
     offset: 60,
   });
-
   return (
     <div className="overflow-x-hidden">
       <Head>
-        <title>Winda | Safari Pricer For Properties</title>
+        <title>Winda | Safari Pricer For Agents</title>
         <meta
           name="description"
           content="Search, discover, and book your travel needs in Kenya, all in one place. Try it now."
@@ -48,20 +43,23 @@ export default function Home() {
 
           <div className="flex items-center gap-4">
             <div className="flex flex-col items-center gap-1">
-              <Link className="text-white font-bold no-underline" href="/">
+              <Link
+                className="text-white font-bold opacity-80 hover:opacity-100 no-underline"
+                href="/"
+              >
                 For Properties
               </Link>
-              <div className="h-[1.5px] w-[16px] bg-white"></div>
+              <div></div>
             </div>
 
             <div className="flex flex-col items-center gap-1">
               <Link
-                className="text-white font-bold opacity-80 hover:opacity-100 no-underline"
+                className="text-white font-bold no-underline"
                 href="/for-agents"
               >
                 For Agents
               </Link>
-              <div></div>
+              <div className="h-[1.5px] w-[16px] bg-white"></div>
             </div>
           </div>
 
@@ -89,8 +87,8 @@ export default function Home() {
                 "mb-2 text-xl pr-12 sm:text-xl md:text-2xl xl:text-2xl text-white "
               }
             >
-              An integrated pricing and payment platform for the travel industry
-              in Africa.
+              Calculate complex trips across multiple suppliers and destinations
+              in minutes
             </Text>
 
             <Button
@@ -111,7 +109,7 @@ export default function Home() {
               <Image
                 className={"w-full "}
                 fill
-                src="/images/home/laptop.png"
+                src="/images/home/laptop-white.png"
                 alt=""
                 priority
               />
@@ -120,9 +118,11 @@ export default function Home() {
         </Flex>
       </div>
 
-      <div className="mb-6">
-        <Main targetRef={targetRef}></Main>
+      <div className="">
+        <AgentMain targetRef={targetRef}></AgentMain>
       </div>
     </div>
   );
 }
+
+export default ForAgents;

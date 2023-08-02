@@ -1,6 +1,5 @@
 import {
   Button,
-  Divider,
   Flex,
   Grid,
   List,
@@ -17,21 +16,19 @@ import Image from "next/image";
 import React from "react";
 import { notifications } from "@mantine/notifications";
 import { useDisclosure } from "@mantine/hooks";
-import PropertySignin from "./PropertySignin";
+import AgentSignin from "./AgentSignin";
 
 type MainProps = {
   targetRef: React.MutableRefObject<HTMLDivElement | null>;
 };
 
-function Main({ targetRef }: MainProps) {
+function AgentMain({ targetRef }: MainProps) {
   const form = useForm({
     initialValues: {
       email: "",
       name: "",
     },
   });
-
-  const [opened, { open, close }] = useDisclosure(false);
 
   type FormValues = {
     firstName: string;
@@ -68,26 +65,46 @@ function Main({ targetRef }: MainProps) {
         form.reset();
       });
   };
+
+  const [opened, { open, close }] = useDisclosure(false);
   return (
     <div>
+      <Modal
+        opened={opened}
+        onClose={close}
+        overlayProps={{
+          opacity: 0.55,
+          blur: 3,
+        }}
+        className="!w-[500px]"
+      >
+        <div className="flex flex-col justify-center gap-4">
+          <AgentSignin
+            name={form.values.name}
+            email={form.values.email}
+          ></AgentSignin>
+        </div>
+      </Modal>
+
       <div ref={targetRef} className="bg-[#f5f3f4]">
         <div className="py-8 max-w-[1300px] mx-auto">
           <div className="px-6 md:px-12 lg:px-24 flex-col md:flex-row flex items-center gap-4 md:gap-10">
-            <div className="flex flex-col gap-4 md:gap-6">
+            <div className="flex md:w-[80%] lg:w-[70%] flex-col gap-4 md:gap-6">
               <Text
                 className={
                   "font-black md:mb-2 uppercase text-xl self-baseline sm:text-2xl md:text-4xl xl:text-4xl text-black "
                 }
               >
-                For Properties
+                For Agents
               </Text>
               <Text
                 className={
                   "mb-2 text-xl pr-12 sm:text-xl md:text-2xl xl:text-2xl text-black "
                 }
               >
-                Manage travel agents and your contract rates in central
-                database.
+                No more manually referencing contract rates. Automatically pull
+                rates directly from properties and calculate trip costs across
+                different locations in minutes.
               </Text>
             </div>
 
@@ -101,12 +118,12 @@ function Main({ targetRef }: MainProps) {
                 id="video"
               >
                 <source
-                  src="https://winda-guide.s3.eu-west-2.amazonaws.com/video/Property+Screen+recording+2023-08-01+5.10.04+PM.webm"
+                  src="https://winda-guide.s3.eu-west-2.amazonaws.com/video/Travel+Agent+Screen+recording+2023-08-01+5.04.48+PM.webm"
                   type="video/webm"
                   width={700}
                 ></source>
                 <source
-                  src="https://winda-guide.s3.eu-west-2.amazonaws.com/video/Property+Screen+recording+2023-08-01+5.10.04+PM.mp4"
+                  src="https://winda-guide.s3.eu-west-2.amazonaws.com/video/Travel+Agent+Screen+recording+2023-08-01+5.04.48+PM.mp4"
                   type="video/mp4"
                   width={700}
                 ></source>
@@ -151,23 +168,6 @@ function Main({ targetRef }: MainProps) {
               </Button>
             </div>
           </div>
-
-          <Modal
-            opened={opened}
-            onClose={close}
-            overlayProps={{
-              opacity: 0.55,
-              blur: 3,
-            }}
-            className="!w-[500px]"
-          >
-            <div className="flex flex-col justify-center gap-4">
-              <PropertySignin
-                name={form.values.name}
-                email={form.values.email}
-              ></PropertySignin>
-            </div>
-          </Modal>
         </div>
       </div>
 
@@ -482,4 +482,4 @@ function Main({ targetRef }: MainProps) {
   );
 }
 
-export default Main;
+export default AgentMain;
