@@ -73,6 +73,8 @@ function PartnerSignin(props: PaperProps) {
     if (type === "login" && form.isValid()) {
       try {
         setLoading(true);
+        setLoginError(false);
+        setNotAnAgentError(false);
         const response = await axios.post(
           `${process.env.NEXT_PUBLIC_baseURL}/custom/login/`,
           {
@@ -83,13 +85,11 @@ function PartnerSignin(props: PaperProps) {
         );
 
         Cookies.set("token", response.data.key);
-        setLoginError(false);
-        setNotAnAgentError(false);
         router.replace((router.query.redirect as string) || "/partner/agent");
       } catch (error) {
         setLoading(false);
         if (error instanceof AxiosError) {
-          if (!error.response?.data?.is_agent) {
+          if (error.response?.data?.is_agent === false) {
             setNotAnAgentError(true);
           } else {
             setLoginError(true);
