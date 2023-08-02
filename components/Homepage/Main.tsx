@@ -40,7 +40,7 @@ function Main({ targetRef }: MainProps) {
               "font-black mb-2 uppercase text-2xl self-baseline sm:text-3xl md:text-5xl xl:text-5xl text-black "
             }
           >
-            Title Here
+            For Properties
           </Text>
           <Text
             className={
@@ -65,11 +65,16 @@ function Main({ targetRef }: MainProps) {
               type="video/webm"
               width={700}
             ></source>
+            <source
+              src="https://winda-guide.s3.eu-west-2.amazonaws.com/video/Property+Screen+recording+2023-08-01+5.10.04+PM.mp4"
+              type="video/mp4"
+              width={700}
+            ></source>
           </video>
         </div>
       </div>
 
-      <div className="px-24 flex flex-col justify-center items-center gap-5 mt-10">
+      <div className="px-24 flex flex-col justify-center items-center gap-5 mt-14">
         <Text
           className={
             "text-xl pr-12 sm:text-xl md:text-2xl xl:text-2xl text-black "

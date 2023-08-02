@@ -25,13 +25,13 @@ function ForAgents() {
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />
       </Head>
 
-      <div className="w-full flex flex-col items-center h-[350px] md:h-[350px] lg:h-[500px] !relative">
+      <div className="w-full flex flex-col items-center home-gradient h-[350px] md:h-[350px] lg:h-[500px] !relative">
         <div className="absolute w-full flex justify-between top-5 md:top-5 left-6">
           <Link href="/">
             <div className="relative w-28 h-9 cursor-pointer">
               <Image
                 alt="Winda logo"
-                src="/images/winda_logo/horizontal-blue-font.png"
+                src="/images/winda_logo/horizontal-white-font.png"
                 className="w-full h-full"
                 sizes="(max-width: 768px) 100vw,
               (max-width: 1200px) 50vw,
@@ -44,7 +44,7 @@ function ForAgents() {
           <div className="flex items-center gap-4">
             <div className="flex flex-col items-center gap-1">
               <Link
-                className="text-gray-600 hover:text-black no-underline"
+                className="text-white hover:text-white no-underline"
                 href="/"
               >
                 For Properties
@@ -53,10 +53,10 @@ function ForAgents() {
             </div>
 
             <div className="flex flex-col items-center gap-1">
-              <Link className="text-black no-underline" href="/for-agents">
+              <Link className="text-white no-underline" href="/for-agents">
                 For Agents
               </Link>
-              <div className="h-[1.5px] w-[16px] bg-black"></div>
+              <div className="h-[1.5px] w-[16px] bg-white"></div>
             </div>
           </div>
 
@@ -74,14 +74,14 @@ function ForAgents() {
           <div className="absolute lg:static bottom-10 flex w-full lg:w-[50%] flex-col">
             <Text
               className={
-                "font-black mb-2 uppercase text-4xl self-baseline sm:text-3xl md:text-7xl xl:text-7xl text-black "
+                "font-black mb-2 uppercase text-4xl self-baseline sm:text-3xl md:text-7xl xl:text-7xl text-white "
               }
             >
               Safari Pricer
             </Text>
             <Text
               className={
-                "mb-2 text-xl pr-12 sm:text-xl md:text-2xl xl:text-2xl text-black "
+                "mb-2 text-xl pr-12 sm:text-xl md:text-2xl xl:text-2xl text-white "
               }
             >
               Calculate complex trips across multiple suppliers and destinations

@@ -93,7 +93,7 @@ function PropertySignin({ name, email }: PropertySigninTypes) {
       } catch (error) {
         setLoading(false);
         if (error instanceof AxiosError) {
-          if (error.response?.data?.is_agent === false) {
+          if (error.response?.data?.is_partner === false) {
             setNotAPartnerError(true);
           } else {
             setLoginError(true);
