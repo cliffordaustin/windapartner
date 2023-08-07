@@ -8,6 +8,7 @@ import {
   Loader,
   Pagination,
   ScrollArea,
+  Tabs,
 } from "@mantine/core";
 import { getUser } from "../../api/user";
 import { GetServerSideProps } from "next";
@@ -21,6 +22,7 @@ import {
   getDetailPartnerStays,
   getPartnerStays,
   getPartnerStaysType,
+  getPartnerStaysWithoutAccess,
 } from "@/pages/api/stays";
 import { NextRouter, useRouter } from "next/router";
 import {
@@ -56,6 +58,15 @@ export default function AgentPage() {
       token
     )
   );
+
+  const { data: stayListWithoutAccess, isLoading: isStayWithoutAccessLoading } =
+    useQuery<getPartnerStaysType>("partner-stays-without-access", () =>
+      getPartnerStaysWithoutAccess(
+        router.query.search as string,
+        Number(router.query.second_page || 1),
+        token
+      )
+    );
 
   const { data: user } = useQuery<UserTypes | null>("user", () =>
     getUser(token)
@@ -109,125 +120,225 @@ export default function AgentPage() {
         <Navbar user={user}></Navbar>
       </div>
 
-      {addedStays && addedStays.length > 0 && !isLoading && (
-        <div className="sticky flex bg-white border-b border-solid border-x-0 border-t-0 border-gray-200 top-0 z-40 left-0 right-0">
-          <div className="w-[calc(100vw-230px)]">
+      <Tabs variant="outline" mt={6} defaultValue="have-contract">
+        <Tabs.List>
+          <Tabs.Tab value="have-contract">Have Contract With</Tabs.Tab>
+          <Tabs.Tab value="have-no-contract">Have No Contract With</Tabs.Tab>
+        </Tabs.List>
+
+        {addedStays && addedStays.length > 0 && isLoading && (
+          <div className="sticky bg-white z-40 top-0 left-0 right-0">
             <ScrollArea>
-              <div className="sticky top-0 left-0 right-0 flex items-center gap-4 h-[70px] px-6">
-                {addedStays?.map((stay, index) => (
-                  <UserSelectedStays
-                    stay={stay}
-                    key={stay.id}
-                  ></UserSelectedStays>
-                ))}
+              <div className="border-b sticky top-0 left-0 right-0 border-t-0 flex items-center gap-4 border-solid border-x-0 border-gray-200 py-4 px-6">
+                <Skeleton height={40} w={"150px"} radius="md" />
+                <Skeleton height={40} w={"150px"} radius="md" />
+                <Skeleton height={40} w={"150px"} radius="md" />
+                <Skeleton height={40} w={"150px"} radius="md" />
               </div>
             </ScrollArea>
           </div>
-          <div className="w-[230px] flex items-center justify-center absolute right-0 h-full px-8">
-            <Link className="no-underline" href="/partner/agent/calculate">
-              <Button
-                leftIcon={
-                  isLoading ? (
-                    <Loader size="sm" color="white" />
-                  ) : (
-                    <IconCalculator size="1.4rem" className="text-white ml-1" />
-                  )
-                }
-                disabled={state.stayIds.length === 0 || isLoading}
-                className="w-fit flex  items-center justify-center rounded-lg px-4 text-white z-10 bg-[#000] hover:bg-[#333] font-semibold"
-              >
-                Calculate pricing
-              </Button>
-            </Link>
-          </div>
-        </div>
-      )}
+        )}
 
-      {addedStays && addedStays.length > 0 && isLoading && (
-        <div className="sticky bg-white z-40 top-0 left-0 right-0">
-          <ScrollArea>
-            <div className="border-b sticky top-0 left-0 right-0 border-t-0 flex items-center gap-4 border-solid border-x-0 border-gray-200 py-4 px-6">
-              <Skeleton height={40} w={"150px"} radius="md" />
-              <Skeleton height={40} w={"150px"} radius="md" />
-              <Skeleton height={40} w={"150px"} radius="md" />
-              <Skeleton height={40} w={"150px"} radius="md" />
+        {addedStays && addedStays.length > 0 && !isLoading && (
+          <div className="sticky flex bg-white border-b border-solid border-x-0 border-t-0 border-gray-200 top-0 z-40 left-0 right-0">
+            <div className="w-[calc(100vw-230px)]">
+              <ScrollArea>
+                <div className="sticky top-0 left-0 right-0 flex items-center gap-4 h-[70px] px-6">
+                  {addedStays?.map((stay, index) => (
+                    <UserSelectedStays
+                      stay={stay}
+                      key={stay.id}
+                    ></UserSelectedStays>
+                  ))}
+                </div>
+              </ScrollArea>
             </div>
-          </ScrollArea>
-        </div>
-      )}
+            <div className="w-[230px] flex items-center justify-center absolute right-0 h-full px-8">
+              <Link className="no-underline" href="/partner/agent/calculate">
+                <Button
+                  leftIcon={
+                    isLoading ? (
+                      <Loader size="sm" color="white" />
+                    ) : (
+                      <IconCalculator
+                        size="1.4rem"
+                        className="text-white ml-1"
+                      />
+                    )
+                  }
+                  disabled={state.stayIds.length === 0 || isLoading}
+                  className="w-fit flex  items-center justify-center rounded-lg px-4 text-white z-10 bg-[#000] hover:bg-[#333] font-semibold"
+                >
+                  Calculate pricing
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
 
-      <div className="md:px-12 max-w-[1440px] mx-auto px-6">
-        {!router.query.search && stayList && stayList.results.length > 0 && (
-          <Flex gap="xs" align="center" wrap="wrap" className="mt-2">
-            <IconInfoCircle
-              className="text-gray-600"
-              size="1.3rem"
-              stroke={1.5}
+        <Tabs.Panel value="have-contract" pt="xs">
+          <div className="md:px-12 max-w-[1440px] mx-auto px-6">
+            {!router.query.search &&
+              stayList &&
+              stayList.results.length > 0 && (
+                <Flex gap="xs" align="center" wrap="wrap" className="mt-2">
+                  <IconInfoCircle
+                    className="text-gray-600"
+                    size="1.3rem"
+                    stroke={1.5}
+                  />
+                  <Text className="text-gray-600">
+                    Click on the plus button on a lodge to calculate pricing
+                  </Text>
+                </Flex>
+              )}
+
+            {router.query.search &&
+              stayList &&
+              stayList.results.length === 0 && (
+                <div className="flex ml-6 items-center gap-2 mt-4">
+                  <Text size="lg" className="text-gray-600">
+                    No results found for{" "}
+                    <span className="font-semibold">{router.query.search}</span>
+                  </Text>
+                  <Link className="text-blue-500" href="/partner/agent">
+                    clear search
+                  </Link>
+                </div>
+              )}
+
+            <Grid gutter={"xl"} className="mt-5">
+              {!isStayLoading &&
+                stayList?.results.map((stay, index) => (
+                  <Grid.Col xl={2.7} lg={3} md={4} sm={6} xs={6} key={stay.id}>
+                    <Listing stay={stay}></Listing>
+                  </Grid.Col>
+                ))}
+
+              {isStayLoading &&
+                Array.from({ length: 8 }).map((_, index) => (
+                  <Grid.Col xl={2.7} lg={3} md={4} sm={6} xs={6} key={index}>
+                    <Skeleton height={220} radius="md" />
+                    <Skeleton height={10} mt={4} radius="md" />
+                    <Skeleton height={10} w="70%" mt={4} radius="md" />
+                    <Skeleton height={10} w="50%" mt={4} radius="md" />
+                  </Grid.Col>
+                ))}
+            </Grid>
+          </div>
+
+          {stayList && stayList.total_pages > 1 && (
+            <Pagination
+              radius="lg"
+              color="red"
+              className="my-8"
+              total={stayList.total_pages}
+              position="center"
+              value={Number(router.query.page || 1)}
+              onChange={(page) => {
+                router.push(
+                  `/partner/agent?page=${page}&search=${
+                    router.query.search || ""
+                  }`
+                );
+              }}
             />
-            <Text className="text-gray-600">
-              Click on the plus button on a lodge to calculate pricing
-            </Text>
-          </Flex>
-        )}
+          )}
 
-        {router.query.search && stayList && stayList.results.length === 0 && (
-          <div className="flex ml-6 items-center gap-2 mt-4">
-            <Text size="lg" className="text-gray-600">
-              No results found for{" "}
-              <span className="font-semibold">{router.query.search}</span>
-            </Text>
-            <Link className="text-blue-500" href="/partner/agent">
-              clear search
-            </Link>
+          {stayList?.results.length === 0 &&
+            !isStayLoading &&
+            !router.query.search && (
+              <div className="flex flex-col items-center justify-center mt-12">
+                <Text size="lg" className="text-gray-600">
+                  You have no lodges yet. We have been notified and we will be
+                  in touch to add the lodges you have contract with.
+                </Text>
+              </div>
+            )}
+        </Tabs.Panel>
+
+        <Tabs.Panel value="have-no-contract" pt="xs">
+          <div className="md:px-12 max-w-[1440px] mx-auto px-6">
+            {!router.query.search &&
+              stayListWithoutAccess &&
+              stayListWithoutAccess.results.length > 0 && (
+                <Flex gap="xs" align="center" wrap="wrap" className="mt-2">
+                  <IconInfoCircle
+                    className="text-gray-600"
+                    size="1.3rem"
+                    stroke={1.5}
+                  />
+                  <Text className="text-gray-600">
+                    Click on the plus button on a lodge to request access to
+                    their pricing
+                  </Text>
+                </Flex>
+              )}
+
+            {router.query.search &&
+              stayListWithoutAccess &&
+              stayListWithoutAccess.results.length === 0 && (
+                <div className="flex ml-6 items-center gap-2 mt-4">
+                  <Text size="lg" className="text-gray-600">
+                    No results found for{" "}
+                    <span className="font-semibold">{router.query.search}</span>
+                  </Text>
+                  <Link className="text-blue-500" href="/partner/agent">
+                    clear search
+                  </Link>
+                </div>
+              )}
+
+            <Grid gutter={"xl"} className="mt-5">
+              {!isStayWithoutAccessLoading &&
+                stayListWithoutAccess?.results.map((stay, index) => (
+                  <Grid.Col xl={2.7} lg={3} md={4} sm={6} xs={6} key={stay.id}>
+                    <Listing stay={stay} withoutAccess></Listing>
+                  </Grid.Col>
+                ))}
+
+              {isStayWithoutAccessLoading &&
+                Array.from({ length: 8 }).map((_, index) => (
+                  <Grid.Col xl={2.7} lg={3} md={4} sm={6} xs={6} key={index}>
+                    <Skeleton height={220} radius="md" />
+                    <Skeleton height={10} mt={4} radius="md" />
+                    <Skeleton height={10} w="70%" mt={4} radius="md" />
+                    <Skeleton height={10} w="50%" mt={4} radius="md" />
+                  </Grid.Col>
+                ))}
+            </Grid>
           </div>
-        )}
 
-        <Grid gutter={"xl"} className="mt-5">
-          {!isStayLoading &&
-            stayList?.results.map((stay, index) => (
-              <Grid.Col xl={2.7} lg={3} md={4} sm={6} xs={6} key={stay.id}>
-                <Listing stay={stay}></Listing>
-              </Grid.Col>
-            ))}
+          {stayListWithoutAccess && stayListWithoutAccess.total_pages > 1 && (
+            <Pagination
+              radius="lg"
+              color="red"
+              className="my-8"
+              total={stayListWithoutAccess.total_pages}
+              position="center"
+              value={Number(router.query.second_page || 1)}
+              onChange={(page) => {
+                router.push(
+                  `/partner/agent?second_page=${page}&search=${
+                    router.query.search || ""
+                  }`
+                );
+              }}
+            />
+          )}
 
-          {isStayLoading &&
-            Array.from({ length: 8 }).map((_, index) => (
-              <Grid.Col xl={2.7} lg={3} md={4} sm={6} xs={6} key={index}>
-                <Skeleton height={220} radius="md" />
-                <Skeleton height={10} mt={4} radius="md" />
-                <Skeleton height={10} w="70%" mt={4} radius="md" />
-                <Skeleton height={10} w="50%" mt={4} radius="md" />
-              </Grid.Col>
-            ))}
-        </Grid>
-      </div>
-
-      {stayList && stayList.total_pages > 1 && (
-        <Pagination
-          radius="lg"
-          color="red"
-          className="my-8"
-          total={stayList.total_pages}
-          position="center"
-          value={Number(router.query.page || 1)}
-          onChange={(page) => {
-            router.push(
-              `/partner/agent?page=${page}&search=${router.query.search || ""}`
-            );
-          }}
-        />
-      )}
-
-      {stayList?.results.length === 0 &&
-        !isStayLoading &&
-        !router.query.search && (
-          <div className="flex flex-col items-center justify-center mt-12">
-            <Text size="lg" className="text-gray-600">
-              You have no lodges yet. We have been notified and we will be in
-              touch to add the lodges you have contract with.
-            </Text>
-          </div>
-        )}
+          {stayListWithoutAccess?.results.length === 0 &&
+            !isStayWithoutAccessLoading &&
+            !router.query.search && (
+              <div className="flex flex-col items-center justify-center mt-12">
+                <Text size="lg" className="text-gray-600">
+                  You have no lodges yet. We have been notified and we will be
+                  in touch to add the lodges you have contract with.
+                </Text>
+              </div>
+            )}
+        </Tabs.Panel>
+      </Tabs>
 
       {/* {addedStays && addedStays.length > 0 && !isStayLoading && (
         <NavLink

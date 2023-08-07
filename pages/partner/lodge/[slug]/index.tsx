@@ -163,7 +163,10 @@ function LodgeDetail() {
       </Modal>
 
       <Flex className="mt-20">
-        <div className="fixed overflow-y-scroll w-fit left-0">
+        <div className="fixed overflow-y-scroll w-[230px] left-0">
+          <Text weight={500} px={12} mt={8}>
+            {stay?.property_name}
+          </Text>
           <Box w={220} mt={12} miw={230}>
             {items}
           </Box>

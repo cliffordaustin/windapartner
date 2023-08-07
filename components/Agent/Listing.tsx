@@ -1,14 +1,16 @@
 import { Carousel } from "@mantine/carousel";
-import { Button, Text, Card } from "@mantine/core";
+import { Button, Text, Card, Modal, FileInput, rem, Flex } from "@mantine/core";
 import { Stay } from "../../utils/types";
 import { createStyles } from "@mantine/core";
-import { IconPlus } from "@tabler/icons-react";
+import { IconPlus, IconUpload } from "@tabler/icons-react";
 import { useState, useEffect, useContext } from "react";
 import { Context } from "@/context/AgentPage";
 import axios from "axios";
 import Cookies from "js-cookie";
 import Image from "next/image";
 import { Mixpanel } from "@/utils/mixpanelconfig";
+import { useDisclosure } from "@mantine/hooks";
+import { useMutation, useQueryClient } from "react-query";
 
 const useStyles = createStyles(() => ({
   control: {
@@ -21,9 +23,10 @@ const useStyles = createStyles(() => ({
 
 type ListingProps = {
   stay: Stay;
+  withoutAccess?: boolean;
 };
 
-export default function Listing({ stay }: ListingProps) {
+export default function Listing({ stay, withoutAccess = false }: ListingProps) {
   const { classes } = useStyles();
 
   const images = stay.stay_images.sort(
@@ -121,36 +124,88 @@ export default function Listing({ stay }: ListingProps) {
     );
   }
 
+  const [opened, { open, close }] = useDisclosure(false);
+
+  const [document, setDocument] = useState<File | null>(null);
+
+  const [noDocument, setNoDocument] = useState(false);
+
+  const token = Cookies.get("token");
+
+  const addAgentToStay = async () => {
+    if (!document) {
+      setNoDocument(true);
+      return;
+    } else {
+      setNoDocument(false);
+      const formData = new FormData();
+      formData.append("document", document);
+
+      await axios.patch(
+        `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/update-agents-with-file/`,
+        formData,
+        {
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        }
+      );
+    }
+  };
+
+  const queryClient = useQueryClient();
+
+  const { mutateAsync, isLoading } = useMutation(addAgentToStay, {
+    onSuccess: () => {
+      queryClient.invalidateQueries("partner-stays-without-access");
+      close();
+    },
+  });
+
   return (
     <div className="w-full relative">
-      <Carousel
-        w={"100%"}
-        color="red"
-        // className="rounded-xl relative"
-        classNames={classes}
-      >
-        {arrImages.map((image, index) => (
-          <Carousel.Slide
-            className="bg-gray-200 rounded-lg blur-xl"
-            w={"100%"}
-            h={220}
-            key={index}
-          >
-            <Image
-              src={image}
-              className={
-                isAdded ? "opacity-70 rounded-lg" : " w-full rounded-lg"
-              }
-              alt={"Images of " + (stay.property_name || stay.name)}
-              sizes="100%"
-              priority
-              fill
-            />
-          </Carousel.Slide>
-        ))}
-      </Carousel>
+      <div className="relative">
+        <Carousel
+          w={"100%"}
+          color="red"
+          speed={20}
+          // className="rounded-xl relative"
+          classNames={classes}
+        >
+          {arrImages.map((image, index) => (
+            <Carousel.Slide
+              className="bg-gray-200 rounded-lg blur-xl"
+              w={"100%"}
+              h={220}
+              key={index}
+            >
+              <Image
+                src={image}
+                className={
+                  isAdded && !withoutAccess
+                    ? "opacity-70 rounded-lg"
+                    : stay.agent_access_request_made &&
+                      !stay.agent_access_request_approved
+                    ? "opacity-40 rounded-lg"
+                    : " w-full rounded-lg"
+                }
+                alt={"Images of " + (stay.property_name || stay.name)}
+                sizes="100%"
+                priority
+                fill
+              />
+            </Carousel.Slide>
+          ))}
+        </Carousel>
+        {stay.agent_access_request_made &&
+          !stay.agent_access_request_approved && (
+            <Text className="absolute bottom-16 font-bold left-2">
+              Access request has been sent.
+            </Text>
+          )}
+      </div>
 
-      {isAdded ? (
+      {isAdded && !withoutAccess ? (
         <Button
           onClick={() => handleRemoveItemClick(stay.id)}
           className="w-[35px] p-0 bg-black hover:bg-black absolute left-3 bottom-[70px] h-[35px] flex items-center justify-center rounded-full"
@@ -168,7 +223,7 @@ export default function Listing({ stay }: ListingProps) {
             />
           </svg>
         </Button>
-      ) : (
+      ) : !isAdded && !withoutAccess ? (
         <Button
           color="red"
           onClick={() => addListingToCalculate(stay.id)}
@@ -176,7 +231,59 @@ export default function Listing({ stay }: ListingProps) {
         >
           <IconPlus size="1.4rem" className="text-white" />
         </Button>
+      ) : !stay.agent_access_request_made ? (
+        <Button
+          color="red"
+          onClick={open}
+          className="w-[35px] p-0 absolute left-3 bottom-[70px] h-[35px] flex items-center justify-center rounded-full"
+        >
+          <IconPlus size="1.4rem" className="text-white" />
+        </Button>
+      ) : (
+        ""
       )}
+
+      <Modal
+        opened={opened}
+        onClose={close}
+        title="Add your document"
+        overlayProps={{
+          opacity: 0.55,
+          blur: 3,
+        }}
+        classNames={{
+          title: "text-lg font-bold",
+          close: "text-black hover:text-gray-700 hover:bg-gray-200",
+        }}
+        className="!w-[500px]"
+      >
+        <FileInput
+          label="Upload documents"
+          placeholder="Accepted file types: PDF"
+          accept="application/pdf"
+          icon={<IconUpload size={rem(14)} />}
+          error={noDocument ? "Please select at least one file" : ""}
+          onChange={(payload: File) => {
+            setNoDocument(false);
+            setDocument(payload);
+          }}
+        />
+
+        <Flex gap={8} justify="right" mt={6}>
+          <Button onClick={close} variant="default">
+            Close
+          </Button>
+          <Button
+            onClick={() => {
+              mutateAsync();
+            }}
+            color="red"
+            loading={isLoading}
+          >
+            Request Access
+          </Button>
+        </Flex>
+      </Modal>
 
       <div className="mt-2">
         <Text truncate weight={600} size="md">

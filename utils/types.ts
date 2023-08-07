@@ -213,6 +213,8 @@ export interface Stay {
   conference_center: boolean;
   library: boolean;
   beachfront: boolean;
+  agent_access_request_made: boolean;
+  agent_access_request_approved: boolean;
 }
 
 export interface UserTypes {

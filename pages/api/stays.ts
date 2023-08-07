@@ -47,10 +47,22 @@ export type getPartnerStaysType = {
 
 export type AgentType = {
   id: number;
+
   first_name: string;
   last_name: string;
   email: string;
   profile_pic: string | null;
+};
+
+export type AgentStayType = {
+  id: number;
+  user: {
+    first_name: string;
+    last_name: string;
+    email: string;
+    profile_pic: string | null;
+  };
+  approved: boolean;
 };
 
 export const getHighlightedStays = async (): Promise<Stay[]> => {
@@ -68,6 +80,32 @@ export const getPartnerStays = async (
 ): Promise<getPartnerStaysType> => {
   const stays = await axios.get(
     `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/?search=${
+      location || ""
+    }&page=${page || 1}`,
+    {
+      headers: {
+        Authorization: "Token " + token,
+      },
+    }
+  );
+
+  return {
+    results: stays.data.results,
+    count: stays.data.count,
+    page_size: stays.data.page_size,
+    next: stays.data.next,
+    previous: stays.data.previous,
+    total_pages: stays.data.total_pages,
+  };
+};
+
+export const getPartnerStaysWithoutAccess = async (
+  location: string | undefined,
+  page: number | undefined,
+  token: string | undefined
+): Promise<getPartnerStaysType> => {
+  const stays = await axios.get(
+    `${process.env.NEXT_PUBLIC_baseURL}/partner-stays-without-access/?search=${
       location || ""
     }&page=${page || 1}`,
     {
@@ -168,10 +206,29 @@ export const getAllAgents = async (
 export const getStayAgents = async (
   token: string | undefined,
   stay: LodgeStay | undefined
-): Promise<AgentType[]> => {
+): Promise<AgentStayType[]> => {
   if (stay) {
     const agents = await axios.get(
       `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${stay.slug}/agents/`,
+      {
+        headers: {
+          Authorization: "Token " + token,
+        },
+      }
+    );
+
+    return agents.data.results;
+  }
+  return [];
+};
+
+export const getStayAgentsNotVerified = async (
+  token: string | undefined,
+  stay: LodgeStay | undefined
+): Promise<AgentStayType[]> => {
+  if (stay) {
+    const agents = await axios.get(
+      `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${stay.slug}/agents-not-verified/`,
       {
         headers: {
           Authorization: "Token " + token,
