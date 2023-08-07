@@ -59,14 +59,17 @@ export default function AgentPage() {
     )
   );
 
-  const { data: stayListWithoutAccess, isLoading: isStayWithoutAccessLoading } =
-    useQuery<getPartnerStaysType>("partner-stays-without-access", () =>
-      getPartnerStaysWithoutAccess(
-        router.query.search as string,
-        Number(router.query.second_page || 1),
-        token
-      )
-    );
+  const {
+    data: stayListWithoutAccess,
+    isLoading: isStayWithoutAccessLoading,
+    refetch: partnerStayRefetch,
+  } = useQuery<getPartnerStaysType>("partner-stays-without-access", () =>
+    getPartnerStaysWithoutAccess(
+      router.query.search as string,
+      Number(router.query.second_page || 1),
+      token
+    )
+  );
 
   const { data: user } = useQuery<UserTypes | null>("user", () =>
     getUser(token)
@@ -74,7 +77,8 @@ export default function AgentPage() {
 
   useEffect(() => {
     refetch();
-  }, [router.query.search, router.query.page]);
+    partnerStayRefetch();
+  }, [router.query.search, router.query.page, router.query.second_page]);
 
   const { state, setState } = useContext(Context);
 
