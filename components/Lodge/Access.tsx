@@ -309,7 +309,9 @@ function Access({ stay }: AccessPropTypes) {
         ))}
 
         {agentVerified && agentVerified.length > 0 && (
-          <Text weight={600}>Verified Agents</Text>
+          <Text weight={600} className="mt-2">
+            Verified Agents
+          </Text>
         )}
         {agentVerified?.map((agent) => (
           <Flex justify="space-between" key={agent.id} align="center">
