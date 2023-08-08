@@ -92,7 +92,9 @@ export default function AgentPage() {
     setIsLoading(true);
 
     const ids = localStorage.getItem("stayIds");
-    const newIds = ids?.replace(/[\[\]']+/g, "");
+    let newIds = ids?.replace(/[\[\]']+/g, "");
+
+    newIds = newIds || "0";
 
     const getStay = getDetailPartnerStays(newIds, token);
     getStay
@@ -164,7 +166,7 @@ export default function AgentPage() {
                       />
                     )
                   }
-                  disabled={state.stayIds.length === 0 || isLoading}
+                  disabled={isLoading}
                   className="w-fit flex  items-center justify-center rounded-lg px-4 text-white z-10 bg-[#000] hover:bg-[#333] font-semibold"
                 >
                   Calculate pricing
