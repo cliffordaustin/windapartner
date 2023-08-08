@@ -12,13 +12,17 @@ import {
   Flex,
   Group,
   Loader,
+  Modal,
   MultiSelect,
   Text,
 } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import { IconShare, IconShare2 } from "@tabler/icons-react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import React, { forwardRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
+import Share from "../ui/Share";
 
 type AccessPropTypes = {
   stay: LodgeStay | undefined;
@@ -187,11 +191,28 @@ function Access({ stay }: AccessPropTypes) {
 
   const [selectedAgentId, setSelectedAgentId] = React.useState<number | null>();
 
+  const [opened, { open, close }] = useDisclosure(false);
+
   return (
     <div className="border border-solid w-full border-gray-200 rounded-xl p-5">
-      <Text className="font-semibold" size="lg">
-        Agent Access
-      </Text>
+      <div className="flex items-center justify-between">
+        <Text className="font-semibold" size="lg">
+          Agent Access
+        </Text>
+
+        <Button
+          color="red"
+          size="sm"
+          leftIcon={<IconShare2></IconShare2>}
+          onClick={open}
+        >
+          Share
+        </Button>
+      </div>
+
+      <Modal opened={opened} onClose={close} centered>
+        <Share property={stay?.property_name || ""}></Share>
+      </Modal>
 
       <Flex gap={5} align="flex-end" className="mt-2">
         <MultiSelect
