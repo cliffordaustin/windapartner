@@ -82,17 +82,7 @@ export default function AgentPage() {
 
   const { state, setState } = useContext(Context);
 
-  const [stayIds, setStayIds] = useState<string | undefined>("0");
-
   const itemIds = process.browser ? localStorage.getItem("stayIds") : "";
-
-  useEffect(() => {
-    const ids = localStorage.getItem("stayIds");
-    const newIds = ids?.replace(/[\[\]']+/g, "");
-    if (ids) {
-      setStayIds(newIds || "0");
-    }
-  }, [itemIds]);
 
   const [addedStays, setAddedStays] = useState<Stay[]>([]);
 
@@ -100,7 +90,11 @@ export default function AgentPage() {
 
   useEffect(() => {
     setIsLoading(true);
-    const getStay = getDetailPartnerStays(stayIds, token);
+
+    const ids = localStorage.getItem("stayIds");
+    const newIds = ids?.replace(/[\[\]']+/g, "");
+
+    const getStay = getDetailPartnerStays(newIds, token);
     getStay
       .then((res) => {
         setAddedStays(res);
@@ -109,7 +103,7 @@ export default function AgentPage() {
       .catch((err) => {
         setIsLoading(false);
       });
-  }, [stayIds]);
+  }, [itemIds]);
 
   useEffect(() => {
     const storedItemIds = localStorage.getItem("stayIds");
@@ -130,7 +124,7 @@ export default function AgentPage() {
           <Tabs.Tab value="have-no-contract">Have No Contract With</Tabs.Tab>
         </Tabs.List>
 
-        {addedStays && addedStays.length > 0 && isLoading && (
+        {isLoading && (
           <div className="sticky bg-white z-40 top-0 left-0 right-0">
             <ScrollArea>
               <div className="border-b sticky top-0 left-0 right-0 border-t-0 flex items-center gap-4 border-solid border-x-0 border-gray-200 py-4 px-6">
