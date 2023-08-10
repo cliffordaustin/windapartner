@@ -14,9 +14,13 @@ import { useRouter } from "next/router";
 
 type UserDropdownProps = {
   user?: UserTypes | null;
+  navBarAccountLink?: string;
 };
 
-export default function UserDropdown({ user }: UserDropdownProps) {
+export default function UserDropdown({
+  user,
+  navBarAccountLink,
+}: UserDropdownProps) {
   const fullName = (user?.first_name || "") + " " + (user?.last_name || "");
   const router = useRouter();
   return (
@@ -106,7 +110,7 @@ export default function UserDropdown({ user }: UserDropdownProps) {
             <NavLink
               label="Your account"
               component="a"
-              href="/account"
+              href={navBarAccountLink}
               icon={<IconUser size="1rem" stroke={1.5} />}
             />
           )}

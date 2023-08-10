@@ -9,6 +9,7 @@ import { getUser } from "@/pages/api/user";
 import Cookies from "js-cookie";
 import LodgeCard from "@/components/Lodge/LodgeCard";
 import { useRouter } from "next/router";
+import ReactPlayer from "react-player";
 import {
   Accordion,
   Avatar,
@@ -31,6 +32,7 @@ import {
   IconCalendar,
   IconChevronLeft,
   IconChevronRight,
+  IconPlayerPlay,
   IconSelector,
   IconUpload,
 } from "@tabler/icons-react";
@@ -42,6 +44,8 @@ import { DatePickerInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { FileInput, FileInputProps, Group, Center, rem } from "@mantine/core";
 import { IconPhoto } from "@tabler/icons-react";
+import Image from "next/image";
+import ClientOnly from "@/components/ui/ClientOnly";
 
 function Lodge({}) {
   const token = Cookies.get("token");
@@ -62,6 +66,8 @@ function Lodge({}) {
   const [stayIds, setStayIds] = React.useState<number[]>([]);
 
   const [opened, { open, close }] = useDisclosure(false);
+  const [videoOpened, { open: openVideo, close: closeVideo }] =
+    useDisclosure(false);
   const [
     grantAccessModal,
     { open: openGrantAccessModal, close: closeGrantAccessModal },
@@ -281,8 +287,56 @@ function Lodge({}) {
           showAddProperty={true}
           showGrantAccess={true}
           navBarLogoLink="/partner/lodge"
+          navBarAccountLink="/account/lodge"
         ></Navbar>
       </div>
+
+      {stays?.length === 0 && (
+        <div className="h-[400px] bg-[#fffcf2] bg-opacity-50 border-b border-gray-300 border-solid border-x-0 border-t-0">
+          <div className="mx-auto w-[1000px] gap-10 flex items-center h-full">
+            <div className="flex flex-col gap-6">
+              <Text className="text-3xl font-bold text-gray-700">
+                Price Management and Agent Collaboration Made{" "}
+                <span className="text-black">Easy</span>
+              </Text>
+              <Text className="text-lg">
+                Forge Stronger Connections and Optimize Operations with
+                Effortless Price Management and Collaborative Agent Oversight
+              </Text>
+
+              <div className="flex gap-3 items-center">
+                <Button onClick={open} color="red">
+                  Add your property
+                </Button>
+                <Button onClick={openVideo} color="red" variant="default">
+                  Watch video
+                </Button>
+              </div>
+            </div>
+
+            <div className="w-[900px] h-[250px] rounded-lg overflow-hidden relative">
+              <div className="absolute bg-black w-full h-full inset-0 z-20 bg-opacity-5"></div>
+              <div
+                onClick={openVideo}
+                className="w-[70px] h-[70px] cursor-pointer rounded-full top-[40%] left-[45%] -translate-y-2/4 bg-blue-600 absolute z-30 flex items-center justify-center"
+              >
+                <IconPlayerPlay
+                  className="w-[40px] h-[40px] text-white"
+                  strokeWidth={2}
+                />
+              </div>
+              <Image
+                src="/images/price-img.png"
+                // className="object-cover"
+                alt=""
+                sizes="100%"
+                priority
+                fill
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-[1500px] mx-auto">
         <Grid px={32} py={10} mt={8} gutter={"sm"} className="w-full">
@@ -297,6 +351,38 @@ function Lodge({}) {
           ))}
         </Grid>
       </div>
+
+      <Modal
+        opened={videoOpened}
+        onClose={closeVideo}
+        transitionProps={{ transition: "fade", duration: 200 }}
+        closeButtonProps={{
+          style: {
+            width: 30,
+            height: 30,
+          },
+          iconSize: 20,
+        }}
+        overlayProps={{
+          opacity: 0.3,
+          blur: 3,
+        }}
+        classNames={{
+          title: "text-lg font-bold",
+          close: "text-black hover:text-gray-700 hover:bg-gray-200",
+        }}
+        title="How to manage your prices"
+        size="xl"
+        centered
+      >
+        <ClientOnly>
+          <ReactPlayer
+            width="100%"
+            height={420}
+            url="https://www.youtube.com/watch?v=Lqa956bU4kk"
+          />
+        </ClientOnly>
+      </Modal>
 
       <Modal
         opened={grantAccessModal}

@@ -55,6 +55,7 @@
     "react-ga4": "^2.1.0",
     "react-map-gl": "^7.0.21",
     "react-phone-number-input": "^3.2.19",
+    "react-player": "^2.12.0",
     "react-query": "^3.39.3",
     "react-scroll": "^1.8.9",
     "react-to-print": "^2.14.13",

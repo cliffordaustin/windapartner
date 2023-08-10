@@ -114,6 +114,7 @@ function LodgeDetail() {
           setDate={setDate}
           includeDateSearch={true}
           navBarLogoLink="/partner/lodge"
+          navBarAccountLink="/account/lodge"
         ></Navbar>
       </div>
 

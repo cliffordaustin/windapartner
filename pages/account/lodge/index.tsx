@@ -9,7 +9,7 @@ import Cookies from "js-cookie";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import { GetServerSideProps } from "next";
-import { getUser } from "../api/user";
+import { getUser } from "../../api/user";
 import { UserTypes } from "@/utils/types";
 import getToken from "@/utils/getToken";
 import { QueryClient, dehydrate, useMutation, useQuery } from "react-query";
@@ -153,7 +153,12 @@ const AboutUs = () => {
       </Head>
 
       <div className="border-b border-x-0 border-t-0 border-solid border-b-gray-200">
-        <Navbar includeSearch={false} user={user}></Navbar>
+        <Navbar
+          navBarLogoLink="/partner/lodge"
+          navBarAccountLink="/account/lodge"
+          includeSearch={false}
+          user={user}
+        ></Navbar>
       </div>
 
       <div className="max-w-[1100px] px-6 md:px-12 xl:px-0 mx-auto mt-6">

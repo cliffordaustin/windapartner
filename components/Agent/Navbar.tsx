@@ -26,6 +26,7 @@ type NavbarProps = {
   openModal?: () => void;
   grantAccessModal?: () => void;
   navBarLogoLink?: string;
+  navBarAccountLink?: string;
 };
 
 export default function Navbar({
@@ -40,6 +41,7 @@ export default function Navbar({
   openModal,
   grantAccessModal,
   navBarLogoLink = "/partner/agent",
+  navBarAccountLink = "/account/agent",
 }: NavbarProps) {
   const router = useRouter();
   const [location, setLocation] = useState(
@@ -162,11 +164,14 @@ export default function Navbar({
         )}
 
         {showGrantAccess && (
-          <Button color="blue" onClick={grantAccessModal}>
+          <Button className="bg-blue-600" onClick={grantAccessModal}>
             Grant access
           </Button>
         )}
-        <UserDropdown user={user}></UserDropdown>
+        <UserDropdown
+          navBarAccountLink={navBarAccountLink}
+          user={user}
+        ></UserDropdown>
       </div>
     </div>
   );
