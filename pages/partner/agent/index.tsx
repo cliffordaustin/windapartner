@@ -122,8 +122,8 @@ export default function AgentPage() {
 
       <Tabs variant="outline" mt={6} defaultValue="have-contract">
         <Tabs.List>
-          <Tabs.Tab value="have-contract">Have Contract With</Tabs.Tab>
-          <Tabs.Tab value="have-no-contract">Have No Contract With</Tabs.Tab>
+          <Tabs.Tab value="have-contract">My contracts</Tabs.Tab>
+          <Tabs.Tab value="have-no-contract">All properties</Tabs.Tab>
         </Tabs.List>
 
         {isLoading && (
