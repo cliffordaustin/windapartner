@@ -285,7 +285,7 @@ function Lodge({}) {
           includeSearch={false}
           user={user}
           showAddProperty={true}
-          showGrantAccess={true}
+          showGrantAccess={stays && stays?.length > 0 ? true : false}
           navBarLogoLink="/partner/lodge"
           navBarAccountLink="/account/lodge"
         ></Navbar>
