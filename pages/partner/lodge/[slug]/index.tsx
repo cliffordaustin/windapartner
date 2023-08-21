@@ -250,6 +250,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           permanent: false,
         },
       };
+    } else if (error instanceof AxiosError && error.response?.status === 404) {
+      return {
+        notFound: true,
+      };
     }
     return {
       props: {},

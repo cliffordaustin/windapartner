@@ -131,7 +131,7 @@ function AboutRoomEdit({ stay }: RoomResidentPriceEditProps) {
   return (
     <div className="border border-solid w-full border-gray-200 rounded-xl p-5">
       <Text className="font-semibold" size="lg">
-        Resident Prices
+        About
       </Text>
 
       <form

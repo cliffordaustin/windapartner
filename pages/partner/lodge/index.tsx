@@ -308,13 +308,13 @@ function Lodge({}) {
                 <Button onClick={open} color="red">
                   Add your property
                 </Button>
-                <Button onClick={openVideo} color="red" variant="default">
+                <Button onClick={openVideo} variant="default">
                   Watch video
                 </Button>
               </div>
             </div>
 
-            <div className="w-[900px] h-[250px] rounded-lg overflow-hidden relative">
+            <div className="w-[900px] h-[250px] rounded-xl overflow-hidden shadow-lg relative">
               <div className="absolute bg-black w-full h-full inset-0 z-20 bg-opacity-5"></div>
               <div
                 onClick={openVideo}
