@@ -59,6 +59,8 @@ export default function AgentPage() {
     )
   );
 
+  console.log("stayList", stayList);
+
   const {
     data: stayListWithoutAccess,
     isLoading: isStayWithoutAccessLoading,
