@@ -65,6 +65,21 @@ export type AgentStayType = {
   approved: boolean;
 };
 
+export type UserAgentStayType = {
+  id: number;
+  user: {
+    first_name: string;
+    last_name: string;
+    email: string;
+    profile_pic: string | null;
+  };
+};
+
+export type NotUserAgentStayType = {
+  id: number;
+  email: string;
+};
+
 export const getHighlightedStays = async (): Promise<Stay[]> => {
   const stays = await axios.get(
     `${process.env.NEXT_PUBLIC_baseURL}/highlighted-stays/`
@@ -210,6 +225,44 @@ export const getStayAgents = async (
   if (stay) {
     const agents = await axios.get(
       `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${stay.slug}/agents/`,
+      {
+        headers: {
+          Authorization: "Token " + token,
+        },
+      }
+    );
+
+    return agents.data.results;
+  }
+  return [];
+};
+
+export const getStayAgentsByEmailUser = async (
+  token: string | undefined,
+  stay: LodgeStay | undefined
+): Promise<UserAgentStayType[]> => {
+  if (stay) {
+    const agents = await axios.get(
+      `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${stay.slug}/user-agents-email/`,
+      {
+        headers: {
+          Authorization: "Token " + token,
+        },
+      }
+    );
+
+    return agents.data.results;
+  }
+  return [];
+};
+
+export const getStayAgentsByEmailNotUser = async (
+  token: string | undefined,
+  stay: LodgeStay | undefined
+): Promise<NotUserAgentStayType[]> => {
+  if (stay) {
+    const agents = await axios.get(
+      `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${stay.slug}/not-user-agents-email/`,
       {
         headers: {
           Authorization: "Token " + token,
