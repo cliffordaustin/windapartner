@@ -163,11 +163,11 @@ export default function Navbar({
           </Button>
         )}
 
-        {showGrantAccess && (
+        {/* {showGrantAccess && (
           <Button className="bg-blue-600" onClick={grantAccessModal}>
             Grant access
           </Button>
-        )}
+        )} */}
         <UserDropdown
           navBarAccountLink={navBarAccountLink}
           user={user}
