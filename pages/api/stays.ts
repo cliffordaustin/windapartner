@@ -344,8 +344,6 @@ export const getRoomTypes = async (
       `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/room-types/?start_date=${startDate}&end_date=${endDate}`
     );
 
-    console.log("room", room_types.data.results);
-
     return room_types.data.results;
   }
 
