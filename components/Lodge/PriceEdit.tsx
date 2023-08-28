@@ -169,6 +169,8 @@ function PriceEdit({ date, stay }: PriceEditProps) {
   const [isNonResidentDropdownOpen, setIsNonResidentDropdownOpen] =
     React.useState(false);
 
+  console.log(selectedRoomType?.room_non_resident_availabilities);
+
   return (
     <div className="border relative border-solid w-full border-gray-200 rounded-xl p-5">
       <Text className="font-semibold" size="lg">
