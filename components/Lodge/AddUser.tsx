@@ -115,7 +115,7 @@ function AddUser({ stay }: AddUserPropTypes) {
       <div className="flex gap-10 items-center justify-between">
         <Flex gap={3} direction="column">
           <Text className="font-semibold" size="lg">
-            Add Users
+            Add Team Members
           </Text>
           <Text size="sm" color="gray">
             {/* *If the user is already registered with us, they will automatically

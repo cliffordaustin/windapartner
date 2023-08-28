@@ -29,6 +29,7 @@ import {
   IconRun,
   IconSquare,
   IconUserPlus,
+  IconUsersGroup,
 } from "@tabler/icons-react";
 import { AxiosError } from "axios";
 import Cookies from "js-cookie";
@@ -73,7 +74,7 @@ function LodgeDetail() {
     { icon: IconRun, label: "Activities/Extras" },
     { icon: IconSquare, label: "Park fees" },
     { icon: IconLockAccess, label: "Agent access" },
-    { icon: IconUserPlus, label: "Add users" },
+    { icon: IconUsersGroup, label: "Team members" },
     { icon: IconInfoCircle, label: "About" },
   ];
 
