@@ -28,6 +28,7 @@ import {
   IconMailCheck,
   IconRun,
   IconSquare,
+  IconUserPlus,
 } from "@tabler/icons-react";
 import { AxiosError } from "axios";
 import Cookies from "js-cookie";
@@ -45,6 +46,7 @@ import { deleteStayEmail } from "@/pages/api/stays";
 import { useDisclosure } from "@mantine/hooks";
 import Access from "@/components/Lodge/Access";
 import AgentEmailAccess from "@/components/Lodge/AgentEmailAccess";
+import AddUser from "@/components/Lodge/AddUser";
 
 function LodgeDetail() {
   const token = Cookies.get("token");
@@ -71,7 +73,7 @@ function LodgeDetail() {
     { icon: IconRun, label: "Activities/Extras" },
     { icon: IconSquare, label: "Park fees" },
     { icon: IconLockAccess, label: "Agent access" },
-    // { icon: IconMailCheck, label: "Agent email access" },
+    { icon: IconUserPlus, label: "Add users" },
     { icon: IconInfoCircle, label: "About" },
   ];
 
@@ -206,13 +208,13 @@ function LodgeDetail() {
 
               {active === 3 && <ParkFeesEdit stay={stay}></ParkFeesEdit>}
 
-              {/* {active === 4 && <Access stay={stay}></Access>} */}
-
               {active === 4 && (
                 <AgentEmailAccess stay={stay}></AgentEmailAccess>
               )}
 
-              {active === 5 && <AboutRoomEdit stay={stay}></AboutRoomEdit>}
+              {active === 5 && <AddUser stay={stay}></AddUser>}
+
+              {active === 6 && <AboutRoomEdit stay={stay}></AboutRoomEdit>}
             </Container>
           </div>
         </ContextProvider>

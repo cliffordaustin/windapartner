@@ -275,6 +275,44 @@ export const getStayAgentsByEmailNotUser = async (
   return [];
 };
 
+export const getStayPropertyAccess = async (
+  token: string | undefined,
+  stay: LodgeStay | undefined
+): Promise<UserAgentStayType[]> => {
+  if (stay) {
+    const property = await axios.get(
+      `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${stay.slug}/verified-property-access/`,
+      {
+        headers: {
+          Authorization: "Token " + token,
+        },
+      }
+    );
+
+    return property.data.results;
+  }
+  return [];
+};
+
+export const getStayPropertyAccessNotUser = async (
+  token: string | undefined,
+  stay: LodgeStay | undefined
+): Promise<NotUserAgentStayType[]> => {
+  if (stay) {
+    const property = await axios.get(
+      `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${stay.slug}/not-verified-property-access/`,
+      {
+        headers: {
+          Authorization: "Token " + token,
+        },
+      }
+    );
+
+    return property.data.results;
+  }
+  return [];
+};
+
 export const getStayAgentsNotVerified = async (
   token: string | undefined,
   stay: LodgeStay | undefined

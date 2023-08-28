@@ -172,10 +172,15 @@ function AgentEmailAccess({ stay }: AgentEmailAccessPropTypes) {
   const totalAgents = (notUserAgentsByEmail?.length || 0) + lenApprovedAgents;
   return (
     <div className="border border-solid w-full border-gray-200 rounded-xl px-5 py-3">
-      <div className="flex items-center justify-between">
-        <Text className="font-semibold" size="lg">
-          Agent Access
-        </Text>
+      <div className="flex items-center gap-10 justify-between">
+        <Flex gap={3} direction="column">
+          <Text className="font-semibold" size="lg">
+            Agent Access
+          </Text>
+          <Text size="sm" color="gray">
+            Grant access to your contracted agents to view property prices.
+          </Text>
+        </Flex>
 
         <div className="flex items-center gap-2">
           {totalAgents > 0 && (
