@@ -164,14 +164,6 @@ function AddUser({ stay }: AddUserPropTypes) {
         </Button>
       </form>
 
-      {totalAgents === 0 && (
-        <div className="flex mt-2 flex-col gap-4 items-center">
-          <Text className="font-semibold" size="md">
-            No agents have access to this property.
-          </Text>
-        </div>
-      )}
-
       {totalAgents > 0 && (
         <div className="mt-4 flex flex-col gap-3">
           <div className="flex flex-col gap-1">
