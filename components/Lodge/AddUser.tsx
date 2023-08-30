@@ -169,7 +169,7 @@ function AddUser({ stay }: AddUserPropTypes) {
           <div className="flex flex-col gap-1">
             {propertAccessNotUser && propertAccessNotUser?.length > 0 && (
               <Text className="font-semibold" size="md">
-                Waiting for approval
+                Invitation pending
               </Text>
             )}
 
@@ -199,7 +199,7 @@ function AddUser({ stay }: AddUserPropTypes) {
                       selectedPropertyAccessUserId === property.id
                     }
                   >
-                    Delete
+                    cancel invite
                   </Button>
                 </Flex>
               ))}

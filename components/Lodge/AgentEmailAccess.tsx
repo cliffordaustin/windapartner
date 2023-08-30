@@ -215,7 +215,7 @@ function AgentEmailAccess({ stay }: AgentEmailAccessPropTypes) {
           <div className="flex flex-col gap-1">
             {notUserAgentsByEmail && notUserAgentsByEmail?.length > 0 && (
               <Text className="font-semibold" size="md">
-                Waiting for approval
+                Invitation pending
               </Text>
             )}
 
@@ -245,7 +245,7 @@ function AgentEmailAccess({ stay }: AgentEmailAccessPropTypes) {
                       selectedRemoveNotUserAgentId === agent.id
                     }
                   >
-                    Delete
+                    cancel invite
                   </Button>
                 </Flex>
               ))}

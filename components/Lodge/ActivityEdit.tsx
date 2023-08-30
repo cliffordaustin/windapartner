@@ -163,7 +163,7 @@ function ActivityEdit({ stay }: ActivityEditProps) {
           />
 
           <NumberInput
-            label="Non-resident Price"
+            label="Non-resident Price($)"
             placeholder="Enter non-resident price"
             value={activityForm.values.nonResidentPrice}
             onChange={(value) =>
@@ -172,7 +172,7 @@ function ActivityEdit({ stay }: ActivityEditProps) {
           />
 
           <NumberInput
-            label="Resident Price"
+            label="Resident Price(KES)"
             placeholder="Enter resident price"
             value={activityForm.values.residentPrice}
             onChange={(value) =>
