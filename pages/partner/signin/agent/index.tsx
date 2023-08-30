@@ -114,6 +114,10 @@ function PartnerSignin(props: PaperProps) {
           if (error.response?.data?.email?.length > 0) {
             form.setErrors({ email: error.response?.data?.email[0] });
           }
+
+          if (error.response?.data?.password1?.length > 0) {
+            form.setErrors({ password: error.response?.data?.password1[0] });
+          }
         }
       }
     }
