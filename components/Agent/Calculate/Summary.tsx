@@ -49,7 +49,7 @@ export default function Summary({ calculateStay, stays }: SummaryProps) {
       ? differenceInCalendarDays(calculateStay.date[1], calculateStay.date[0])
       : 1;
   // to include the last day, add 1
-  const days = nights + 1;
+  const days = nights;
 
   const totalNumberOfGuests = calculateStay.rooms.reduce((acc, room) => {
     const countResidentGuestTypes = pricing.countResidentGuestTypesWithPrice(

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { subDays, format } from "date-fns";
 import {
   ActivityFee,
   OtherFeesNonResident,
@@ -338,10 +339,12 @@ export const getRoomTypes = async (
   endDate: string | null | undefined
 ): Promise<RoomType[]> => {
   // subtract 1 day from end date
+  let endMinusOne = subDays(new Date(endDate || ""), 1);
+  let endMinusOneFormat = format(endMinusOne || new Date(), "yyyy-MM-dd");
 
   if (startDate && endDate && stay) {
     const room_types = await axios.get(
-      `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/room-types/?start_date=${startDate}&end_date=${endDate}`
+      `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/room-types/?start_date=${startDate}&end_date=${endMinusOneFormat}`
     );
 
     return room_types.data.results;
