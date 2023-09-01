@@ -14,7 +14,7 @@ const sans = Source_Sans_Pro({
   subsets: ["latin"],
 });
 
-export default function Home() {
+export default function Home({ signOut }: { signOut: () => void }) {
   const { scrollIntoView, targetRef } = useScrollIntoView<HTMLDivElement>({
     offset: 60,
   });
@@ -46,6 +46,14 @@ export default function Home() {
             </div>
           </Link>
 
+          <Button
+            onClick={() => {
+              signOut();
+            }}
+          >
+            Sign out
+          </Button>
+
           <div className="flex items-center gap-4">
             <div className="flex flex-col items-center gap-1">
               <Link className="text-white font-bold no-underline" href="/">
@@ -53,7 +61,6 @@ export default function Home() {
               </Link>
               <div className="h-[1.5px] w-[16px] bg-white"></div>
             </div>
-
             <div className="flex flex-col items-center gap-1">
               <Link
                 className="text-white font-bold opacity-80 hover:opacity-100 no-underline"

@@ -15,6 +15,13 @@ import NProgress from "nprogress";
 import "nprogress/nprogress.css";
 import Head from "next/head";
 
+import { Authenticator } from "@aws-amplify/ui-react";
+import "@aws-amplify/ui-react/styles.css";
+import { Amplify } from "aws-amplify";
+
+import awsExports from "../src/aws-exports";
+Amplify.configure({ ...awsExports, ssr: true });
+
 const open_sans = Open_Sans({
   subsets: ["latin"],
   weight: ["400", "700", "800", "500", "600"],
@@ -48,32 +55,42 @@ export default function App({ Component, pageProps }: AppProps) {
   const [queryClient] = useState(() => new QueryClient());
 
   return (
-    <GoogleOAuthProvider
-      clientId={process.env.NEXT_PUBLIC_GOOGLE_SOCAIL_AUTH_CLIENT_ID || ""}
+    <Authenticator
+      socialProviders={["google", "facebook"]}
+      loginMechanisms={["email"]}
     >
-      <Head>
-        <meta name="viewport" content="initial-scale=1.0, width=device-width" />
-      </Head>
-      <MantineProvider
-        withGlobalStyles
-        withNormalizeCSS
-        theme={{
-          fontFamily: open_sans.style.fontFamily,
-        }}
-      >
-        <Notifications />
-        <QueryClientProvider client={queryClient}>
-          <Hydrate state={pageProps.dehydratedState}>
-            <AgentContextProvider>
-              <CalculateContextProvider>
-                <main className={open_sans.className}>
-                  <Component {...pageProps} />
-                </main>
-              </CalculateContextProvider>
-            </AgentContextProvider>
-          </Hydrate>
-        </QueryClientProvider>
-      </MantineProvider>
-    </GoogleOAuthProvider>
+      {({ signOut, user }) => (
+        <GoogleOAuthProvider
+          clientId={process.env.NEXT_PUBLIC_GOOGLE_SOCAIL_AUTH_CLIENT_ID || ""}
+        >
+          <Head>
+            <meta
+              name="viewport"
+              content="initial-scale=1.0, width=device-width"
+            />
+          </Head>
+          <MantineProvider
+            withGlobalStyles
+            withNormalizeCSS
+            theme={{
+              fontFamily: open_sans.style.fontFamily,
+            }}
+          >
+            <Notifications />
+            <QueryClientProvider client={queryClient}>
+              <Hydrate state={pageProps.dehydratedState}>
+                <AgentContextProvider>
+                  <CalculateContextProvider>
+                    <main className={open_sans.className}>
+                      <Component {...pageProps} signOut={signOut} />
+                    </main>
+                  </CalculateContextProvider>
+                </AgentContextProvider>
+              </Hydrate>
+            </QueryClientProvider>
+          </MantineProvider>
+        </GoogleOAuthProvider>
+      )}
+    </Authenticator>
   );
 }
