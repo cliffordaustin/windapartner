@@ -32,7 +32,7 @@ function ParkFee({ fee, stay }: ParkFeeProps) {
       `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/${stay?.slug}/park-fees/${fee.id}/`,
       {
         headers: {
-          Authorization: "Token " + token,
+          Authorization: "Bearer " + token,
         },
       }
     );
@@ -86,7 +86,7 @@ function ParkFee({ fee, stay }: ParkFeeProps) {
       },
       {
         headers: {
-          Authorization: `Token ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       }
     );

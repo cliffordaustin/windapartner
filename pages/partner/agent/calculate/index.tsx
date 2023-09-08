@@ -2,13 +2,17 @@ import getToken from "@/utils/getToken";
 import { GetServerSideProps } from "next";
 import { UserTypes } from "@/utils/types";
 import { getUser } from "@/pages/api/user";
-import { AxiosError } from "axios";
-import { dehydrate, QueryClient, useQuery } from "react-query";
+import axios, { AxiosError } from "axios";
+import { dehydrate, QueryClient, useMutation, useQuery } from "react-query";
 import Cookies from "js-cookie";
 import Navbar from "@/components/Agent/Navbar";
 import { use, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Stay } from "@/utils/types";
-import { getDetailPartnerStays } from "@/pages/api/stays";
+import {
+  AgentDiscountRateType,
+  getAgentDiscountRates,
+  getDetailPartnerStays,
+} from "@/pages/api/stays";
 import { useRouter } from "next/router";
 import {
   ActionIcon,
@@ -19,11 +23,13 @@ import {
   Divider,
   FileInput,
   Flex,
+  Grid,
   Loader,
   Modal,
   rem,
   ScrollArea,
   Select,
+  Slider,
   Tabs,
   Text,
   TextInput,
@@ -36,7 +42,10 @@ import { v4 as uuidv4 } from "uuid";
 import {
   IconAlertCircle,
   IconCalculator,
+  IconCalendar,
   IconGraph,
+  IconSelector,
+  IconTrash,
   IconUpload,
   IconX,
 } from "@tabler/icons-react";
@@ -48,9 +57,22 @@ import { useDisclosure } from "@mantine/hooks";
 import PrintSummary from "@/components/Agent/Calculate/PrintSummary";
 import Image from "next/image";
 import { Mixpanel } from "@/utils/mixpanelconfig";
+import { Auth, withSSRContext } from "aws-amplify";
+import { DatePickerInput } from "@mantine/dates";
+import { format } from "date-fns";
 
 export default function Calculate() {
-  const token = Cookies.get("token");
+  const [token, setToken] = useState("");
+
+  useEffect(() => {
+    Auth.currentSession().then((res) => {
+      let accessToken = res.getAccessToken();
+      let jwt = accessToken.getJwtToken();
+
+      setToken(jwt);
+    });
+  }, []);
+
   const router = useRouter();
 
   const [includeClientInCalculation, setIncludeResidentInCalculation] =
@@ -58,8 +80,10 @@ export default function Calculate() {
 
   const [summarizedCalculation, setSummarizedCalculation] = useState(false);
 
-  const { data: user } = useQuery<UserTypes | null>("user", () =>
-    getUser(token)
+  const { data: user } = useQuery<UserTypes | null>(
+    "user",
+    () => getUser(token),
+    { enabled: !!token }
   );
 
   const [queryClient] = useState(() => new QueryClient());
@@ -78,196 +102,11 @@ export default function Calculate() {
     }
   }, [stayIds]);
 
-  const {
-    data: stays,
-    isLoading: isStayLoading,
-    refetch,
-  } = useQuery<Stay[]>(
+  const { data: stays, isLoading: isStayLoading } = useQuery<Stay[]>(
     "partner-stay-ids",
     () => getDetailPartnerStays(stayIds, token),
-    { enabled: !!stayIds }
+    { enabled: !!stayIds && !!token }
   );
-
-  // const initialItems: StateType[] = stays
-  //   ? Array.from({ length: stays.length }, (_, i) => ({
-  //       id: stays[i].id,
-  //       slug: stays[i].slug,
-  //       date: [null, null],
-  //       name: stays[i].property_name || stays[i].name,
-  //       rooms: [
-  //         {
-  //           id: uuidv4(),
-  //           name: "",
-  //           residentAdult: 0,
-  //           residentChild: 0,
-  //           residentInfant: 0,
-  //           nonResidentAdult: 0,
-  //           nonResidentChild: 0,
-  //           nonResidentInfant: 0,
-  //           residentGuests: [
-  //             {
-  //               id: uuidv4(),
-  //               resident: "",
-  //               guestType: "",
-  //               numberOfGuests: 0,
-  //               description: "",
-  //             },
-  //           ],
-  //           nonResidentGuests: [
-  //             {
-  //               id: uuidv4(),
-  //               nonResident: "",
-  //               numberOfGuests: 0,
-  //               guestType: "",
-  //               description: "",
-  //             },
-  //           ],
-  //           package: "",
-  //           residentParkFee: [],
-  //           nonResidentParkFee: [],
-  //           otherFees: [],
-  //         },
-  //       ],
-  //       residentCommission: "",
-  //       nonResidentCommission: "",
-  //       activityFee: [],
-  //       extraFee: [
-  //         {
-  //           id: uuidv4(),
-  //           name: "",
-  //           price: "",
-  //           pricingType: "",
-  //           guestType: "",
-  //         },
-  //       ],
-  //     }))
-  //   : [];
-
-  // setState((prev) => [...prev, ...initialItems]);
-
-  // console.log(initialItems);
-
-  // const initialItems: StateType[] = useMemo(
-  //   (): StateType[] =>
-  //     stays
-  //       ? Array.from({ length: stays.length }, (_, i) => ({
-  //           id: stays[i].id,
-  //           slug: stays[i].slug,
-  //           date: [null, null],
-  //           name: stays[i].property_name || stays[i].name,
-  //           rooms: [
-  //             {
-  //               id: uuidv4(),
-  //               name: "",
-  //               residentAdult: 0,
-  //               residentChild: 0,
-  //               residentInfant: 0,
-  //               nonResidentAdult: 0,
-  //               nonResidentChild: 0,
-  //               nonResidentInfant: 0,
-  //               residentGuests: [
-  //                 {
-  //                   id: uuidv4(),
-  //                   resident: "",
-  //                   guestType: "",
-  //                   numberOfGuests: 0,
-  //                   description: "",
-  //                 },
-  //               ],
-  //               nonResidentGuests: [
-  //                 {
-  //                   id: uuidv4(),
-  //                   nonResident: "",
-  //                   numberOfGuests: 0,
-  //                   guestType: "",
-  //                   description: "",
-  //                 },
-  //               ],
-  //               package: "",
-  //               residentParkFee: [],
-  //               nonResidentParkFee: [],
-  //               otherFees: [],
-  //             },
-  //           ],
-  //           residentCommission: "",
-  //           nonResidentCommission: "",
-  //           activityFee: [],
-  //           extraFee: [
-  //             {
-  //               id: uuidv4(),
-  //               name: "",
-  //               price: "",
-  //               pricingType: "",
-  //               guestType: "",
-  //             },
-  //           ],
-  //         }))
-  //       : [],
-  //   [stays]
-  // );
-
-  // setState(initialItems);
-
-  // useEffect(() => {
-  //   if (stays) {
-  //     const items: StateType[] = Array.from(
-  //       { length: stays.length },
-  //       (_, i) => ({
-  //         id: stays[i].id,
-  //         slug: stays[i].slug,
-  //         date: [null, null],
-  //         name: stays[i].property_name || stays[i].name,
-  //         rooms: [
-  //           {
-  //             id: uuidv4(),
-  //             name: "",
-  //             residentAdult: 0,
-  //             residentChild: 0,
-  //             residentInfant: 0,
-  //             nonResidentAdult: 0,
-  //             nonResidentChild: 0,
-  //             nonResidentInfant: 0,
-  //             residentGuests: [
-  //               {
-  //                 id: uuidv4(),
-  //                 resident: "",
-  //                 guestType: "",
-  //                 numberOfGuests: 0,
-  //                 description: "",
-  //               },
-  //             ],
-  //             nonResidentGuests: [
-  //               {
-  //                 id: uuidv4(),
-  //                 nonResident: "",
-  //                 numberOfGuests: 0,
-  //                 guestType: "",
-  //                 description: "",
-  //               },
-  //             ],
-  //             package: "",
-  //             residentParkFee: [],
-  //             nonResidentParkFee: [],
-  //             otherFees: [],
-  //           },
-  //         ],
-  //         residentCommission: "",
-  //         nonResidentCommission: "",
-  //         activityFee: [],
-  //         extraFee: [
-  //           {
-  //             id: uuidv4(),
-  //             name: "",
-  //             price: "",
-  //             pricingType: "",
-  //             guestType: "",
-  //           },
-  //         ],
-  //       })
-  //     );
-  //     setState(items);
-  //   }
-  // }, [stays, setState, dynamicRoute]);
 
   type TotalTypes = {
     id: number;
@@ -353,24 +192,101 @@ export default function Calculate() {
     0
   );
 
-  function handleRemoveItemClick(id: number) {
-    const filterStayIds = stayIds?.split(",").filter((stayId) => {
-      return stayId !== String(id);
-    });
+  // function handleRemoveItemClick(id: number) {
+  //   const filterStayIds = stayIds?.split(",").filter((stayId) => {
+  //     return stayId !== String(id);
+  //   });
 
-    setStayIds(filterStayIds?.join(","));
+  //   setStayIds(filterStayIds?.join(","));
 
-    const storedItemIds = localStorage.getItem("stayIds");
-    localStorage.setItem(
-      "stayIds",
-      JSON.stringify(
-        JSON.parse(storedItemIds || "[]").filter(
-          (stayId: number) => stayId !== id
+  //   const storedItemIds = localStorage.getItem("stayIds");
+  //   localStorage.setItem(
+  //     "stayIds",
+  //     JSON.stringify(
+  //       JSON.parse(storedItemIds || "[]").filter(
+  //         (stayId: number) => stayId !== id
+  //       )
+  //     )
+  //   );
+  //   refetch();
+  // }
+
+  const [
+    discountRateModalOpened,
+    { open: openDiscountRateModalOpen, close: closeDiscountRateModalOpen },
+  ] = useDisclosure(false);
+
+  const [date, setDate] = useState<[Date | null, Date | null]>([null, null]);
+
+  const [applyForAllDates, setApplyForAllDates] = useState(false);
+
+  const [sliderValue, setSliderValue] = useState(5);
+
+  const [selectedTab, setSelectedTab] = useState<string | null>("");
+
+  useEffect(() => {
+    if (stays && stays.length > 0) {
+      setSelectedTab(stays[0].slug);
+    }
+  }, [stays]);
+
+  const { data: agents, refetch } = useQuery<AgentDiscountRateType[]>(
+    "agent-discount-rates",
+    () => getAgentDiscountRates(selectedTab, token),
+    { enabled: false }
+  );
+
+  useEffect(() => {
+    if (selectedTab) {
+      refetch();
+    }
+  }, [selectedTab]);
+
+  const addAgentRate = async () => {
+    if (selectedTab) {
+      await axios
+        .post(
+          `${process.env.NEXT_PUBLIC_baseURL}/stays/${selectedTab}/agent-discounts/`,
+          {
+            start_date: applyForAllDates
+              ? null
+              : format(date[0]!, "yyyy-MM-dd"),
+            end_date: applyForAllDates ? null : format(date[1]!, "yyyy-MM-dd"),
+            percentage: sliderValue,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         )
-      )
-    );
-    refetch();
-  }
+        .then(() => {
+          refetch();
+        });
+    }
+  };
+
+  const deleteAgentRate = async (id: number) => {
+    if (selectedTab) {
+      await axios
+        .delete(
+          `${process.env.NEXT_PUBLIC_baseURL}/stays/${selectedTab}/agent-discounts/${id}/`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+        .then(() => {
+          refetch();
+        });
+    }
+  };
+
+  const { mutateAsync: addAgentRateMutation, isLoading: addAgentRateLoading } =
+    useMutation(addAgentRate, {
+      onSuccess: () => {},
+    });
 
   return (
     <div>
@@ -385,6 +301,9 @@ export default function Calculate() {
               color="red"
               defaultValue={stays[0].slug}
               className="w-[64%] mb-4"
+              onTabChange={(value) => {
+                setSelectedTab(value);
+              }}
               keepMounted={false}
             >
               <ScrollArea>
@@ -428,10 +347,255 @@ export default function Calculate() {
               <div className="w-full mt-4 flex flex-col gap-4">
                 {stays?.map((stay, index) => (
                   <Tabs.Panel key={index} value={stay.slug} pt="xs">
-                    <CalculateStay stay={stay} index={index}></CalculateStay>
+                    <Alert
+                      icon={<IconAlertCircle size="1rem" />}
+                      title="No discount added"
+                      className="w-full mx-auto"
+                      color="yellow"
+                      // withCloseButton
+                      onClose={() => {}}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <Text>No discount rate has been added yet.</Text>
+                        <Button
+                          onClick={() => {
+                            openDiscountRateModalOpen();
+                          }}
+                          className="text-black"
+                          variant="white"
+                        >
+                          Add discount rate
+                        </Button>
+                      </div>
+                    </Alert>
+                    <CalculateStay
+                      agentRates={agents}
+                      stay={stay}
+                      index={index}
+                    ></CalculateStay>
                   </Tabs.Panel>
                 ))}
               </div>
+
+              <Modal
+                opened={discountRateModalOpened}
+                onClose={closeDiscountRateModalOpen}
+                title=""
+                classNames={{
+                  title: "text-xl font-semibold",
+                  close: "text-black hover:text-gray-700 hover:bg-gray-200",
+                }}
+                fullScreen
+                transitionProps={{ transition: "slide-up", duration: 200 }}
+                closeButtonProps={{
+                  style: {
+                    width: 30,
+                    height: 30,
+                  },
+                  iconSize: 20,
+                }}
+              >
+                <div className="flex gap-6 mt-5">
+                  <div className="w-[calc(100%-400px)]">
+                    <p>
+                      Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                      Molestiae at saepe porro, dolore ratione quas debitis
+                      nesciunt sapiente corrupti et fuga distinctio officia
+                      magnam, ipsa vitae labore possimus, repudiandae non.
+                      Numquam soluta ipsam, necessitatibus ullam laboriosam
+                      earum odio obcaecati magnam laudantium eveniet sit
+                      recusandae sequi nisi dolores. Perspiciatis, autem at
+                      provident adipisci reprehenderit cumque delectus eligendi!
+                      Dolorem vitae repudiandae facilis. Adipisci fugiat
+                      delectus quisquam provident blanditiis facilis nostrum
+                      veritatis commodi enim dignissimos. Similique qui aliquam
+                      architecto. Dolore voluptate mollitia placeat sapiente!
+                      Perferendis quo iusto vitae quaerat inventore labore.
+                      Nulla, eligendi? Iste dolorem ut velit praesentium totam
+                      in ratione quos odit unde eaque neque, earum quod magnam
+                      nostrum ducimus sit, deserunt impedit aliquid pariatur.
+                      Maxime similique cum minima aperiam sit explicabo?
+                      Accusamus obcaecati nobis aliquam minus ab exercitationem
+                      beatae mollitia ullam quisquam assumenda dolorem sint
+                      recusandae.
+                    </p>
+                  </div>
+
+                  <div className="w-[400px] border border-solid border-gray-200 px-4 bg-white rounded-xl py-4 shadow-round">
+                    <Text className="font-bold text-xl">Discount Rates</Text>
+                    <div className="flex justify-between mt-4">
+                      <div></div>
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-1">
+                          <div className="w-[10px] h-[10px] bg-green-500"></div>
+                          <Text size="sm">
+                            Default rate given to you by a property
+                          </Text>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          <div className="w-[10px] h-[10px] bg-blue-500"></div>
+                          <Text size="sm">
+                            Rates given to you on special occasions
+                          </Text>
+                        </div>
+                      </div>
+                    </div>
+                    {/* <p>
+                      Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                      Excepturi eveniet illo id delectus qui molestias dolore,
+                      dolor iusto cum! Laboriosam, id impedit? Exercitationem,
+                      corrupti quae? Libero asperiores excepturi doloribus
+                      corrupti?
+                    </p> */}
+
+                    <div className="flex flex-col gap-2 mt-4">
+                      {/* <div className="w-full px-3 flex justify-between items-center py-3 rounded-lg bg-green-100 border border-solid border-green-400">
+                        <div className="px-1 py-1 bg-green-300 w-fit">
+                          <Text className="text-sm">Standard rate</Text>
+                        </div>
+                        <Text className="text-sm">10%</Text>
+                      </div>
+
+                      <div className="w-full px-3 flex justify-between items-center py-3 rounded-lg bg-blue-100 border border-solid border-blue-400">
+                        <div className="px-1 py-1 bg-blue-300 w-fit">
+                          <Text className="text-sm">2nd sep - 14th oct</Text>
+                        </div>
+                        <Text className="text-sm">14%</Text>
+                      </div> */}
+
+                      {agents?.map((agent) => (
+                        <div className="w-full" key={agent.id}>
+                          {!agent.start_date && !agent.end_date && (
+                            <div className="w-full px-3 flex justify-between items-center py-3 rounded-lg bg-green-100 border border-solid border-green-400">
+                              <div className="px-1 py-1 bg-green-300 w-fit">
+                                <Text className="text-sm">Standard rate</Text>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                <Text className="text-sm">
+                                  {agent.percentage}%
+                                </Text>
+
+                                <ActionIcon
+                                  onClick={() => {
+                                    deleteAgentRate(agent.id);
+                                  }}
+                                  color="red"
+                                  size="sm"
+                                >
+                                  <IconTrash></IconTrash>
+                                </ActionIcon>
+                              </div>
+                            </div>
+                          )}
+
+                          {agent.start_date && agent.end_date && (
+                            <div className="w-full px-3 flex justify-between items-center py-3 rounded-lg bg-blue-100 border border-solid border-blue-400">
+                              <div className="px-1 py-1 bg-blue-300 w-fit">
+                                <Text className="text-sm">
+                                  {format(new Date(agent.start_date), "dd MMM")}{" "}
+                                  - {format(new Date(agent.end_date), "dd MMM")}
+                                </Text>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Text className="text-sm">
+                                  {agent.percentage}%
+                                </Text>
+
+                                <ActionIcon
+                                  onClick={() => {
+                                    deleteAgentRate(agent.id);
+                                  }}
+                                  color="red"
+                                  size="sm"
+                                >
+                                  <IconTrash></IconTrash>
+                                </ActionIcon>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+
+                      {agents?.length === 0 && (
+                        <Text className="text-sm my-4 text-center font-bold">
+                          No discount rates added yet
+                        </Text>
+                      )}
+                    </div>
+
+                    <div className="mt-6 py-2 border-t border-solid border-b-0 border-x-0 border-gray-100">
+                      <DatePickerInput
+                        type="range"
+                        value={date}
+                        onChange={(date) => {
+                          setDate(date);
+                        }}
+                        color="red"
+                        placeholder="Select date range"
+                        styles={{
+                          input: { paddingTop: 13, paddingBottom: 13 },
+                        }}
+                        labelProps={{ className: "font-semibold mb-1" }}
+                        rightSection={
+                          <IconSelector className="text-gray-500" />
+                        }
+                        className="w-full"
+                        minDate={new Date()}
+                        icon={<IconCalendar className="text-gray-500" />}
+                        numberOfColumns={2}
+                        autoSave="true"
+                        disabled={applyForAllDates}
+                        dropdownType="modal"
+                        modalProps={{
+                          closeOnClickOutside: true,
+                          overlayProps: {
+                            color: "#333",
+                            opacity: 0.4,
+                            zIndex: 201,
+                          },
+                        }}
+                      />
+
+                      <Checkbox
+                        label="Apply across all dates"
+                        className="mt-2"
+                        color="red"
+                        checked={applyForAllDates}
+                        onChange={(event) => {
+                          setApplyForAllDates(event.currentTarget.checked);
+                        }}
+                      ></Checkbox>
+
+                      <Slider
+                        value={sliderValue}
+                        className="mt-4"
+                        onChange={setSliderValue}
+                        color="red"
+                        // labelAlwaysOn
+                      />
+
+                      <div className="flex items-center justify-between">
+                        <div></div>
+
+                        <Button
+                          onClick={() => {
+                            addAgentRateMutation();
+                          }}
+                          loading={addAgentRateLoading}
+                          color="red"
+                          className="mt-4"
+                          variant="filled"
+                          disabled={!date[0] && !date[1] && !applyForAllDates}
+                        >
+                          Add rate
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Modal>
 
               <Modal
                 opened={opened}
@@ -709,7 +873,11 @@ export default function Calculate() {
                       value={item.slug}
                       className="h-[500px]"
                     >
-                      <Summary stays={stays} calculateStay={item}></Summary>
+                      <Summary
+                        agentRates={agents}
+                        stays={stays}
+                        calculateStay={item}
+                      ></Summary>
                     </Tabs.Panel>
                   ))}
                 </div>
@@ -772,37 +940,44 @@ export default function Calculate() {
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
+export const getServerSideProps: GetServerSideProps = async ({
+  req,
+  res,
+  query,
+}) => {
   const queryClient = new QueryClient();
 
-  const token = getToken(context);
+  const { Auth, API } = withSSRContext({ req });
+
+  const userIsAuthenticated = await Auth.currentAuthenticatedUser()
+    .then(() => true)
+    .catch(() => false);
 
   try {
-    const user = await queryClient.fetchQuery<UserTypes | null>("user", () =>
-      getUser(token)
-    );
-
-    if (user?.is_agent) {
-      return {
-        props: {
-          dehydratedState: dehydrate(queryClient),
-        },
-      };
-    } else {
+    if (!userIsAuthenticated) {
       return {
         redirect: {
-          destination: `/partner/signin/agent?redirect=/partner/agent/calculate`,
+          destination: `/signin?redirect=/partner/agent/calculate`,
           permanent: false,
         },
       };
     }
+    const userSession = await Auth.currentSession();
+    const token = userSession.getAccessToken().getJwtToken();
+
+    await queryClient.fetchQuery<UserTypes | null>("user", () =>
+      getUser(token)
+    );
+
+    return {
+      props: {
+        dehydratedState: dehydrate(queryClient),
+      },
+    };
   } catch (error) {
-    if (error instanceof AxiosError && error.response?.status === 401) {
+    if (error instanceof AxiosError && error.response?.status === 404) {
       return {
-        redirect: {
-          destination: `/partner/signin/agent?redirect=/partner/agent/calculate`,
-          permanent: false,
-        },
+        notFound: true,
       };
     }
     return {

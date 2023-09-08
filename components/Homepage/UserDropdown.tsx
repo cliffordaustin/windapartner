@@ -8,6 +8,7 @@ import {
   IconNews,
   IconInfoCircle,
 } from "@tabler/icons-react";
+import { Auth } from "aws-amplify";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useRouter } from "next/router";
@@ -118,17 +119,12 @@ export default function UserDropdown({
           {user && (
             <NavLink
               onClick={async () => {
-                await axios.post(
-                  `${process.env.NEXT_PUBLIC_baseURL}/rest-auth/logout/`,
-                  "",
-                  {
-                    headers: {
-                      Authorization: "Token " + Cookies.get("token"),
-                    },
-                  }
-                );
-                Cookies.remove("token");
-                router.reload();
+                try {
+                  await Auth.signOut();
+                  router.reload();
+                } catch (error) {
+                  // console.log(error);
+                }
               }}
               label="Logout"
               component="div"

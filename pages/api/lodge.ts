@@ -70,7 +70,7 @@ export const addRoom = async (
     },
     {
       headers: {
-        Authorization: "Token " + Cookies.get("token"),
+        Authorization: "Bearer " + Cookies.get("token"),
       },
     }
   );
@@ -93,7 +93,7 @@ export const deleteRoom = async ({
       `${process.env.NEXT_PUBLIC_baseURL}/room-types/${roomSlug}/delete-nonresident-availability/`,
       {
         headers: {
-          Authorization: "Token " + Cookies.get("token"),
+          Authorization: "Bearer " + Cookies.get("token"),
         },
       }
     );
@@ -106,7 +106,7 @@ export const deleteRoom = async ({
       `${process.env.NEXT_PUBLIC_baseURL}/room-types/${roomSlug}/delete-resident-availability/`,
       {
         headers: {
-          Authorization: "Token " + Cookies.get("token"),
+          Authorization: "Bearer " + Cookies.get("token"),
         },
       }
     );
@@ -115,7 +115,7 @@ export const deleteRoom = async ({
       `${process.env.NEXT_PUBLIC_baseURL}/stays/${staySlug}/room-types/${roomSlug}/`,
       {
         headers: {
-          Authorization: "Token " + Cookies.get("token"),
+          Authorization: "Bearer " + Cookies.get("token"),
         },
       }
     );

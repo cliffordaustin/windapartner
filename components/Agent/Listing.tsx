@@ -146,7 +146,7 @@ export default function Listing({ stay, withoutAccess = false }: ListingProps) {
         formData,
         {
           headers: {
-            Authorization: `Token ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -183,11 +183,11 @@ export default function Listing({ stay, withoutAccess = false }: ListingProps) {
                 src={image}
                 className={
                   isAdded && !withoutAccess
-                    ? "opacity-70 rounded-lg"
+                    ? "opacity-70 rounded-lg object-cover"
                     : stay.agent_access_request_made &&
                       !stay.agent_access_request_approved
-                    ? "opacity-40 rounded-lg"
-                    : " w-full rounded-lg"
+                    ? "opacity-40 rounded-lg object-cover"
+                    : " w-full rounded-lg object-cover"
                 }
                 alt={"Images of " + (stay.property_name || stay.name)}
                 sizes="100%"
@@ -235,9 +235,10 @@ export default function Listing({ stay, withoutAccess = false }: ListingProps) {
         <Button
           color="red"
           onClick={open}
-          className="w-[35px] p-0 absolute left-3 bottom-[70px] h-[35px] flex items-center justify-center rounded-full"
+          className="p-0 px-4 absolute left-3 bottom-[70px] h-[35px] flex items-center justify-center rounded-full"
         >
-          <IconPlus size="1.4rem" className="text-white" />
+          {/* <IconPlus size="1.4rem" className="text-white" /> */}
+          Request access
         </Button>
       ) : (
         ""

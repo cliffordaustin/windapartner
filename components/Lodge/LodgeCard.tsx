@@ -8,7 +8,6 @@ import {
   FileInput,
   Flex,
   Group,
-  Image,
   Loader,
   Modal,
   Text,
@@ -48,6 +47,7 @@ import { useForm } from "@mantine/form";
 import axios from "axios";
 import { useRouter } from "next/router";
 import StayImages from "./StayImages";
+import Image from "next/image";
 
 type LodgeProps = {
   stay: LodgeStay;
@@ -236,7 +236,7 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
       },
       {
         headers: {
-          Authorization: `Token ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       }
     );
@@ -249,7 +249,7 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
         formData,
         {
           headers: {
-            Authorization: `Token ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -286,7 +286,7 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
       },
       {
         headers: {
-          Authorization: `Token ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       }
     );
@@ -313,7 +313,7 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
       },
       {
         headers: {
-          Authorization: `Token ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       }
     );
@@ -356,7 +356,7 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
         formData,
         {
           headers: {
-            Authorization: `Token ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -366,14 +366,41 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
   };
 
   return (
-    <div className="w-full rounded-md relative shadow border">
-      <Carousel
-        classNames={classes}
-        className="rounded-md relative"
-        w={"100%"}
-        color="red"
-      >
-        {arrImages.map((image, index) => (
+    <div className="w-full shadow-md rounded-lg relative">
+      <div className="relative">
+        <Carousel w={"100%"} color="red" speed={20} classNames={classes}>
+          {arrImages.map((image, index) => (
+            <Carousel.Slide
+              className="bg-gray-200 rounded-lg blur-xl"
+              w={"100%"}
+              h={160}
+              key={index}
+            >
+              <Image
+                src={image}
+                className={" w-full rounded-lg object-cover"}
+                alt={"Images of " + stay.property_name}
+                sizes="100%"
+                priority
+                fill
+              />
+            </Carousel.Slide>
+          ))}
+        </Carousel>
+
+        <Tooltip
+          label={`
+      ${stay.number_of_agents} agent(s) have access to this property
+      `}
+          position="bottom"
+          withArrow
+        >
+          <div className="absolute bottom-4 w-[20px] h-[20px] cursor-pointer rounded-full flex items-center justify-center left-2.5 bg-gray-200">
+            <IconInfoCircle size={20} color="gray"></IconInfoCircle>
+          </div>
+        </Tooltip>
+      </div>
+      {/* {arrImages.map((image, index) => (
           <Carousel.Slide className="rounded-md" w={"100%"} key={index}>
             <Image
               w={"100%"}
@@ -384,20 +411,7 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
               alt={"Images of " + stay.property_name}
             />
           </Carousel.Slide>
-        ))}
-      </Carousel>
-
-      <Tooltip
-        label={`
-      ${stay.number_of_agents} agent(s) have access to this property
-      `}
-        position="bottom"
-        withArrow
-      >
-        <div className="absolute top-[95px] w-[20px] h-[20px] cursor-pointer rounded-full flex items-center justify-center bottom-2 left-1.5 bg-gray-200">
-          <IconInfoCircle size={20} color="gray"></IconInfoCircle>
-        </div>
-      </Tooltip>
+        ))} */}
 
       {/* <div className="absolute flex items-center top-2 left-2 rounded-full bg-white">
         <div

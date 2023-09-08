@@ -55,42 +55,32 @@ export default function App({ Component, pageProps }: AppProps) {
   const [queryClient] = useState(() => new QueryClient());
 
   return (
-    <Authenticator
-      socialProviders={["google", "facebook"]}
-      loginMechanisms={["email"]}
+    <GoogleOAuthProvider
+      clientId={process.env.NEXT_PUBLIC_GOOGLE_SOCAIL_AUTH_CLIENT_ID || ""}
     >
-      {({ signOut, user }) => (
-        <GoogleOAuthProvider
-          clientId={process.env.NEXT_PUBLIC_GOOGLE_SOCAIL_AUTH_CLIENT_ID || ""}
-        >
-          <Head>
-            <meta
-              name="viewport"
-              content="initial-scale=1.0, width=device-width"
-            />
-          </Head>
-          <MantineProvider
-            withGlobalStyles
-            withNormalizeCSS
-            theme={{
-              fontFamily: open_sans.style.fontFamily,
-            }}
-          >
-            <Notifications />
-            <QueryClientProvider client={queryClient}>
-              <Hydrate state={pageProps.dehydratedState}>
-                <AgentContextProvider>
-                  <CalculateContextProvider>
-                    <main className={open_sans.className}>
-                      <Component {...pageProps} signOut={signOut} />
-                    </main>
-                  </CalculateContextProvider>
-                </AgentContextProvider>
-              </Hydrate>
-            </QueryClientProvider>
-          </MantineProvider>
-        </GoogleOAuthProvider>
-      )}
-    </Authenticator>
+      <Head>
+        <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+      </Head>
+      <MantineProvider
+        withGlobalStyles
+        withNormalizeCSS
+        theme={{
+          fontFamily: open_sans.style.fontFamily,
+        }}
+      >
+        <Notifications />
+        <QueryClientProvider client={queryClient}>
+          <Hydrate state={pageProps.dehydratedState}>
+            <AgentContextProvider>
+              <CalculateContextProvider>
+                <main className={open_sans.className}>
+                  <Component {...pageProps} />
+                </main>
+              </CalculateContextProvider>
+            </AgentContextProvider>
+          </Hydrate>
+        </QueryClientProvider>
+      </MantineProvider>
+    </GoogleOAuthProvider>
   );
 }

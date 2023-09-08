@@ -29,7 +29,7 @@ function StayImages({ stay, image }: StayImagesProps) {
       `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/images/${index}/`,
       {
         headers: {
-          Authorization: `Token ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       }
     );

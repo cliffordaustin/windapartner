@@ -12,6 +12,7 @@ import {
   RoomType,
   Stay,
 } from "./types";
+import { AgentDiscountRateType } from "@/pages/api/stays";
 
 export function countRoomTypes(roomArray: Room[]): string[] {
   const roomCount: { [name: string]: number } = {};
@@ -111,6 +112,25 @@ function calculateExtraFees(
   return totalExtraFees;
 }
 
+function findPercentage(data: AgentDiscountRateType[], date: string): number {
+  const targetDate = new Date(date);
+
+  for (const item of data) {
+    const startDate = item.start_date ? new Date(item.start_date) : new Date();
+    const endDate = item.end_date ? new Date(item.end_date) : new Date();
+
+    if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+      if (targetDate >= startDate && targetDate <= endDate) {
+        return item.percentage;
+      }
+    } else if (!startDate.getTime() && !endDate.getTime()) {
+      return item.percentage;
+    }
+  }
+
+  return 0;
+}
+
 function residentPrice(
   roomName: string,
   guestName: string | undefined,
@@ -149,7 +169,8 @@ const nonResidentPrice = (
   guestName: string | undefined,
   packageName: string | undefined,
   numberOfGuests: number,
-  availabilities: RoomType[] | undefined
+  availabilities: RoomType[] | undefined,
+  agentRates: AgentDiscountRateType[] | undefined
 ) => {
   if (!availabilities) {
     return null; // Invalid input, return null
@@ -167,7 +188,14 @@ const nonResidentPrice = (
           if (
             guestAvailability.name?.toLowerCase() === guestName?.toLowerCase()
           ) {
-            totalPrice += guestAvailability.price;
+            let percentage = findPercentage(
+              agentRates || [],
+              roomAvailability.date
+            );
+            // convert to decimal
+            percentage = percentage / 100;
+            totalPrice +=
+              guestAvailability.price - guestAvailability.price * percentage;
             break;
           }
         }
@@ -311,7 +339,8 @@ function countResidentGuestTypesWithPrice(
 function countNonResidentGuestTypesWithPrice(
   nonResidentGuests: NonResidentGuests[],
   room: Room,
-  roomTypes: RoomType[] | undefined
+  roomTypes: RoomType[] | undefined,
+  agentRates: AgentDiscountRateType[] | undefined
 ): { name: string; price: number | null }[] {
   const counts: { [key: string]: number } = {};
 
@@ -331,7 +360,14 @@ function countNonResidentGuestTypesWithPrice(
     const guestType = name.slice(name.indexOf("(") + 1, name.lastIndexOf(")"));
 
     const price = guestType
-      ? nonResidentPrice(room.name, guestType, room.package, count, roomTypes)
+      ? nonResidentPrice(
+          room.name,
+          guestType,
+          room.package,
+          count,
+          roomTypes,
+          agentRates
+        )
       : 0;
 
     return { name: `${count} ${name}`, price };

@@ -42,7 +42,7 @@ function NonResidentPriceEdit({
         },
         {
           headers: {
-            Authorization: `Token ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );

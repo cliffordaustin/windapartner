@@ -7,6 +7,7 @@ import {
   Loader,
   Modal,
   NumberInput,
+  ScrollArea,
   Select,
   Text,
   TextInput,
@@ -21,15 +22,15 @@ import { useForm } from "@mantine/form";
 
 type ActivityEditProps = {
   stay: LodgeStay | undefined;
+  token: string;
 };
 
-function ActivityEdit({ stay }: ActivityEditProps) {
+function ActivityEdit({ stay, token }: ActivityEditProps) {
   const { data: activities, isLoading } = useQuery(
     `activities-${stay?.slug}`,
-    () => getStayActivities(stay)
+    () => getStayActivities(stay, token),
+    { enabled: !!token }
   );
-
-  const token = Cookies.get("token");
 
   const queryClient = useQueryClient();
 
@@ -69,7 +70,7 @@ function ActivityEdit({ stay }: ActivityEditProps) {
         },
         {
           headers: {
-            Authorization: `Token ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -87,129 +88,134 @@ function ActivityEdit({ stay }: ActivityEditProps) {
   );
 
   return (
-    <div className="border border-solid w-full border-gray-200 rounded-xl p-5">
-      <Flex justify="space-between" align="center">
-        <Text className="font-semibold" size="lg">
-          Activities/Extras
-        </Text>
-
-        <Button
-          onClick={(e) => {
-            e.stopPropagation();
-            openActivity();
-          }}
-          color="red"
-          size="xs"
-        >
-          Add Activity
-        </Button>
-      </Flex>
-
-      <Modal
-        opened={openActivityModal}
-        onClose={closeActivity}
-        title={"Activities/Extras"}
-        classNames={{
-          title: "text-lg font-bold",
-          close: "text-black hover:text-gray-700 hover:bg-gray-200",
-          header: "bg-gray-100",
-        }}
-        transitionProps={{ transition: "fade", duration: 200 }}
-        closeButtonProps={{
-          style: {
-            width: 30,
-            height: 30,
-          },
-          iconSize: 20,
-        }}
-      >
-        <form
-          className="flex flex-col gap-1"
-          onSubmit={activityForm.onSubmit((values) => addActivity(values))}
-        >
-          <TextInput
-            label="Activity name"
-            placeholder="Enter activity name"
-            value={activityForm.values.name}
-            onChange={(event) =>
-              activityForm.setFieldValue("name", event.currentTarget.value)
-            }
-            required
-          />
-
-          <TextInput
-            label="Activity description"
-            placeholder="Enter activity description"
-            value={activityForm.values.description}
-            onChange={(event) =>
-              activityForm.setFieldValue(
-                "description",
-                event.currentTarget.value
-              )
-            }
-          />
-
-          <Select
-            label="Select the pricing type"
-            placeholder="Select the pricing type"
-            value={activityOption}
-            onChange={(value) => setActivityOption(value)}
-            data={[
-              { label: "Per Person", value: "PER PERSON" },
-              { label: "Per Person Per Night", value: "PER PERSON PER NIGHT" },
-              { label: "Whole Group", value: "WHOLE GROUP" },
-            ]}
-            required
-          />
-
-          <NumberInput
-            label="Non-resident Price($)"
-            placeholder="Enter non-resident price"
-            value={activityForm.values.nonResidentPrice}
-            onChange={(value) =>
-              activityForm.setFieldValue("nonResidentPrice", value)
-            }
-          />
-
-          <NumberInput
-            label="Resident Price(KES)"
-            placeholder="Enter resident price"
-            value={activityForm.values.residentPrice}
-            onChange={(value) =>
-              activityForm.setFieldValue("residentPrice", value)
-            }
-          />
-
-          <Flex gap={8} justify="right" mt={6}>
-            <Button onClick={closeActivity} variant="default">
-              Close
-            </Button>
-            <Button disabled={activityLoading} type="submit">
-              Submit{" "}
-              {activityLoading && (
-                <Loader size="xs" color="gray" ml={5}></Loader>
-              )}
-            </Button>
-          </Flex>
-        </form>
-      </Modal>
-
-      <Container className="mt-5 p-0 w-full">
-        {activities && activities.length > 0 && (
-          <div className="flex flex-col gap-3">
-            {activities.map((fee, index) => (
-              <Activity stay={stay} fee={fee} key={index} />
-            ))}
-          </div>
-        )}
-
-        {activities && activities.length === 0 && (
-          <Text className="text-center font-semibold" size="sm">
-            No activities available
+    <ScrollArea className="w-full h-[85vh] px-5 pt-5">
+      <div className="">
+        <Flex justify="space-between" align="center">
+          <Text className="font-semibold" size="lg">
+            Activities/Extras
           </Text>
-        )}
-      </Container>
-    </div>
+
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+              openActivity();
+            }}
+            color="red"
+            size="xs"
+          >
+            Add Activity
+          </Button>
+        </Flex>
+
+        <Modal
+          opened={openActivityModal}
+          onClose={closeActivity}
+          title={"Activities/Extras"}
+          classNames={{
+            title: "text-lg font-bold",
+            close: "text-black hover:text-gray-700 hover:bg-gray-200",
+            header: "bg-gray-100",
+          }}
+          transitionProps={{ transition: "fade", duration: 200 }}
+          closeButtonProps={{
+            style: {
+              width: 30,
+              height: 30,
+            },
+            iconSize: 20,
+          }}
+        >
+          <form
+            className="flex flex-col gap-1"
+            onSubmit={activityForm.onSubmit((values) => addActivity(values))}
+          >
+            <TextInput
+              label="Activity name"
+              placeholder="Enter activity name"
+              value={activityForm.values.name}
+              onChange={(event) =>
+                activityForm.setFieldValue("name", event.currentTarget.value)
+              }
+              required
+            />
+
+            <TextInput
+              label="Activity description"
+              placeholder="Enter activity description"
+              value={activityForm.values.description}
+              onChange={(event) =>
+                activityForm.setFieldValue(
+                  "description",
+                  event.currentTarget.value
+                )
+              }
+            />
+
+            <Select
+              label="Select the pricing type"
+              placeholder="Select the pricing type"
+              value={activityOption}
+              onChange={(value) => setActivityOption(value)}
+              data={[
+                { label: "Per Person", value: "PER PERSON" },
+                {
+                  label: "Per Person Per Night",
+                  value: "PER PERSON PER NIGHT",
+                },
+                { label: "Whole Group", value: "WHOLE GROUP" },
+              ]}
+              required
+            />
+
+            <NumberInput
+              label="Non-resident Price($)"
+              placeholder="Enter non-resident price"
+              value={activityForm.values.nonResidentPrice}
+              onChange={(value) =>
+                activityForm.setFieldValue("nonResidentPrice", value)
+              }
+            />
+
+            <NumberInput
+              label="Resident Price(KES)"
+              placeholder="Enter resident price"
+              value={activityForm.values.residentPrice}
+              onChange={(value) =>
+                activityForm.setFieldValue("residentPrice", value)
+              }
+            />
+
+            <Flex gap={8} justify="right" mt={6}>
+              <Button onClick={closeActivity} variant="default">
+                Close
+              </Button>
+              <Button disabled={activityLoading} type="submit">
+                Submit{" "}
+                {activityLoading && (
+                  <Loader size="xs" color="gray" ml={5}></Loader>
+                )}
+              </Button>
+            </Flex>
+          </form>
+        </Modal>
+
+        <Container className="mt-5 p-0 w-full">
+          {activities && activities.length > 0 && (
+            <div className="flex flex-col gap-3">
+              {activities.map((fee, index) => (
+                <Activity stay={stay} fee={fee} key={index} />
+              ))}
+            </div>
+          )}
+
+          {activities && activities.length === 0 && (
+            <Text className="text-center font-semibold" size="sm">
+              No activities available
+            </Text>
+          )}
+        </Container>
+      </div>
+    </ScrollArea>
   );
 }
 

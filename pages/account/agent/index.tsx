@@ -34,8 +34,12 @@ const getCharacterValidationError = (str: string) => {
 const AboutUs = () => {
   const token = Cookies.get("token");
 
-  const { data: user } = useQuery<UserTypes | null>("user-account", () =>
-    getUser(token)
+  const { data: user } = useQuery<UserTypes | null>(
+    "user-account",
+    () => getUser(token),
+    {
+      enabled: !!token,
+    }
   );
 
   const fullName = (user?.first_name || "") + " " + (user?.last_name || "");
@@ -67,7 +71,7 @@ const AboutUs = () => {
         formData,
         {
           headers: {
-            Authorization: `Token ${Cookies.get("token")}`,
+            Authorization: `Bearer ${Cookies.get("token")}`,
           },
         }
       );
@@ -111,7 +115,7 @@ const AboutUs = () => {
         },
         {
           headers: {
-            Authorization: "Token " + Cookies.get("token"),
+            Authorization: "Bearer " + Cookies.get("token"),
           },
         }
       )

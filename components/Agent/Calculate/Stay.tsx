@@ -31,13 +31,15 @@ import { v4 as uuidv4 } from "uuid";
 import Activity from "./Activity";
 import { Mixpanel } from "@/utils/mixpanelconfig";
 import { format } from "date-fns";
+import { AgentDiscountRateType } from "@/pages/api/stays";
 
 type StayProps = {
   stay: AgentStay;
   index: number;
+  agentRates: AgentDiscountRateType[] | undefined;
 };
 
-export function Stay({ stay, index }: StayProps) {
+export function Stay({ stay, index, agentRates }: StayProps) {
   const { state, setState } = useContext(Context);
   const [opened, { toggle }] = useDisclosure(index === 0);
 

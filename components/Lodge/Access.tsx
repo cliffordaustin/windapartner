@@ -97,7 +97,7 @@ function Access({ stay }: AccessPropTypes) {
           },
           {
             headers: {
-              Authorization: `Token ${token}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -126,7 +126,7 @@ function Access({ stay }: AccessPropTypes) {
         },
         {
           headers: {
-            Authorization: `Token ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -149,7 +149,7 @@ function Access({ stay }: AccessPropTypes) {
         },
         {
           headers: {
-            Authorization: `Token ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -162,7 +162,7 @@ function Access({ stay }: AccessPropTypes) {
         `${process.env.NEXT_PUBLIC_baseURL}/agent-access/${id}/`,
         {
           headers: {
-            Authorization: `Token ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );

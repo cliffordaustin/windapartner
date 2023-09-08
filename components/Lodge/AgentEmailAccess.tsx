@@ -1,14 +1,16 @@
 import {
+  ActionIcon,
   Avatar,
   Button,
   Flex,
   Group,
   Modal,
+  ScrollArea,
   Text,
   TextInput,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconShare2, IconX } from "@tabler/icons-react";
+import { IconPlus, IconShare2, IconX } from "@tabler/icons-react";
 import React from "react";
 import Share from "../ui/Share";
 import { LodgeStay } from "@/utils/types";
@@ -26,13 +28,14 @@ import {
   getStayAgentsByEmailUser,
   getStayAgentsNotVerified,
 } from "@/pages/api/stays";
+import { WithContext as ReactTags, Tag } from "react-tag-input";
 
 type AgentEmailAccessPropTypes = {
   stay: LodgeStay | undefined;
+  token: string;
 };
 
-function AgentEmailAccess({ stay }: AgentEmailAccessPropTypes) {
-  const token = Cookies.get("token");
+function AgentEmailAccess({ stay, token }: AgentEmailAccessPropTypes) {
   const queryClient = useQueryClient();
 
   const { data: agentVerified, isLoading: isAgentVerifiedLoading } = useQuery<
@@ -66,7 +69,14 @@ function AgentEmailAccess({ stay }: AgentEmailAccessPropTypes) {
     },
   });
 
-  const [emails, setEmails] = React.useState<string[]>([]);
+  const KeyCodes = {
+    comma: 188,
+    enter: 13,
+  };
+
+  const delimiters = [KeyCodes.comma, KeyCodes.enter];
+
+  const [emails, setEmails] = React.useState<Tag[]>([]);
 
   const grantAccess = async () => {
     for (const email of emails) {
@@ -74,12 +84,12 @@ function AgentEmailAccess({ stay }: AgentEmailAccessPropTypes) {
         await axios.patch(
           `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/update-agents-email/`,
           {
-            email,
-            encoded_email: Buffer.from(email).toString("base64"),
+            email: email.text,
+            encoded_email: Buffer.from(email.text).toString("base64"),
           },
           {
             headers: {
-              Authorization: `Token ${token}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -123,7 +133,7 @@ function AgentEmailAccess({ stay }: AgentEmailAccessPropTypes) {
         },
         {
           headers: {
-            Authorization: `Token ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -145,7 +155,7 @@ function AgentEmailAccess({ stay }: AgentEmailAccessPropTypes) {
       `${process.env.NEXT_PUBLIC_baseURL}/agent-access-by-email/${id}/`,
       {
         headers: {
-          Authorization: `Token ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       }
     );
@@ -169,270 +179,315 @@ function AgentEmailAccess({ stay }: AgentEmailAccessPropTypes) {
     },
   });
 
+  const handleDelete = (i: number) => {
+    setEmails(emails.filter((tag, index) => index !== i));
+  };
+
+  const handleAddition = (tag: Tag) => {
+    setEmails([...emails, tag]);
+  };
+
+  const handleDrag = (tag: Tag, currPos: number, newPos: number) => {
+    const newTags = emails.slice();
+
+    newTags.splice(currPos, 1);
+    newTags.splice(newPos, 0, tag);
+
+    // re-render
+    setEmails(newTags);
+  };
+
   const totalAgents = (notUserAgentsByEmail?.length || 0) + lenApprovedAgents;
   return (
-    <div className="border border-solid w-full border-gray-200 rounded-xl px-5 py-3">
-      <div className="flex items-center gap-10 justify-between">
-        <Flex gap={3} direction="column">
-          <Text className="font-semibold" size="lg">
-            Agent Access
-          </Text>
-          <Text size="sm" color="gray">
-            Grant access to your contracted agents to view property prices.
-          </Text>
-        </Flex>
+    <ScrollArea className="w-full h-[85vh] rounded-xl px-5 pt-5">
+      <div className="">
+        <div className="flex items-center gap-10 justify-between">
+          <Flex gap={3} direction="column">
+            <Text size="sm" className="font-bold" color="gray">
+              Manage agents access
+            </Text>
+            <Text className="font-semibold" size="lg">
+              Agent Access
+            </Text>
+          </Flex>
 
-        <div className="flex items-center gap-2">
-          {totalAgents > 0 && (
-            <Button color="red" size="sm" onClick={openEmailAccess}>
-              Grant access
-            </Button>
-          )}
-          <Button
-            color="red"
-            size="sm"
-            leftIcon={<IconShare2></IconShare2>}
-            onClick={open}
-          >
-            Share
-          </Button>
-        </div>
-      </div>
-
-      {totalAgents === 0 && (
-        <div className="flex mt-2 flex-col gap-4 items-center">
-          <Text className="font-semibold" size="md">
-            No agents have access to this property.
-          </Text>
-          <Button color="red" size="sm" onClick={openEmailAccess}>
-            Grant access
-          </Button>
-        </div>
-      )}
-
-      {totalAgents > 0 && (
-        <div className="mt-4 flex flex-col gap-3">
-          <div className="flex flex-col gap-1">
-            {notUserAgentsByEmail && notUserAgentsByEmail?.length > 0 && (
-              <Text className="font-semibold" size="md">
-                Invitation pending
-              </Text>
-            )}
-
-            <Flex gap={5} direction="column">
-              {notUserAgentsByEmail?.map((agent) => (
-                <Flex justify="space-between" key={agent.id} align="center">
-                  <Group key={agent.id} noWrap>
-                    <div>
-                      <Text size="sm" color="dimmed">
-                        {agent.email}
-                      </Text>
-                    </div>
-                  </Group>
-
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedRemoveNotUserAgentId(agent.id);
-                      removeNotUserAgentAccessMutation(agent.id);
-                    }}
-                    color="red"
-                    variant="subtle"
-                    className="px-1"
-                    size="xs"
-                    loading={
-                      removeNotUserAgentAccessLoading &&
-                      selectedRemoveNotUserAgentId === agent.id
-                    }
-                  >
-                    cancel invite
-                  </Button>
-                </Flex>
-              ))}
-            </Flex>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            {lenApprovedAgents > 0 && (
-              <Text className="font-semibold" size="md">
-                Approved agents
-              </Text>
-            )}
-
-            <Flex gap={5} direction="column">
-              {agentVerified?.map((agent) => (
-                <Flex justify="space-between" key={agent.id} align="center">
-                  <Group key={agent.id} noWrap>
-                    <Avatar radius="xl" src={agent.user.profile_pic} />
-
-                    <div>
-                      <Text>
-                        {(agent.user.first_name || "") +
-                          " " +
-                          (agent.user.last_name || "")}
-                      </Text>
-                      <Text size="xs" color="dimmed">
-                        {agent.user.email}
-                      </Text>
-                    </div>
-                  </Group>
-
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedRemoveAgentId(agent.id);
-                      removeAccessMutation(agent.id);
-                    }}
-                    color="red"
-                    variant="subtle"
-                    className="px-1"
-                    size="xs"
-                    loading={
-                      removeAccessLoading && selectedRemoveAgentId === agent.id
-                    }
-                  >
-                    Remove access
-                  </Button>
-                </Flex>
-              ))}
-
-              {userAgentsByEmail?.map((agent) => (
-                <Flex justify="space-between" key={agent.id} align="center">
-                  <Group key={agent.id} noWrap>
-                    <Avatar radius="xl" src={agent.user.profile_pic} />
-
-                    <div>
-                      <Text>
-                        {(agent.user.first_name || "") +
-                          " " +
-                          (agent.user.last_name || "")}
-                      </Text>
-                      <Text size="xs" color="dimmed">
-                        {agent.user.email}
-                      </Text>
-                    </div>
-                  </Group>
-
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedRemoveUserAgentId(agent.id);
-                      removeUserAgentAccessMutation(agent.id);
-                    }}
-                    color="red"
-                    variant="subtle"
-                    className="px-1"
-                    size="xs"
-                    loading={
-                      removeUserAgentAccessLoading &&
-                      selectedRemoveUserAgentId === agent.id
-                    }
-                  >
-                    Remove access
-                  </Button>
-                </Flex>
-              ))}
-            </Flex>
-          </div>
-        </div>
-      )}
-
-      <Modal
-        opened={openedEmailAccess}
-        onClose={closeEmailAccess}
-        size="lg"
-        title="Grant Agent Access"
-        // overlayProps={{
-        //   opacity: 0.55,
-        //   blur: 3,
-        // }}
-        classNames={{
-          title: "text-lg font-bold",
-          close: "text-black hover:text-gray-700 hover:bg-gray-200",
-          body: "max-h-[500px] overflow-y-scroll",
-        }}
-        // withinPortal={false}
-      >
-        <div className="mt-2">
-          <div className="flex gap-2 flex-wrap items-center">
-            {emails.map((email, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-1 bg-gray-100 rounded-full py-1 px-2"
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              <Button
+                color="red"
+                size="sm"
+                leftIcon={<IconPlus></IconPlus>}
+                onClick={openEmailAccess}
+                className="rounded-full"
               >
-                <Text size="sm">{email}</Text>
+                Add agent
+              </Button>
 
-                <IconX
-                  onClick={() => {
-                    setEmails(emails.filter((_, i) => i !== index));
-                  }}
-                  size={15}
-                  className="cursor-pointer"
-                ></IconX>
-              </div>
-            ))}
+              <ActionIcon
+                className="rounded-full hover:bg-gray-100"
+                size={35}
+                onClick={open}
+                color="gray"
+              >
+                <IconShare2 size={25}></IconShare2>
+              </ActionIcon>
+            </div>
+          </div>
+        </div>
+
+        {totalAgents === 0 && (
+          <div className="flex mt-6 flex-col gap-4 items-center">
+            <Text className="font-semibold" size="md">
+              No agents have access to this property.
+            </Text>
+            {/* <Button color="red" size="sm" onClick={openEmailAccess}>
+              Grant access
+            </Button> */}
+          </div>
+        )}
+
+        {totalAgents > 0 && (
+          <div className="mt-4 flex flex-col gap-3">
+            <div className="flex flex-col gap-1">
+              {/* {notUserAgentsByEmail && notUserAgentsByEmail?.length > 0 && (
+                <Text className="font-semibold" size="md">
+                  Invitation pending
+                </Text>
+              )} */}
+
+              <Flex gap={5} direction="column">
+                {notUserAgentsByEmail?.map((agent) => (
+                  <Flex justify="space-between" key={agent.id} align="center">
+                    <Group key={agent.id} noWrap>
+                      <div>
+                        <Text size="sm" color="dimmed">
+                          {agent.email}
+                        </Text>
+                      </div>
+                    </Group>
+
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedRemoveNotUserAgentId(agent.id);
+                        removeNotUserAgentAccessMutation(agent.id);
+                      }}
+                      color="red"
+                      variant="subtle"
+                      className="px-1"
+                      size="xs"
+                      loading={
+                        removeNotUserAgentAccessLoading &&
+                        selectedRemoveNotUserAgentId === agent.id
+                      }
+                    >
+                      cancel invite
+                    </Button>
+                  </Flex>
+                ))}
+              </Flex>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              {/* {lenApprovedAgents > 0 && (
+                <Text className="font-semibold" size="md">
+                  Approved agents
+                </Text>
+              )} */}
+
+              <Flex gap={5} direction="column">
+                {agentVerified?.map((agent) => (
+                  <Flex justify="space-between" key={agent.id} align="center">
+                    <Group key={agent.id} noWrap>
+                      <Avatar radius="xl" src={agent.user.profile_pic} />
+
+                      <div>
+                        <Text>
+                          {(agent.user.first_name || "") +
+                            " " +
+                            (agent.user.last_name || "")}
+                        </Text>
+                        <Text size="xs" color="dimmed">
+                          {agent.user.email}
+                        </Text>
+                      </div>
+                    </Group>
+
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedRemoveAgentId(agent.id);
+                        removeAccessMutation(agent.id);
+                      }}
+                      color="red"
+                      variant="subtle"
+                      className="px-1"
+                      size="xs"
+                      loading={
+                        removeAccessLoading &&
+                        selectedRemoveAgentId === agent.id
+                      }
+                    >
+                      Remove access
+                    </Button>
+                  </Flex>
+                ))}
+
+                {userAgentsByEmail?.map((agent) => (
+                  <Flex justify="space-between" key={agent.id} align="center">
+                    <Group key={agent.id} noWrap>
+                      <Avatar radius="xl" src={agent.user.profile_pic} />
+
+                      <div>
+                        <Text>
+                          {(agent.user.first_name || "") +
+                            " " +
+                            (agent.user.last_name || "")}
+                        </Text>
+                        <Text size="xs" color="dimmed">
+                          {agent.user.email}
+                        </Text>
+                      </div>
+                    </Group>
+
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedRemoveUserAgentId(agent.id);
+                        removeUserAgentAccessMutation(agent.id);
+                      }}
+                      color="red"
+                      variant="subtle"
+                      className="px-1"
+                      size="xs"
+                      loading={
+                        removeUserAgentAccessLoading &&
+                        selectedRemoveUserAgentId === agent.id
+                      }
+                    >
+                      Remove access
+                    </Button>
+                  </Flex>
+                ))}
+              </Flex>
+            </div>
+          </div>
+        )}
+
+        <Modal
+          opened={openedEmailAccess}
+          onClose={closeEmailAccess}
+          size="lg"
+          classNames={{
+            title: "text-lg font-bold",
+            close:
+              "text-black hover:text-gray-700 w-[40px] h-[30px] hover:bg-gray-100",
+            body: "max-h-[500px] overflow-y-scroll px-10 pb-8 w-full",
+            content: "rounded-3xl",
+          }}
+          centered
+        >
+          <div className="">
+            <Text className="font-bold text-xl">Add agents</Text>
+            <div className="flex gap-2 flex-wrap mt-2 items-center">
+              {emails.map((email, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-1 bg-gray-100 rounded-full py-1 px-2"
+                >
+                  <Text size="sm">{email.text}</Text>
+
+                  <IconX
+                    onClick={() => {
+                      setEmails(emails.filter((_, i) => i !== index));
+                    }}
+                    size={15}
+                    className="cursor-pointer"
+                  ></IconX>
+                </div>
+              ))}
+            </div>
+            <form
+              onSubmit={form.onSubmit((values) => {
+                setEmails([
+                  ...emails,
+                  {
+                    id: values.email,
+                    text: values.email,
+                  },
+                ]);
+                form.setFieldValue("email", "");
+              })}
+              className="flex items-center mt-2 mb-2 gap-2"
+            >
+              {/* <ReactTags
+                tags={emails}
+                delimiters={delimiters}
+                handleDelete={handleDelete}
+                handleAddition={handleAddition}
+                handleDrag={handleDrag}
+                inputFieldPosition="bottom"
+                autocomplete
+              /> */}
+              <TextInput
+                placeholder="Enter as many emails as you want..."
+                type="email"
+                w="100%"
+                size="md"
+                value={form.values.email}
+                onChange={(event) =>
+                  form.setFieldValue("email", event.currentTarget.value)
+                }
+              />
+
+              {/* <Button
+                className="mt-[22px] w-[130px]"
+                color="red"
+                type="submit"
+                size="sm"
+              >
+                Add email
+              </Button> */}
+            </form>
+
+            <Text size="sm" color="gray">
+              *If an agent is already registered with us, they will
+              automatically be granted access to this property prices without
+              requiring an email to be sent to them.
+            </Text>
           </div>
 
-          <form
-            onSubmit={form.onSubmit((values) => {
-              setEmails([...emails, form.values.email]);
-              form.setFieldValue("email", "");
-            })}
-            className="flex items-center mt-2 mb-2 gap-2"
-          >
-            <TextInput
-              placeholder="Email address"
-              type="email"
-              w="100%"
-              required
-              value={form.values.email}
-              label="Agent's email"
-              onChange={(event) =>
-                form.setFieldValue("email", event.currentTarget.value)
-              }
-            />
-
+          <div className="flex justify-between mt-[22px] items-center">
             <Button
-              className="mt-[22px] w-[130px]"
-              color="red"
-              type="submit"
+              onClick={() => {
+                closeEmailAccess();
+              }}
+              variant="light"
+              color="gray"
               size="sm"
             >
-              Add email
+              Close
             </Button>
-          </form>
 
-          <Text size="sm" color="gray">
-            *If an agent is already registered with us, they will automatically
-            be granted access to this property prices without requiring an email
-            to be sent to them.
-          </Text>
-        </div>
-
-        <div className="flex justify-between items-center">
-          <div></div>
-
-          {emails.length > 0 && (
             <Button
               onClick={() => {
                 grantAccessMutation();
               }}
               loading={grantAccessLoading}
-              className="mt-[22px]"
               color="red"
               type="submit"
               size="sm"
             >
-              Grant access to {emails.length} agents
+              Submit
             </Button>
-          )}
-        </div>
-      </Modal>
+          </div>
+        </Modal>
 
-      <Modal opened={opened} onClose={close} centered>
-        <Share property={stay?.property_name || ""}></Share>
-      </Modal>
-    </div>
+        <Modal opened={opened} onClose={close} centered>
+          <Share property={stay?.property_name || ""}></Share>
+        </Modal>
+      </div>
+    </ScrollArea>
   );
 }
 

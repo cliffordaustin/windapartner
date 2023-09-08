@@ -67,7 +67,7 @@ const AboutUs = () => {
         formData,
         {
           headers: {
-            Authorization: `Token ${Cookies.get("token")}`,
+            Authorization: `Bearer ${Cookies.get("token")}`,
           },
         }
       );
@@ -111,7 +111,7 @@ const AboutUs = () => {
         },
         {
           headers: {
-            Authorization: "Token " + Cookies.get("token"),
+            Authorization: "Bearer " + Cookies.get("token"),
           },
         }
       )

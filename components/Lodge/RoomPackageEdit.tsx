@@ -94,7 +94,7 @@ function RoomPackageEdit({ index, room, stay }: RoomPackageEditProps) {
           },
           {
             headers: {
-              Authorization: `Token ${token}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -109,7 +109,7 @@ function RoomPackageEdit({ index, room, stay }: RoomPackageEditProps) {
           `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/room-detail-types/${packageItem.id}/`,
           {
             headers: {
-              Authorization: `Token ${token}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -123,7 +123,7 @@ function RoomPackageEdit({ index, room, stay }: RoomPackageEditProps) {
         `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/room-detail-types/${id}/`,
         {
           headers: {
-            Authorization: `Token ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );

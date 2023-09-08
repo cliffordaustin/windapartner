@@ -74,7 +74,7 @@ function ResidentBulkEdit({
             newPrice ? objectWithPrice : objectWithoutPrice,
             {
               headers: {
-                Authorization: `Token ${token}`,
+                Authorization: `Bearer ${token}`,
               },
             }
           );
@@ -109,7 +109,7 @@ function ResidentBulkEdit({
                 newPrice ? objectWithPrice : objectWithoutPrice,
                 {
                   headers: {
-                    Authorization: `Token ${token}`,
+                    Authorization: `Bearer ${token}`,
                   },
                 }
               );

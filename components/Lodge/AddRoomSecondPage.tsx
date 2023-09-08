@@ -250,7 +250,7 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
             guest,
             {
               headers: {
-                Authorization: "Token " + Cookies.get("token"),
+                Authorization: "Bearer " + Cookies.get("token"),
               },
             }
           );
@@ -262,7 +262,7 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
             guest,
             {
               headers: {
-                Authorization: "Token " + Cookies.get("token"),
+                Authorization: "Bearer " + Cookies.get("token"),
               },
             }
           );
@@ -432,7 +432,7 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
               guest,
               {
                 headers: {
-                  Authorization: "Token " + Cookies.get("token"),
+                  Authorization: "Bearer " + Cookies.get("token"),
                 },
               }
             );
@@ -444,7 +444,7 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
               guest,
               {
                 headers: {
-                  Authorization: "Token " + Cookies.get("token"),
+                  Authorization: "Bearer " + Cookies.get("token"),
                 },
               }
             );

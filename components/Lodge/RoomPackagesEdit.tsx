@@ -6,6 +6,7 @@ import {
   Flex,
   Loader,
   Modal,
+  ScrollArea,
   Text,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
@@ -24,6 +25,7 @@ import { ContextProvider } from "@/context/LodgeDetailPage";
 type RoomPackagesEditProps = {
   date: [Date | null, Date | null];
   stay: LodgeStay | undefined;
+  token: string;
 };
 
 type GuestType = { name: string; description?: string };
@@ -44,7 +46,7 @@ type UniqueRoomsType = {
   infant_capacity: number;
 };
 
-function RoomPackagesEdit({ date, stay }: RoomPackagesEditProps) {
+function RoomPackagesEdit({ date, stay, token }: RoomPackagesEditProps) {
   const queryStr = stay ? stay.slug : "room-type";
 
   const { data: roomTypeList, isLoading: roomTypeListLoading } = useQuery(
@@ -53,9 +55,10 @@ function RoomPackagesEdit({ date, stay }: RoomPackagesEditProps) {
       getRoomTypes(
         stay,
         format(date[0] || new Date(), "yyyy-MM-dd"),
-        format(date[1] || new Date(), "yyyy-MM-dd")
+        format(date[1] || new Date(), "yyyy-MM-dd"),
+        token
       ),
-    { enabled: date[0] && date[1] ? true : false }
+    { enabled: date[0] && date[1] && token ? true : false }
   );
 
   const getGuestTypes = useCallback(
@@ -145,133 +148,137 @@ function RoomPackagesEdit({ date, stay }: RoomPackagesEditProps) {
   const [currentSlideIndex, setCurrentSlideIndex] = React.useState(0);
 
   return (
-    <div className="border border-solid w-full border-gray-200 rounded-xl p-5">
-      <Flex justify="space-between" align="center">
-        <Text className="font-semibold" size="lg">
-          Rooms and Packages
-        </Text>
+    <ScrollArea className="w-full h-[85vh] rounded-xl px-5 pt-5">
+      <div className="">
+        <Flex justify="space-between" align="center">
+          <Text className="font-semibold" size="lg">
+            Rooms and Packages
+          </Text>
 
-        <Button
-          onClick={(e) => {
-            e.stopPropagation();
-            openAddRoomModal();
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+              openAddRoomModal();
 
-            // addPackage();
-          }}
-          color="red"
-          size="xs"
-        >
-          Add Room
-        </Button>
-      </Flex>
+              // addPackage();
+            }}
+            color="red"
+            size="xs"
+          >
+            Add Room
+          </Button>
+        </Flex>
 
-      {/* {date[0] && date[1] && (
+        {/* {date[0] && date[1] && (
         <Text className="text-gray-600" size="sm">
           Data being shown is based on {format(date[0] as Date, "dd MMM yyyy")}{" "}
           to {format(new Date(date[1]) as Date, "dd MMM yyyy")}
         </Text>
       )} */}
 
-      {!date[0] ||
-        (!date[1] && (
-          <Text className="text-gray-600" size="sm">
-            Please select a date range to view the rooms and packages
-          </Text>
-        ))}
-
-      <Modal
-        opened={addRoomModal}
-        onClose={closeAddRoomModal}
-        title={"Add rates"}
-        classNames={{
-          title: "text-xl font-bold",
-          close: "text-black hover:text-gray-700 hover:bg-gray-200",
-          header: "bg-gray-100",
-        }}
-        fullScreen
-        transitionProps={{ transition: "fade", duration: 200 }}
-        closeButtonProps={{
-          style: {
-            width: 30,
-            height: 30,
-          },
-          iconSize: 20,
-        }}
-      >
-        <Carousel
-          getEmblaApi={(embla) => {
-            setEmbla(embla);
-          }}
-          withControls={false}
-          onSlideChange={(index) => {
-            setCurrentSlideIndex(index);
-          }}
-          speed={14}
-          mx="auto"
-          mb={30}
-          withKeyboardEvents={false}
-        >
-          <Carousel.Slide>
-            <AddRoomFirstPage></AddRoomFirstPage>
-          </Carousel.Slide>
-          <Carousel.Slide>
-            <AddRoomSecondPage staySlug={stay?.slug || ""}></AddRoomSecondPage>
-          </Carousel.Slide>
-        </Carousel>
-
-        <Container
-          pos="fixed"
-          bottom={0}
-          right={0}
-          w="100%"
-          className="w-[600px] bg-gray-100 flex justify-between items-center text-right px-10"
-        >
-          {currentSlideIndex === 0 && <div></div>}
-          {currentSlideIndex === 1 && (
-            <Flex
-              onClick={() => {
-                embla?.scrollPrev();
-              }}
-              className="cursor-pointer"
-              gap={4}
-              align="center"
-            >
-              <IconChevronLeft className="w-5 h-5" />
-              <p>Previous</p>
-            </Flex>
-          )}
-          {currentSlideIndex === 0 && (
-            <Flex
-              onClick={() => {
-                embla?.scrollNext();
-              }}
-              className="cursor-pointer"
-              gap={4}
-              align="center"
-            >
-              <p>Next</p>
-              <IconChevronRight className="w-5 h-5" />
-            </Flex>
-          )}
-        </Container>
-      </Modal>
-
-      <Container className="mt-5 p-0 w-full">
-        <Accordion defaultValue="0">
-          {uniqueRooms.map((room, index) => (
-            <ContextProvider key={room.id}>
-              <RoomPackageEdit stay={stay} index={index} room={room} />
-            </ContextProvider>
+        {!date[0] ||
+          (!date[1] && (
+            <Text className="text-gray-600" size="sm">
+              Please select a date range to view the rooms and packages
+            </Text>
           ))}
-        </Accordion>
-      </Container>
 
-      {roomTypeListLoading && (
-        <div className="flex items-center justify-center">
-          <Loader color="red" className="mt-5" />
-        </div>
-      )}
-    </div>
+        <Modal
+          opened={addRoomModal}
+          onClose={closeAddRoomModal}
+          title={"Add rates"}
+          classNames={{
+            title: "text-xl font-bold",
+            close: "text-black hover:text-gray-700 hover:bg-gray-200",
+            header: "bg-gray-100",
+          }}
+          fullScreen
+          transitionProps={{ transition: "fade", duration: 200 }}
+          closeButtonProps={{
+            style: {
+              width: 30,
+              height: 30,
+            },
+            iconSize: 20,
+          }}
+        >
+          <Carousel
+            getEmblaApi={(embla) => {
+              setEmbla(embla);
+            }}
+            withControls={false}
+            onSlideChange={(index) => {
+              setCurrentSlideIndex(index);
+            }}
+            speed={14}
+            mx="auto"
+            mb={30}
+            withKeyboardEvents={false}
+          >
+            <Carousel.Slide>
+              <AddRoomFirstPage></AddRoomFirstPage>
+            </Carousel.Slide>
+            <Carousel.Slide>
+              <AddRoomSecondPage
+                staySlug={stay?.slug || ""}
+              ></AddRoomSecondPage>
+            </Carousel.Slide>
+          </Carousel>
+
+          <Container
+            pos="fixed"
+            bottom={0}
+            right={0}
+            w="100%"
+            className="w-[600px] bg-gray-100 flex justify-between items-center text-right px-10"
+          >
+            {currentSlideIndex === 0 && <div></div>}
+            {currentSlideIndex === 1 && (
+              <Flex
+                onClick={() => {
+                  embla?.scrollPrev();
+                }}
+                className="cursor-pointer"
+                gap={4}
+                align="center"
+              >
+                <IconChevronLeft className="w-5 h-5" />
+                <p>Previous</p>
+              </Flex>
+            )}
+            {currentSlideIndex === 0 && (
+              <Flex
+                onClick={() => {
+                  embla?.scrollNext();
+                }}
+                className="cursor-pointer"
+                gap={4}
+                align="center"
+              >
+                <p>Next</p>
+                <IconChevronRight className="w-5 h-5" />
+              </Flex>
+            )}
+          </Container>
+        </Modal>
+
+        <Container className="mt-5 p-0 w-full">
+          <Accordion defaultValue="0">
+            {uniqueRooms.map((room, index) => (
+              <ContextProvider key={room.id}>
+                <RoomPackageEdit stay={stay} index={index} room={room} />
+              </ContextProvider>
+            ))}
+          </Accordion>
+        </Container>
+
+        {roomTypeListLoading && (
+          <div className="flex items-center justify-center">
+            <Loader color="red" className="mt-5" />
+          </div>
+        )}
+      </div>
+    </ScrollArea>
   );
 }
 
