@@ -115,20 +115,66 @@ function calculateExtraFees(
 function findPercentage(data: AgentDiscountRateType[], date: string): number {
   const targetDate = new Date(date);
 
-  for (const item of data) {
-    const startDate = item.start_date ? new Date(item.start_date) : new Date();
-    const endDate = item.end_date ? new Date(item.end_date) : new Date();
+  let percentage = 0;
 
-    if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+  for (const item of data) {
+    const startDate = item.start_date ? new Date(item.start_date) : null;
+    const endDate = item.end_date ? new Date(item.end_date) : null;
+
+    if (startDate && endDate) {
       if (targetDate >= startDate && targetDate <= endDate) {
-        return item.percentage;
+        percentage = item.percentage;
       }
-    } else if (!startDate.getTime() && !endDate.getTime()) {
-      return item.percentage;
+    } else if (!startDate && !endDate) {
+      percentage = item.percentage;
     }
   }
 
-  return 0;
+  return percentage;
+}
+
+function findPercentageWithState(
+  data: AgentDiscountRateType[],
+  date: string
+): {
+  standard: boolean;
+  rate: number;
+  start_date: string;
+  end_date: string;
+} {
+  const targetDate = new Date(date);
+
+  let percentage = {
+    standard: false,
+    rate: 0,
+    start_date: "",
+    end_date: "",
+  };
+
+  for (const item of data) {
+    const startDate = item.start_date ? new Date(item.start_date) : null;
+    const endDate = item.end_date ? new Date(item.end_date) : null;
+
+    if (startDate && endDate) {
+      if (targetDate >= startDate && targetDate <= endDate) {
+        percentage = {
+          standard: false,
+          rate: item.percentage,
+          start_date: item.start_date || "",
+          end_date: item.end_date || "",
+        };
+      }
+    } else if (!startDate && !endDate) {
+      percentage = {
+        standard: true,
+        rate: item.percentage,
+        start_date: "",
+        end_date: "",
+      };
+    }
+  }
+
+  return percentage;
 }
 
 function residentPrice(
@@ -136,7 +182,8 @@ function residentPrice(
   guestName: string | undefined,
   packageName: string | undefined,
   numberOfGuests: number,
-  availabilities: RoomType[] | undefined
+  availabilities: RoomType[] | undefined,
+  agentRates: AgentDiscountRateType[] | undefined
 ) {
   if (!availabilities) {
     return null; // Invalid input, return null
@@ -154,7 +201,14 @@ function residentPrice(
           if (
             guestAvailability.name?.toLowerCase() === guestName?.toLowerCase()
           ) {
-            totalPrice += guestAvailability.price;
+            let percentage = findPercentage(
+              agentRates || [],
+              roomAvailability.date
+            );
+            // convert to decimal
+            percentage = percentage / 100;
+            totalPrice +=
+              guestAvailability.price - guestAvailability.price * percentage;
           }
         }
       }
@@ -308,7 +362,8 @@ const findCommonRoomNonResidentNamesWithDescription = (
 function countResidentGuestTypesWithPrice(
   residentGuests: ResidentGuests[],
   room: Room,
-  roomTypes: RoomType[] | undefined
+  roomTypes: RoomType[] | undefined,
+  agentRates: AgentDiscountRateType[] | undefined
 ): { name: string; price: number | null }[] {
   const counts: { [key: string]: number } = {};
 
@@ -329,7 +384,14 @@ function countResidentGuestTypesWithPrice(
         ? name.split("(")[1].split(")")[0]
         : undefined;
     const price = guestType
-      ? residentPrice(room.name, guestType, room.package, count, roomTypes)
+      ? residentPrice(
+          room.name,
+          guestType,
+          room.package,
+          count,
+          roomTypes,
+          agentRates
+        )
       : 0;
 
     return { name: `${count} ${name}`, price };
@@ -727,6 +789,8 @@ const pricing = {
   getResidentTotalPriceOtherFee,
   getNonResidentTotalPriceOtherFee,
   calculateResidentActivityFees,
+  findPercentage,
+  findPercentageWithState,
 
   findCommonRoomResidentNamesWithDescription,
   findCommonRoomNonResidentNamesWithDescription,

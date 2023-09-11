@@ -220,7 +220,7 @@ export default function NavbarSimple() {
         <Navbar className="w-full" p="md">
           <Navbar.Section grow>
             <Group className={classes.header} position="apart">
-              <Link href="/partner/agent">
+              <Link href="/partner/lodge">
                 <div className="relative w-28 h-9 cursor-pointer">
                   <Image
                     alt="Winda logo"

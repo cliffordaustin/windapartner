@@ -84,6 +84,7 @@ function ParkFeesEdit({ stay, token }: ParkFeesEditProps) {
     useMutation(addParkFees, {
       onSuccess: () => {
         queryClient.invalidateQueries(`park-fees-${stay?.slug}`);
+        closeParkFees();
       },
     });
   return (
@@ -141,7 +142,7 @@ function ParkFeesEdit({ stay, token }: ParkFeesEditProps) {
             />
 
             <NumberInput
-              label="Non-resident adult fee"
+              label="Non-resident adult fee($)"
               placeholder="Enter non-resident adult fee"
               value={parkFeesForm.values.nonResidentAdultPrice}
               onChange={(value) =>
@@ -150,7 +151,7 @@ function ParkFeesEdit({ stay, token }: ParkFeesEditProps) {
             />
 
             <NumberInput
-              label="Non-resident teen fee"
+              label="Non-resident teen fee($)"
               placeholder="Enter non-resident teen fee"
               value={parkFeesForm.values.nonResidentTeenPrice}
               onChange={(value) =>
@@ -159,7 +160,7 @@ function ParkFeesEdit({ stay, token }: ParkFeesEditProps) {
             />
 
             <NumberInput
-              label="Non-resident child fee"
+              label="Non-resident child fee($)"
               placeholder="Enter non-resident child fee"
               value={parkFeesForm.values.nonResidentChildPrice}
               onChange={(value) =>
@@ -168,7 +169,7 @@ function ParkFeesEdit({ stay, token }: ParkFeesEditProps) {
             />
 
             <NumberInput
-              label="Resident adult fee"
+              label="Resident adult fee(KES)"
               placeholder="Enter resident adult fee"
               value={parkFeesForm.values.adultPrice}
               onChange={(value) =>
@@ -177,7 +178,7 @@ function ParkFeesEdit({ stay, token }: ParkFeesEditProps) {
             />
 
             <NumberInput
-              label="Resident teen fee"
+              label="Resident teen fee(KES)"
               placeholder="Enter resident teen fee"
               value={parkFeesForm.values.teenPrice}
               onChange={(value) =>
@@ -186,7 +187,7 @@ function ParkFeesEdit({ stay, token }: ParkFeesEditProps) {
             />
 
             <NumberInput
-              label="Resident child fee"
+              label="Resident child fee(KES)"
               placeholder="Enter resident child fee"
               value={parkFeesForm.values.childPrice}
               onChange={(value) =>
@@ -209,7 +210,7 @@ function ParkFeesEdit({ stay, token }: ParkFeesEditProps) {
           {parkFees && parkFees.length > 0 && (
             <div className="flex flex-col gap-3">
               {parkFees.map((fee, index) => (
-                <ParkFee stay={stay} fee={fee} key={index} />
+                <ParkFee token={token} stay={stay} fee={fee} key={index} />
               ))}
             </div>
           )}

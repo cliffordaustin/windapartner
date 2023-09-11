@@ -206,6 +206,50 @@
         }
       }
     },
+    "functionAdminQueries3cdeff20": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/amplify-winda-dev-152307-deployment/amplify-cfn-templates/function/AdminQueries3cdeff20-cloudformation-template.json",
+        "Parameters": {
+          "deploymentBucketName": "amplify-winda-dev-152307-deployment",
+          "s3Key": "amplify-builds/AdminQueries3cdeff20-62434c32327077507078-build.zip",
+          "authwindac5c546cfUserPoolId": {
+            "Fn::GetAtt": [
+              "authwindac5c546cf",
+              "Outputs.UserPoolId"
+            ]
+          },
+          "env": "dev"
+        }
+      }
+    },
+    "apiAdminQueries": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/amplify-winda-dev-152307-deployment/amplify-cfn-templates/api/AdminQueries-cloudformation-template.json",
+        "Parameters": {
+          "authwindac5c546cfUserPoolId": {
+            "Fn::GetAtt": [
+              "authwindac5c546cf",
+              "Outputs.UserPoolId"
+            ]
+          },
+          "functionAdminQueries3cdeff20Arn": {
+            "Fn::GetAtt": [
+              "functionAdminQueries3cdeff20",
+              "Outputs.Arn"
+            ]
+          },
+          "functionAdminQueries3cdeff20Name": {
+            "Fn::GetAtt": [
+              "functionAdminQueries3cdeff20",
+              "Outputs.Name"
+            ]
+          },
+          "env": "dev"
+        }
+      }
+    },
     "UpdateRolesWithIDPFunction": {
       "DependsOn": [
         "AuthRole",

@@ -8,6 +8,7 @@ import {
   LodgeStay,
   AgentStay,
 } from "../../utils/types";
+import { format, subDays } from "date-fns";
 
 type StayDetailProps = {
   slug: string;
@@ -366,10 +367,36 @@ export const getRoomTypes = async (
   token: string | undefined
 ): Promise<RoomType[]> => {
   // subtract 1 day from end date
-
+  let endMinusOne = subDays(new Date(endDate || ""), 1);
+  let endMinusOneFormat = format(endMinusOne || new Date(), "yyyy-MM-dd");
   if (startDate && endDate && stay) {
     const room_types = await axios.get(
-      `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/room-types/?start_date=${startDate}&end_date=${endDate}`,
+      `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/room-types/?start_date=${startDate}&end_date=${endMinusOneFormat}`,
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
+    );
+
+    return room_types.data.results;
+  }
+
+  return [];
+};
+
+export const getRoomTypesWithStaySlug = async (
+  staySlug: string | null,
+  startDate: string | null | undefined,
+  endDate: string | null | undefined,
+  token: string | undefined
+): Promise<RoomType[]> => {
+  // subtract 1 day from end date
+  let endMinusOne = subDays(new Date(endDate || ""), 1);
+  let endMinusOneFormat = format(endMinusOne || new Date(), "yyyy-MM-dd");
+  if (startDate && endDate && staySlug) {
+    const room_types = await axios.get(
+      `${process.env.NEXT_PUBLIC_baseURL}/stays/${staySlug}/room-types/?start_date=${startDate}&end_date=${endMinusOneFormat}`,
       {
         headers: {
           Authorization: "Bearer " + token,

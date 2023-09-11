@@ -441,7 +441,7 @@ function PartnerSignin(props: PaperProps) {
               </div>
             </form>
 
-            <Divider labelPosition="center" my={8} label="or" />
+            {/* <Divider labelPosition="center" my={8} label="or" />
 
             <Button
               onClick={() => {
@@ -484,7 +484,7 @@ function PartnerSignin(props: PaperProps) {
               w={"100%"}
             >
               Continue with Google
-            </Button>
+            </Button> */}
 
             {/* <Anchor
         component="button"

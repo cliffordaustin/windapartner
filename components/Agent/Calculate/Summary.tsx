@@ -76,7 +76,8 @@ export default function Summary({
     const countResidentGuestTypes = pricing.countResidentGuestTypesWithPrice(
       room.residentGuests,
       room,
-      roomTypes
+      roomTypes,
+      agentRates
     );
     const roomTotal = countResidentGuestTypes.reduce((acc, item) => {
       const numGuests = parseInt(item.name.split(" ")[0]);
@@ -151,7 +152,8 @@ export default function Summary({
     const countResidentGuestTypes = pricing.countResidentGuestTypesWithPrice(
       room.residentGuests,
       room,
-      roomTypes
+      roomTypes,
+      agentRates
     );
     const roomTotal = countResidentGuestTypes.reduce(
       (acc, item) => acc + (item.price || 0),
@@ -342,6 +344,7 @@ export default function Summary({
                         room={room}
                         index={index}
                         roomTypes={roomTypes}
+                        agentRates={agentRates}
                       ></NonResidentGuestsSummary>
                     ))}
                   </Flex>
@@ -578,6 +581,7 @@ export default function Summary({
                         room={room}
                         index={index}
                         roomTypes={roomTypes}
+                        agentRates={agentRates}
                       ></GuestsSummary>
                     ))}
                   </Flex>

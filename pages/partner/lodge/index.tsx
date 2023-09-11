@@ -166,39 +166,42 @@ function Lodge({}) {
     if (files.length === 0) {
       setNoFiles(true);
     } else {
-      setNoFiles(false);
-      setLoading(true);
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_baseURL}/create-stay/`,
-        {
-          property_name: values.property_name,
-          name: values.property_name,
-          location: values.location,
-          is_partner_property: true,
-          contact_email: user?.email,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
+      try {
+        setNoFiles(false);
+        setLoading(true);
+        const res = await axios.post(
+          `${process.env.NEXT_PUBLIC_baseURL}/create-stay/`,
+          {
+            property_name: values.property_name,
+            name: values.property_name,
+            location: values.location,
+            is_partner_property: true,
           },
-        }
-      );
-
-      for (const file of files) {
-        const formData = new FormData();
-        formData.append("image", file);
-        await axios.post(
-          `${process.env.NEXT_PUBLIC_baseURL}/stays/${res.data?.slug}/create-image/`,
-          formData,
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }
         );
-      }
 
-      router.reload();
+        for (const file of files) {
+          const formData = new FormData();
+          formData.append("image", file);
+          await axios.post(
+            `${process.env.NEXT_PUBLIC_baseURL}/stays/${res.data?.slug}/create-image/`,
+            formData,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+        }
+
+        router.reload();
+      } catch (error) {
+        setLoading(false);
+      }
     }
   };
 
@@ -372,6 +375,7 @@ function Lodge({}) {
                 stayIds={stayIds}
                 setStayIds={setStayIds}
                 stay={stay}
+                token={token}
               />
             </Grid.Col>
           ))}

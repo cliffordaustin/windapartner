@@ -11,7 +11,7 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { format } from "date-fns";
-import React, { use, useCallback } from "react";
+import React, { use, useCallback, useEffect } from "react";
 import RoomPackageEdit from "./RoomPackageEdit";
 import { RoomTypeDetail, getRoomTypes } from "@/pages/api/stays";
 import { useQuery } from "react-query";
@@ -261,6 +261,12 @@ function RoomPackagesEdit({ date, stay, token }: RoomPackagesEditProps) {
             )}
           </Container>
         </Modal>
+
+        {uniqueRooms.length === 0 && (
+          <div className="flex items-center justify-center">
+            <Text className="mt-4 font-bold">No rooms and packages found</Text>
+          </div>
+        )}
 
         <Container className="mt-5 p-0 w-full">
           <Accordion defaultValue="0">

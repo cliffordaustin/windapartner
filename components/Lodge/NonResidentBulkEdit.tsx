@@ -27,6 +27,7 @@ type BulkEditProps = {
   >;
   stay: LodgeStay | undefined;
   closeModal: () => void;
+  token: string | undefined;
 };
 
 function NonResidentBulkEdit({
@@ -39,6 +40,7 @@ function NonResidentBulkEdit({
   setSelectedNonResidentGuestType,
   stay,
   closeModal,
+  token,
 }: BulkEditProps) {
   const [guestTypeValue, setGuestTypeValue] = React.useState<string>(guestType);
   const [descriptionValue, setDescriptionValue] =
@@ -46,7 +48,6 @@ function NonResidentBulkEdit({
   const [newPrice, setNewPrice] = React.useState<number | "" | undefined>();
   const [value, setValue] = React.useState("date");
 
-  const token = Cookies.get("token");
   const objectWithPrice = {
     price: Number(newPrice),
     name: guestTypeValue,
@@ -82,7 +83,12 @@ function NonResidentBulkEdit({
       }
     } else if (stay && value === "all") {
       const room_types: AxiosResponse<any> = await axios.get(
-        `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/room-types/`
+        `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/room-types/`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       const room_types_results: RoomType[] | undefined =

@@ -10,6 +10,7 @@ type ResidentPriceEditProps = {
   date: string;
   residentGuests: RoomAvailabilityResidentGuest[];
   stay: LodgeStay | undefined;
+  token: string | undefined;
 };
 
 function NonResidentPriceEdit({
@@ -17,6 +18,7 @@ function NonResidentPriceEdit({
   date,
   residentGuests,
   stay,
+  token,
 }: ResidentPriceEditProps) {
   const residentGuest: RoomAvailabilityResidentGuest | undefined =
     residentGuests.find(
@@ -30,8 +32,6 @@ function NonResidentPriceEdit({
   useEffect(() => {
     setNewPrice(residentGuest?.price);
   }, []);
-
-  const token = Cookies.get("token");
 
   const updatePrice = async () => {
     if (newPrice && residentGuest) {

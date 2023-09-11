@@ -5,13 +5,14 @@ import {
   Flex,
   Group,
   Modal,
+  NumberInput,
   ScrollArea,
   Text,
   TextInput,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconPlus, IconShare2, IconX } from "@tabler/icons-react";
-import React from "react";
+import React, { use, useEffect, useState } from "react";
 import Share from "../ui/Share";
 import { LodgeStay } from "@/utils/types";
 import { useForm } from "@mantine/form";
@@ -29,6 +30,13 @@ import {
   getStayAgentsNotVerified,
 } from "@/pages/api/stays";
 import { WithContext as ReactTags, Tag } from "react-tag-input";
+import AWS from "aws-sdk";
+import awsmobile from "@/src/aws-exports";
+import {
+  UserType,
+  UsersListType,
+} from "aws-sdk/clients/cognitoidentityserviceprovider";
+import { API, Auth } from "aws-amplify";
 
 type AgentEmailAccessPropTypes = {
   stay: LodgeStay | undefined;
@@ -63,9 +71,15 @@ function AgentEmailAccess({ stay, token }: AgentEmailAccessPropTypes) {
     { open: openEmailAccess, close: closeEmailAccess },
   ] = useDisclosure(false);
 
-  const form = useForm({
+  type FormValues = {
+    email: string;
+    contract_rate: number | "";
+  };
+
+  const form = useForm<FormValues>({
     initialValues: {
       email: "",
+      contract_rate: "",
     },
   });
 
@@ -76,7 +90,13 @@ function AgentEmailAccess({ stay, token }: AgentEmailAccessPropTypes) {
 
   const delimiters = [KeyCodes.comma, KeyCodes.enter];
 
-  const [emails, setEmails] = React.useState<Tag[]>([]);
+  type EmailType = {
+    id: string;
+    text: string;
+    rate: number | "";
+  };
+
+  const [emails, setEmails] = React.useState<EmailType[]>([]);
 
   const grantAccess = async () => {
     for (const email of emails) {
@@ -86,6 +106,7 @@ function AgentEmailAccess({ stay, token }: AgentEmailAccessPropTypes) {
           {
             email: email.text,
             encoded_email: Buffer.from(email.text).toString("base64"),
+            contract_rate: email.rate,
           },
           {
             headers: {
@@ -126,11 +147,8 @@ function AgentEmailAccess({ stay, token }: AgentEmailAccessPropTypes) {
 
   const removeAccess = async (agentId: number) => {
     if (stay) {
-      await axios.patch(
-        `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/remove-agent/`,
-        {
-          agent_id: agentId,
-        },
+      await axios.delete(
+        `${process.env.NEXT_PUBLIC_baseURL}/remove-agent/${agentId}/`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -179,23 +197,76 @@ function AgentEmailAccess({ stay, token }: AgentEmailAccessPropTypes) {
     },
   });
 
-  const handleDelete = (i: number) => {
-    setEmails(emails.filter((tag, index) => index !== i));
-  };
+  type UserType = {};
 
-  const handleAddition = (tag: Tag) => {
-    setEmails([...emails, tag]);
-  };
+  const [users, setUsers] = useState<UserType[]>([]);
 
-  const handleDrag = (tag: Tag, currPos: number, newPos: number) => {
-    const newTags = emails.slice();
+  let nextToken: string;
 
-    newTags.splice(currPos, 1);
-    newTags.splice(newPos, 0, tag);
+  async function listUsers() {
+    try {
+      let apiName = "AdminQueries";
+      let path = "/listUsers";
 
-    // re-render
-    setEmails(newTags);
-  };
+      let myInit = {
+        queryStringParameters: {
+          limit: 10,
+          nextToken: nextToken,
+        },
+
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `${(await Auth.currentSession())
+            .getAccessToken()
+            .getJwtToken()}`,
+        },
+      };
+
+      const { NextToken, ...rest } = await API.get(apiName, path, myInit);
+
+      nextToken = NextToken;
+      setUsers([...users, ...rest.Users]);
+    } catch (error: any) {
+      console.log(error.response);
+    }
+  }
+
+  async function getUser() {
+    try {
+      let apiName = "AdminQueries";
+      let path = "/getUser";
+
+      let myInit = {
+        queryStringParameters: {
+          username: "user1",
+        },
+
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `${(await Auth.currentSession())
+            .getAccessToken()
+            .getJwtToken()}`,
+        },
+      };
+
+      const data = await API.get(apiName, path, myInit);
+
+      console.log(data);
+    } catch (error: any) {
+      console.log(error.response);
+    }
+  }
+
+  async function listUsersInGroup() {
+    let user = await Auth.currentAuthenticatedUser();
+    let userAttributes = await Auth.userAttributes(user);
+
+    console.log(userAttributes);
+  }
+
+  // useEffect(() => {
+  //   listUsersInGroup();
+  // }, []);
 
   const totalAgents = (notUserAgentsByEmail?.length || 0) + lenApprovedAgents;
   return (
@@ -260,7 +331,7 @@ function AgentEmailAccess({ stay, token }: AgentEmailAccessPropTypes) {
                   <Flex justify="space-between" key={agent.id} align="center">
                     <Group key={agent.id} noWrap>
                       <div>
-                        <Text size="sm" color="dimmed">
+                        <Text size="sm" className="font-normal text-gray-500">
                           {agent.email}
                         </Text>
                       </div>
@@ -395,7 +466,9 @@ function AgentEmailAccess({ stay, token }: AgentEmailAccessPropTypes) {
                   key={index}
                   className="flex items-center gap-1 bg-gray-100 rounded-full py-1 px-2"
                 >
-                  <Text size="sm">{email.text}</Text>
+                  <Text size="sm">
+                    {email.text} - {email.rate}%
+                  </Text>
 
                   <IconX
                     onClick={() => {
@@ -414,40 +487,54 @@ function AgentEmailAccess({ stay, token }: AgentEmailAccessPropTypes) {
                   {
                     id: values.email,
                     text: values.email,
+                    rate: values.contract_rate,
                   },
                 ]);
                 form.setFieldValue("email", "");
+                form.setFieldValue("contract_rate", "");
               })}
               className="flex items-center mt-2 mb-2 gap-2"
             >
-              {/* <ReactTags
-                tags={emails}
-                delimiters={delimiters}
-                handleDelete={handleDelete}
-                handleAddition={handleAddition}
-                handleDrag={handleDrag}
-                inputFieldPosition="bottom"
-                autocomplete
-              /> */}
-              <TextInput
-                placeholder="Enter as many emails as you want..."
-                type="email"
-                w="100%"
-                size="md"
-                value={form.values.email}
-                onChange={(event) =>
-                  form.setFieldValue("email", event.currentTarget.value)
-                }
-              />
+              <div className="flex gap-4 items-center">
+                <TextInput
+                  placeholder="Agent's email"
+                  type="email"
+                  w="50%"
+                  size="md"
+                  label="Agent's email"
+                  value={form.values.email}
+                  onChange={(event) =>
+                    form.setFieldValue("email", event.currentTarget.value)
+                  }
+                />
 
-              {/* <Button
-                className="mt-[22px] w-[130px]"
-                color="red"
-                type="submit"
-                size="sm"
-              >
-                Add email
-              </Button> */}
+                <NumberInput
+                  placeholder="Agent's contract rate"
+                  size="md"
+                  w="50%"
+                  label="Agent's contract rate"
+                  step={0.05}
+                  min={0}
+                  max={100}
+                  precision={2}
+                  value={form.values.contract_rate}
+                  onChange={(value) =>
+                    form.setFieldValue("contract_rate", value)
+                  }
+                />
+
+                <Button
+                  className="mt-[22px] w-[130px]"
+                  color="red"
+                  type="submit"
+                  disabled={
+                    form.values.email === "" || form.values.contract_rate === ""
+                  }
+                  size="md"
+                >
+                  Add email
+                </Button>
+              </div>
             </form>
 
             <Text size="sm" color="gray">

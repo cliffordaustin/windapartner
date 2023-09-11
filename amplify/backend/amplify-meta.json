@@ -43,7 +43,7 @@
         "s3TemplateURL": "https://s3.amazonaws.com/amplify-winda-dev-152307-deployment/amplify-cfn-templates/auth/windac5c546cf-cloudformation-template.json",
         "logicalId": "authwindac5c546cf"
       },
-      "lastPushTimeStamp": "2023-09-01T15:28:45.815Z",
+      "lastPushTimeStamp": "2023-09-11T05:45:49.918Z",
       "output": {
         "UserPoolId": "eu-west-2_yuwnSe3Jo",
         "AppClientIDWeb": "2qosk0gvsv2i4gcm52ag6r1bja",
@@ -53,7 +53,79 @@
         "IdentityPoolName": "windac5c546cf_identitypool_c5c546cf__dev",
         "UserPoolName": "windac5c546cf_userpool_c5c546cf"
       },
-      "lastPushDirHash": "29Ao928n06zG6C+LWybSHCfXSSs="
+      "lastPushDirHash": "wjeIirjDE+eE6X5Qt9LmdUZFiAI="
+    }
+  },
+  "function": {
+    "AdminQueries3cdeff20": {
+      "service": "Lambda",
+      "providerPlugin": "awscloudformation",
+      "build": true,
+      "dependsOn": [
+        {
+          "category": "auth",
+          "resourceName": "windac5c546cf",
+          "attributes": [
+            "UserPoolId"
+          ]
+        }
+      ],
+      "lastBuildTimeStamp": "2023-09-11T05:43:58.563Z",
+      "lastBuildType": "PROD",
+      "lastPackageTimeStamp": "2023-09-11T05:43:59.453Z",
+      "distZipFilename": "AdminQueries3cdeff20-62434c32327077507078-build.zip",
+      "s3Bucket": {
+        "deploymentBucketName": "amplify-winda-dev-152307-deployment",
+        "s3Key": "amplify-builds/AdminQueries3cdeff20-62434c32327077507078-build.zip"
+      },
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-winda-dev-152307-deployment/amplify-cfn-templates/function/AdminQueries3cdeff20-cloudformation-template.json",
+        "logicalId": "functionAdminQueries3cdeff20"
+      },
+      "lastPushTimeStamp": "2023-09-11T05:45:49.918Z",
+      "output": {
+        "LambdaExecutionRoleArn": "arn:aws:iam::952027537293:role/AdminQueries3cdeff20LambdaRole-dev",
+        "Region": "eu-west-2",
+        "Arn": "arn:aws:lambda:eu-west-2:952027537293:function:AdminQueries3cdeff20-dev",
+        "Name": "AdminQueries3cdeff20-dev",
+        "LambdaExecutionRole": "AdminQueries3cdeff20LambdaRole-dev"
+      },
+      "lastPushDirHash": "Ypg8nentnXp9W8ehVbwnetpbV84="
+    }
+  },
+  "api": {
+    "AdminQueries": {
+      "service": "API Gateway",
+      "providerPlugin": "awscloudformation",
+      "authorizationType": "AMAZON_COGNITO_USER_POOLS",
+      "dependsOn": [
+        {
+          "category": "auth",
+          "resourceName": "windac5c546cf",
+          "attributes": [
+            "UserPoolId"
+          ]
+        },
+        {
+          "category": "function",
+          "resourceName": "AdminQueries3cdeff20",
+          "attributes": [
+            "Arn",
+            "Name"
+          ]
+        }
+      ],
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-winda-dev-152307-deployment/amplify-cfn-templates/api/AdminQueries-cloudformation-template.json",
+        "logicalId": "apiAdminQueries"
+      },
+      "lastPushTimeStamp": "2023-09-11T05:45:49.918Z",
+      "output": {
+        "ApiName": "AdminQueries",
+        "RootUrl": "https://5cn95jautk.execute-api.eu-west-2.amazonaws.com/dev",
+        "ApiId": "5cn95jautk"
+      },
+      "lastPushDirHash": "crJNOEIuIrg4Q6Em1VI2WHGlUoA="
     }
   }
 }

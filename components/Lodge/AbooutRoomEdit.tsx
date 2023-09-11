@@ -162,7 +162,12 @@ function AboutRoomEdit({ stay, token }: RoomResidentPriceEditProps) {
 
           <Flex direction="column" mt={8} gap={3}>
             {stay?.stay_images.map((image, index) => (
-              <StayImages stay={stay} image={image} key={index}></StayImages>
+              <StayImages
+                stay={stay}
+                image={image}
+                token={token}
+                key={index}
+              ></StayImages>
             ))}
           </Flex>
 

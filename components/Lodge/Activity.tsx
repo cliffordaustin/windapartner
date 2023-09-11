@@ -20,10 +20,10 @@ import { useMutation, useQueryClient } from "react-query";
 type ParkFeeProps = {
   fee: ActivityFee;
   stay: LodgeStay | undefined;
+  token: string | undefined;
 };
 
-function Activity({ fee, stay }: ParkFeeProps) {
-  const token = Cookies.get("token");
+function Activity({ fee, stay, token }: ParkFeeProps) {
   const queryClient = useQueryClient();
 
   const deleteParkFee = async () => {
@@ -198,20 +198,20 @@ function Activity({ fee, stay }: ParkFeeProps) {
           />
 
           <NumberInput
-            label="Resident Activity Price"
-            placeholder="Enter resident activity price"
-            value={activityForm.values.residentPrice}
-            onChange={(value) =>
-              activityForm.setFieldValue("residentPrice", value)
-            }
-          />
-
-          <NumberInput
             label="Non-resident Activity Price"
             placeholder="Enter non-resident activity price"
             value={activityForm.values.nonResidentPrice}
             onChange={(value) =>
               activityForm.setFieldValue("nonResidentPrice", value)
+            }
+          />
+
+          <NumberInput
+            label="Resident Activity Price"
+            placeholder="Enter resident activity price"
+            value={activityForm.values.residentPrice}
+            onChange={(value) =>
+              activityForm.setFieldValue("residentPrice", value)
             }
           />
 

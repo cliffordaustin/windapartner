@@ -178,7 +178,7 @@ export default function AgentPage() {
     useState<boolean>(false);
 
   return (
-    <div className="">
+    <div className="relative">
       <div className="border-b border-x-0 border-t-0 border-solid border-b-gray-200">
         <Navbar user={user}></Navbar>
       </div>
@@ -272,7 +272,7 @@ export default function AgentPage() {
 
             <div
               className={
-                "fixed bottom-0 z-40 left-0 shadow-top right-0 h-[100px] flex flex-col items-center justify-center gap-3 py-4 w-full " +
+                "fixed bottom-0 z-[999] left-0 shadow-top right-0 h-[100px] flex flex-col items-center justify-center gap-3 py-4 w-full " +
                 (showCalculatePricingPopup
                   ? "bg-gray-100 border-t border-solid border-gray-200 border-x-0 border-b-0"
                   : "")
@@ -338,7 +338,7 @@ export default function AgentPage() {
                     )
                   }
                   disabled={isLoading}
-                  className="flex mx-auto items-center justify-center rounded-full w-[300px] text-white z-10 bg-[#000] hover:bg-[#333] font-semibold"
+                  className="flex mx-auto items-center justify-center rounded-full w-[300px] text-white bg-[#000] hover:bg-[#333] font-semibold"
                 >
                   Create quote
                 </Button>

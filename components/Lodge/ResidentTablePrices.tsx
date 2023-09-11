@@ -60,7 +60,7 @@ function ResidentTablePrice({
 
   const column = residentColumns;
   const data = residentData;
-  const columns = [...column];
+  const columns = [...residentColumns];
 
   // Use the state and functions returned from useTable to build your UI
   const table = useReactTable({

@@ -1,4 +1,5 @@
 import { Context, GuestTotal, Room } from "@/context/CalculatePage";
+import { AgentDiscountRateType } from "@/pages/api/stays";
 import pricing from "@/utils/calculation";
 import { RoomType } from "@/utils/types";
 import { Divider, Flex, Text } from "@mantine/core";
@@ -12,6 +13,7 @@ type GuestsSummaryProps = {
   includeClientInCalculation?: boolean;
   commission?: number;
   summarizedCalculation?: boolean;
+  agentRates: AgentDiscountRateType[] | undefined;
 };
 
 export default function GuestsSummary({
@@ -21,11 +23,13 @@ export default function GuestsSummary({
   includeClientInCalculation,
   commission,
   summarizedCalculation,
+  agentRates,
 }: GuestsSummaryProps) {
   const countResidentGuestTypes = pricing.countResidentGuestTypesWithPrice(
     room.residentGuests,
     room,
-    roomTypes
+    roomTypes,
+    agentRates
   );
 
   return (

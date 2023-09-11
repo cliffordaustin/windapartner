@@ -30,6 +30,7 @@ import {
   ScrollArea,
   Select,
   Slider,
+  Switch,
   Tabs,
   Text,
   TextInput,
@@ -60,6 +61,7 @@ import { Mixpanel } from "@/utils/mixpanelconfig";
 import { Auth, withSSRContext } from "aws-amplify";
 import { DatePickerInput } from "@mantine/dates";
 import { format } from "date-fns";
+import AgentPriceTable from "@/components/Agent/Calculate/AgentPriceTable";
 
 export default function Calculate() {
   const [token, setToken] = useState("");
@@ -288,6 +290,8 @@ export default function Calculate() {
       onSuccess: () => {},
     });
 
+  const [displayRackRates, setDisplayRackRates] = useState(false);
+
   return (
     <div>
       <div className="border-b sticky top-0 z-10 bg-white left-0 right-0 border-x-0 border-t-0 border-solid border-b-gray-200">
@@ -396,32 +400,20 @@ export default function Calculate() {
                 }}
               >
                 <div className="flex gap-6 mt-5">
-                  <div className="w-[calc(100%-400px)]">
-                    <p>
-                      Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                      Molestiae at saepe porro, dolore ratione quas debitis
-                      nesciunt sapiente corrupti et fuga distinctio officia
-                      magnam, ipsa vitae labore possimus, repudiandae non.
-                      Numquam soluta ipsam, necessitatibus ullam laboriosam
-                      earum odio obcaecati magnam laudantium eveniet sit
-                      recusandae sequi nisi dolores. Perspiciatis, autem at
-                      provident adipisci reprehenderit cumque delectus eligendi!
-                      Dolorem vitae repudiandae facilis. Adipisci fugiat
-                      delectus quisquam provident blanditiis facilis nostrum
-                      veritatis commodi enim dignissimos. Similique qui aliquam
-                      architecto. Dolore voluptate mollitia placeat sapiente!
-                      Perferendis quo iusto vitae quaerat inventore labore.
-                      Nulla, eligendi? Iste dolorem ut velit praesentium totam
-                      in ratione quos odit unde eaque neque, earum quod magnam
-                      nostrum ducimus sit, deserunt impedit aliquid pariatur.
-                      Maxime similique cum minima aperiam sit explicabo?
-                      Accusamus obcaecati nobis aliquam minus ab exercitationem
-                      beatae mollitia ullam quisquam assumenda dolorem sint
-                      recusandae.
-                    </p>
-                  </div>
-
                   <div className="w-[400px] border border-solid border-gray-200 px-4 bg-white rounded-xl py-4 shadow-round">
+                    <div className="flex items-center justify-between">
+                      <div></div>
+
+                      <Switch
+                        className=""
+                        label="Display rack rates"
+                        color="red"
+                        checked={displayRackRates}
+                        onChange={(event) =>
+                          setDisplayRackRates(event.currentTarget.checked)
+                        }
+                      />
+                    </div>
                     <Text className="font-bold text-xl">Discount Rates</Text>
                     <div className="flex justify-between mt-4">
                       <div></div>
@@ -467,13 +459,15 @@ export default function Calculate() {
                       {agents?.map((agent) => (
                         <div className="w-full" key={agent.id}>
                           {!agent.start_date && !agent.end_date && (
-                            <div className="w-full px-3 flex justify-between items-center py-3 rounded-lg bg-green-100 border border-solid border-green-400">
-                              <div className="px-1 py-1 bg-green-300 w-fit">
-                                <Text className="text-sm">Standard rate</Text>
+                            <div className="w-full px-3 flex justify-between items-center py-3 rounded-lg bg-green-50 border border-solid border-green-400">
+                              <div className="px-2 py-1 bg-white rounded-lg shadow-sm w-fit">
+                                <Text className="text-sm font-medium">
+                                  Nett rate
+                                </Text>
                               </div>
 
                               <div className="flex items-center gap-2">
-                                <Text className="text-sm">
+                                <Text className="text-sm medium">
                                   {agent.percentage}%
                                 </Text>
 
@@ -491,15 +485,15 @@ export default function Calculate() {
                           )}
 
                           {agent.start_date && agent.end_date && (
-                            <div className="w-full px-3 flex justify-between items-center py-3 rounded-lg bg-blue-100 border border-solid border-blue-400">
-                              <div className="px-1 py-1 bg-blue-300 w-fit">
-                                <Text className="text-sm">
+                            <div className="w-full px-3 flex justify-between items-center py-3 rounded-lg bg-blue-50 border border-solid border-blue-400">
+                              <div className="px-2 py-1 bg-white rounded-lg shadow-sm w-fit">
+                                <Text className="text-sm font-medium">
                                   {format(new Date(agent.start_date), "dd MMM")}{" "}
                                   - {format(new Date(agent.end_date), "dd MMM")}
                                 </Text>
                               </div>
                               <div className="flex items-center gap-2">
-                                <Text className="text-sm">
+                                <Text className="text-sm font-medium">
                                   {agent.percentage}%
                                 </Text>
 
@@ -589,10 +583,18 @@ export default function Calculate() {
                           variant="filled"
                           disabled={!date[0] && !date[1] && !applyForAllDates}
                         >
-                          Add rate
+                          Add discount rate
                         </Button>
                       </div>
                     </div>
+                  </div>
+                  <div className="w-[calc(100%-400px)]">
+                    <AgentPriceTable
+                      agentRates={agents}
+                      staySlug={selectedTab}
+                      token={token}
+                      displayRackRates={displayRackRates}
+                    />
                   </div>
                 </div>
               </Modal>
@@ -727,6 +729,8 @@ export default function Calculate() {
                               includeClientInCalculation
                             }
                             summarizedCalculation={summarizedCalculation}
+                            agentRates={agents}
+                            token={token}
                           ></PrintSummary>
                         </div>
                       ))}

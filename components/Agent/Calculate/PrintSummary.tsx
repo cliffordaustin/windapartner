@@ -4,7 +4,7 @@ import {
   GuestTotal,
   StateType,
 } from "@/context/CalculatePage";
-import { getRoomTypes } from "@/pages/api/stays";
+import { AgentDiscountRateType, getRoomTypes } from "@/pages/api/stays";
 import pricing, { countRoomTypes } from "@/utils/calculation";
 import { AgentStay } from "@/utils/types";
 import { Button, Divider, Flex, Tabs, Text } from "@mantine/core";
@@ -32,6 +32,8 @@ type SummaryProps = {
   includeClientInCalculation: boolean;
   summarizedCalculation: boolean;
   updateTotals: (id: number, total: number, isResident: boolean) => void;
+  agentRates: AgentDiscountRateType[] | undefined;
+  token: string | undefined;
 };
 
 export default function PrintSummary({
@@ -39,8 +41,9 @@ export default function PrintSummary({
   stays,
   includeClientInCalculation,
   summarizedCalculation,
-
   updateTotals,
+  agentRates,
+  token,
 }: SummaryProps) {
   const countRoomType = countRoomTypes(calculateStay.rooms);
 
@@ -53,9 +56,13 @@ export default function PrintSummary({
       getRoomTypes(
         currentStay,
         format(calculateStay.date[0] || new Date(), "yyyy-MM-dd"),
-        format(calculateStay.date[1] || new Date(), "yyyy-MM-dd")
+        format(calculateStay.date[1] || new Date(), "yyyy-MM-dd"),
+        token
       ),
-    { enabled: calculateStay.date[0] && calculateStay.date[1] ? true : false }
+    {
+      enabled:
+        calculateStay.date[0] && calculateStay.date[1] && token ? true : false,
+    }
   );
 
   const nights =
@@ -69,7 +76,8 @@ export default function PrintSummary({
     const countResidentGuestTypes = pricing.countResidentGuestTypesWithPrice(
       room.residentGuests,
       room,
-      roomTypes
+      roomTypes,
+      agentRates
     );
     const roomTotal = countResidentGuestTypes.reduce((acc, item) => {
       const numGuests = parseInt(item.name.split(" ")[0]);
@@ -84,7 +92,8 @@ export default function PrintSummary({
         pricing.countNonResidentGuestTypesWithPrice(
           room.nonResidentGuests,
           room,
-          roomTypes
+          roomTypes,
+          agentRates
         );
       const roomTotal = countNonResidentGuestTypes.reduce((acc, item) => {
         const numGuests = parseInt(item.name.split(" ")[0]);
@@ -156,7 +165,8 @@ export default function PrintSummary({
     const countResidentGuestTypes = pricing.countResidentGuestTypesWithPrice(
       room.residentGuests,
       room,
-      roomTypes
+      roomTypes,
+      agentRates
     );
     const roomTotal = countResidentGuestTypes.reduce(
       (acc, item) => acc + (item.price || 0),
@@ -174,7 +184,8 @@ export default function PrintSummary({
     const countResidentGuestTypes = pricing.countNonResidentGuestTypesWithPrice(
       room.nonResidentGuests,
       room,
-      roomTypes
+      roomTypes,
+      agentRates
     );
     const roomTotal = countResidentGuestTypes.reduce(
       (acc, item) => acc + (item.price || 0),
@@ -341,6 +352,7 @@ export default function PrintSummary({
                           {calculateStay.rooms.map((room, index) => (
                             <NonResidentGuestsSummary
                               key={index}
+                              agentRates={agentRates}
                               summarizedCalculation={summarizedCalculation}
                               includeClientInCalculation={
                                 includeClientInCalculation
@@ -562,6 +574,7 @@ export default function PrintSummary({
                             <GuestsSummary
                               key={index}
                               room={room}
+                              agentRates={agentRates}
                               summarizedCalculation={summarizedCalculation}
                               includeClientInCalculation={
                                 includeClientInCalculation

@@ -9,10 +9,10 @@ import { useMutation, useQueryClient } from "react-query";
 type StayImagesProps = {
   stay: LodgeStay;
   image: stayImages;
+  token: string | undefined;
 };
 
-function StayImages({ stay, image }: StayImagesProps) {
-  const token = Cookies.get("token");
+function StayImages({ stay, image, token }: StayImagesProps) {
   const queryClient = useQueryClient();
 
   const getImageName = (url: string) => {

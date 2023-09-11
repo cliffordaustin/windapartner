@@ -53,6 +53,7 @@ type LodgeProps = {
   stay: LodgeStay;
   setStayIds: React.Dispatch<React.SetStateAction<number[]>>;
   stayIds: number[];
+  token: string;
 };
 
 const useStyles = createStyles(() => ({
@@ -64,7 +65,7 @@ const useStyles = createStyles(() => ({
   },
 }));
 
-function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
+function LodgeCard({ stay, stayIds, setStayIds, token }: LodgeProps) {
   const { classes } = useStyles();
 
   const images = stay.stay_images.sort(
@@ -103,7 +104,6 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
 
   const queryClient = useQueryClient();
 
-  const token = Cookies.get("token");
   const [opened, { open, close }] = useDisclosure(false);
 
   const [embla, setEmbla] = React.useState<EmblaCarouselType | null>(null);
@@ -771,7 +771,12 @@ function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
 
           <Flex direction="column" mt={8} gap={3}>
             {stay.stay_images.map((image, index) => (
-              <StayImages stay={stay} image={image} key={index}></StayImages>
+              <StayImages
+                token={token}
+                stay={stay}
+                image={image}
+                key={index}
+              ></StayImages>
             ))}
           </Flex>
 

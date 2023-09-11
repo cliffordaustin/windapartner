@@ -583,6 +583,7 @@ function PriceEdit({ stay, token }: PriceEditProps) {
                         guest.room_non_resident_guest_availabilities
                       }
                       stay={stay}
+                      token={token}
                     />
                   )
                 )}
@@ -604,6 +605,7 @@ function PriceEdit({ stay, token }: PriceEditProps) {
                       guestType={selectedResidentGuestType?.name || ""}
                       residentGuests={guest.room_resident_guest_availabilities}
                       stay={stay}
+                      token={token}
                     />
                   )
                 )}
@@ -633,6 +635,7 @@ function PriceEdit({ stay, token }: PriceEditProps) {
               stay={stay}
               setSelectedNonResidentGuestType={setSelectedNonResidentGuestType}
               closeModal={close}
+              token={token}
             ></NonResidentBulkEdit>
           )}
 
@@ -647,6 +650,7 @@ function PriceEdit({ stay, token }: PriceEditProps) {
               stay={stay}
               setSelectedResidentGuestType={setSelectedResidentGuestType}
               closeModal={close}
+              token={token}
             ></ResidentBulkEdit>
           )}
         </Modal>

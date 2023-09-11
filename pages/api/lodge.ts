@@ -41,6 +41,7 @@ type RoomProps = {
   infantCapacity: number | "";
   roomPackage: string | null;
   packageDescription: string;
+  token: string | undefined;
 };
 
 export type RoomReturnType = {
@@ -55,6 +56,7 @@ export const addRoom = async (
     infantCapacity,
     roomPackage,
     packageDescription,
+    token,
   }: RoomProps,
   slug: string | null
 ): Promise<RoomReturnType | null> => {
@@ -70,7 +72,7 @@ export const addRoom = async (
     },
     {
       headers: {
-        Authorization: "Bearer " + Cookies.get("token"),
+        Authorization: "Bearer " + token,
       },
     }
   );

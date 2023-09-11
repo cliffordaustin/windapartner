@@ -21,10 +21,10 @@ import { useMutation, useQueryClient } from "react-query";
 type ParkFeeProps = {
   fee: ParkFee;
   stay: LodgeStay | undefined;
+  token: string | undefined;
 };
 
-function ParkFee({ fee, stay }: ParkFeeProps) {
-  const token = Cookies.get("token");
+function ParkFee({ fee, stay, token }: ParkFeeProps) {
   const queryClient = useQueryClient();
 
   const deleteParkFee = async () => {

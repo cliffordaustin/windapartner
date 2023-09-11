@@ -203,7 +203,7 @@ function ActivityEdit({ stay, token }: ActivityEditProps) {
           {activities && activities.length > 0 && (
             <div className="flex flex-col gap-3">
               {activities.map((fee, index) => (
-                <Activity stay={stay} fee={fee} key={index} />
+                <Activity token={token} stay={stay} fee={fee} key={index} />
               ))}
             </div>
           )}
