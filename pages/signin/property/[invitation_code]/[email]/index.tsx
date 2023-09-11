@@ -154,6 +154,7 @@ function PartnerSignin(props: PaperProps) {
         }
       } catch (error: any) {
         setLoading(false);
+        console.log(error);
         if (error?.code === "UserNotConfirmedException") {
           setUserNotConfirmed(true);
         } else {
