@@ -29,7 +29,7 @@ import {
   IconSelector,
   IconX,
 } from "@tabler/icons-react";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import RoomSeason from "./Season";
 import axios, { AxiosResponse } from "axios";
 import { useRouter } from "next/router";
@@ -43,6 +43,7 @@ import {
 } from "@/pages/api/lodge";
 import { useMutation } from "react-query";
 import { addDays, format } from "date-fns";
+import { Auth } from "aws-amplify";
 
 const useStyles = createStyles((theme) => ({
   link: {
@@ -96,6 +97,17 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
   const [activeRoom, setActiveRoom] = useState(0);
 
   const { classes, cx } = useStyles();
+
+  const [token, setToken] = useState("");
+
+  useEffect(() => {
+    Auth.currentSession().then((res) => {
+      let accessToken = res.getAccessToken();
+      let jwt = accessToken.getJwtToken();
+
+      setToken(jwt);
+    });
+  }, []);
 
   const router = useRouter();
 
@@ -170,6 +182,7 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
             infantCapacity: Number(room.infant_capacity),
             roomPackage: pkg.name,
             packageDescription: pkg.description,
+            token,
           },
           staySlug
         );
@@ -250,7 +263,7 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
             guest,
             {
               headers: {
-                Authorization: "Token " + Cookies.get("token"),
+                Authorization: "Bearer " + token,
               },
             }
           );
@@ -262,7 +275,7 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
             guest,
             {
               headers: {
-                Authorization: "Token " + Cookies.get("token"),
+                Authorization: "Bearer " + token,
               },
             }
           );
@@ -420,6 +433,7 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
               infantCapacity: Number(room.infant_capacity),
               roomPackage: pkg.name,
               packageDescription: pkg.description,
+              token,
             },
             staySlug
           );
@@ -432,7 +446,7 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
               guest,
               {
                 headers: {
-                  Authorization: "Token " + Cookies.get("token"),
+                  Authorization: "Bearer " + token,
                 },
               }
             );
@@ -444,7 +458,7 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
               guest,
               {
                 headers: {
-                  Authorization: "Token " + Cookies.get("token"),
+                  Authorization: "Bearer " + token,
                 },
               }
             );

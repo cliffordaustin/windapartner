@@ -1,5 +1,4 @@
 import axios from "axios";
-import { subDays, format } from "date-fns";
 import {
   ActivityFee,
   OtherFeesNonResident,
@@ -9,6 +8,7 @@ import {
   LodgeStay,
   AgentStay,
 } from "../../utils/types";
+import { format, subDays } from "date-fns";
 
 type StayDetailProps = {
   slug: string;
@@ -81,6 +81,13 @@ export type NotUserAgentStayType = {
   email: string;
 };
 
+export type AgentDiscountRateType = {
+  id: number;
+  percentage: number;
+  start_date: string | null;
+  end_date: string | null;
+};
+
 export const getHighlightedStays = async (): Promise<Stay[]> => {
   const stays = await axios.get(
     `${process.env.NEXT_PUBLIC_baseURL}/highlighted-stays/`
@@ -100,7 +107,7 @@ export const getPartnerStays = async (
     }&page=${page || 1}`,
     {
       headers: {
-        Authorization: "Token " + token,
+        Authorization: "Bearer " + token,
       },
     }
   );
@@ -126,7 +133,7 @@ export const getPartnerStaysWithoutAccess = async (
     }&page=${page || 1}`,
     {
       headers: {
-        Authorization: "Token " + token,
+        Authorization: "Bearer " + token,
       },
     }
   );
@@ -149,12 +156,32 @@ export const getDetailPartnerStays = async (
     `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/${listIds || ""}/`,
     {
       headers: {
-        Authorization: "Token " + token,
+        Authorization: "Bearer " + token,
       },
     }
   );
 
   return stays.data.results;
+};
+
+export const getAgentDiscountRates = async (
+  staySlug: string | null,
+  token: string | undefined
+): Promise<AgentDiscountRateType[]> => {
+  if (staySlug) {
+    const rates = await axios.get(
+      `${process.env.NEXT_PUBLIC_baseURL}/stays/${staySlug}/agent-discounts/`,
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
+    );
+
+    return rates.data.results;
+  }
+
+  return [];
 };
 
 export const getStayDetail = async (slug: string): Promise<Stay> => {
@@ -173,7 +200,7 @@ export const getStayEmail = async (
     `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${slug}/`,
     {
       headers: {
-        Authorization: "Token " + token,
+        Authorization: "Bearer " + token,
       },
     }
   );
@@ -186,7 +213,7 @@ export const deleteStayEmail = async ({ slug, token }: StayDetailProps) => {
     `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${slug}/`,
     {
       headers: {
-        Authorization: "Token " + token,
+        Authorization: "Bearer " + token,
       },
     }
   );
@@ -199,7 +226,7 @@ export const getAllStaysEmail = async (
     `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/`,
     {
       headers: {
-        Authorization: "Token " + token,
+        Authorization: "Bearer " + token,
       },
     }
   );
@@ -212,7 +239,7 @@ export const getAllAgents = async (
 ): Promise<AgentType[]> => {
   const agents = await axios.get(`${process.env.NEXT_PUBLIC_baseURL}/agents/`, {
     headers: {
-      Authorization: "Token " + token,
+      Authorization: "Bearer " + token,
     },
   });
 
@@ -228,7 +255,7 @@ export const getStayAgents = async (
       `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${stay.slug}/agents/`,
       {
         headers: {
-          Authorization: "Token " + token,
+          Authorization: "Bearer " + token,
         },
       }
     );
@@ -247,7 +274,7 @@ export const getStayAgentsByEmailUser = async (
       `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${stay.slug}/user-agents-email/`,
       {
         headers: {
-          Authorization: "Token " + token,
+          Authorization: "Bearer " + token,
         },
       }
     );
@@ -266,7 +293,7 @@ export const getStayAgentsByEmailNotUser = async (
       `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${stay.slug}/not-user-agents-email/`,
       {
         headers: {
-          Authorization: "Token " + token,
+          Authorization: "Bearer " + token,
         },
       }
     );
@@ -285,7 +312,7 @@ export const getStayPropertyAccess = async (
       `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${stay.slug}/verified-property-access/`,
       {
         headers: {
-          Authorization: "Token " + token,
+          Authorization: "Bearer " + token,
         },
       }
     );
@@ -304,7 +331,7 @@ export const getStayPropertyAccessNotUser = async (
       `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${stay.slug}/not-verified-property-access/`,
       {
         headers: {
-          Authorization: "Token " + token,
+          Authorization: "Bearer " + token,
         },
       }
     );
@@ -323,7 +350,7 @@ export const getStayAgentsNotVerified = async (
       `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${stay.slug}/agents-not-verified/`,
       {
         headers: {
-          Authorization: "Token " + token,
+          Authorization: "Bearer " + token,
         },
       }
     );
@@ -336,7 +363,8 @@ export const getStayAgentsNotVerified = async (
 export const getRoomTypes = async (
   stay: LodgeStay | AgentStay | undefined,
   startDate: string | null | undefined,
-  endDate: string | null | undefined
+  endDate: string | null | undefined,
+  token: string | undefined
 ): Promise<RoomType[]> => {
   // subtract 1 day from end date
   let endMinusOne = subDays(new Date(endDate || ""), 1);
@@ -344,7 +372,37 @@ export const getRoomTypes = async (
 
   if (startDate && endDate && stay) {
     const room_types = await axios.get(
-      `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/room-types/?start_date=${startDate}&end_date=${endMinusOneFormat}`
+      `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/room-types/?start_date=${startDate}&end_date=${endMinusOneFormat}`,
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
+    );
+
+    return room_types.data.results;
+  }
+
+  return [];
+};
+
+export const getRoomTypesWithStaySlug = async (
+  staySlug: string | null,
+  startDate: string | null | undefined,
+  endDate: string | null | undefined,
+  token: string | undefined
+): Promise<RoomType[]> => {
+  // subtract 1 day from end date
+  let endMinusOne = subDays(new Date(endDate || ""), 1);
+  let endMinusOneFormat = format(endMinusOne || new Date(), "yyyy-MM-dd");
+  if (startDate && endDate && staySlug) {
+    const room_types = await axios.get(
+      `${process.env.NEXT_PUBLIC_baseURL}/stays/${staySlug}/room-types/?start_date=${startDate}&end_date=${endMinusOneFormat}`,
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
     );
 
     return room_types.data.results;
@@ -354,11 +412,17 @@ export const getRoomTypes = async (
 };
 
 export const getParkFees = async (
-  stay: LodgeStay | AgentStay | undefined
+  stay: LodgeStay | AgentStay | undefined,
+  token: string | undefined
 ): Promise<ParkFee[]> => {
   if (stay) {
     const park_fees = await axios.get(
-      `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/${stay.slug}/park-fees/`
+      `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/${stay.slug}/park-fees/`,
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
     );
 
     return park_fees.data.results;
@@ -368,11 +432,17 @@ export const getParkFees = async (
 };
 
 export const getStayActivities = async (
-  stay: LodgeStay | AgentStay | undefined
+  stay: LodgeStay | AgentStay | undefined,
+  token: string | undefined
 ): Promise<ActivityFee[]> => {
   if (stay) {
     const activities = await axios.get(
-      `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/${stay.slug}/activities/`
+      `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/${stay.slug}/activities/`,
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
     );
 
     return activities.data.results;
@@ -382,11 +452,17 @@ export const getStayActivities = async (
 };
 
 export const getRoomTypeList = async (
-  stay: Stay | undefined
+  stay: Stay | undefined,
+  token: string | undefined
 ): Promise<RoomTypeDetail[]> => {
   if (stay) {
     const room_types = await axios.get(
-      `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/room-detail-types/`
+      `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/room-detail-types/`,
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
     );
 
     return room_types.data.results;
@@ -397,11 +473,17 @@ export const getRoomTypeList = async (
 
 export const getRoomTypeDetail = async (
   stay: Stay | undefined,
-  slug: string
+  slug: string,
+  token: string | undefined
 ): Promise<RoomTypeDetail | undefined> => {
   if (stay) {
     const room_types = await axios.get(
-      `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/room-detail-types/${slug}/`
+      `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/room-detail-types/${slug}/`,
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
     );
 
     return room_types.data;

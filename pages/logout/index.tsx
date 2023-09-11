@@ -15,7 +15,7 @@ function LogoutPage() {
         "",
         {
           headers: {
-            Authorization: "Token " + Cookies.get("token"),
+            Authorization: "Bearer " + Cookies.get("token"),
           },
         }
       );

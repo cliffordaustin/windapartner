@@ -46,21 +46,46 @@ import { FileInput, FileInputProps, Group, Center, rem } from "@mantine/core";
 import { IconPhoto } from "@tabler/icons-react";
 import Image from "next/image";
 import ClientOnly from "@/components/ui/ClientOnly";
+import { Auth, withSSRContext } from "aws-amplify";
 
 function Lodge({}) {
-  const token = Cookies.get("token");
+  const [token, setToken] = useState("");
+
+  useEffect(() => {
+    Auth.currentSession().then((res) => {
+      let accessToken = res.getAccessToken();
+      let jwt = accessToken.getJwtToken();
+
+      setToken(jwt);
+    });
+  }, []);
+
   const router = useRouter();
-  const { data: user } = useQuery<UserTypes | null>("user", () =>
-    getUser(token)
+  const { data: user } = useQuery<UserTypes | null>(
+    "user",
+    () => {
+      return getUser(token);
+    },
+    { enabled: !!token }
   );
-  const { data: stays, isLoading: isStayLoading } = useQuery<LodgeStay[]>(
+  const { data: stays, isLoading: isStayLoading } = useQuery<
+    LodgeStay[] | null
+  >(
     "all-stay-email",
-    () => getAllStaysEmail(token)
+    () => {
+      return getAllStaysEmail(token);
+    },
+    { enabled: !!token }
   );
 
-  const { data: agents, isLoading: isAgentLoading } = useQuery<AgentType[]>(
+  const { data: agents, isLoading: isAgentLoading } = useQuery<
+    AgentType[] | null
+  >(
     "all-agents",
-    () => getAllAgents(token)
+    () => {
+      return getAllAgents(token);
+    },
+    { enabled: !!token }
   );
 
   const [stayIds, setStayIds] = React.useState<number[]>([]);
@@ -141,39 +166,42 @@ function Lodge({}) {
     if (files.length === 0) {
       setNoFiles(true);
     } else {
-      setNoFiles(false);
-      setLoading(true);
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_baseURL}/create-stay/`,
-        {
-          property_name: values.property_name,
-          name: values.property_name,
-          location: values.location,
-          is_partner_property: true,
-          contact_email: user?.email,
-        },
-        {
-          headers: {
-            Authorization: `Token ${token}`,
+      try {
+        setNoFiles(false);
+        setLoading(true);
+        const res = await axios.post(
+          `${process.env.NEXT_PUBLIC_baseURL}/create-stay/`,
+          {
+            property_name: values.property_name,
+            name: values.property_name,
+            location: values.location,
+            is_partner_property: true,
           },
-        }
-      );
-
-      for (const file of files) {
-        const formData = new FormData();
-        formData.append("image", file);
-        await axios.post(
-          `${process.env.NEXT_PUBLIC_baseURL}/stays/${res.data?.slug}/create-image/`,
-          formData,
           {
             headers: {
-              Authorization: `Token ${token}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
-      }
 
-      router.reload();
+        for (const file of files) {
+          const formData = new FormData();
+          formData.append("image", file);
+          await axios.post(
+            `${process.env.NEXT_PUBLIC_baseURL}/stays/${res.data?.slug}/create-image/`,
+            formData,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+        }
+
+        router.reload();
+      } catch (error) {
+        setLoading(false);
+      }
     }
   };
 
@@ -257,7 +285,7 @@ function Lodge({}) {
           },
           {
             headers: {
-              Authorization: `Token ${token}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -284,6 +312,7 @@ function Lodge({}) {
           }}
           includeSearch={false}
           user={user}
+          propertyPage={true}
           showAddProperty={true}
           showGrantAccess={stays && stays?.length > 0 ? true : false}
           navBarLogoLink="/partner/lodge"
@@ -338,14 +367,15 @@ function Lodge({}) {
         </div>
       )}
 
-      <div className="max-w-[1500px] mx-auto">
-        <Grid px={32} py={10} mt={8} gutter={"sm"} className="w-full">
+      <div className="max-w-[1500px] px-10 mt-6 mx-auto">
+        <Grid py={10} gutter={"xl"} className="">
           {stays?.map((stay, index) => (
-            <Grid.Col xl={2} lg={2} md={4} sm={6} xs={6} key={index}>
+            <Grid.Col xl={2.4} lg={2.7} md={4} sm={6} xs={6} key={index}>
               <LodgeCard
                 stayIds={stayIds}
                 setStayIds={setStayIds}
                 stay={stay}
+                token={token}
               />
             </Grid.Col>
           ))}
@@ -524,43 +554,41 @@ function Lodge({}) {
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const queryClient = new QueryClient();
 
-  const token = getToken(context);
+  const { Auth, API } = withSSRContext({ req });
+
+  const userIsAuthenticated = await Auth.currentAuthenticatedUser()
+    .then(() => true)
+    .catch(() => false);
 
   try {
-    const user = await queryClient.fetchQuery<UserTypes | null>("user", () =>
+    if (!userIsAuthenticated) {
+      return {
+        redirect: {
+          destination: `/signin?redirect=/partner/lodge/`,
+          permanent: false,
+        },
+      };
+    }
+    const userSession = await Auth.currentSession();
+    const token = userSession.getAccessToken().getJwtToken();
+
+    await queryClient.fetchQuery<LodgeStay[] | null>("all-stay-email", () =>
+      getAllStaysEmail(token)
+    );
+
+    await queryClient.fetchQuery<UserTypes | null>("user", () =>
       getUser(token)
     );
 
-    if (user?.is_partner) {
-      await queryClient.fetchQuery<LodgeStay[] | null>("all-stay-email", () =>
-        getAllStaysEmail(token)
-      );
-
-      return {
-        props: {
-          dehydratedState: dehydrate(queryClient),
-        },
-      };
-    } else {
-      return {
-        redirect: {
-          destination: `/partner/signin?redirect=/partner/lodge/`,
-          permanent: false,
-        },
-      };
-    }
+    return {
+      props: {
+        dehydratedState: dehydrate(queryClient),
+      },
+    };
   } catch (error) {
-    if (error instanceof AxiosError && error.response?.status === 401) {
-      return {
-        redirect: {
-          destination: `/partner/signin?redirect=/partner/lodge/`,
-          permanent: false,
-        },
-      };
-    }
     return {
       props: {},
     };

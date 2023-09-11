@@ -32,6 +32,7 @@ import { useQuery } from "react-query";
 import { v4 as uuidv4 } from "uuid";
 import { parse, format, add } from "date-fns";
 import { Mixpanel } from "@/utils/mixpanelconfig";
+import { Auth } from "aws-amplify";
 
 type RoomProps = {
   room: StateRoomType;
@@ -43,6 +44,17 @@ const guestClassName =
   "h-[35px] hover:bg-red-500 cursor-pointer hover:border-red-500 hover:text-white transition-all duration-300 flex text-gray-600 items-center justify-center w-[35px] border border-solid border-gray-400 ";
 
 export default function Room({ room, stay, index }: RoomProps) {
+  const [token, setToken] = useState("");
+
+  useEffect(() => {
+    Auth.currentSession().then((res) => {
+      let accessToken = res.getAccessToken();
+      let jwt = accessToken.getJwtToken();
+
+      setToken(jwt);
+    });
+  }, []);
+
   type SelectedPackagesType = {
     name: string;
     description: string | null;
@@ -163,15 +175,14 @@ export default function Room({ room, stay, index }: RoomProps) {
       getRoomTypes(
         stay,
         format(currentState?.date[0] || new Date(), "yyyy-MM-dd"),
-        format(currentState?.date[1] || new Date(), "yyyy-MM-dd")
+        format(currentState?.date[1] || new Date(), "yyyy-MM-dd"),
+        token
       ),
-    { enabled: currentState?.date[0] && currentState.date[1] ? true : false }
+    {
+      enabled:
+        currentState?.date[0] && currentState.date[1] && token ? true : false,
+    }
   );
-
-  // console.log(roomTypes);
-  // console.log(new Date());
-  // console.log(currentState?.date[0]);
-  // console.log(currentState?.date[1]);
 
   const uniqueRooms: UniqueRoomsType[] =
     roomTypes?.reduce((accumulator: UniqueRoomsType[], current: RoomType) => {
@@ -734,7 +745,8 @@ export default function Room({ room, stay, index }: RoomProps) {
 
   const { data: otherFees, isLoading: otherFeesLoading } = useQuery(
     `park-fees-${stay?.slug}`,
-    () => getParkFees(stay)
+    () => getParkFees(stay, token),
+    { enabled: !!token }
   );
 
   const [isRoomOpen, setIsRoomOpen] = useState(false);

@@ -7,6 +7,7 @@ import {
   Loader,
   Modal,
   NumberInput,
+  ScrollArea,
   Text,
   TextInput,
 } from "@mantine/core";
@@ -20,12 +21,14 @@ import Cookies from "js-cookie";
 
 type ParkFeesEditProps = {
   stay: LodgeStay | undefined;
+  token: string;
 };
 
-function ParkFeesEdit({ stay }: ParkFeesEditProps) {
+function ParkFeesEdit({ stay, token }: ParkFeesEditProps) {
   const { data: parkFees, isLoading } = useQuery(
     `park-fees-${stay?.slug}`,
-    () => getParkFees(stay)
+    () => getParkFees(stay, token),
+    { enabled: !!token }
   );
 
   const queryClient = useQueryClient();
@@ -52,8 +55,6 @@ function ParkFeesEdit({ stay }: ParkFeesEditProps) {
     },
   });
 
-  const token = Cookies.get("token");
-
   const [openParkFeesModal, { open: openParkFees, close: closeParkFees }] =
     useDisclosure(false);
 
@@ -72,7 +73,7 @@ function ParkFeesEdit({ stay }: ParkFeesEditProps) {
         },
         {
           headers: {
-            Authorization: `Token ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -83,140 +84,145 @@ function ParkFeesEdit({ stay }: ParkFeesEditProps) {
     useMutation(addParkFees, {
       onSuccess: () => {
         queryClient.invalidateQueries(`park-fees-${stay?.slug}`);
+        closeParkFees();
       },
     });
   return (
-    <div className="border border-solid w-full border-gray-200 rounded-xl p-5">
-      <Flex justify="space-between" align="center">
-        <Text className="font-semibold" size="lg">
-          Park Fees
-        </Text>
-
-        <Button
-          onClick={(e) => {
-            e.stopPropagation();
-            openParkFees();
-          }}
-          color="red"
-          size="xs"
-        >
-          Add Park Fees
-        </Button>
-      </Flex>
-
-      <Modal
-        opened={openParkFeesModal}
-        onClose={closeParkFees}
-        title={"Park/Conservancy fees"}
-        classNames={{
-          title: "text-lg font-bold",
-          close: "text-black hover:text-gray-700 hover:bg-gray-200",
-          header: "bg-gray-100",
-        }}
-        transitionProps={{ transition: "fade", duration: 200 }}
-        closeButtonProps={{
-          style: {
-            width: 30,
-            height: 30,
-          },
-          iconSize: 20,
-        }}
-      >
-        <form
-          className="flex flex-col gap-1"
-          onSubmit={parkFeesForm.onSubmit((values) =>
-            addParkFeesMutation(values)
-          )}
-        >
-          <TextInput
-            label="Fee name"
-            placeholder="Enter fee name"
-            value={parkFeesForm.values.name}
-            onChange={(event) =>
-              parkFeesForm.setFieldValue("name", event.currentTarget.value)
-            }
-            required
-          />
-
-          <NumberInput
-            label="Non-resident adult fee"
-            placeholder="Enter non-resident adult fee"
-            value={parkFeesForm.values.nonResidentAdultPrice}
-            onChange={(value) =>
-              parkFeesForm.setFieldValue("nonResidentAdultPrice", value)
-            }
-          />
-
-          <NumberInput
-            label="Non-resident teen fee"
-            placeholder="Enter non-resident teen fee"
-            value={parkFeesForm.values.nonResidentTeenPrice}
-            onChange={(value) =>
-              parkFeesForm.setFieldValue("nonResidentTeenPrice", value)
-            }
-          />
-
-          <NumberInput
-            label="Non-resident child fee"
-            placeholder="Enter non-resident child fee"
-            value={parkFeesForm.values.nonResidentChildPrice}
-            onChange={(value) =>
-              parkFeesForm.setFieldValue("nonResidentChildPrice", value)
-            }
-          />
-
-          <NumberInput
-            label="Resident adult fee"
-            placeholder="Enter resident adult fee"
-            value={parkFeesForm.values.adultPrice}
-            onChange={(value) =>
-              parkFeesForm.setFieldValue("adultPrice", value)
-            }
-          />
-
-          <NumberInput
-            label="Resident teen fee"
-            placeholder="Enter resident teen fee"
-            value={parkFeesForm.values.teenPrice}
-            onChange={(value) => parkFeesForm.setFieldValue("teenPrice", value)}
-          />
-
-          <NumberInput
-            label="Resident child fee"
-            placeholder="Enter resident child fee"
-            value={parkFeesForm.values.childPrice}
-            onChange={(value) =>
-              parkFeesForm.setFieldValue("childPrice", value)
-            }
-          />
-
-          <Flex gap={8} justify="right" mt={6}>
-            <Button onClick={closeParkFees} variant="default">
-              Close
-            </Button>
-            <Button loading={addParkFeesLoading} type="submit">
-              Submit
-            </Button>
-          </Flex>
-        </form>
-      </Modal>
-
-      <Container className="mt-5 p-0 w-full">
-        {parkFees && parkFees.length > 0 && (
-          <div className="flex flex-col gap-3">
-            {parkFees.map((fee, index) => (
-              <ParkFee stay={stay} fee={fee} key={index} />
-            ))}
-          </div>
-        )}
-
-        {parkFees && parkFees.length === 0 && (
-          <Text className="text-center font-semibold" size="sm">
-            No park fees available
+    <ScrollArea className="w-full h-[85vh] px-5 pt-5">
+      <div className="">
+        <Flex justify="space-between" align="center">
+          <Text className="font-semibold" size="lg">
+            Park Fees
           </Text>
-        )}
-      </Container>
-    </div>
+
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+              openParkFees();
+            }}
+            color="red"
+            size="xs"
+          >
+            Add Park Fees
+          </Button>
+        </Flex>
+
+        <Modal
+          opened={openParkFeesModal}
+          onClose={closeParkFees}
+          title={"Park/Conservancy fees"}
+          classNames={{
+            title: "text-lg font-bold",
+            close: "text-black hover:text-gray-700 hover:bg-gray-200",
+            header: "bg-gray-100",
+          }}
+          transitionProps={{ transition: "fade", duration: 200 }}
+          closeButtonProps={{
+            style: {
+              width: 30,
+              height: 30,
+            },
+            iconSize: 20,
+          }}
+        >
+          <form
+            className="flex flex-col gap-1"
+            onSubmit={parkFeesForm.onSubmit((values) =>
+              addParkFeesMutation(values)
+            )}
+          >
+            <TextInput
+              label="Fee name"
+              placeholder="Enter fee name"
+              value={parkFeesForm.values.name}
+              onChange={(event) =>
+                parkFeesForm.setFieldValue("name", event.currentTarget.value)
+              }
+              required
+            />
+
+            <NumberInput
+              label="Non-resident adult fee($)"
+              placeholder="Enter non-resident adult fee"
+              value={parkFeesForm.values.nonResidentAdultPrice}
+              onChange={(value) =>
+                parkFeesForm.setFieldValue("nonResidentAdultPrice", value)
+              }
+            />
+
+            <NumberInput
+              label="Non-resident teen fee($)"
+              placeholder="Enter non-resident teen fee"
+              value={parkFeesForm.values.nonResidentTeenPrice}
+              onChange={(value) =>
+                parkFeesForm.setFieldValue("nonResidentTeenPrice", value)
+              }
+            />
+
+            <NumberInput
+              label="Non-resident child fee($)"
+              placeholder="Enter non-resident child fee"
+              value={parkFeesForm.values.nonResidentChildPrice}
+              onChange={(value) =>
+                parkFeesForm.setFieldValue("nonResidentChildPrice", value)
+              }
+            />
+
+            <NumberInput
+              label="Resident adult fee(KES)"
+              placeholder="Enter resident adult fee"
+              value={parkFeesForm.values.adultPrice}
+              onChange={(value) =>
+                parkFeesForm.setFieldValue("adultPrice", value)
+              }
+            />
+
+            <NumberInput
+              label="Resident teen fee(KES)"
+              placeholder="Enter resident teen fee"
+              value={parkFeesForm.values.teenPrice}
+              onChange={(value) =>
+                parkFeesForm.setFieldValue("teenPrice", value)
+              }
+            />
+
+            <NumberInput
+              label="Resident child fee(KES)"
+              placeholder="Enter resident child fee"
+              value={parkFeesForm.values.childPrice}
+              onChange={(value) =>
+                parkFeesForm.setFieldValue("childPrice", value)
+              }
+            />
+
+            <Flex gap={8} justify="right" mt={6}>
+              <Button onClick={closeParkFees} variant="default">
+                Close
+              </Button>
+              <Button loading={addParkFeesLoading} type="submit">
+                Submit
+              </Button>
+            </Flex>
+          </form>
+        </Modal>
+
+        <Container className="mt-5 p-0 w-full">
+          {parkFees && parkFees.length > 0 && (
+            <div className="flex flex-col gap-3">
+              {parkFees.map((fee, index) => (
+                <ParkFee token={token} stay={stay} fee={fee} key={index} />
+              ))}
+            </div>
+          )}
+
+          {parkFees && parkFees.length === 0 && (
+            <Text className="text-center font-semibold" size="sm">
+              No park fees available
+            </Text>
+          )}
+        </Container>
+      </div>
+    </ScrollArea>
   );
 }
 

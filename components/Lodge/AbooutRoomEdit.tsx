@@ -9,6 +9,7 @@ import {
   TextInput,
   FileInputProps,
   rem,
+  ScrollArea,
 } from "@mantine/core";
 import { IconPhoto, IconUpload } from "@tabler/icons-react";
 import { useMutation, useQueryClient } from "react-query";
@@ -20,10 +21,10 @@ import StayImages from "./StayImages";
 
 type RoomResidentPriceEditProps = {
   stay: LodgeStay | undefined;
+  token: string;
 };
 
-function AboutRoomEdit({ stay }: RoomResidentPriceEditProps) {
-  const token = Cookies.get("token");
+function AboutRoomEdit({ stay, token }: RoomResidentPriceEditProps) {
   const queryClient = useQueryClient();
 
   type FormValues = {
@@ -66,7 +67,7 @@ function AboutRoomEdit({ stay }: RoomResidentPriceEditProps) {
       },
       {
         headers: {
-          Authorization: `Token ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       }
     );
@@ -79,7 +80,7 @@ function AboutRoomEdit({ stay }: RoomResidentPriceEditProps) {
         formData,
         {
           headers: {
-            Authorization: `Token ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -129,65 +130,72 @@ function AboutRoomEdit({ stay }: RoomResidentPriceEditProps) {
   }
 
   return (
-    <div className="border border-solid w-full border-gray-200 rounded-xl p-5">
-      <Text className="font-semibold" size="lg">
-        About
-      </Text>
+    <ScrollArea className="w-full h-[85vh] px-5 pt-5">
+      <div className="">
+        <Text className="font-semibold" size="lg">
+          About
+        </Text>
 
-      <form
-        className="flex flex-col gap-1 mt-4"
-        onSubmit={form.onSubmit((values) => edit(values))}
-      >
-        <TextInput
-          label="Property name"
-          placeholder="Enter property name"
-          value={form.values.property_name}
-          onChange={(event) =>
-            form.setFieldValue("property_name", event.currentTarget.value)
-          }
-          required
-        />
+        <form
+          className="flex flex-col gap-1 mt-4"
+          onSubmit={form.onSubmit((values) => edit(values))}
+        >
+          <TextInput
+            label="Property name"
+            placeholder="Enter property name"
+            value={form.values.property_name}
+            onChange={(event) =>
+              form.setFieldValue("property_name", event.currentTarget.value)
+            }
+            required
+          />
 
-        <TextInput
-          label="Location"
-          placeholder="Enter location"
-          value={form.values.location}
-          onChange={(event) =>
-            form.setFieldValue("location", event.currentTarget.value)
-          }
-          required
-        />
+          <TextInput
+            label="Location"
+            placeholder="Enter location"
+            value={form.values.location}
+            onChange={(event) =>
+              form.setFieldValue("location", event.currentTarget.value)
+            }
+            required
+          />
 
-        <Flex direction="column" mt={8} gap={3}>
-          {stay?.stay_images.map((image, index) => (
-            <StayImages stay={stay} image={image} key={index}></StayImages>
-          ))}
-        </Flex>
+          <Flex direction="column" mt={8} gap={3}>
+            {stay?.stay_images.map((image, index) => (
+              <StayImages
+                stay={stay}
+                image={image}
+                token={token}
+                key={index}
+              ></StayImages>
+            ))}
+          </Flex>
 
-        <FileInput
-          label="Add image"
-          mt={6}
-          placeholder="Select one or more images"
-          multiple
-          valueComponent={ValueComponent}
-          value={files}
-          onEmptied={() => setNoFiles(true)}
-          accept="image/png, image/jpeg, image/jpg"
-          icon={<IconUpload size={rem(14)} />}
-          error={noFiles ? "Please select at least one file" : ""}
-          onChange={(payload: File[]) => {
-            setNoFiles(false);
-            setFiles(payload);
-          }}
-        />
+          <FileInput
+            label="Add image"
+            mt={6}
+            placeholder="Select one or more images"
+            multiple
+            valueComponent={ValueComponent}
+            value={files}
+            onEmptied={() => setNoFiles(true)}
+            accept="image/png, image/jpeg, image/jpg"
+            icon={<IconUpload size={rem(14)} />}
+            error={noFiles ? "Please select at least one file" : ""}
+            onChange={(payload: File[]) => {
+              setNoFiles(false);
+              setFiles(payload);
+            }}
+          />
 
-        <Flex gap={8} justify="right" mt={6}>
-          <Button loading={editLoading} type="submit">
-            Submit
-          </Button>
-        </Flex>
-      </form>
-    </div>
+          <Flex gap={8} justify="right" mt={6}>
+            <Button loading={editLoading} type="submit">
+              Submit
+            </Button>
+          </Flex>
+        </form>
+      </div>
+    </ScrollArea>
   );
 }
 

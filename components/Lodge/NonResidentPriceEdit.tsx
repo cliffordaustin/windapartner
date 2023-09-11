@@ -10,6 +10,7 @@ type NonResidentPriceEditProps = {
   date: string;
   nonResidentGuests: RoomAvailabilityResidentGuest[];
   stay: LodgeStay | undefined;
+  token: string | undefined;
 };
 
 function NonResidentPriceEdit({
@@ -17,6 +18,7 @@ function NonResidentPriceEdit({
   date,
   nonResidentGuests,
   stay,
+  token,
 }: NonResidentPriceEditProps) {
   const nonResidentGuest: RoomAvailabilityResidentGuest | undefined =
     nonResidentGuests.find(
@@ -31,8 +33,6 @@ function NonResidentPriceEdit({
     setNewPrice(nonResidentGuest?.price);
   }, []);
 
-  const token = Cookies.get("token");
-
   const updatePrice = async () => {
     if (newPrice && nonResidentGuest) {
       await axios.patch(
@@ -42,7 +42,7 @@ function NonResidentPriceEdit({
         },
         {
           headers: {
-            Authorization: `Token ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );

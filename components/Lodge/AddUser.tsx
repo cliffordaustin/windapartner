@@ -1,15 +1,17 @@
 import { LodgeStay, UserTypes } from "@/utils/types";
 import {
+  ActionIcon,
   Avatar,
   Button,
   Flex,
   Group,
   Modal,
+  ScrollArea,
   Text,
   TextInput,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconShare2 } from "@tabler/icons-react";
+import { IconPlus, IconShare2 } from "@tabler/icons-react";
 import React from "react";
 import Share from "../ui/Share";
 import { useForm } from "@mantine/form";
@@ -25,12 +27,12 @@ import axios from "axios";
 
 type AddUserPropTypes = {
   stay: LodgeStay | undefined;
+  token: string;
 };
 
-function AddUser({ stay }: AddUserPropTypes) {
+function AddUser({ stay, token }: AddUserPropTypes) {
   const queryClient = useQueryClient();
   const [opened, { open, close }] = useDisclosure(false);
-  const token = Cookies.get("token");
 
   const { data: propertAccess, isLoading: propertAccessLoading } = useQuery<
     UserAgentStayType[]
@@ -65,7 +67,7 @@ function AddUser({ stay }: AddUserPropTypes) {
         },
         {
           headers: {
-            Authorization: `Token ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -86,7 +88,7 @@ function AddUser({ stay }: AddUserPropTypes) {
       `${process.env.NEXT_PUBLIC_baseURL}/property-access/${id}/`,
       {
         headers: {
-          Authorization: `Token ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       }
     );
@@ -110,155 +112,258 @@ function AddUser({ stay }: AddUserPropTypes) {
     },
   });
 
+  const [
+    openedPropertyAccess,
+    { open: openPropertyAccess, close: closePropertyAccess },
+  ] = useDisclosure(false);
+
   return (
-    <div className="border border-solid w-full border-gray-200 rounded-xl p-5">
-      <div className="flex gap-10 items-center justify-between">
-        <Flex gap={3} direction="column">
-          <Text className="font-semibold" size="lg">
-            Add Team Members
-          </Text>
-          <Text size="sm" color="gray">
-            {/* *If the user is already registered with us, they will automatically
-            be granted access to this property without requiring an email to be
-            sent to them. */}
-            Users added will be able to manage this property and its prices.
-          </Text>
-        </Flex>
+    <ScrollArea className="w-full h-[85vh] px-5 pt-5">
+      <div className="">
+        <div className="flex gap-10 items-center justify-between">
+          <Flex gap={3} direction="column">
+            <Text size="sm" className="font-bold" color="gray">
+              Users added will be able to manage this property and its prices.
+            </Text>
+            <Text className="font-semibold" size="lg">
+              Add Team Members
+            </Text>
+          </Flex>
 
-        <Button
-          color="red"
-          size="sm"
-          leftIcon={<IconShare2></IconShare2>}
-          onClick={open}
-        >
-          Share
-        </Button>
-      </div>
+          {/* <Button
+            color="red"
+            size="sm"
+            leftIcon={<IconShare2></IconShare2>}
+            onClick={open}
+          >
+            Share
+          </Button> */}
 
-      <form
-        onSubmit={form.onSubmit((values) => {
-          grantAccessMutation(values.email);
-        })}
-        className="flex items-center mt-2 mb-2 gap-2 w-[60%]"
-      >
-        <TextInput
-          placeholder="Email address"
-          type="email"
-          w="100%"
-          required
-          value={form.values.email}
-          label="User's email"
-          onChange={(event) =>
-            form.setFieldValue("email", event.currentTarget.value)
-          }
-        />
+          <div className="flex items-center gap-3">
+            <Button
+              color="red"
+              size="sm"
+              leftIcon={<IconPlus></IconPlus>}
+              onClick={openPropertyAccess}
+              className="rounded-full"
+            >
+              Add agent
+            </Button>
 
-        <Button
-          loading={grantAccessLoading}
-          className="mt-[22px]"
-          color="red"
-          type="submit"
-          size="sm"
-        >
-          Grant Access
-        </Button>
-      </form>
-
-      {totalAgents > 0 && (
-        <div className="mt-4 flex flex-col gap-3">
-          <div className="flex flex-col gap-1">
-            {propertAccessNotUser && propertAccessNotUser?.length > 0 && (
-              <Text className="font-semibold" size="md">
-                Invitation pending
-              </Text>
-            )}
-
-            <Flex gap={5} direction="column">
-              {propertAccessNotUser?.map((property) => (
-                <Flex justify="space-between" key={property.id} align="center">
-                  <Group key={property.id} noWrap>
-                    <div>
-                      <Text size="sm" color="dimmed">
-                        {property.email}
-                      </Text>
-                    </div>
-                  </Group>
-
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedPropertyAccessUserId(property.id);
-                      removePropertyAccessNotUserMutation(property.id);
-                    }}
-                    color="red"
-                    variant="subtle"
-                    className="px-1"
-                    size="xs"
-                    loading={
-                      removePropertyAccessNotUserLoading &&
-                      selectedPropertyAccessUserId === property.id
-                    }
-                  >
-                    cancel invite
-                  </Button>
-                </Flex>
-              ))}
-            </Flex>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            {propertAccess && propertAccess?.length > 0 && (
-              <Text className="font-semibold" size="md">
-                Approved users
-              </Text>
-            )}
-
-            <Flex gap={5} direction="column">
-              {propertAccess?.map((property) => (
-                <Flex justify="space-between" key={property.id} align="center">
-                  <Group key={property.id} noWrap>
-                    <Avatar radius="xl" src={property.user.profile_pic} />
-
-                    <div>
-                      <Text>
-                        {(property.user.first_name || "") +
-                          " " +
-                          (property.user.last_name || "")}
-                      </Text>
-                      <Text size="xs" color="dimmed">
-                        {property.user.email}
-                      </Text>
-                    </div>
-                  </Group>
-
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedPropertyAccessUserId(property.id);
-                      removePropertyAccessMutation(property.id);
-                    }}
-                    color="red"
-                    variant="subtle"
-                    className="px-1"
-                    size="xs"
-                    loading={
-                      removePropertyAccessLoading &&
-                      selectedPropertyAccessUserId === property.id
-                    }
-                  >
-                    Remove access
-                  </Button>
-                </Flex>
-              ))}
-            </Flex>
+            <ActionIcon
+              className="rounded-full hover:bg-gray-100"
+              size={35}
+              onClick={open}
+              color="gray"
+            >
+              <IconShare2 size={25}></IconShare2>
+            </ActionIcon>
           </div>
         </div>
-      )}
 
-      <Modal opened={opened} onClose={close} centered>
-        <Share property={stay?.property_name || ""}></Share>
-      </Modal>
-    </div>
+        <Modal
+          opened={openedPropertyAccess}
+          onClose={closePropertyAccess}
+          size="lg"
+          classNames={{
+            title: "text-lg font-bold",
+            close:
+              "text-black hover:text-gray-700 w-[40px] h-[30px] hover:bg-gray-100",
+            body: "max-h-[500px] overflow-y-scroll px-10 pb-8 w-full",
+            content: "rounded-3xl",
+          }}
+          centered
+        >
+          <div className="">
+            <Text className="font-bold text-xl">Add Team Members</Text>
+
+            <form
+              onSubmit={form.onSubmit((values) => {
+                form.setFieldValue("email", "");
+              })}
+              className="flex w-full items-center mt-2 mb-2 gap-2"
+            >
+              <div className="flex gap-4 w-full items-center">
+                <TextInput
+                  placeholder="Add user's email"
+                  type="email"
+                  w="100%"
+                  size="md"
+                  value={form.values.email}
+                  onChange={(event) =>
+                    form.setFieldValue("email", event.currentTarget.value)
+                  }
+                />
+              </div>
+            </form>
+
+            <Text size="sm" color="gray">
+              *If user is already registered with us, they will automatically be
+              granted access to this property prices without requiring an email
+              to be sent to them.
+            </Text>
+          </div>
+
+          <div className="flex justify-between mt-[22px] items-center">
+            <Button
+              onClick={() => {
+                closePropertyAccess();
+              }}
+              variant="light"
+              color="gray"
+              size="sm"
+            >
+              Close
+            </Button>
+
+            <Button
+              onClick={() => {
+                grantAccessMutation(form.values.email);
+                closePropertyAccess();
+              }}
+              loading={grantAccessLoading}
+              color="red"
+              type="submit"
+              size="sm"
+            >
+              Submit
+            </Button>
+          </div>
+        </Modal>
+
+        {/* <form
+          onSubmit={form.onSubmit((values) => {
+            grantAccessMutation(values.email);
+          })}
+          className="flex items-center mt-2 mb-2 gap-2 w-[60%]"
+        >
+          <TextInput
+            placeholder="Email address"
+            type="email"
+            w="100%"
+            required
+            value={form.values.email}
+            label="User's email"
+            onChange={(event) =>
+              form.setFieldValue("email", event.currentTarget.value)
+            }
+          />
+
+          <Button
+            loading={grantAccessLoading}
+            className="mt-[22px]"
+            color="red"
+            type="submit"
+            size="sm"
+          >
+            Grant Access
+          </Button>
+        </form> */}
+
+        {totalAgents > 0 && (
+          <div className="mt-4 flex flex-col gap-3">
+            <div className="flex flex-col gap-1">
+              {propertAccessNotUser && propertAccessNotUser?.length > 0 && (
+                <Text className="font-semibold" size="md">
+                  Invitation pending
+                </Text>
+              )}
+
+              <Flex gap={5} direction="column">
+                {propertAccessNotUser?.map((property) => (
+                  <Flex
+                    justify="space-between"
+                    key={property.id}
+                    align="center"
+                  >
+                    <Group key={property.id} noWrap>
+                      <div>
+                        <Text size="sm" color="dimmed">
+                          {property.email}
+                        </Text>
+                      </div>
+                    </Group>
+
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedPropertyAccessUserId(property.id);
+                        removePropertyAccessNotUserMutation(property.id);
+                      }}
+                      color="red"
+                      variant="subtle"
+                      className="px-1"
+                      size="xs"
+                      loading={
+                        removePropertyAccessNotUserLoading &&
+                        selectedPropertyAccessUserId === property.id
+                      }
+                    >
+                      cancel invite
+                    </Button>
+                  </Flex>
+                ))}
+              </Flex>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              {propertAccess && propertAccess?.length > 0 && (
+                <Text className="font-semibold" size="md">
+                  Approved users
+                </Text>
+              )}
+
+              <Flex gap={5} direction="column">
+                {propertAccess?.map((property) => (
+                  <Flex
+                    justify="space-between"
+                    key={property.id}
+                    align="center"
+                  >
+                    <Group key={property.id} noWrap>
+                      <Avatar radius="xl" src={property.user.profile_pic} />
+
+                      <div>
+                        <Text>
+                          {(property.user.first_name || "") +
+                            " " +
+                            (property.user.last_name || "")}
+                        </Text>
+                        <Text size="xs" color="dimmed">
+                          {property.user.email}
+                        </Text>
+                      </div>
+                    </Group>
+
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedPropertyAccessUserId(property.id);
+                        removePropertyAccessMutation(property.id);
+                      }}
+                      color="red"
+                      variant="subtle"
+                      className="px-1"
+                      size="xs"
+                      loading={
+                        removePropertyAccessLoading &&
+                        selectedPropertyAccessUserId === property.id
+                      }
+                    >
+                      Remove access
+                    </Button>
+                  </Flex>
+                ))}
+              </Flex>
+            </div>
+          </div>
+        )}
+
+        <Modal opened={opened} onClose={close} centered>
+          <Share property={stay?.property_name || ""}></Share>
+        </Modal>
+      </div>
+    </ScrollArea>
   );
 }
 

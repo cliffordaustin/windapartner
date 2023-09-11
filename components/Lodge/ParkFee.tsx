@@ -21,10 +21,10 @@ import { useMutation, useQueryClient } from "react-query";
 type ParkFeeProps = {
   fee: ParkFee;
   stay: LodgeStay | undefined;
+  token: string | undefined;
 };
 
-function ParkFee({ fee, stay }: ParkFeeProps) {
-  const token = Cookies.get("token");
+function ParkFee({ fee, stay, token }: ParkFeeProps) {
   const queryClient = useQueryClient();
 
   const deleteParkFee = async () => {
@@ -32,7 +32,7 @@ function ParkFee({ fee, stay }: ParkFeeProps) {
       `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/${stay?.slug}/park-fees/${fee.id}/`,
       {
         headers: {
-          Authorization: "Token " + token,
+          Authorization: "Bearer " + token,
         },
       }
     );
@@ -86,7 +86,7 @@ function ParkFee({ fee, stay }: ParkFeeProps) {
       },
       {
         headers: {
-          Authorization: `Token ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       }
     );

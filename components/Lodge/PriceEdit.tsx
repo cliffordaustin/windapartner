@@ -14,7 +14,7 @@ import {
   Text,
   Tooltip,
 } from "@mantine/core";
-import { IconSelector } from "@tabler/icons-react";
+import { IconCalendar, IconSelector } from "@tabler/icons-react";
 import { format } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { useQuery } from "react-query";
@@ -23,10 +23,11 @@ import { useDisclosure } from "@mantine/hooks";
 import NonResidentBulkEdit from "./NonResidentBulkEdit";
 import ResidentPriceEdit from "./ResidentPriceEdit";
 import ResidentBulkEdit from "./ResidentBulkEdit";
+import { DatePickerInput } from "@mantine/dates";
 
 type PriceEditProps = {
-  date: [Date | null, Date | null];
   stay: LodgeStay | undefined;
+  token: string;
 };
 
 type UniqueRoomsType = {
@@ -44,7 +45,12 @@ type SelectedGuestType = {
   description?: string;
 };
 
-function PriceEdit({ date, stay }: PriceEditProps) {
+function PriceEdit({ stay, token }: PriceEditProps) {
+  const [date, setDate] = useState<[Date | null, Date | null]>([
+    new Date(),
+    new Date(new Date().setDate(new Date().getDate() + 7)),
+  ]);
+
   const queryStr = stay ? "room-type-" + stay.slug : "room-type";
   const { data: roomTypes, isLoading: roomTypesLoading } = useQuery(
     queryStr,
@@ -52,9 +58,10 @@ function PriceEdit({ date, stay }: PriceEditProps) {
       getRoomTypes(
         stay,
         format(date[0] || new Date(), "yyyy-MM-dd"),
-        format(date[1] || new Date(), "yyyy-MM-dd")
+        format(date[1] || new Date(), "yyyy-MM-dd"),
+        token
       ),
-    { enabled: date[0] && date[1] ? true : false }
+    { enabled: date[0] && date[1] && token ? true : false }
   );
 
   const uniqueRooms: UniqueRoomsType[] =
@@ -170,194 +177,78 @@ function PriceEdit({ date, stay }: PriceEditProps) {
     React.useState(false);
 
   return (
-    <div className="border relative border-solid w-full border-gray-200 rounded-xl p-5">
-      <Text className="font-semibold" size="lg">
-        Prices
-      </Text>
-      {date[0] && date[1] && (
-        <Text className="text-gray-600" size="sm">
-          Data being shown is from {format(date[0] as Date, "dd MMM yyyy")} to{" "}
-          {format(new Date(date[1]) as Date, "dd MMM yyyy")}
+    <ScrollArea className="w-full h-[85vh] px-5 pt-5">
+      <div className="flex items-center justify-center">
+        <DatePickerInput
+          type="range"
+          value={date}
+          onChange={(date) => {
+            setDate(date);
+          }}
+          color="red"
+          placeholder="Select dates"
+          styles={{ input: { paddingTop: 13, paddingBottom: 13 } }}
+          labelProps={{ className: "font-semibold mb-1" }}
+          rightSection={<IconSelector className="text-gray-500" />}
+          className="w-[400px]"
+          minDate={new Date()}
+          icon={<IconCalendar className="text-gray-500" />}
+          numberOfColumns={2}
+          autoSave="true"
+        />
+      </div>
+      <div className="">
+        <Text className="font-semibold" size="lg">
+          Prices
         </Text>
-      )}
-
-      {!date[0] ||
-        (!date[1] && (
+        {date[0] && date[1] && (
           <Text className="text-gray-600" size="sm">
-            Please select a date range to view the rooms and packages
+            Data being shown is from {format(date[0] as Date, "dd MMM yyyy")} to{" "}
+            {format(new Date(date[1]) as Date, "dd MMM yyyy")}
           </Text>
-        ))}
+        )}
 
-      <Switch
-        label="Non-resident prices"
-        color="red"
-        className="absolute top-4 right-4"
-        checked={isNonResident}
-        onChange={(event) => setIsNonResident(event.currentTarget.checked)}
-      />
+        {!date[0] ||
+          (!date[1] && (
+            <Text className="text-gray-600" size="sm">
+              Please select a date range to view the rooms and packages
+            </Text>
+          ))}
 
-      <Divider my={12} />
+        <Switch
+          label="Non-resident prices"
+          color="red"
+          className="absolute top-8 right-4"
+          checked={isNonResident}
+          onChange={(event) => setIsNonResident(event.currentTarget.checked)}
+        />
 
-      <Flex className="w-full" mt={18}>
-        <Popover
-          width={350}
-          position="bottom-start"
-          arrowOffset={60}
-          withArrow
-          shadow="md"
-          opened={isRoomOpen}
-          onChange={setIsRoomOpen}
-        >
-          <Popover.Target>
-            <Flex
-              justify={"space-between"}
-              align={"center"}
-              onClick={() => setIsRoomOpen((prev) => !prev)}
-              className="px-2 py-1 cursor-pointer rounded-l-md border border-solid w-[180px] border-gray-300"
-            >
-              <Flex direction="column" gap={4}>
-                <Text size="xs" weight={600} className="text-gray-500">
-                  Rooms
-                </Text>
-                <div className="w-[140px] overflow-hidden">
-                  <Text truncate size="sm" weight={600}>
-                    {selectedRoom ? `${selectedRoom}` : "Select the room"}
-                  </Text>
-                </div>
-              </Flex>
+        <Divider my={12} />
 
-              <IconSelector className="text-gray-500"></IconSelector>
-            </Flex>
-          </Popover.Target>
-
-          <Popover.Dropdown className="px-3">
-            {uniqueRooms.map((selectRoom, index) => (
-              <Flex
-                key={index}
-                justify={"space-between"}
-                align={"center"}
-                onClick={() => {
-                  if (selectRoom.name === selectedRoom) {
-                    deselectRoom();
-                  } else {
-                    clickSelectRoom(selectRoom.name);
-                  }
-                }}
-                // onMouseDown={() => {
-                //   setIsRoomOpen(false);
-                // }}
-                className={
-                  "py-2 px-2 rounded-md mt-1 cursor-pointer " +
-                  (selectRoom.name === selectedRoom
-                    ? "bg-[#FA5252] text-white"
-                    : "hover:bg-gray-100")
-                }
-              >
-                <Text size="sm" weight={600}>
-                  {selectRoom.name}
-                </Text>
-              </Flex>
-            ))}
-          </Popover.Dropdown>
-        </Popover>
-
-        <Popover
-          width={350}
-          position="bottom-start"
-          arrowOffset={60}
-          withArrow
-          shadow="md"
-          opened={isPackageOpen}
-          onChange={setIsPackageOpen}
-        >
-          <Popover.Target>
-            <Flex
-              justify={"space-between"}
-              align={"center"}
-              onClick={() => setIsPackageOpen((prev) => !prev)}
-              className="px-2 py-1 cursor-pointer border-l-transparent border border-solid w-[200px] border-gray-300"
-            >
-              <Flex direction="column" gap={4}>
-                <Text size="xs" weight={600} className="text-gray-500">
-                  Package
-                </Text>
-                <div className="w-[140px] overflow-hidden">
-                  <Text truncate size="sm" weight={600}>
-                    {selectedPackage
-                      ? selectedPackage.charAt(0).toUpperCase() +
-                        selectedPackage.slice(1).toLowerCase()
-                      : "Select the package"}
-                  </Text>
-                </div>
-              </Flex>
-
-              <IconSelector className="text-gray-500"></IconSelector>
-            </Flex>
-          </Popover.Target>
-
-          <Popover.Dropdown className="px-3">
-            {selectedPackages.map((roomPackage, index) => (
-              <Flex
-                key={index}
-                justify={"space-between"}
-                align={"center"}
-                onClick={() => {
-                  if (roomPackage.name === selectedPackage) {
-                    deselectPackage();
-                  } else {
-                    clickSelectPackage(roomPackage.name);
-                  }
-                }}
-                // onMouseDown={() => {
-                //   setIsPackageOpen(false);
-                // }}
-                className={
-                  "rounded-md mt-1 cursor-pointer " +
-                  (selectedPackage === roomPackage.name
-                    ? "bg-[#FA5252] text-white"
-                    : "hover:bg-gray-100")
-                }
-              >
-                <Text className="py-2 px-2 " size="sm" weight={600}>
-                  {roomPackage.name.charAt(0).toUpperCase() +
-                    roomPackage.name.slice(1).toLowerCase()}
-                </Text>
-              </Flex>
-            ))}
-          </Popover.Dropdown>
-        </Popover>
-
-        {isNonResident && (
+        <Flex className="w-full" mt={18}>
           <Popover
-            width={300}
+            width={350}
             position="bottom-start"
             arrowOffset={60}
             withArrow
             shadow="md"
-            opened={isNonResidentDropdownOpen}
-            onChange={setIsNonResidentDropdownOpen}
+            opened={isRoomOpen}
+            onChange={setIsRoomOpen}
           >
             <Popover.Target>
               <Flex
                 justify={"space-between"}
                 align={"center"}
-                onClick={() => setIsNonResidentDropdownOpen((prev) => !prev)}
-                className="px-2 py-1 cursor-pointer rounded-r-md border-l-transparent border border-solid w-[200px] border-gray-300"
+                onClick={() => setIsRoomOpen((prev) => !prev)}
+                className="px-2 py-1 cursor-pointer rounded-l-md border border-solid w-[180px] border-gray-300"
               >
                 <Flex direction="column" gap={4}>
                   <Text size="xs" weight={600} className="text-gray-500">
-                    Non-resident guest types
+                    Rooms
                   </Text>
                   <div className="w-[140px] overflow-hidden">
-                    <Text
-                      transform="capitalize"
-                      size="sm"
-                      truncate
-                      weight={600}
-                    >
-                      {selectedNonResidentGuestType
-                        ? selectedNonResidentGuestType.name
-                        : "Select guest type"}
+                    <Text truncate size="sm" weight={600}>
+                      {selectedRoom ? `${selectedRoom}` : "Select the room"}
                     </Text>
                   </div>
                 </Flex>
@@ -366,32 +257,185 @@ function PriceEdit({ date, stay }: PriceEditProps) {
               </Flex>
             </Popover.Target>
 
-            <Popover.Dropdown className="px-0 py-2">
-              <ScrollArea.Autosize
-                type="auto"
-                mah={300}
-                offsetScrollbars={true}
-                className="w-full px-2"
+            <Popover.Dropdown className="px-3">
+              {uniqueRooms.map((selectRoom, index) => (
+                <Flex
+                  key={index}
+                  justify={"space-between"}
+                  align={"center"}
+                  onClick={() => {
+                    if (selectRoom.name === selectedRoom) {
+                      deselectRoom();
+                    } else {
+                      clickSelectRoom(selectRoom.name);
+                    }
+                  }}
+                  // onMouseDown={() => {
+                  //   setIsRoomOpen(false);
+                  // }}
+                  className={
+                    "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                    (selectRoom.name === selectedRoom
+                      ? "bg-[#FA5252] text-white"
+                      : "hover:bg-gray-100")
+                  }
+                >
+                  <Text size="sm" weight={600}>
+                    {selectRoom.name}
+                  </Text>
+                </Flex>
+              ))}
+            </Popover.Dropdown>
+          </Popover>
+
+          <Popover
+            width={350}
+            position="bottom-start"
+            arrowOffset={60}
+            withArrow
+            shadow="md"
+            opened={isPackageOpen}
+            onChange={setIsPackageOpen}
+          >
+            <Popover.Target>
+              <Flex
+                justify={"space-between"}
+                align={"center"}
+                onClick={() => setIsPackageOpen((prev) => !prev)}
+                className="px-2 py-1 cursor-pointer border-l-transparent border border-solid w-[200px] border-gray-300"
               >
-                {commonRoomNonResidentNamesWithDescription.map(
-                  (guestType, index) => (
-                    <Flex
-                      w="100%"
-                      onClick={() => {
-                        setSelectedNonResidentGuestType(guestType);
-                        setIsNonResidentDropdownOpen(false);
-                      }}
-                      key={index}
-                    >
-                      {guestType?.description ? (
-                        <Tooltip.Floating
-                          multiline
-                          width={220}
-                          color="white"
-                          position="bottom"
-                          className="text-gray-800 font-semibold border-gray-200 border border-solid"
-                          label={guestType.description}
-                        >
+                <Flex direction="column" gap={4}>
+                  <Text size="xs" weight={600} className="text-gray-500">
+                    Package
+                  </Text>
+                  <div className="w-[140px] overflow-hidden">
+                    <Text truncate size="sm" weight={600}>
+                      {selectedPackage
+                        ? selectedPackage.charAt(0).toUpperCase() +
+                          selectedPackage.slice(1).toLowerCase()
+                        : "Select the package"}
+                    </Text>
+                  </div>
+                </Flex>
+
+                <IconSelector className="text-gray-500"></IconSelector>
+              </Flex>
+            </Popover.Target>
+
+            <Popover.Dropdown className="px-3">
+              {selectedPackages.map((roomPackage, index) => (
+                <Flex
+                  key={index}
+                  justify={"space-between"}
+                  align={"center"}
+                  onClick={() => {
+                    if (roomPackage.name === selectedPackage) {
+                      deselectPackage();
+                    } else {
+                      clickSelectPackage(roomPackage.name);
+                    }
+                  }}
+                  // onMouseDown={() => {
+                  //   setIsPackageOpen(false);
+                  // }}
+                  className={
+                    "rounded-md mt-1 cursor-pointer " +
+                    (selectedPackage === roomPackage.name
+                      ? "bg-[#FA5252] text-white"
+                      : "hover:bg-gray-100")
+                  }
+                >
+                  <Text className="py-2 px-2 " size="sm" weight={600}>
+                    {roomPackage.name.charAt(0).toUpperCase() +
+                      roomPackage.name.slice(1).toLowerCase()}
+                  </Text>
+                </Flex>
+              ))}
+            </Popover.Dropdown>
+          </Popover>
+
+          {isNonResident && (
+            <Popover
+              width={300}
+              position="bottom-start"
+              arrowOffset={60}
+              withArrow
+              shadow="md"
+              opened={isNonResidentDropdownOpen}
+              onChange={setIsNonResidentDropdownOpen}
+            >
+              <Popover.Target>
+                <Flex
+                  justify={"space-between"}
+                  align={"center"}
+                  onClick={() => setIsNonResidentDropdownOpen((prev) => !prev)}
+                  className="px-2 py-1 cursor-pointer rounded-r-md border-l-transparent border border-solid w-[200px] border-gray-300"
+                >
+                  <Flex direction="column" gap={4}>
+                    <Text size="xs" weight={600} className="text-gray-500">
+                      Non-resident guest types
+                    </Text>
+                    <div className="w-[140px] overflow-hidden">
+                      <Text
+                        transform="capitalize"
+                        size="sm"
+                        truncate
+                        weight={600}
+                      >
+                        {selectedNonResidentGuestType
+                          ? selectedNonResidentGuestType.name
+                          : "Select guest type"}
+                      </Text>
+                    </div>
+                  </Flex>
+
+                  <IconSelector className="text-gray-500"></IconSelector>
+                </Flex>
+              </Popover.Target>
+
+              <Popover.Dropdown className="px-0 py-2">
+                <ScrollArea.Autosize
+                  type="auto"
+                  mah={300}
+                  offsetScrollbars={true}
+                  className="w-full px-2"
+                >
+                  {commonRoomNonResidentNamesWithDescription.map(
+                    (guestType, index) => (
+                      <Flex
+                        w="100%"
+                        onClick={() => {
+                          setSelectedNonResidentGuestType(guestType);
+                          setIsNonResidentDropdownOpen(false);
+                        }}
+                        key={index}
+                      >
+                        {guestType?.description ? (
+                          <Tooltip.Floating
+                            multiline
+                            width={220}
+                            color="white"
+                            position="bottom"
+                            className="text-gray-800 font-semibold border-gray-200 border border-solid"
+                            label={guestType.description}
+                          >
+                            <Text
+                              w="100%"
+                              className={
+                                "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                                (selectedNonResidentGuestType?.name ===
+                                guestType?.name
+                                  ? "bg-[#FA5252] text-white"
+                                  : "hover:bg-gray-100")
+                              }
+                              size="sm"
+                              weight={600}
+                              transform="capitalize"
+                            >
+                              {guestType?.name}
+                            </Text>
+                          </Tooltip.Floating>
+                        ) : (
                           <Text
                             w="100%"
                             className={
@@ -407,97 +451,97 @@ function PriceEdit({ date, stay }: PriceEditProps) {
                           >
                             {guestType?.name}
                           </Text>
-                        </Tooltip.Floating>
-                      ) : (
-                        <Text
-                          w="100%"
-                          className={
-                            "py-2 px-2 rounded-md mt-1 cursor-pointer " +
-                            (selectedNonResidentGuestType?.name ===
-                            guestType?.name
-                              ? "bg-[#FA5252] text-white"
-                              : "hover:bg-gray-100")
-                          }
-                          size="sm"
-                          weight={600}
-                          transform="capitalize"
-                        >
-                          {guestType?.name}
-                        </Text>
-                      )}
-                    </Flex>
-                  )
-                )}
-              </ScrollArea.Autosize>
-            </Popover.Dropdown>
-          </Popover>
-        )}
+                        )}
+                      </Flex>
+                    )
+                  )}
+                </ScrollArea.Autosize>
+              </Popover.Dropdown>
+            </Popover>
+          )}
 
-        {!isNonResident && (
-          <Popover
-            width={300}
-            position="bottom-start"
-            arrowOffset={60}
-            withArrow
-            shadow="md"
-            opened={isResidentDropdownOpen}
-            onChange={setIsResidentDropdownOpen}
-          >
-            <Popover.Target>
-              <Flex
-                justify={"space-between"}
-                align={"center"}
-                onClick={() => setIsResidentDropdownOpen((prev) => !prev)}
-                className="px-2 py-1 cursor-pointer rounded-r-md border-l-transparent border border-solid w-[200px] border-gray-300"
-              >
-                <Flex direction="column" gap={4}>
-                  <Text size="xs" weight={600} className="text-gray-500">
-                    Resident guest types
-                  </Text>
-                  <div className="w-[140px] overflow-hidden">
-                    <Text
-                      transform="capitalize"
-                      size="sm"
-                      truncate
-                      weight={600}
-                    >
-                      {selectedResidentGuestType
-                        ? selectedResidentGuestType.name
-                        : "Select guest type"}
+          {!isNonResident && (
+            <Popover
+              width={300}
+              position="bottom-start"
+              arrowOffset={60}
+              withArrow
+              shadow="md"
+              opened={isResidentDropdownOpen}
+              onChange={setIsResidentDropdownOpen}
+            >
+              <Popover.Target>
+                <Flex
+                  justify={"space-between"}
+                  align={"center"}
+                  onClick={() => setIsResidentDropdownOpen((prev) => !prev)}
+                  className="px-2 py-1 cursor-pointer rounded-r-md border-l-transparent border border-solid w-[200px] border-gray-300"
+                >
+                  <Flex direction="column" gap={4}>
+                    <Text size="xs" weight={600} className="text-gray-500">
+                      Resident guest types
                     </Text>
-                  </div>
+                    <div className="w-[140px] overflow-hidden">
+                      <Text
+                        transform="capitalize"
+                        size="sm"
+                        truncate
+                        weight={600}
+                      >
+                        {selectedResidentGuestType
+                          ? selectedResidentGuestType.name
+                          : "Select guest type"}
+                      </Text>
+                    </div>
+                  </Flex>
+
+                  <IconSelector className="text-gray-500"></IconSelector>
                 </Flex>
+              </Popover.Target>
 
-                <IconSelector className="text-gray-500"></IconSelector>
-              </Flex>
-            </Popover.Target>
-
-            <Popover.Dropdown className="px-0 py-2">
-              <ScrollArea.Autosize
-                type="auto"
-                mah={300}
-                offsetScrollbars={true}
-                className="w-full px-2"
-              >
-                {commonRoomResidentNamesWithDescription.map(
-                  (guestType, index) => (
-                    <Flex
-                      w="100%"
-                      onClick={() => {
-                        setSelectedResidentGuestType(guestType);
-                        setIsResidentDropdownOpen(false);
-                      }}
-                      key={index}
-                    >
-                      {guestType?.description ? (
-                        <Tooltip.Floating
-                          multiline
-                          width={220}
-                          color="white"
-                          position="bottom"
-                          className="text-gray-800 font-semibold border-gray-200 border border-solid"
-                          label={guestType.description}
-                        >
+              <Popover.Dropdown className="px-0 py-2">
+                <ScrollArea.Autosize
+                  type="auto"
+                  mah={300}
+                  offsetScrollbars={true}
+                  className="w-full px-2"
+                >
+                  {commonRoomResidentNamesWithDescription.map(
+                    (guestType, index) => (
+                      <Flex
+                        w="100%"
+                        onClick={() => {
+                          setSelectedResidentGuestType(guestType);
+                          setIsResidentDropdownOpen(false);
+                        }}
+                        key={index}
+                      >
+                        {guestType?.description ? (
+                          <Tooltip.Floating
+                            multiline
+                            width={220}
+                            color="white"
+                            position="bottom"
+                            className="text-gray-800 font-semibold border-gray-200 border border-solid"
+                            label={guestType.description}
+                          >
+                            <Text
+                              w="100%"
+                              className={
+                                "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                                (selectedResidentGuestType?.name ===
+                                guestType?.name
+                                  ? "bg-[#FA5252] text-white"
+                                  : "hover:bg-gray-100")
+                              }
+                              size="sm"
+                              weight={600}
+                              transform="capitalize"
+                            >
+                              {guestType?.name}
+                            </Text>
+                          </Tooltip.Floating>
+                        ) : (
                           <Text
                             w="100%"
                             className={
@@ -513,140 +557,129 @@ function PriceEdit({ date, stay }: PriceEditProps) {
                           >
                             {guestType?.name}
                           </Text>
-                        </Tooltip.Floating>
-                      ) : (
-                        <Text
-                          w="100%"
-                          className={
-                            "py-2 px-2 rounded-md mt-1 cursor-pointer " +
-                            (selectedResidentGuestType?.name === guestType?.name
-                              ? "bg-[#FA5252] text-white"
-                              : "hover:bg-gray-100")
-                          }
-                          size="sm"
-                          weight={600}
-                          transform="capitalize"
-                        >
-                          {guestType?.name}
-                        </Text>
-                      )}
-                    </Flex>
+                        )}
+                      </Flex>
+                    )
+                  )}
+                </ScrollArea.Autosize>
+              </Popover.Dropdown>
+            </Popover>
+          )}
+        </Flex>
+
+        {selectedRoom &&
+          selectedPackage &&
+          selectedNonResidentGuestType?.name &&
+          isNonResident && (
+            <Container className="mt-10">
+              <Grid className="border-t border-b-0 border-r-0 border-l border-solid border-gray-300">
+                {selectedRoomType?.room_non_resident_availabilities.map(
+                  (guest, index) => (
+                    <NonResidentPriceEdit
+                      key={guest.id}
+                      date={format(new Date(guest.date), "dd MMM yyyy")}
+                      guestType={selectedNonResidentGuestType?.name || ""}
+                      nonResidentGuests={
+                        guest.room_non_resident_guest_availabilities
+                      }
+                      stay={stay}
+                      token={token}
+                    />
                   )
                 )}
-              </ScrollArea.Autosize>
-            </Popover.Dropdown>
-          </Popover>
-        )}
-      </Flex>
+              </Grid>
+            </Container>
+          )}
 
-      {selectedRoom &&
-        selectedPackage &&
-        selectedNonResidentGuestType?.name &&
-        isNonResident && (
-          <Container className="mt-10">
-            <Grid className="border-t border-b-0 border-r-0 border-l border-solid border-gray-300">
-              {selectedRoomType?.room_non_resident_availabilities.map(
-                (guest, index) => (
-                  <NonResidentPriceEdit
-                    key={guest.id}
-                    date={format(new Date(guest.date), "dd MMM yyyy")}
-                    guestType={selectedNonResidentGuestType?.name || ""}
-                    nonResidentGuests={
-                      guest.room_non_resident_guest_availabilities
-                    }
-                    stay={stay}
-                  />
-                )
-              )}
-            </Grid>
-          </Container>
-        )}
+        {selectedRoom &&
+          selectedPackage &&
+          selectedResidentGuestType?.name &&
+          !isNonResident && (
+            <Container className="mt-10">
+              <Grid className="border-t border-b-0 border-r-0 border-l border-solid border-gray-300">
+                {selectedRoomType?.room_resident_availabilities.map(
+                  (guest, index) => (
+                    <ResidentPriceEdit
+                      key={guest.id}
+                      date={format(new Date(guest.date), "dd MMM yyyy")}
+                      guestType={selectedResidentGuestType?.name || ""}
+                      residentGuests={guest.room_resident_guest_availabilities}
+                      stay={stay}
+                      token={token}
+                    />
+                  )
+                )}
+              </Grid>
+            </Container>
+          )}
 
-      {selectedRoom &&
-        selectedPackage &&
-        selectedResidentGuestType?.name &&
-        !isNonResident && (
-          <Container className="mt-10">
-            <Grid className="border-t border-b-0 border-r-0 border-l border-solid border-gray-300">
-              {selectedRoomType?.room_resident_availabilities.map(
-                (guest, index) => (
-                  <ResidentPriceEdit
-                    key={guest.id}
-                    date={format(new Date(guest.date), "dd MMM yyyy")}
-                    guestType={selectedResidentGuestType?.name || ""}
-                    residentGuests={guest.room_resident_guest_availabilities}
-                    stay={stay}
-                  />
-                )
-              )}
-            </Grid>
-          </Container>
-        )}
+        <Modal
+          classNames={{
+            title: "text-lg font-bold",
+            close: "text-black hover:text-gray-700 hover:bg-gray-200",
+            header: "bg-gray-100",
+          }}
+          opened={opened}
+          size="lg"
+          onClose={close}
+          title="Bulk update"
+        >
+          {isNonResident && (
+            <NonResidentBulkEdit
+              guestType={selectedNonResidentGuestType?.name || ""}
+              description={selectedNonResidentGuestType?.description || ""}
+              date={date}
+              roomName={selectedRoomType?.name || ""}
+              packageName={selectedPackage || ""}
+              selectedRoomType={selectedRoomType}
+              stay={stay}
+              setSelectedNonResidentGuestType={setSelectedNonResidentGuestType}
+              closeModal={close}
+              token={token}
+            ></NonResidentBulkEdit>
+          )}
 
-      <Modal
-        classNames={{
-          title: "text-lg font-bold",
-          close: "text-black hover:text-gray-700 hover:bg-gray-200",
-          header: "bg-gray-100",
-        }}
-        opened={opened}
-        size="lg"
-        onClose={close}
-        title="Bulk update"
-      >
-        {isNonResident && (
-          <NonResidentBulkEdit
-            guestType={selectedNonResidentGuestType?.name || ""}
-            description={selectedNonResidentGuestType?.description || ""}
-            date={date}
-            roomName={selectedRoomType?.name || ""}
-            packageName={selectedPackage || ""}
-            selectedRoomType={selectedRoomType}
-            stay={stay}
-            setSelectedNonResidentGuestType={setSelectedNonResidentGuestType}
-            closeModal={close}
-          ></NonResidentBulkEdit>
-        )}
+          {!isNonResident && (
+            <ResidentBulkEdit
+              guestType={selectedResidentGuestType?.name || ""}
+              description={selectedResidentGuestType?.description || ""}
+              date={date}
+              roomName={selectedRoomType?.name || ""}
+              packageName={selectedPackage || ""}
+              selectedRoomType={selectedRoomType}
+              stay={stay}
+              setSelectedResidentGuestType={setSelectedResidentGuestType}
+              closeModal={close}
+              token={token}
+            ></ResidentBulkEdit>
+          )}
+        </Modal>
 
-        {!isNonResident && (
-          <ResidentBulkEdit
-            guestType={selectedResidentGuestType?.name || ""}
-            description={selectedResidentGuestType?.description || ""}
-            date={date}
-            roomName={selectedRoomType?.name || ""}
-            packageName={selectedPackage || ""}
-            selectedRoomType={selectedRoomType}
-            stay={stay}
-            setSelectedResidentGuestType={setSelectedResidentGuestType}
-            closeModal={close}
-          ></ResidentBulkEdit>
-        )}
-      </Modal>
+        {selectedRoom &&
+          selectedPackage &&
+          selectedNonResidentGuestType?.name &&
+          isNonResident && (
+            <div className="flex mt-8 justify-between">
+              <div></div>
+              <Button onClick={open} color="red" radius="md" size="sm">
+                Bulk update
+              </Button>
+            </div>
+          )}
 
-      {selectedRoom &&
-        selectedPackage &&
-        selectedNonResidentGuestType?.name &&
-        isNonResident && (
-          <div className="flex mt-8 justify-between">
-            <div></div>
-            <Button onClick={open} color="red" radius="md" size="sm">
-              Bulk update
-            </Button>
-          </div>
-        )}
-
-      {selectedRoom &&
-        selectedPackage &&
-        selectedResidentGuestType?.name &&
-        !isNonResident && (
-          <div className="flex mt-8 justify-between">
-            <div></div>
-            <Button onClick={open} color="red" radius="md" size="sm">
-              Bulk update
-            </Button>
-          </div>
-        )}
-    </div>
+        {selectedRoom &&
+          selectedPackage &&
+          selectedResidentGuestType?.name &&
+          !isNonResident && (
+            <div className="flex mt-8 justify-between">
+              <div></div>
+              <Button onClick={open} color="red" radius="md" size="sm">
+                Bulk update
+              </Button>
+            </div>
+          )}
+      </div>
+    </ScrollArea>
   );
 }
 

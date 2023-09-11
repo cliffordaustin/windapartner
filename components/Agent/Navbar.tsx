@@ -18,6 +18,7 @@ type NavbarProps = {
   user?: UserTypes | null;
   calculatePage?: boolean;
   includeSearch?: boolean;
+  propertyPage?: boolean;
   showAddProperty?: boolean;
   showGrantAccess?: boolean;
   includeDateSearch?: boolean;
@@ -33,6 +34,7 @@ export default function Navbar({
   user,
   calculatePage = false,
   includeSearch = true,
+  propertyPage = false,
   showAddProperty = false,
   showGrantAccess = false,
   includeDateSearch = false,
@@ -157,8 +159,58 @@ export default function Navbar({
       )}
 
       <div className="flex items-center gap-4">
+        {propertyPage && (
+          <Button
+            variant="light"
+            onClick={() => {
+              localStorage.setItem(
+                "lastPropertyDestinationPage",
+                router.asPath
+              );
+
+              const lastAgentDestinationPage = localStorage.getItem(
+                "lastAgentDestinationPage"
+              );
+
+              if (lastAgentDestinationPage) {
+                router.push(lastAgentDestinationPage);
+              } else {
+                router.push("/partner/agent");
+              }
+            }}
+            className="font-semibold hover:bg-gray-100 rounded-full bg-transparent text-black"
+          >
+            Switch to agent
+          </Button>
+        )}
+        {!propertyPage && (
+          <Button
+            variant="light"
+            onClick={() => {
+              localStorage.setItem("lastAgentDestinationPage", router.asPath);
+
+              const lastPropertyDestinationPage = localStorage.getItem(
+                "lastPropertyDestinationPage"
+              );
+
+              if (lastPropertyDestinationPage) {
+                router.push(lastPropertyDestinationPage);
+              } else {
+                router.push("/partner/lodge");
+              }
+            }}
+            className="font-semibold hover:bg-gray-100 rounded-full bg-transparent text-black"
+          >
+            Switch to property
+          </Button>
+        )}
         {showAddProperty && (
-          <Button color="red" onClick={openModal}>
+          <Button
+            variant="light"
+            color="red"
+            className="rounded-full"
+            onClick={openModal}
+          >
             Add your property
           </Button>
         )}

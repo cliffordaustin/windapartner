@@ -8,7 +8,7 @@ export const getUser = async (
     try {
       const user = await axios.get(`${process.env.NEXT_PUBLIC_baseURL}/user/`, {
         headers: {
-          Authorization: "Token " + token,
+          Authorization: "Bearer " + token,
         },
       });
 

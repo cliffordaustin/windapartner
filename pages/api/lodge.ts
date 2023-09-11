@@ -41,6 +41,7 @@ type RoomProps = {
   infantCapacity: number | "";
   roomPackage: string | null;
   packageDescription: string;
+  token: string | undefined;
 };
 
 export type RoomReturnType = {
@@ -55,6 +56,7 @@ export const addRoom = async (
     infantCapacity,
     roomPackage,
     packageDescription,
+    token,
   }: RoomProps,
   slug: string | null
 ): Promise<RoomReturnType | null> => {
@@ -70,7 +72,7 @@ export const addRoom = async (
     },
     {
       headers: {
-        Authorization: "Token " + Cookies.get("token"),
+        Authorization: "Bearer " + token,
       },
     }
   );
@@ -93,7 +95,7 @@ export const deleteRoom = async ({
       `${process.env.NEXT_PUBLIC_baseURL}/room-types/${roomSlug}/delete-nonresident-availability/`,
       {
         headers: {
-          Authorization: "Token " + Cookies.get("token"),
+          Authorization: "Bearer " + Cookies.get("token"),
         },
       }
     );
@@ -106,7 +108,7 @@ export const deleteRoom = async ({
       `${process.env.NEXT_PUBLIC_baseURL}/room-types/${roomSlug}/delete-resident-availability/`,
       {
         headers: {
-          Authorization: "Token " + Cookies.get("token"),
+          Authorization: "Bearer " + Cookies.get("token"),
         },
       }
     );
@@ -115,7 +117,7 @@ export const deleteRoom = async ({
       `${process.env.NEXT_PUBLIC_baseURL}/stays/${staySlug}/room-types/${roomSlug}/`,
       {
         headers: {
-          Authorization: "Token " + Cookies.get("token"),
+          Authorization: "Bearer " + Cookies.get("token"),
         },
       }
     );

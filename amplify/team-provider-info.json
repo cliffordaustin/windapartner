@@ -1,0 +1,29 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-winda-dev-152307-authRole",
+      "UnauthRoleArn": "arn:aws:iam::952027537293:role/amplify-winda-dev-152307-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::952027537293:role/amplify-winda-dev-152307-authRole",
+      "Region": "eu-west-2",
+      "DeploymentBucketName": "amplify-winda-dev-152307-deployment",
+      "UnauthRoleName": "amplify-winda-dev-152307-unauthRole",
+      "StackName": "amplify-winda-dev-152307",
+      "StackId": "arn:aws:cloudformation:eu-west-2:952027537293:stack/amplify-winda-dev-152307/76704150-48db-11ee-b7f7-0209da65cc36",
+      "AmplifyAppId": "d2usjfbivi6fbl"
+    },
+    "categories": {
+      "auth": {
+        "windac5c546cf": {}
+      },
+      "function": {
+        "AdminQueries3cdeff20": {
+          "deploymentBucketName": "amplify-winda-dev-152307-deployment",
+          "s3Key": "amplify-builds/AdminQueries3cdeff20-62434c32327077507078-build.zip"
+        }
+      },
+      "api": {
+        "AdminQueries": {}
+      }
+    }
+  }
+}
