@@ -372,7 +372,7 @@ export default function Calculate() {
                           className="text-black"
                           variant="white"
                         >
-                          Add discount rate
+                          Edit discount rates
                         </Button>
                       </div>
                     </Alert>
@@ -965,7 +965,7 @@ export const getServerSideProps: GetServerSideProps = async ({
     if (!userIsAuthenticated) {
       return {
         redirect: {
-          destination: `/signin?redirect=/partner/agent/calculate`,
+          destination: `/signin?redirect=/partner/agent`,
           permanent: false,
         },
       };

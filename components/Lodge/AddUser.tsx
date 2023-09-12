@@ -147,7 +147,7 @@ function AddUser({ stay, token }: AddUserPropTypes) {
               onClick={openPropertyAccess}
               className="rounded-full"
             >
-              Add agent
+              Add Team Member
             </Button>
 
             <ActionIcon

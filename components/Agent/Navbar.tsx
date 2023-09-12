@@ -163,20 +163,22 @@ export default function Navbar({
           <Button
             variant="light"
             onClick={() => {
-              localStorage.setItem(
-                "lastPropertyDestinationPage",
-                router.asPath
-              );
+              router.push("/partner/agent");
 
-              const lastAgentDestinationPage = localStorage.getItem(
-                "lastAgentDestinationPage"
-              );
+              // localStorage.setItem(
+              //   "lastPropertyDestinationPage",
+              //   router.asPath
+              // );
 
-              if (lastAgentDestinationPage) {
-                router.push(lastAgentDestinationPage);
-              } else {
-                router.push("/partner/agent");
-              }
+              // const lastAgentDestinationPage = localStorage.getItem(
+              //   "lastAgentDestinationPage"
+              // );
+
+              // if (lastAgentDestinationPage) {
+              //   router.push(lastAgentDestinationPage);
+              // } else {
+              //   router.push("/partner/agent");
+              // }
             }}
             className="font-semibold hover:bg-gray-100 rounded-full bg-transparent text-black"
           >
@@ -187,17 +189,18 @@ export default function Navbar({
           <Button
             variant="light"
             onClick={() => {
-              localStorage.setItem("lastAgentDestinationPage", router.asPath);
+              router.push("/partner/lodge");
+              // localStorage.setItem("lastAgentDestinationPage", router.asPath);
 
-              const lastPropertyDestinationPage = localStorage.getItem(
-                "lastPropertyDestinationPage"
-              );
+              // const lastPropertyDestinationPage = localStorage.getItem(
+              //   "lastPropertyDestinationPage"
+              // );
 
-              if (lastPropertyDestinationPage) {
-                router.push(lastPropertyDestinationPage);
-              } else {
-                router.push("/partner/lodge");
-              }
+              // if (lastPropertyDestinationPage) {
+              //   router.push(lastPropertyDestinationPage);
+              // } else {
+              //   router.push("/partner/lodge");
+              // }
             }}
             className="font-semibold hover:bg-gray-100 rounded-full bg-transparent text-black"
           >

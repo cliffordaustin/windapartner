@@ -314,20 +314,21 @@ export default function NavbarSimple() {
               <Button
                 variant="light"
                 onClick={() => {
-                  localStorage.setItem(
-                    "lastPropertyDestinationPage",
-                    router.asPath
-                  );
+                  router.push("/partner/agent");
+                  // localStorage.setItem(
+                  //   "lastPropertyDestinationPage",
+                  //   router.asPath
+                  // );
 
-                  const lastAgentDestinationPage = localStorage.getItem(
-                    "lastAgentDestinationPage"
-                  );
+                  // const lastAgentDestinationPage = localStorage.getItem(
+                  //   "lastAgentDestinationPage"
+                  // );
 
-                  if (lastAgentDestinationPage) {
-                    router.push(lastAgentDestinationPage);
-                  } else {
-                    router.push("/partner/agent");
-                  }
+                  // if (lastAgentDestinationPage) {
+                  //   router.push(lastAgentDestinationPage);
+                  // } else {
+                  //   router.push("/partner/agent");
+                  // }
                 }}
                 className="font-semibold hover:bg-gray-100 rounded-full bg-transparent text-black"
               >
@@ -389,7 +390,7 @@ export const getServerSideProps: GetServerSideProps = async ({
     if (!userIsAuthenticated) {
       return {
         redirect: {
-          destination: `/signin?redirect=/partner/lodge/${query.slug}`,
+          destination: `/signin?redirect=/partner/lodge`,
           permanent: false,
         },
       };

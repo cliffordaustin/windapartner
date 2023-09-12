@@ -388,7 +388,7 @@ function LodgeCard({ stay, stayIds, setStayIds, token }: LodgeProps) {
           ))}
         </Carousel>
 
-        <Tooltip
+        {/* <Tooltip
           label={`
       ${stay.number_of_agents} agent(s) have access to this property
       `}
@@ -398,7 +398,7 @@ function LodgeCard({ stay, stayIds, setStayIds, token }: LodgeProps) {
           <div className="absolute bottom-4 w-[20px] h-[20px] cursor-pointer rounded-full flex items-center justify-center left-2.5 bg-gray-200">
             <IconInfoCircle size={20} color="gray"></IconInfoCircle>
           </div>
-        </Tooltip>
+        </Tooltip> */}
       </div>
       {/* {arrImages.map((image, index) => (
           <Carousel.Slide className="rounded-md" w={"100%"} key={index}>
