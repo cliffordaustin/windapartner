@@ -24,6 +24,7 @@ import Navbar from "@/components/Agent/Navbar";
 import {
   getAllStaysEmail,
   getDetailPartnerStays,
+  getPartnerAllStays,
   getPartnerStays,
   getPartnerStaysType,
   getPartnerStaysWithoutAccess,
@@ -68,24 +69,11 @@ export default function AgentPage() {
 
   const router: NextRouter = useRouter();
 
-  const { data: stayList, isLoading: isStayLoading } =
+  const { data: allPartnerStays, isLoading: allPartnerStaysLoading } =
     useQuery<getPartnerStaysType>(
-      "partner-stays",
-      () => {
-        return getPartnerStays(
-          router.query.search as string,
-          Number(router.query.page || 1),
-          token
-        );
-      },
-      { enabled: !!token }
-    );
-
-  const { data: stayListWithoutAccess, isLoading: isStayWithoutAccessLoading } =
-    useQuery<getPartnerStaysType>(
-      "partner-stays-without-access",
+      "all-partner-stays",
       () =>
-        getPartnerStaysWithoutAccess(
+        getPartnerAllStays(
           router.query.search as string,
           Number(router.query.second_page || 1),
           token
@@ -98,11 +86,6 @@ export default function AgentPage() {
     () => getUser(token),
     { enabled: !!token }
   );
-
-  // useEffect(() => {
-  //   refetch();
-  //   partnerStayRefetch();
-  // }, [router.query.search, router.query.page, router.query.second_page]);
 
   const { state, setState } = useContext(Context);
 
@@ -140,39 +123,8 @@ export default function AgentPage() {
     }
   }, []);
 
-  type CombinedStay = {
-    stay: Stay;
-    withoutAccess: boolean;
-  };
-
   const [showListOfStaysWithoutAccess, setShowListOfStaysWithoutAccess] =
     useState<boolean>(router.query.contracts === "1" ? false : true);
-
-  const combineStays = useCallback((): CombinedStay[] => {
-    const allStays: CombinedStay[] = [];
-
-    stayList?.results.map((item) => {
-      allStays.push({
-        stay: item,
-        withoutAccess: false,
-      });
-    });
-
-    if (router.query.contracts === "1") {
-      return allStays;
-    }
-
-    stayListWithoutAccess?.results.map((item) => {
-      allStays.push({
-        stay: item,
-        withoutAccess: true,
-      });
-    });
-
-    return allStays;
-  }, [stayList, stayListWithoutAccess, router.query.contracts]);
-
-  const allStays = combineStays();
 
   const [showCalculatePricingPopup, setShowCalculatePricingPopup] =
     useState<boolean>(false);
@@ -183,61 +135,7 @@ export default function AgentPage() {
         <Navbar user={user}></Navbar>
       </div>
 
-      <Tabs
-        variant="outline"
-        className="mb-[110px]"
-        defaultValue="have-contract"
-      >
-        {/* {isLoading && (
-          <div className="sticky bg-white z-40 top-0 left-0 right-0">
-            <ScrollArea>
-              <div className="border-b sticky top-0 left-0 right-0 border-t-0 flex items-center gap-4 border-solid border-x-0 border-gray-200 py-4 px-6">
-                <Skeleton height={40} w={"150px"} radius="md" />
-                <Skeleton height={40} w={"150px"} radius="md" />
-                <Skeleton height={40} w={"150px"} radius="md" />
-                <Skeleton height={40} w={"150px"} radius="md" />
-              </div>
-            </ScrollArea>
-          </div>
-        )} */}
-
-        {/* {addedStays && addedStays.length > 0 && !isLoading && (
-          <div className="sticky flex bg-white border-b border-solid border-x-0 border-t-0 border-gray-200 top-0 z-40 left-0 right-0">
-            <div className="w-[calc(100vw-230px)]">
-              <ScrollArea>
-                <div className="sticky top-0 left-0 right-0 flex items-center gap-4 h-[70px] px-6">
-                  {addedStays?.map((stay, index) => (
-                    <UserSelectedStays
-                      stay={stay}
-                      key={stay.id}
-                    ></UserSelectedStays>
-                  ))}
-                </div>
-              </ScrollArea>
-            </div>
-            <div className="w-[230px] flex items-center justify-center absolute right-0 h-full px-8">
-              <Link className="no-underline" href="/partner/agent/calculate">
-                <Button
-                  leftIcon={
-                    isLoading ? (
-                      <Loader size="sm" color="white" />
-                    ) : (
-                      <IconCalculator
-                        size="1.4rem"
-                        className="text-white ml-1"
-                      />
-                    )
-                  }
-                  disabled={isLoading}
-                  className="w-fit flex  items-center justify-center rounded-lg px-4 text-white z-10 bg-[#000] hover:bg-[#333] font-semibold"
-                >
-                  Calculate pricing
-                </Button>
-              </Link>
-            </div>
-          </div>
-        )} */}
-
+      <div className="mb-[110px]">
         {addedStays && addedStays.length > 0 && !isLoading && (
           <>
             {showCalculatePricingPopup && (
@@ -272,9 +170,9 @@ export default function AgentPage() {
 
             <div
               className={
-                "fixed bottom-0 z-[999] left-0 shadow-top right-0 h-[100px] flex flex-col items-center justify-center gap-3 py-4 w-full " +
+                "fixed bottom-0 z-[40] bg-white left-0 shadow-top right-0 h-[100px] flex flex-col items-center justify-center gap-3 py-4 w-full " +
                 (showCalculatePricingPopup
-                  ? "bg-gray-100 border-t border-solid border-gray-200 border-x-0 border-b-0"
+                  ? "!bg-gray-100 border-t border-solid border-gray-200 border-x-0 border-b-0"
                   : "")
               }
             >
@@ -347,32 +245,31 @@ export default function AgentPage() {
           </>
         )}
 
-        <Tabs.Panel value="have-contract" pt="xs">
-          <div className="max-w-[640px] mx-auto px-4 py-6 border border-solid rounded-lg border-gray-200 flex items-center">
-            <div className="w-[150px] px-4 border-r border-y-0 border-l-0 border-solid border-gray-200">
-              <Text className="font-bold">My contracts</Text>
-            </div>
-            <div className="px-4 flex gap-7 items-center">
-              <Text size="sm" className="text-gray-500">
-                View only the properties you have a contract with
-              </Text>
-
-              <Switch
-                color="red"
-                checked={!showListOfStaysWithoutAccess}
-                onChange={() => {
-                  setShowListOfStaysWithoutAccess((prev) => !prev);
-                  router.replace({
-                    query: {
-                      contracts: showListOfStaysWithoutAccess ? "1" : "",
-                    },
-                  });
-                }}
-              ></Switch>
-            </div>
+        <div className="max-w-[640px] mx-auto mt-4 px-4 py-6 border border-solid rounded-lg border-gray-200 flex items-center">
+          <div className="w-[150px] px-4 border-r border-y-0 border-l-0 border-solid border-gray-200">
+            <Text className="font-bold">My contracts</Text>
           </div>
-          <div className="md:px-12 max-w-[1440px] mt-4 mx-auto px-6">
-            {/* {!router.query.search &&
+          <div className="px-4 flex gap-7 items-center">
+            <Text size="sm" className="text-gray-500">
+              View only the properties you have a contract with
+            </Text>
+
+            <Switch
+              color="red"
+              checked={!showListOfStaysWithoutAccess}
+              onChange={() => {
+                setShowListOfStaysWithoutAccess((prev) => !prev);
+                router.replace({
+                  query: {
+                    contracts: showListOfStaysWithoutAccess ? "1" : "",
+                  },
+                });
+              }}
+            ></Switch>
+          </div>
+        </div>
+        <div className="md:px-12 max-w-[1440px] mt-4 mx-auto px-6">
+          {/* {!router.query.search &&
               stayList &&
               stayList.results.length > 0 && (
                 <Flex gap="xs" align="center" wrap="wrap" className="mt-2">
@@ -387,151 +284,61 @@ export default function AgentPage() {
                 </Flex>
               )} */}
 
-            {router.query.search &&
-              stayList &&
-              stayList.results.length === 0 && (
-                <div className="flex ml-6 items-center gap-2 mt-4">
-                  <Text size="lg" className="text-gray-600">
-                    No results found for{" "}
-                    <span className="font-semibold">{router.query.search}</span>
-                  </Text>
-                  <Link className="text-blue-500" href="/partner/agent">
-                    clear search
-                  </Link>
-                </div>
-              )}
-
-            <Grid gutter={"xl"} className="mt-5">
-              {!isStayLoading &&
-                allStays.map((item, index) => (
-                  <Grid.Col
-                    xl={2.7}
-                    lg={3}
-                    md={4}
-                    sm={6}
-                    xs={6}
-                    key={item.stay.id}
-                  >
-                    <Listing
-                      stay={item.stay}
-                      withoutAccess={item.withoutAccess}
-                    ></Listing>
-                  </Grid.Col>
-                ))}
-
-              {isStayLoading &&
-                Array.from({ length: 8 }).map((_, index) => (
-                  <Grid.Col xl={2.7} lg={3} md={4} sm={6} xs={6} key={index}>
-                    <Skeleton height={220} radius="md" />
-                    <Skeleton height={10} mt={4} radius="md" />
-                    <Skeleton height={10} w="70%" mt={4} radius="md" />
-                    <Skeleton height={10} w="50%" mt={4} radius="md" />
-                  </Grid.Col>
-                ))}
-            </Grid>
-          </div>
-
-          {stayList && stayList.total_pages > 1 && (
-            <Pagination
-              radius="lg"
-              color="red"
-              className="my-8"
-              total={stayList.total_pages}
-              position="center"
-              value={Number(router.query.page || 1)}
-              onChange={(page) => {
-                router.push(
-                  `/partner/agent?page=${page}&search=${
-                    router.query.search || ""
-                  }`
-                );
-              }}
-            />
-          )}
-        </Tabs.Panel>
-
-        <Tabs.Panel value="have-no-contract" pt="xs">
-          <div className="md:px-12 max-w-[1440px] mx-auto px-6">
-            {!router.query.search &&
-              stayListWithoutAccess &&
-              stayListWithoutAccess.results.length > 0 && (
-                <Flex gap="xs" align="center" wrap="wrap" className="mt-2">
-                  <IconInfoCircle
-                    className="text-gray-600"
-                    size="1.3rem"
-                    stroke={1.5}
-                  />
-                  <Text className="text-gray-600">
-                    Click on the plus button on a lodge to request access to
-                    their pricing
-                  </Text>
-                </Flex>
-              )}
-
-            {router.query.search &&
-              stayListWithoutAccess &&
-              stayListWithoutAccess.results.length === 0 && (
-                <div className="flex ml-6 items-center gap-2 mt-4">
-                  <Text size="lg" className="text-gray-600">
-                    No results found for{" "}
-                    <span className="font-semibold">{router.query.search}</span>
-                  </Text>
-                  <Link className="text-blue-500" href="/partner/agent">
-                    clear search
-                  </Link>
-                </div>
-              )}
-
-            <Grid gutter={"xl"} className="mt-5">
-              {!isStayWithoutAccessLoading &&
-                stayListWithoutAccess?.results.map((stay, index) => (
-                  <Grid.Col xl={2.7} lg={3} md={4} sm={6} xs={6} key={stay.id}>
-                    <Listing stay={stay} withoutAccess></Listing>
-                  </Grid.Col>
-                ))}
-
-              {isStayWithoutAccessLoading &&
-                Array.from({ length: 8 }).map((_, index) => (
-                  <Grid.Col xl={2.7} lg={3} md={4} sm={6} xs={6} key={index}>
-                    <Skeleton height={220} radius="md" />
-                    <Skeleton height={10} mt={4} radius="md" />
-                    <Skeleton height={10} w="70%" mt={4} radius="md" />
-                    <Skeleton height={10} w="50%" mt={4} radius="md" />
-                  </Grid.Col>
-                ))}
-            </Grid>
-          </div>
-
-          {stayListWithoutAccess && stayListWithoutAccess.total_pages > 1 && (
-            <Pagination
-              radius="lg"
-              color="red"
-              className="my-8"
-              total={stayListWithoutAccess.total_pages}
-              position="center"
-              value={Number(router.query.second_page || 1)}
-              onChange={(page) => {
-                router.push(
-                  `/partner/agent?second_page=${page}&search=${
-                    router.query.search || ""
-                  }`
-                );
-              }}
-            />
-          )}
-
-          {stayListWithoutAccess?.results.length === 0 &&
-            !isStayWithoutAccessLoading &&
-            !router.query.search && (
-              <div className="flex flex-col items-center justify-center mt-12">
+          {router.query.search &&
+            allPartnerStays &&
+            allPartnerStays.results.length === 0 && (
+              <div className="flex ml-6 items-center gap-2 mt-4">
                 <Text size="lg" className="text-gray-600">
-                  You have no lodges yet. We have been notified and we will be
-                  in touch to add the lodges you have contract with.
+                  No results found for{" "}
+                  <span className="font-semibold">{router.query.search}</span>
                 </Text>
+                <Link className="text-blue-500" href="/partner/agent">
+                  clear search
+                </Link>
               </div>
             )}
-        </Tabs.Panel>
-      </Tabs>
+
+          <Grid gutter={"xl"} className="mt-5">
+            {!allPartnerStaysLoading &&
+              allPartnerStays?.results.map((item, index) => (
+                <Grid.Col xl={2.7} lg={3} md={4} sm={6} xs={6} key={item.id}>
+                  <Listing
+                    stay={item}
+                    withoutAccess={item.has_property_access ? false : true}
+                  ></Listing>
+                </Grid.Col>
+              ))}
+
+            {allPartnerStaysLoading &&
+              Array.from({ length: 8 }).map((_, index) => (
+                <Grid.Col xl={2.7} lg={3} md={4} sm={6} xs={6} key={index}>
+                  <Skeleton height={220} radius="md" />
+                  <Skeleton height={10} mt={4} radius="md" />
+                  <Skeleton height={10} w="70%" mt={4} radius="md" />
+                  <Skeleton height={10} w="50%" mt={4} radius="md" />
+                </Grid.Col>
+              ))}
+          </Grid>
+        </div>
+
+        {allPartnerStays && allPartnerStays.total_pages > 1 && (
+          <Pagination
+            radius="lg"
+            color="red"
+            className="my-8"
+            total={allPartnerStays.total_pages}
+            position="center"
+            value={Number(router.query.page || 1)}
+            onChange={(page) => {
+              router.push(
+                `/partner/agent?page=${page}&search=${
+                  router.query.search || ""
+                }`
+              );
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 }
@@ -561,18 +368,8 @@ export const getServerSideProps: GetServerSideProps = async ({
     const userSession = await Auth.currentSession();
     const token = userSession.getAccessToken().getJwtToken();
 
-    await queryClient.fetchQuery<getPartnerStaysType>("partner-stays", () =>
-      getPartnerStays(query.search as string, Number(query.page || 1), token)
-    );
-
-    await queryClient.fetchQuery<getPartnerStaysType>(
-      "partner-stays-without-access",
-      () =>
-        getPartnerStaysWithoutAccess(
-          query.search as string,
-          Number(query.page || 1),
-          token
-        )
+    await queryClient.fetchQuery<getPartnerStaysType>("all-partner-stays", () =>
+      getPartnerAllStays(query.search as string, Number(query.page || 1), token)
     );
 
     await queryClient.fetchQuery<UserTypes | null>("user", () =>

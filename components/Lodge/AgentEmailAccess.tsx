@@ -29,14 +29,6 @@ import {
   getStayAgentsByEmailUser,
   getStayAgentsNotVerified,
 } from "@/pages/api/stays";
-import { WithContext as ReactTags, Tag } from "react-tag-input";
-import AWS from "aws-sdk";
-import awsmobile from "@/src/aws-exports";
-import {
-  UserType,
-  UsersListType,
-} from "aws-sdk/clients/cognitoidentityserviceprovider";
-import { API, Auth } from "aws-amplify";
 
 type AgentEmailAccessPropTypes = {
   stay: LodgeStay | undefined;

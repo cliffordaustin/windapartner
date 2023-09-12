@@ -215,6 +215,7 @@ export interface Stay {
   beachfront: boolean;
   agent_access_request_made: boolean;
   agent_access_request_approved: boolean;
+  has_property_access: boolean;
 }
 
 export interface UserTypes {

@@ -148,6 +148,32 @@ export const getPartnerStaysWithoutAccess = async (
   };
 };
 
+export const getPartnerAllStays = async (
+  location: string | undefined,
+  page: number | undefined,
+  token: string | undefined
+): Promise<getPartnerStaysType> => {
+  const stays = await axios.get(
+    `${process.env.NEXT_PUBLIC_baseURL}/all-partner-stays/?search=${
+      location || ""
+    }&page=${page || 1}`,
+    {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    }
+  );
+
+  return {
+    results: stays.data.results,
+    count: stays.data.count,
+    page_size: stays.data.page_size,
+    next: stays.data.next,
+    previous: stays.data.previous,
+    total_pages: stays.data.total_pages,
+  };
+};
+
 export const getDetailPartnerStays = async (
   listIds: string | undefined,
   token: string | undefined
