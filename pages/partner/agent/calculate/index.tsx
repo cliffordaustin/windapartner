@@ -353,14 +353,18 @@ export default function Calculate() {
                   <Tabs.Panel key={index} value={stay.slug} pt="xs">
                     <Alert
                       icon={<IconAlertCircle size="1rem" />}
-                      title="No discount added"
+                      title="Discount rates"
                       className="w-full mx-auto"
                       color="yellow"
                       // withCloseButton
                       onClose={() => {}}
                     >
                       <div className="flex items-center justify-between gap-3">
-                        <Text>No discount rate has been added yet.</Text>
+                        <Text>
+                          {agents && agents.length > 0
+                            ? "You are now viewing nett rates."
+                            : "You are now viewing rack rates."}
+                        </Text>
                         <Button
                           onClick={() => {
                             openDiscountRateModalOpen();
