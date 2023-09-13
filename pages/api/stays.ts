@@ -84,6 +84,7 @@ export type NotUserAgentStayType = {
 export type AgentDiscountRateType = {
   id: number;
   percentage: number;
+  resident_percentage: number;
   start_date: string | null;
   end_date: string | null;
 };

@@ -66,12 +66,14 @@ function AgentEmailAccess({ stay, token }: AgentEmailAccessPropTypes) {
   type FormValues = {
     email: string;
     contract_rate: number | "";
+    resident_contract_rate: number | "";
   };
 
   const form = useForm<FormValues>({
     initialValues: {
       email: "",
       contract_rate: "",
+      resident_contract_rate: "",
     },
   });
 
@@ -86,6 +88,7 @@ function AgentEmailAccess({ stay, token }: AgentEmailAccessPropTypes) {
     id: string;
     text: string;
     rate: number | "";
+    resident_rate: number | "";
   };
 
   const [emails, setEmails] = React.useState<EmailType[]>([]);
@@ -99,6 +102,7 @@ function AgentEmailAccess({ stay, token }: AgentEmailAccessPropTypes) {
             email: email.text,
             encoded_email: Buffer.from(email.text).toString("base64"),
             contract_rate: email.rate,
+            resident_contract_rate: email.resident_rate,
           },
           {
             headers: {
@@ -369,7 +373,7 @@ function AgentEmailAccess({ stay, token }: AgentEmailAccessPropTypes) {
         <Modal
           opened={openedEmailAccess}
           onClose={closeEmailAccess}
-          size="lg"
+          size="xl"
           classNames={{
             title: "text-lg font-bold",
             close:
@@ -388,7 +392,11 @@ function AgentEmailAccess({ stay, token }: AgentEmailAccessPropTypes) {
                   className="flex items-center gap-1 bg-gray-100 rounded-full py-1 px-2"
                 >
                   <Text size="sm">
-                    {email.text} - {email.rate}%
+                    {email.text} -{" "}
+                    <span className="font-semibold">
+                      {email.rate}%(Non-resident) - {email.resident_rate}
+                      %(resident)
+                    </span>
                   </Text>
 
                   <IconX
@@ -409,18 +417,20 @@ function AgentEmailAccess({ stay, token }: AgentEmailAccessPropTypes) {
                     id: values.email,
                     text: values.email,
                     rate: values.contract_rate,
+                    resident_rate: values.resident_contract_rate,
                   },
                 ]);
                 form.setFieldValue("email", "");
                 form.setFieldValue("contract_rate", "");
+                form.setFieldValue("resident_contract_rate", "");
               })}
-              className="flex items-center mt-2 mb-2 gap-2"
+              className="flex items-center mt-2 mb-2"
             >
-              <div className="flex gap-4 items-center">
+              <div className="flex flex-col gap-2 w-full items-center">
                 <TextInput
                   placeholder="Agent's email"
                   type="email"
-                  w="50%"
+                  w="100%"
                   size="md"
                   label="Agent's email"
                   value={form.values.email}
@@ -429,32 +439,50 @@ function AgentEmailAccess({ stay, token }: AgentEmailAccessPropTypes) {
                   }
                 />
 
-                <NumberInput
-                  placeholder="Agent's contract rate"
-                  size="md"
-                  w="50%"
-                  label="Agent's contract rate"
-                  step={0.05}
-                  min={0}
-                  max={100}
-                  precision={2}
-                  value={form.values.contract_rate}
-                  onChange={(value) =>
-                    form.setFieldValue("contract_rate", value)
-                  }
-                />
+                <div className="flex gap-4 w-full">
+                  <NumberInput
+                    placeholder="Contract rate"
+                    size="md"
+                    w="50%"
+                    label="Non-resident contract rate"
+                    step={0.05}
+                    min={0}
+                    max={100}
+                    precision={2}
+                    value={form.values.contract_rate}
+                    onChange={(value) =>
+                      form.setFieldValue("contract_rate", value)
+                    }
+                  />
 
-                <Button
-                  className="mt-[22px] w-[130px]"
-                  color="red"
-                  type="submit"
-                  disabled={
-                    form.values.email === "" || form.values.contract_rate === ""
-                  }
-                  size="md"
-                >
-                  Add email
-                </Button>
+                  <NumberInput
+                    placeholder="Contract rate"
+                    size="md"
+                    w="50%"
+                    label="Resident contract rate"
+                    step={0.05}
+                    min={0}
+                    max={100}
+                    precision={2}
+                    value={form.values.resident_contract_rate}
+                    onChange={(value) =>
+                      form.setFieldValue("resident_contract_rate", value)
+                    }
+                  />
+                  <Button
+                    className="mt-[22px] w-[130px]"
+                    color="red"
+                    type="submit"
+                    disabled={
+                      (!form.values.contract_rate &&
+                        !form.values.resident_contract_rate) ||
+                      !form.values.email
+                    }
+                    size="md"
+                  >
+                    Add email
+                  </Button>
+                </div>
               </div>
             </form>
 
@@ -482,6 +510,7 @@ function AgentEmailAccess({ stay, token }: AgentEmailAccessPropTypes) {
                 grantAccessMutation();
               }}
               loading={grantAccessLoading}
+              disabled={emails.length === 0}
               color="red"
               type="submit"
               size="sm"

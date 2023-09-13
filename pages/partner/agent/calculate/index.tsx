@@ -292,6 +292,8 @@ export default function Calculate() {
 
   const [displayRackRates, setDisplayRackRates] = useState(false);
 
+  const [isNonResident, setIsNonResident] = useState<boolean>(true);
+
   return (
     <div>
       <div className="border-b sticky top-0 z-10 bg-white left-0 right-0 border-x-0 border-t-0 border-solid border-b-gray-200">
@@ -472,7 +474,10 @@ export default function Calculate() {
 
                               <div className="flex items-center gap-2">
                                 <Text className="text-sm medium">
-                                  {agent.percentage}%
+                                  {isNonResident
+                                    ? agent.percentage
+                                    : agent.resident_percentage}
+                                  %
                                 </Text>
 
                                 <ActionIcon
@@ -498,7 +503,10 @@ export default function Calculate() {
                               </div>
                               <div className="flex items-center gap-2">
                                 <Text className="text-sm font-medium">
-                                  {agent.percentage}%
+                                  {isNonResident
+                                    ? agent.percentage
+                                    : agent.resident_percentage}
+                                  %
                                 </Text>
 
                                 <ActionIcon
@@ -598,6 +606,8 @@ export default function Calculate() {
                       staySlug={selectedTab}
                       token={token}
                       displayRackRates={displayRackRates}
+                      setIsNonResident={setIsNonResident}
+                      isNonResident={isNonResident}
                     />
                   </div>
                 </div>

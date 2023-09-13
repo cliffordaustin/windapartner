@@ -112,10 +112,19 @@ function calculateExtraFees(
   return totalExtraFees;
 }
 
-function findPercentage(data: AgentDiscountRateType[], date: string): number {
+function findPercentage(
+  data: AgentDiscountRateType[],
+  date: string
+): {
+  rate: number;
+  resident_rate: number;
+} {
   const targetDate = new Date(date);
 
-  let percentage = 0;
+  let percentage = {
+    rate: 0,
+    resident_rate: 0,
+  };
 
   for (const item of data) {
     const startDate = item.start_date ? new Date(item.start_date) : null;
@@ -123,10 +132,16 @@ function findPercentage(data: AgentDiscountRateType[], date: string): number {
 
     if (startDate && endDate) {
       if (targetDate >= startDate && targetDate <= endDate) {
-        percentage = item.percentage;
+        percentage = {
+          rate: item.percentage,
+          resident_rate: item.resident_percentage,
+        };
       }
     } else if (!startDate && !endDate) {
-      percentage = item.percentage;
+      percentage = {
+        rate: item.percentage,
+        resident_rate: item.resident_percentage,
+      };
     }
   }
 
@@ -139,6 +154,7 @@ function findPercentageWithState(
 ): {
   standard: boolean;
   rate: number;
+  resident_rate: number;
   start_date: string;
   end_date: string;
 } {
@@ -147,6 +163,7 @@ function findPercentageWithState(
   let percentage = {
     standard: false,
     rate: 0,
+    resident_rate: 0,
     start_date: "",
     end_date: "",
   };
@@ -160,6 +177,7 @@ function findPercentageWithState(
         percentage = {
           standard: false,
           rate: item.percentage,
+          resident_rate: item.resident_percentage,
           start_date: item.start_date || "",
           end_date: item.end_date || "",
         };
@@ -168,6 +186,7 @@ function findPercentageWithState(
       percentage = {
         standard: true,
         rate: item.percentage,
+        resident_rate: item.resident_percentage,
         start_date: "",
         end_date: "",
       };
@@ -206,9 +225,10 @@ function residentPrice(
               roomAvailability.date
             );
             // convert to decimal
-            percentage = percentage / 100;
+            const residentPercentage = percentage.resident_rate / 100;
             totalPrice +=
-              guestAvailability.price - guestAvailability.price * percentage;
+              guestAvailability.price -
+              guestAvailability.price * residentPercentage;
           }
         }
       }
@@ -247,9 +267,10 @@ const nonResidentPrice = (
               roomAvailability.date
             );
             // convert to decimal
-            percentage = percentage / 100;
+            const nonResidentPercentage = percentage.rate / 100;
             totalPrice +=
-              guestAvailability.price - guestAvailability.price * percentage;
+              guestAvailability.price -
+              guestAvailability.price * nonResidentPercentage;
             break;
           }
         }

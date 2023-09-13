@@ -24,6 +24,8 @@ type AgentPriceTableType = {
   token: string | undefined;
   agentRates: AgentDiscountRateType[] | undefined;
   displayRackRates: boolean;
+  isNonResident: boolean;
+  setIsNonResident: (isNonResident: boolean) => void;
 };
 
 export default function AgentPriceTable({
@@ -31,6 +33,8 @@ export default function AgentPriceTable({
   token,
   agentRates,
   displayRackRates,
+  isNonResident,
+  setIsNonResident,
 }: AgentPriceTableType) {
   const [date, setDate] = useState<[Date | null, Date | null]>([
     new Date(),
@@ -87,7 +91,6 @@ export default function AgentPriceTable({
     }
   }, [roomTypes]);
 
-  const [isNonResident, setIsNonResident] = useState<boolean>(true);
   return (
     <div className="relative">
       <div className="flex items-center gap-4 justify-center mb-5">

@@ -164,7 +164,7 @@ function SelectedRoomTable({
                     "py-4 border-b-4 relative z-0 border-solid border-x-0 border-t-0 border-transparent text-center px-4"
                   }
                 >
-                  ${totalPrice}
+                  ${totalPrice.toFixed(2)}
                 </div>
               </Tooltip>
             );

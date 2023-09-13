@@ -97,7 +97,7 @@ function SelectedRoomTableResident({
       ...uniqueDates.map((date) => {
         let percentage = {
           standard: false,
-          rate: 0,
+          resident_rate: 0,
           start_date: "",
           end_date: "",
         };
@@ -105,7 +105,7 @@ function SelectedRoomTableResident({
         if (!displayRackRates) {
           percentage = pricing.findPercentageWithState(agentRates || [], date);
         }
-        const rate = percentage.rate / 100;
+        const rate = percentage.resident_rate / 100;
 
         return {
           header: () => {
@@ -117,7 +117,7 @@ function SelectedRoomTableResident({
                     ? "bg-green-300"
                     : !percentage.standard &&
                       !displayRackRates &&
-                      percentage.rate > 0
+                      percentage.resident_rate > 0
                     ? "bg-blue-400"
                     : "bg-gray-300")
                 }
@@ -141,7 +141,7 @@ function SelectedRoomTableResident({
                   percentage.standard ? (
                     <div className="text-center ">
                       <div className="text-sm">Nett Rate</div>
-                      <div className="text-sm">{percentage.rate}%</div>
+                      <div className="text-sm">{percentage.resident_rate}%</div>
                     </div>
                   ) : percentage.start_date && percentage.end_date ? (
                     <div className="text-center">
@@ -149,7 +149,7 @@ function SelectedRoomTableResident({
                         {format(new Date(percentage.start_date), "dd MMM")} -{" "}
                         {format(new Date(percentage.end_date), "dd MMM")} Rate
                       </div>
-                      <div className="text-sm">{percentage.rate}%</div>
+                      <div className="text-sm">{percentage.resident_rate}%</div>
                     </div>
                   ) : (
                     "Rack rate"
@@ -164,7 +164,7 @@ function SelectedRoomTableResident({
                     "py-4 border-b-4 relative z-0 border-solid border-x-0 border-t-0 border-transparent text-center px-4"
                   }
                 >
-                  KES{totalPrice}
+                  KES{totalPrice.toFixed(2)}
                 </div>
               </Tooltip>
             );
