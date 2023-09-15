@@ -49,44 +49,21 @@ import ClientOnly from "@/components/ui/ClientOnly";
 import { Auth, withSSRContext } from "aws-amplify";
 
 function Lodge({}) {
-  const [token, setToken] = useState("");
-
-  useEffect(() => {
-    Auth.currentSession().then((res) => {
-      let accessToken = res.getAccessToken();
-      let jwt = accessToken.getJwtToken();
-
-      setToken(jwt);
-    });
-  }, []);
-
   const router = useRouter();
-  const { data: user } = useQuery<UserTypes | null>(
-    "user",
-    () => {
-      return getUser(token);
-    },
-    { enabled: !!token }
-  );
+  const { data: user } = useQuery<UserTypes | null>("user", () => {
+    return getUser();
+  });
   const { data: stays, isLoading: isStayLoading } = useQuery<
     LodgeStay[] | null
-  >(
-    "all-stay-email",
-    () => {
-      return getAllStaysEmail(token);
-    },
-    { enabled: !!token }
-  );
+  >("all-stay-email", () => {
+    return getAllStaysEmail();
+  });
 
   const { data: agents, isLoading: isAgentLoading } = useQuery<
     AgentType[] | null
-  >(
-    "all-agents",
-    () => {
-      return getAllAgents(token);
-    },
-    { enabled: !!token }
-  );
+  >("all-agents", () => {
+    return getAllAgents();
+  });
 
   const [stayIds, setStayIds] = React.useState<number[]>([]);
 
@@ -166,6 +143,9 @@ function Lodge({}) {
     if (files.length === 0) {
       setNoFiles(true);
     } else {
+      const currentSession = await Auth.currentSession();
+      const accessToken = currentSession.getAccessToken();
+      const token = accessToken.getJwtToken();
       try {
         setNoFiles(false);
         setLoading(true);
@@ -275,6 +255,9 @@ function Lodge({}) {
   SelectItem.displayName = "SelectItem";
 
   const grantAccess = async () => {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
     for (const agentId of agentIds) {
       const selected = values.filter((value) => value.checked);
       for (const stay of selected) {
@@ -375,7 +358,6 @@ function Lodge({}) {
                 stayIds={stayIds}
                 setStayIds={setStayIds}
                 stay={stay}
-                token={token}
               />
             </Grid.Col>
           ))}
@@ -572,15 +554,17 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
         },
       };
     }
-    const userSession = await Auth.currentSession();
-    const token = userSession.getAccessToken().getJwtToken();
+
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const ssrToken = accessToken.getJwtToken();
 
     await queryClient.fetchQuery<LodgeStay[] | null>("all-stay-email", () =>
-      getAllStaysEmail(token)
+      getAllStaysEmail(ssrToken)
     );
 
     await queryClient.fetchQuery<UserTypes | null>("user", () =>
-      getUser(token)
+      getUser(ssrToken)
     );
 
     return {

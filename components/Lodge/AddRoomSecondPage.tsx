@@ -98,17 +98,6 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
 
   const { classes, cx } = useStyles();
 
-  const [token, setToken] = useState("");
-
-  useEffect(() => {
-    Auth.currentSession().then((res) => {
-      let accessToken = res.getAccessToken();
-      let jwt = accessToken.getJwtToken();
-
-      setToken(jwt);
-    });
-  }, []);
-
   const router = useRouter();
 
   const links = state.rooms.map((room, roomIndex) =>
@@ -169,6 +158,10 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
 
   const proceedSubmit = async () => {
     setLoadingProceed(true);
+
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
 
     for (const room of state.rooms) {
       for (const pkg of room.packages) {
@@ -289,6 +282,9 @@ function AddRoomSecondPage({ staySlug }: AddRoomSecondPageProps) {
     const submitSeasonDataError: SeasonDataErrorType[] = [];
 
     setSeasonDataError([]);
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
 
     // To perform checks
     for (const room of state.rooms) {

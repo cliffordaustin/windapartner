@@ -27,7 +27,6 @@ import { DatePickerInput } from "@mantine/dates";
 
 type PriceEditProps = {
   stay: LodgeStay | undefined;
-  token: string;
 };
 
 type UniqueRoomsType = {
@@ -45,7 +44,7 @@ type SelectedGuestType = {
   description?: string;
 };
 
-function PriceEdit({ stay, token }: PriceEditProps) {
+function PriceEdit({ stay }: PriceEditProps) {
   const [date, setDate] = useState<[Date | null, Date | null]>([
     new Date(),
     new Date(new Date().setDate(new Date().getDate() + 7)),
@@ -58,10 +57,9 @@ function PriceEdit({ stay, token }: PriceEditProps) {
       getRoomTypes(
         stay,
         format(date[0] || new Date(), "yyyy-MM-dd"),
-        format(date[1] || new Date(), "yyyy-MM-dd"),
-        token
+        format(date[1] || new Date(), "yyyy-MM-dd")
       ),
-    { enabled: date[0] && date[1] && token ? true : false }
+    { enabled: date[0] && date[1] ? true : false }
   );
 
   const uniqueRooms: UniqueRoomsType[] =
@@ -583,7 +581,6 @@ function PriceEdit({ stay, token }: PriceEditProps) {
                         guest.room_non_resident_guest_availabilities
                       }
                       stay={stay}
-                      token={token}
                     />
                   )
                 )}
@@ -605,7 +602,6 @@ function PriceEdit({ stay, token }: PriceEditProps) {
                       guestType={selectedResidentGuestType?.name || ""}
                       residentGuests={guest.room_resident_guest_availabilities}
                       stay={stay}
-                      token={token}
                     />
                   )
                 )}
@@ -635,7 +631,6 @@ function PriceEdit({ stay, token }: PriceEditProps) {
               stay={stay}
               setSelectedNonResidentGuestType={setSelectedNonResidentGuestType}
               closeModal={close}
-              token={token}
             ></NonResidentBulkEdit>
           )}
 
@@ -650,7 +645,6 @@ function PriceEdit({ stay, token }: PriceEditProps) {
               stay={stay}
               setSelectedResidentGuestType={setSelectedResidentGuestType}
               closeModal={close}
-              token={token}
             ></ResidentBulkEdit>
           )}
         </Modal>

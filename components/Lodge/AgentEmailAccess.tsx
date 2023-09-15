@@ -29,32 +29,32 @@ import {
   getStayAgentsByEmailUser,
   getStayAgentsNotVerified,
 } from "@/pages/api/stays";
+import { Auth } from "aws-amplify";
 
 type AgentEmailAccessPropTypes = {
   stay: LodgeStay | undefined;
-  token: string;
 };
 
-function AgentEmailAccess({ stay, token }: AgentEmailAccessPropTypes) {
+function AgentEmailAccess({ stay }: AgentEmailAccessPropTypes) {
   const queryClient = useQueryClient();
 
   const { data: agentVerified, isLoading: isAgentVerifiedLoading } = useQuery<
     AgentStayType[]
-  >("all-agents-verified", () => getStayAgents(token, stay));
+  >("all-agents-verified", () => getStayAgents(stay));
 
   const { data: agentNotVerified, isLoading: isAgentNotVerifiedLoading } =
     useQuery<AgentStayType[]>("all-agents-not-verified", () =>
-      getStayAgentsNotVerified(token, stay)
+      getStayAgentsNotVerified(stay)
     );
 
   const { data: userAgentsByEmail, isLoading: userAgentsByEmailLoading } =
     useQuery<UserAgentStayType[]>("user-agents-email", () =>
-      getStayAgentsByEmailUser(token, stay)
+      getStayAgentsByEmailUser(stay)
     );
 
   const { data: notUserAgentsByEmail, isLoading: notUserAgentsByEmailLoading } =
     useQuery<NotUserAgentStayType[]>("not-user-agents-email", () =>
-      getStayAgentsByEmailNotUser(token, stay)
+      getStayAgentsByEmailNotUser(stay)
     );
 
   const [opened, { open, close }] = useDisclosure(false);
@@ -94,6 +94,9 @@ function AgentEmailAccess({ stay, token }: AgentEmailAccessPropTypes) {
   const [emails, setEmails] = React.useState<EmailType[]>([]);
 
   const grantAccess = async () => {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
     for (const email of emails) {
       if (stay) {
         await axios.patch(
@@ -143,6 +146,9 @@ function AgentEmailAccess({ stay, token }: AgentEmailAccessPropTypes) {
 
   const removeAccess = async (agentId: number) => {
     if (stay) {
+      const currentSession = await Auth.currentSession();
+      const accessToken = currentSession.getAccessToken();
+      const token = accessToken.getJwtToken();
       await axios.delete(
         `${process.env.NEXT_PUBLIC_baseURL}/remove-agent/${agentId}/`,
         {
@@ -165,6 +171,9 @@ function AgentEmailAccess({ stay, token }: AgentEmailAccessPropTypes) {
     (agentVerified?.length || 0) + (userAgentsByEmail?.length || 0);
 
   const removeUserAgentAccess = async (id: number) => {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
     await axios.delete(
       `${process.env.NEXT_PUBLIC_baseURL}/agent-access-by-email/${id}/`,
       {
@@ -379,7 +388,7 @@ function AgentEmailAccess({ stay, token }: AgentEmailAccessPropTypes) {
             close:
               "text-black hover:text-gray-700 w-[40px] h-[30px] hover:bg-gray-100",
             body: "max-h-[500px] overflow-y-scroll px-10 pb-8 w-full",
-            content: "rounded-3xl",
+            content: "rounded-2xl",
           }}
           centered
         >

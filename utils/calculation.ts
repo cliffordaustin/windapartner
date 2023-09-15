@@ -126,15 +126,54 @@ function findPercentage(
     resident_rate: 0,
   };
 
+  const agentNetRate = data?.find((agent) => {
+    return !agent.start_date && !agent.end_date;
+  });
+
   for (const item of data) {
     const startDate = item.start_date ? new Date(item.start_date) : null;
     const endDate = item.end_date ? new Date(item.end_date) : null;
 
     if (startDate && endDate) {
-      if (targetDate >= startDate && targetDate <= endDate) {
+      if (
+        targetDate >= startDate &&
+        targetDate <= endDate &&
+        item.percentage &&
+        item.resident_percentage
+      ) {
         percentage = {
           rate: item.percentage,
           resident_rate: item.resident_percentage,
+        };
+      } else if (
+        targetDate >= startDate &&
+        targetDate <= endDate &&
+        !item.percentage &&
+        !item.resident_percentage
+      ) {
+        percentage = {
+          rate: agentNetRate?.percentage || 0,
+          resident_rate: agentNetRate?.resident_percentage || 0,
+        };
+      } else if (
+        targetDate >= startDate &&
+        targetDate <= endDate &&
+        !item.percentage &&
+        item.resident_percentage
+      ) {
+        percentage = {
+          rate: agentNetRate?.percentage || 0,
+          resident_rate: item.resident_percentage,
+        };
+      } else if (
+        targetDate >= startDate &&
+        targetDate <= endDate &&
+        item.percentage &&
+        !item.resident_percentage
+      ) {
+        percentage = {
+          rate: item.percentage,
+          resident_rate: agentNetRate?.resident_percentage || 0,
         };
       }
     } else if (!startDate && !endDate) {
@@ -143,6 +182,20 @@ function findPercentage(
         resident_rate: item.resident_percentage,
       };
     }
+
+    // if (startDate && endDate) {
+    //   if (targetDate >= startDate && targetDate <= endDate) {
+    //     percentage = {
+    //       rate: item.percentage,
+    //       resident_rate: item.resident_percentage,
+    //     };
+    //   }
+    // } else if (!startDate && !endDate) {
+    //   percentage = {
+    //     rate: item.percentage,
+    //     resident_rate: item.resident_percentage,
+    //   };
+    // }
   }
 
   return percentage;
@@ -155,15 +208,23 @@ function findPercentageWithState(
   standard: boolean;
   rate: number;
   resident_rate: number;
+  isResidentNettRate: boolean;
+  isNonResidentNettRate: boolean;
   start_date: string;
   end_date: string;
 } {
   const targetDate = new Date(date);
 
+  const agentNetRate = data?.find((agent) => {
+    return !agent.start_date && !agent.end_date;
+  });
+
   let percentage = {
     standard: false,
     rate: 0,
     resident_rate: 0,
+    isResidentNettRate: false,
+    isNonResidentNettRate: false,
     start_date: "",
     end_date: "",
   };
@@ -173,11 +234,63 @@ function findPercentageWithState(
     const endDate = item.end_date ? new Date(item.end_date) : null;
 
     if (startDate && endDate) {
-      if (targetDate >= startDate && targetDate <= endDate) {
+      if (
+        targetDate >= startDate &&
+        targetDate <= endDate &&
+        item.percentage &&
+        item.resident_percentage
+      ) {
         percentage = {
           standard: false,
           rate: item.percentage,
           resident_rate: item.resident_percentage,
+          isResidentNettRate: false,
+          isNonResidentNettRate: false,
+          start_date: item.start_date || "",
+          end_date: item.end_date || "",
+        };
+      } else if (
+        targetDate >= startDate &&
+        targetDate <= endDate &&
+        !item.percentage &&
+        !item.resident_percentage
+      ) {
+        percentage = {
+          standard: false,
+          rate: agentNetRate?.percentage || 0,
+          resident_rate: agentNetRate?.resident_percentage || 0,
+          isResidentNettRate: true,
+          isNonResidentNettRate: true,
+          start_date: "",
+          end_date: "",
+        };
+      } else if (
+        targetDate >= startDate &&
+        targetDate <= endDate &&
+        !item.percentage &&
+        item.resident_percentage
+      ) {
+        percentage = {
+          standard: false,
+          rate: agentNetRate?.percentage || 0,
+          resident_rate: item.resident_percentage,
+          isResidentNettRate: false,
+          isNonResidentNettRate: true,
+          start_date: "",
+          end_date: "",
+        };
+      } else if (
+        targetDate >= startDate &&
+        targetDate <= endDate &&
+        item.percentage &&
+        !item.resident_percentage
+      ) {
+        percentage = {
+          standard: false,
+          rate: item.percentage,
+          resident_rate: agentNetRate?.resident_percentage || 0,
+          isResidentNettRate: true,
+          isNonResidentNettRate: false,
           start_date: item.start_date || "",
           end_date: item.end_date || "",
         };
@@ -187,6 +300,8 @@ function findPercentageWithState(
         standard: true,
         rate: item.percentage,
         resident_rate: item.resident_percentage,
+        isResidentNettRate: false,
+        isNonResidentNettRate: false,
         start_date: "",
         end_date: "",
       };

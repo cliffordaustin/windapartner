@@ -124,44 +124,6 @@ export default function Listing({ stay, withoutAccess = false }: ListingProps) {
     );
   }
 
-  const [opened, { open, close }] = useDisclosure(false);
-
-  const [document, setDocument] = useState<File | null>(null);
-
-  const [noDocument, setNoDocument] = useState(false);
-
-  const token = Cookies.get("token");
-
-  const addAgentToStay = async () => {
-    if (!document) {
-      setNoDocument(true);
-      return;
-    } else {
-      setNoDocument(false);
-      const formData = new FormData();
-      formData.append("document", document);
-
-      await axios.patch(
-        `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/update-agents-with-file/`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-    }
-  };
-
-  const queryClient = useQueryClient();
-
-  const { mutateAsync, isLoading } = useMutation(addAgentToStay, {
-    onSuccess: () => {
-      queryClient.invalidateQueries("partner-stays-without-access");
-      close();
-    },
-  });
-
   return (
     <div className="w-full relative">
       <div className="relative">
@@ -182,12 +144,9 @@ export default function Listing({ stay, withoutAccess = false }: ListingProps) {
               <Image
                 src={image}
                 className={
-                  isAdded && !withoutAccess
+                  isAdded
                     ? "opacity-70 rounded-lg object-cover"
-                    : stay.agent_access_request_made &&
-                      !stay.agent_access_request_approved
-                    ? "opacity-40 rounded-lg object-cover"
-                    : " w-full rounded-lg object-cover"
+                    : "rounded-lg object-cover"
                 }
                 alt={"Images of " + (stay.property_name || stay.name)}
                 sizes="100%"
@@ -197,15 +156,15 @@ export default function Listing({ stay, withoutAccess = false }: ListingProps) {
             </Carousel.Slide>
           ))}
         </Carousel>
-        {stay.agent_access_request_made &&
+        {/* {stay.agent_access_request_made &&
           !stay.agent_access_request_approved && (
             <Text className="absolute bottom-16 font-bold left-2">
               Access request has been sent.
             </Text>
-          )}
+          )} */}
       </div>
 
-      {isAdded && !withoutAccess ? (
+      {isAdded ? (
         <Button
           onClick={() => handleRemoveItemClick(stay.id)}
           className="w-[35px] p-0 bg-black hover:bg-black absolute left-3 bottom-[70px] h-[35px] flex items-center justify-center rounded-full"
@@ -223,7 +182,7 @@ export default function Listing({ stay, withoutAccess = false }: ListingProps) {
             />
           </svg>
         </Button>
-      ) : !isAdded && !withoutAccess ? (
+      ) : (
         <Button
           color="red"
           onClick={() => addListingToCalculate(stay.id)}
@@ -231,60 +190,16 @@ export default function Listing({ stay, withoutAccess = false }: ListingProps) {
         >
           <IconPlus size="1.4rem" className="text-white" />
         </Button>
-      ) : !stay.agent_access_request_made ? (
+      )}
+
+      {/* {!stay.agent_access_request_made && 
         <Button
           color="red"
           onClick={open}
           className="p-0 px-4 absolute left-3 bottom-[70px] h-[35px] flex items-center justify-center rounded-full"
         >
-          {/* <IconPlus size="1.4rem" className="text-white" /> */}
           Request access
-        </Button>
-      ) : (
-        ""
-      )}
-
-      <Modal
-        opened={opened}
-        onClose={close}
-        title="Add your document"
-        overlayProps={{
-          opacity: 0.55,
-          blur: 3,
-        }}
-        classNames={{
-          title: "text-lg font-bold",
-          close: "text-black hover:text-gray-700 hover:bg-gray-200",
-        }}
-        className="!w-[500px]"
-      >
-        <FileInput
-          label="Upload documents"
-          placeholder="Accepted file types: PDF"
-          accept="application/pdf"
-          icon={<IconUpload size={rem(14)} />}
-          error={noDocument ? "Please select at least one file" : ""}
-          onChange={(payload: File) => {
-            setNoDocument(false);
-            setDocument(payload);
-          }}
-        />
-
-        <Flex gap={8} justify="right" mt={6}>
-          <Button onClick={close} variant="default">
-            Close
-          </Button>
-          <Button
-            onClick={() => {
-              mutateAsync();
-            }}
-            color="red"
-            loading={isLoading}
-          >
-            Request Access
-          </Button>
-        </Flex>
-      </Modal>
+        </Button>} */}
 
       <div className="mt-2">
         <Text truncate weight={600} size="md">

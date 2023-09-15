@@ -21,7 +21,6 @@ import {
 
 type AgentPriceTableType = {
   staySlug: string | null;
-  token: string | undefined;
   agentRates: AgentDiscountRateType[] | undefined;
   displayRackRates: boolean;
   isNonResident: boolean;
@@ -30,7 +29,6 @@ type AgentPriceTableType = {
 
 export default function AgentPriceTable({
   staySlug,
-  token,
   agentRates,
   displayRackRates,
   isNonResident,
@@ -40,7 +38,9 @@ export default function AgentPriceTable({
     new Date(),
     new Date(new Date().setDate(new Date().getDate() + 20)),
   ]);
-  const queryStr = staySlug ? staySlug : "room-type";
+  const queryStr = staySlug
+    ? `${staySlug}-agent-price-table`
+    : "room-type-agent-price-table";
   const {
     data: roomTypes,
     isLoading: roomTypesLoading,
@@ -51,17 +51,16 @@ export default function AgentPriceTable({
       getRoomTypesWithStaySlug(
         staySlug,
         format(date[0] || new Date(), "yyyy-MM-dd"),
-        format(date[1] || new Date(), "yyyy-MM-dd"),
-        token
+        format(date[1] || new Date(), "yyyy-MM-dd")
       ),
     { enabled: false }
   );
 
   useEffect(() => {
-    if (date[0] && date[1] && token) {
+    if (date[0] && date[1]) {
       refetch();
     }
-  }, [staySlug, date, token]);
+  }, [staySlug, date]);
 
   const getAllGuestTypes = useCallback(
     (roomTypes: RoomType[]) => {
@@ -181,22 +180,6 @@ export default function AgentPriceTable({
             </ScrollArea.Autosize>
           </Popover.Dropdown>
         </Popover>
-        {/* <Switch
-          label="Non-resident prices"
-          color="red"
-          className="absolute top-8 right-4"
-          checked={isNonResident}
-          onChange={(event) => setIsNonResident(event.currentTarget.checked)}
-        /> */}
-        {/* <Switch
-          className="absolute top-0 right-4"
-          onLabel="Non-resident"
-          offLabel="Resident"
-          size="xl"
-          color="red"
-          checked={isNonResident}
-          onChange={(event) => setIsNonResident(event.currentTarget.checked)}
-        /> */}
 
         <Switch
           className="mt-[22px]"

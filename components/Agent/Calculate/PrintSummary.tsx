@@ -33,7 +33,6 @@ type SummaryProps = {
   summarizedCalculation: boolean;
   updateTotals: (id: number, total: number, isResident: boolean) => void;
   agentRates: AgentDiscountRateType[] | undefined;
-  token: string | undefined;
 };
 
 export default function PrintSummary({
@@ -43,7 +42,6 @@ export default function PrintSummary({
   summarizedCalculation,
   updateTotals,
   agentRates,
-  token,
 }: SummaryProps) {
   const countRoomType = countRoomTypes(calculateStay.rooms);
 
@@ -56,12 +54,10 @@ export default function PrintSummary({
       getRoomTypes(
         currentStay,
         format(calculateStay.date[0] || new Date(), "yyyy-MM-dd"),
-        format(calculateStay.date[1] || new Date(), "yyyy-MM-dd"),
-        token
+        format(calculateStay.date[1] || new Date(), "yyyy-MM-dd")
       ),
     {
-      enabled:
-        calculateStay.date[0] && calculateStay.date[1] && token ? true : false,
+      enabled: calculateStay.date[0] && calculateStay.date[1] ? true : false,
     }
   );
 

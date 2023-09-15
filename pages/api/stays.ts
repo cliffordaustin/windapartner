@@ -9,10 +9,10 @@ import {
   AgentStay,
 } from "../../utils/types";
 import { format, subDays } from "date-fns";
+import { Auth } from "aws-amplify";
 
 type StayDetailProps = {
   slug: string;
-  token: string | undefined;
 };
 
 export type RoomTypeDetail = {
@@ -99,9 +99,11 @@ export const getHighlightedStays = async (): Promise<Stay[]> => {
 
 export const getPartnerStays = async (
   location: string | undefined,
-  page: number | undefined,
-  token: string | undefined
+  page: number | undefined
 ): Promise<getPartnerStaysType> => {
+  const currentSession = await Auth.currentSession();
+  const accessToken = currentSession.getAccessToken();
+  const token = accessToken.getJwtToken();
   const stays = await axios.get(
     `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/?search=${
       location || ""
@@ -125,9 +127,11 @@ export const getPartnerStays = async (
 
 export const getPartnerStaysWithoutAccess = async (
   location: string | undefined,
-  page: number | undefined,
-  token: string | undefined
+  page: number | undefined
 ): Promise<getPartnerStaysType> => {
+  const currentSession = await Auth.currentSession();
+  const accessToken = currentSession.getAccessToken();
+  const token = accessToken.getJwtToken();
   const stays = await axios.get(
     `${process.env.NEXT_PUBLIC_baseURL}/partner-stays-without-access/?search=${
       location || ""
@@ -151,13 +155,24 @@ export const getPartnerStaysWithoutAccess = async (
 
 export const getPartnerAllStays = async (
   location: string | undefined,
+  contracts: string | undefined,
   page: number | undefined,
-  token: string | undefined
+  ssrToken: string | undefined = ""
 ): Promise<getPartnerStaysType> => {
+  let token = "";
+
+  if (ssrToken) {
+    token = ssrToken;
+  } else {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    token = accessToken.getJwtToken();
+  }
+
   const stays = await axios.get(
     `${process.env.NEXT_PUBLIC_baseURL}/all-partner-stays/?search=${
       location || ""
-    }&page=${page || 1}`,
+    }&page=${page || 1}&contracts=${contracts || ""}`,
     {
       headers: {
         Authorization: "Bearer " + token,
@@ -176,9 +191,11 @@ export const getPartnerAllStays = async (
 };
 
 export const getDetailPartnerStays = async (
-  listIds: string | undefined,
-  token: string | undefined
+  listIds: string | undefined
 ): Promise<Stay[]> => {
+  const currentSession = await Auth.currentSession();
+  const accessToken = currentSession.getAccessToken();
+  const token = accessToken.getJwtToken();
   const stays = await axios.get(
     `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/${listIds || ""}/`,
     {
@@ -192,10 +209,12 @@ export const getDetailPartnerStays = async (
 };
 
 export const getAgentDiscountRates = async (
-  staySlug: string | null,
-  token: string | undefined
+  staySlug: string | null
 ): Promise<AgentDiscountRateType[]> => {
   if (staySlug) {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
     const rates = await axios.get(
       `${process.env.NEXT_PUBLIC_baseURL}/stays/${staySlug}/agent-discounts/`,
       {
@@ -221,8 +240,18 @@ export const getStayDetail = async (slug: string): Promise<Stay> => {
 
 export const getStayEmail = async (
   slug: string,
-  token: string | undefined
+  ssrToken: string | undefined = ""
 ): Promise<LodgeStay> => {
+  let token = "";
+
+  if (ssrToken) {
+    token = ssrToken;
+  } else {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    token = accessToken.getJwtToken();
+  }
+
   const stay = await axios.get(
     `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${slug}/`,
     {
@@ -235,7 +264,10 @@ export const getStayEmail = async (
   return stay.data;
 };
 
-export const deleteStayEmail = async ({ slug, token }: StayDetailProps) => {
+export const deleteStayEmail = async ({ slug }: StayDetailProps) => {
+  const currentSession = await Auth.currentSession();
+  const accessToken = currentSession.getAccessToken();
+  const token = accessToken.getJwtToken();
   await axios.delete(
     `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${slug}/`,
     {
@@ -247,8 +279,17 @@ export const deleteStayEmail = async ({ slug, token }: StayDetailProps) => {
 };
 
 export const getAllStaysEmail = async (
-  token: string | undefined
+  ssrToken: string | undefined = ""
 ): Promise<LodgeStay[]> => {
+  let token = "";
+
+  if (ssrToken) {
+    token = ssrToken;
+  } else {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    token = accessToken.getJwtToken();
+  }
   const stay = await axios.get(
     `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/`,
     {
@@ -261,9 +302,10 @@ export const getAllStaysEmail = async (
   return stay.data.results;
 };
 
-export const getAllAgents = async (
-  token: string | undefined
-): Promise<AgentType[]> => {
+export const getAllAgents = async (): Promise<AgentType[]> => {
+  const currentSession = await Auth.currentSession();
+  const accessToken = currentSession.getAccessToken();
+  const token = accessToken.getJwtToken();
   const agents = await axios.get(`${process.env.NEXT_PUBLIC_baseURL}/agents/`, {
     headers: {
       Authorization: "Bearer " + token,
@@ -274,10 +316,12 @@ export const getAllAgents = async (
 };
 
 export const getStayAgents = async (
-  token: string | undefined,
   stay: LodgeStay | undefined
 ): Promise<AgentStayType[]> => {
   if (stay) {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
     const agents = await axios.get(
       `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${stay.slug}/agents/`,
       {
@@ -293,10 +337,12 @@ export const getStayAgents = async (
 };
 
 export const getStayAgentsByEmailUser = async (
-  token: string | undefined,
   stay: LodgeStay | undefined
 ): Promise<UserAgentStayType[]> => {
   if (stay) {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
     const agents = await axios.get(
       `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${stay.slug}/user-agents-email/`,
       {
@@ -312,10 +358,12 @@ export const getStayAgentsByEmailUser = async (
 };
 
 export const getStayAgentsByEmailNotUser = async (
-  token: string | undefined,
   stay: LodgeStay | undefined
 ): Promise<NotUserAgentStayType[]> => {
   if (stay) {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
     const agents = await axios.get(
       `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${stay.slug}/not-user-agents-email/`,
       {
@@ -331,10 +379,12 @@ export const getStayAgentsByEmailNotUser = async (
 };
 
 export const getStayPropertyAccess = async (
-  token: string | undefined,
   stay: LodgeStay | undefined
 ): Promise<UserAgentStayType[]> => {
   if (stay) {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
     const property = await axios.get(
       `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${stay.slug}/verified-property-access/`,
       {
@@ -350,10 +400,12 @@ export const getStayPropertyAccess = async (
 };
 
 export const getStayPropertyAccessNotUser = async (
-  token: string | undefined,
   stay: LodgeStay | undefined
 ): Promise<NotUserAgentStayType[]> => {
   if (stay) {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
     const property = await axios.get(
       `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${stay.slug}/not-verified-property-access/`,
       {
@@ -369,10 +421,12 @@ export const getStayPropertyAccessNotUser = async (
 };
 
 export const getStayAgentsNotVerified = async (
-  token: string | undefined,
   stay: LodgeStay | undefined
 ): Promise<AgentStayType[]> => {
   if (stay) {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
     const agents = await axios.get(
       `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${stay.slug}/agents-not-verified/`,
       {
@@ -390,12 +444,15 @@ export const getStayAgentsNotVerified = async (
 export const getRoomTypes = async (
   stay: LodgeStay | AgentStay | undefined,
   startDate: string | null | undefined,
-  endDate: string | null | undefined,
-  token: string | undefined
+  endDate: string | null | undefined
 ): Promise<RoomType[]> => {
   // subtract 1 day from end date
   let endMinusOne = subDays(new Date(endDate || ""), 1);
   let endMinusOneFormat = format(endMinusOne || new Date(), "yyyy-MM-dd");
+
+  const currentSession = await Auth.currentSession();
+  const accessToken = currentSession.getAccessToken();
+  const token = accessToken.getJwtToken();
 
   if (startDate && endDate && stay) {
     const room_types = await axios.get(
@@ -416,12 +473,14 @@ export const getRoomTypes = async (
 export const getRoomTypesWithStaySlug = async (
   staySlug: string | null,
   startDate: string | null | undefined,
-  endDate: string | null | undefined,
-  token: string | undefined
+  endDate: string | null | undefined
 ): Promise<RoomType[]> => {
   // subtract 1 day from end date
   let endMinusOne = subDays(new Date(endDate || ""), 1);
   let endMinusOneFormat = format(endMinusOne || new Date(), "yyyy-MM-dd");
+  const currentSession = await Auth.currentSession();
+  const accessToken = currentSession.getAccessToken();
+  const token = accessToken.getJwtToken();
   if (startDate && endDate && staySlug) {
     const room_types = await axios.get(
       `${process.env.NEXT_PUBLIC_baseURL}/stays/${staySlug}/room-types/?start_date=${startDate}&end_date=${endMinusOneFormat}`,
@@ -439,10 +498,12 @@ export const getRoomTypesWithStaySlug = async (
 };
 
 export const getParkFees = async (
-  stay: LodgeStay | AgentStay | undefined,
-  token: string | undefined
+  stay: LodgeStay | AgentStay | undefined
 ): Promise<ParkFee[]> => {
   if (stay) {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
     const park_fees = await axios.get(
       `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/${stay.slug}/park-fees/`,
       {
@@ -459,10 +520,12 @@ export const getParkFees = async (
 };
 
 export const getStayActivities = async (
-  stay: LodgeStay | AgentStay | undefined,
-  token: string | undefined
+  stay: LodgeStay | AgentStay | undefined
 ): Promise<ActivityFee[]> => {
   if (stay) {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
     const activities = await axios.get(
       `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/${stay.slug}/activities/`,
       {
@@ -479,10 +542,12 @@ export const getStayActivities = async (
 };
 
 export const getRoomTypeList = async (
-  stay: Stay | undefined,
-  token: string | undefined
+  stay: Stay | undefined
 ): Promise<RoomTypeDetail[]> => {
   if (stay) {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
     const room_types = await axios.get(
       `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/room-detail-types/`,
       {
@@ -500,10 +565,12 @@ export const getRoomTypeList = async (
 
 export const getRoomTypeDetail = async (
   stay: Stay | undefined,
-  slug: string,
-  token: string | undefined
+  slug: string
 ): Promise<RoomTypeDetail | undefined> => {
   if (stay) {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
     const room_types = await axios.get(
       `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/room-detail-types/${slug}/`,
       {

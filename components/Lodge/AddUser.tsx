@@ -24,23 +24,23 @@ import {
 import Cookies from "js-cookie";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import axios from "axios";
+import { Auth } from "aws-amplify";
 
 type AddUserPropTypes = {
   stay: LodgeStay | undefined;
-  token: string;
 };
 
-function AddUser({ stay, token }: AddUserPropTypes) {
+function AddUser({ stay }: AddUserPropTypes) {
   const queryClient = useQueryClient();
   const [opened, { open, close }] = useDisclosure(false);
 
   const { data: propertAccess, isLoading: propertAccessLoading } = useQuery<
     UserAgentStayType[]
-  >("user-agents-email", () => getStayPropertyAccess(token, stay));
+  >("user-agents-email", () => getStayPropertyAccess(stay));
 
   const { data: propertAccessNotUser, isLoading: propertAccessNotUserLoading } =
     useQuery<NotUserAgentStayType[]>("not-user-agents-email", () =>
-      getStayPropertyAccessNotUser(token, stay)
+      getStayPropertyAccessNotUser(stay)
     );
 
   const form = useForm({
@@ -59,6 +59,9 @@ function AddUser({ stay, token }: AddUserPropTypes) {
 
   const grantAccess = async (email: string) => {
     if (stay) {
+      const currentSession = await Auth.currentSession();
+      const accessToken = currentSession.getAccessToken();
+      const token = accessToken.getJwtToken();
       await axios.post(
         `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/update-property-access/`,
         {
@@ -84,6 +87,9 @@ function AddUser({ stay, token }: AddUserPropTypes) {
     });
 
   const removePropertyAccess = async (id: number) => {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
     await axios.delete(
       `${process.env.NEXT_PUBLIC_baseURL}/property-access/${id}/`,
       {
@@ -170,7 +176,7 @@ function AddUser({ stay, token }: AddUserPropTypes) {
             close:
               "text-black hover:text-gray-700 w-[40px] h-[30px] hover:bg-gray-100",
             body: "max-h-[500px] overflow-y-scroll px-10 pb-8 w-full",
-            content: "rounded-3xl",
+            content: "rounded-2xl",
           }}
           centered
         >

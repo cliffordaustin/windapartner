@@ -44,17 +44,6 @@ const guestClassName =
   "h-[35px] hover:bg-red-500 cursor-pointer hover:border-red-500 hover:text-white transition-all duration-300 flex text-gray-600 items-center justify-center w-[35px] border border-solid border-gray-400 ";
 
 export default function Room({ room, stay, index }: RoomProps) {
-  const [token, setToken] = useState("");
-
-  useEffect(() => {
-    Auth.currentSession().then((res) => {
-      let accessToken = res.getAccessToken();
-      let jwt = accessToken.getJwtToken();
-
-      setToken(jwt);
-    });
-  }, []);
-
   type SelectedPackagesType = {
     name: string;
     description: string | null;
@@ -175,12 +164,10 @@ export default function Room({ room, stay, index }: RoomProps) {
       getRoomTypes(
         stay,
         format(currentState?.date[0] || new Date(), "yyyy-MM-dd"),
-        format(currentState?.date[1] || new Date(), "yyyy-MM-dd"),
-        token
+        format(currentState?.date[1] || new Date(), "yyyy-MM-dd")
       ),
     {
-      enabled:
-        currentState?.date[0] && currentState.date[1] && token ? true : false,
+      enabled: currentState?.date[0] && currentState.date[1] ? true : false,
     }
   );
 
@@ -745,8 +732,7 @@ export default function Room({ room, stay, index }: RoomProps) {
 
   const { data: otherFees, isLoading: otherFeesLoading } = useQuery(
     `park-fees-${stay?.slug}`,
-    () => getParkFees(stay, token),
-    { enabled: !!token }
+    () => getParkFees(stay)
   );
 
   const [isRoomOpen, setIsRoomOpen] = useState(false);

@@ -48,12 +48,12 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import StayImages from "./StayImages";
 import Image from "next/image";
+import { Auth } from "aws-amplify";
 
 type LodgeProps = {
   stay: LodgeStay;
   setStayIds: React.Dispatch<React.SetStateAction<number[]>>;
   stayIds: number[];
-  token: string;
 };
 
 const useStyles = createStyles(() => ({
@@ -65,7 +65,7 @@ const useStyles = createStyles(() => ({
   },
 }));
 
-function LodgeCard({ stay, stayIds, setStayIds, token }: LodgeProps) {
+function LodgeCard({ stay, stayIds, setStayIds }: LodgeProps) {
   const { classes } = useStyles();
 
   const images = stay.stay_images.sort(
@@ -227,6 +227,9 @@ function LodgeCard({ stay, stayIds, setStayIds, token }: LodgeProps) {
   const [noFiles, setNoFiles] = React.useState(false);
 
   const editProperty = async (values: FormValues) => {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
     await axios.patch(
       `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${stay.slug}/`,
       {
@@ -272,6 +275,9 @@ function LodgeCard({ stay, stayIds, setStayIds, token }: LodgeProps) {
 
   const [parkFeeLoading, setParkFeeLoading] = React.useState(false);
   const addParkFees = async (values: ParkFeesValues) => {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
     setParkFeeLoading(true);
     await axios.post(
       `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/${stay.slug}/park-fees/`,
@@ -302,6 +308,9 @@ function LodgeCard({ stay, stayIds, setStayIds, token }: LodgeProps) {
   );
 
   const addActivityFunc = async (values: ActivityValues) => {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
     await axios.post(
       `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/${stay.slug}/activities/`,
       {
@@ -346,6 +355,9 @@ function LodgeCard({ stay, stayIds, setStayIds, token }: LodgeProps) {
       setNoContractRateFile(true);
       return;
     } else {
+      const currentSession = await Auth.currentSession();
+      const accessToken = currentSession.getAccessToken();
+      const token = accessToken.getJwtToken();
       setNoContractRateFile(false);
       setContractRateLoading(true);
       const formData = new FormData();
@@ -495,20 +507,16 @@ function LodgeCard({ stay, stayIds, setStayIds, token }: LodgeProps) {
       <Modal
         opened={openParkFeesModal}
         onClose={closeParkFees}
-        title={"Park/Conservancy fees"}
+        title={"Add Park/Conservancy fees"}
+        size="lg"
         classNames={{
           title: "text-lg font-bold",
-          close: "text-black hover:text-gray-700 hover:bg-gray-200",
-          header: "bg-gray-100",
+          close:
+            "text-black hover:text-gray-700 w-[40px] h-[30px] hover:bg-gray-100",
+          body: "max-h-[500px] overflow-y-scroll px-10 pb-8 w-full",
+          content: "rounded-2xl",
         }}
-        transitionProps={{ transition: "fade", duration: 200 }}
-        closeButtonProps={{
-          style: {
-            width: 30,
-            height: 30,
-          },
-          iconSize: 20,
-        }}
+        centered
       >
         <form
           className="flex flex-col gap-1"
@@ -771,12 +779,7 @@ function LodgeCard({ stay, stayIds, setStayIds, token }: LodgeProps) {
 
           <Flex direction="column" mt={8} gap={3}>
             {stay.stay_images.map((image, index) => (
-              <StayImages
-                token={token}
-                stay={stay}
-                image={image}
-                key={index}
-              ></StayImages>
+              <StayImages stay={stay} image={image} key={index}></StayImages>
             ))}
           </Flex>
 
@@ -837,7 +840,6 @@ function LodgeCard({ stay, stayIds, setStayIds, token }: LodgeProps) {
             onClick={() =>
               deleteProperty({
                 slug: stay.slug,
-                token: token,
               })
             }
             className="flex items-center"

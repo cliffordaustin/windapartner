@@ -30,7 +30,7 @@ import { confirmSignUp } from "@/utils/confirmSignup";
 import { resendConfirmationCode } from "@/utils/resendConfirmationCode";
 import { Auth } from "aws-amplify";
 import { AuthErrorStrings } from "@aws-amplify/auth";
-import { IconAlertCircle } from "@tabler/icons-react";
+import { IconAlertCircle, IconInfoCircle } from "@tabler/icons-react";
 import { signIn } from "@/utils/signin";
 
 const getCharacterValidationError = (str: string) => {
@@ -53,7 +53,7 @@ function PartnerSignin(props: PaperProps) {
 
   const schema = Yup.object().shape({
     email: Yup.string().email("Invalid email"),
-    password: Yup.string().required("Password is required"),
+    password: Yup.string().required("Password is required").min(8),
 
     retypePassword:
       type === "login"
@@ -227,7 +227,7 @@ function PartnerSignin(props: PaperProps) {
   });
 
   const forgotPasswordSchema = Yup.object().shape({
-    password: Yup.string().required("Password is required"),
+    password: Yup.string().required("Password is required").min(8),
     retypePassword: Yup.string().oneOf(
       [Yup.ref("password"), ""],
       "Passwords must match"
@@ -377,6 +377,15 @@ function PartnerSignin(props: PaperProps) {
                   error={form.errors.password}
                   radius="sm"
                 />
+
+                {type === "register" && (
+                  <div className="flex items-center gap-1">
+                    <IconInfoCircle className="text-gray-500" size="0.8rem" />
+                    <span className="text-gray-500 text-sm">
+                      Passwords must be at least 8 characters.
+                    </span>
+                  </div>
+                )}
 
                 {type === "register" && (
                   <PasswordInput
@@ -645,6 +654,13 @@ function PartnerSignin(props: PaperProps) {
                   error={forgotPasswordForm.errors.password}
                   radius="sm"
                 />
+
+                <div className="flex items-center gap-1">
+                  <IconInfoCircle className="text-gray-500" size="0.8rem" />
+                  <span className="text-gray-500 text-sm">
+                    Passwords must be at least 8 characters.
+                  </span>
+                </div>
 
                 <PasswordInput
                   required

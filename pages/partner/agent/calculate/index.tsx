@@ -62,19 +62,9 @@ import { Auth, withSSRContext } from "aws-amplify";
 import { DatePickerInput } from "@mantine/dates";
 import { format } from "date-fns";
 import AgentPriceTable from "@/components/Agent/Calculate/AgentPriceTable";
+import RequestAccess from "@/components/Agent/Calculate/RequestAccess";
 
 export default function Calculate() {
-  const [token, setToken] = useState("");
-
-  useEffect(() => {
-    Auth.currentSession().then((res) => {
-      let accessToken = res.getAccessToken();
-      let jwt = accessToken.getJwtToken();
-
-      setToken(jwt);
-    });
-  }, []);
-
   const router = useRouter();
 
   const [includeClientInCalculation, setIncludeResidentInCalculation] =
@@ -82,11 +72,7 @@ export default function Calculate() {
 
   const [summarizedCalculation, setSummarizedCalculation] = useState(false);
 
-  const { data: user } = useQuery<UserTypes | null>(
-    "user",
-    () => getUser(token),
-    { enabled: !!token }
-  );
+  const { data: user } = useQuery<UserTypes | null>("user", () => getUser());
 
   const [queryClient] = useState(() => new QueryClient());
 
@@ -106,8 +92,8 @@ export default function Calculate() {
 
   const { data: stays, isLoading: isStayLoading } = useQuery<Stay[]>(
     "partner-stay-ids",
-    () => getDetailPartnerStays(stayIds, token),
-    { enabled: !!stayIds && !!token }
+    () => getDetailPartnerStays(stayIds),
+    { enabled: !!stayIds }
   );
 
   type TotalTypes = {
@@ -220,9 +206,32 @@ export default function Calculate() {
 
   const [date, setDate] = useState<[Date | null, Date | null]>([null, null]);
 
+  const { data: agents, refetch } = useQuery<AgentDiscountRateType[]>(
+    "agent-discount-rates",
+    () => getAgentDiscountRates(selectedTab),
+    { enabled: false }
+  );
+
+  const agentNetRate = agents?.find((agent) => {
+    return !agent.start_date && !agent.end_date;
+  });
+
+  const otherAgentRates = agents?.filter((agent) => {
+    return agent.start_date && agent.end_date;
+  });
+
   const [applyForAllDates, setApplyForAllDates] = useState(false);
 
-  const [sliderValue, setSliderValue] = useState(5);
+  const [sliderValue, setSliderValue] = useState(agentNetRate?.percentage);
+
+  const [sliderValueCustomRate, setSliderValueCustomRate] = useState(0);
+
+  const [residentSliderValue, setResidentSliderValue] = useState(
+    agentNetRate?.resident_percentage
+  );
+
+  const [residentSliderValueCustomRate, setResidentSliderValueCustomRate] =
+    useState(0);
 
   const [selectedTab, setSelectedTab] = useState<string | null>("");
 
@@ -232,12 +241,6 @@ export default function Calculate() {
     }
   }, [stays]);
 
-  const { data: agents, refetch } = useQuery<AgentDiscountRateType[]>(
-    "agent-discount-rates",
-    () => getAgentDiscountRates(selectedTab, token),
-    { enabled: false }
-  );
-
   useEffect(() => {
     if (selectedTab) {
       refetch();
@@ -246,30 +249,65 @@ export default function Calculate() {
 
   const addAgentRate = async () => {
     if (selectedTab) {
-      await axios
-        .post(
+      const currentSession = await Auth.currentSession();
+      const accessToken = currentSession.getAccessToken();
+      const token = accessToken.getJwtToken();
+
+      try {
+        if (date[0] && date[1]) {
+          await axios.post(
+            `${process.env.NEXT_PUBLIC_baseURL}/stays/${selectedTab}/agent-discounts/`,
+            {
+              start_date: format(date[0], "yyyy-MM-dd"),
+              end_date: format(date[1], "yyyy-MM-dd"),
+              percentage: sliderValueCustomRate,
+              resident_percentage: residentSliderValueCustomRate,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+        }
+
+        refetch();
+      } catch (error) {}
+    }
+  };
+
+  const addAgentNettRate = async () => {
+    if (selectedTab) {
+      const currentSession = await Auth.currentSession();
+      const accessToken = currentSession.getAccessToken();
+      const token = accessToken.getJwtToken();
+
+      try {
+        await axios.post(
           `${process.env.NEXT_PUBLIC_baseURL}/stays/${selectedTab}/agent-discounts/`,
           {
-            start_date: applyForAllDates
-              ? null
-              : format(date[0]!, "yyyy-MM-dd"),
-            end_date: applyForAllDates ? null : format(date[1]!, "yyyy-MM-dd"),
+            start_date: null,
+            end_date: null,
             percentage: sliderValue,
+            resident_percentage: residentSliderValue,
           },
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }
-        )
-        .then(() => {
-          refetch();
-        });
+        );
+
+        refetch();
+      } catch (error) {}
     }
   };
 
   const deleteAgentRate = async (id: number) => {
     if (selectedTab) {
+      const currentSession = await Auth.currentSession();
+      const accessToken = currentSession.getAccessToken();
+      const token = accessToken.getJwtToken();
       await axios
         .delete(
           `${process.env.NEXT_PUBLIC_baseURL}/stays/${selectedTab}/agent-discounts/${id}/`,
@@ -290,9 +328,21 @@ export default function Calculate() {
       onSuccess: () => {},
     });
 
+  const {
+    mutateAsync: addAgentNettRateMutation,
+    isLoading: addAgentNettRateLoading,
+  } = useMutation(addAgentNettRate, {
+    onSuccess: () => {},
+  });
+
   const [displayRackRates, setDisplayRackRates] = useState(false);
 
   const [isNonResident, setIsNonResident] = useState<boolean>(true);
+
+  const [
+    requestContractModal,
+    { open: openRequestContractModal, close: closeRequestContractModal },
+  ] = useDisclosure(false);
 
   return (
     <div>
@@ -367,15 +417,29 @@ export default function Calculate() {
                             ? "You are now viewing nett rates."
                             : "You are now viewing rack rates."}
                         </Text>
-                        <Button
-                          onClick={() => {
-                            openDiscountRateModalOpen();
-                          }}
-                          className="text-black"
-                          variant="white"
-                        >
-                          Edit discount rates
-                        </Button>
+                        <div className="flex items-center gap-3">
+                          {!stay.has_property_access && (
+                            <Button
+                              onClick={() => {
+                                openRequestContractModal();
+                              }}
+                              className="text-black"
+                              variant="light"
+                              color="gray"
+                            >
+                              Request contract
+                            </Button>
+                          )}
+                          <Button
+                            onClick={() => {
+                              openDiscountRateModalOpen();
+                            }}
+                            className="text-black"
+                            variant="white"
+                          >
+                            Edit discount rates
+                          </Button>
+                        </div>
                       </div>
                     </Alert>
                     <CalculateStay
@@ -386,6 +450,22 @@ export default function Calculate() {
                   </Tabs.Panel>
                 ))}
               </div>
+              <Modal
+                opened={requestContractModal}
+                onClose={closeRequestContractModal}
+                title={"Request contract rates"}
+                size="lg"
+                classNames={{
+                  title: "text-lg font-bold",
+                  close:
+                    "text-black hover:text-gray-700 w-[40px] h-[30px] hover:bg-gray-100",
+                  body: "max-h-[500px] overflow-y-scroll px-10 pb-8 w-full",
+                  content: "rounded-2xl",
+                }}
+                centered
+              >
+                <RequestAccess staySlug={stayIds}></RequestAccess>
+              </Modal>
 
               <Modal
                 opened={discountRateModalOpened}
@@ -405,23 +485,12 @@ export default function Calculate() {
                   iconSize: 20,
                 }}
               >
-                <div className="flex gap-6 mt-5">
+                <div className="flex gap-6">
                   <div className="w-[400px] border border-solid border-gray-200 px-4 bg-white rounded-xl py-4 shadow-round">
-                    <div className="flex items-center justify-between">
-                      <div></div>
-
-                      <Switch
-                        className=""
-                        label="Display rack rates"
-                        color="red"
-                        checked={displayRackRates}
-                        onChange={(event) =>
-                          setDisplayRackRates(event.currentTarget.checked)
-                        }
-                      />
-                    </div>
-                    <Text className="font-bold text-xl">Discount Rates</Text>
-                    <div className="flex justify-between mt-4">
+                    <Text className="font-bold text-base">
+                      {isNonResident ? "Non-resident" : "Resident"} Rates
+                    </Text>
+                    {/* <div className="flex justify-between mt-4">
                       <div></div>
                       <div className="flex flex-col gap-2">
                         <div className="flex items-center gap-1">
@@ -438,7 +507,7 @@ export default function Calculate() {
                           </Text>
                         </div>
                       </div>
-                    </div>
+                    </div> */}
                     {/* <p>
                       Lorem ipsum dolor sit amet consectetur adipisicing elit.
                       Excepturi eveniet illo id delectus qui molestias dolore,
@@ -462,76 +531,224 @@ export default function Calculate() {
                         <Text className="text-sm">14%</Text>
                       </div> */}
 
-                      {agents?.map((agent) => (
+                      {agentNetRate &&
+                        !agentNetRate.start_date &&
+                        !agentNetRate.end_date && (
+                          <div>
+                            {isNonResident && !!agentNetRate.percentage && (
+                              <div className="w-full px-3 flex justify-between items-center py-3 rounded-lg bg-green-50 border border-solid border-green-400">
+                                <div className="px-2 py-1 bg-white rounded-lg shadow-sm w-fit">
+                                  <Text className="text-sm font-medium">
+                                    Nett rate
+                                  </Text>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  <Text className="text-sm medium">
+                                    {agentNetRate.percentage}%
+                                  </Text>
+
+                                  <ActionIcon
+                                    onClick={() => {
+                                      deleteAgentRate(agentNetRate.id);
+                                    }}
+                                    color="red"
+                                    size="sm"
+                                  >
+                                    <IconTrash></IconTrash>
+                                  </ActionIcon>
+                                </div>
+                              </div>
+                            )}
+
+                            {!isNonResident &&
+                              !!agentNetRate.resident_percentage && (
+                                <div className="w-full px-3 flex justify-between items-center py-3 rounded-lg bg-green-50 border border-solid border-green-400">
+                                  <div className="px-2 py-1 bg-white rounded-lg shadow-sm w-fit">
+                                    <Text className="text-sm font-medium">
+                                      Nett rate
+                                    </Text>
+                                  </div>
+
+                                  <div className="flex items-center gap-2">
+                                    <Text className="text-sm medium">
+                                      {agentNetRate.resident_percentage}%
+                                    </Text>
+
+                                    <ActionIcon
+                                      onClick={() => {
+                                        deleteAgentRate(agentNetRate.id);
+                                      }}
+                                      color="red"
+                                      size="sm"
+                                    >
+                                      <IconTrash></IconTrash>
+                                    </ActionIcon>
+                                  </div>
+                                </div>
+                              )}
+                          </div>
+                        )}
+
+                      {isNonResident &&
+                        (!agentNetRate || !agentNetRate.percentage) && (
+                          <Text className="text-sm text-center font-bold">
+                            No nett rate added yet
+                          </Text>
+                        )}
+
+                      {!isNonResident &&
+                        (!agentNetRate ||
+                          !agentNetRate.resident_percentage) && (
+                          <Text className="text-sm text-center font-bold">
+                            No nett rate added yet
+                          </Text>
+                        )}
+
+                      {isNonResident && (
+                        <div className="my-2">
+                          <span className="text-sm text-gray-600">
+                            Slide to set rate
+                          </span>
+                          <Slider
+                            value={sliderValue}
+                            className=""
+                            onChange={setSliderValue}
+                            color="red"
+                          />
+                        </div>
+                      )}
+
+                      {!isNonResident && (
+                        <div className="my-2">
+                          <span className="text-sm text-gray-600">
+                            Slide to set rate
+                          </span>
+                          <Slider
+                            value={residentSliderValue}
+                            className=""
+                            onChange={setResidentSliderValue}
+                            color="red"
+                          />
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between">
+                        <div></div>
+
+                        {isNonResident && (
+                          <Button
+                            onClick={() => {
+                              addAgentNettRateMutation();
+                            }}
+                            loading={addAgentNettRateLoading}
+                            color="red"
+                            className=""
+                            variant="filled"
+                            disabled={!sliderValue}
+                          >
+                            Add nett rate
+                          </Button>
+                        )}
+
+                        {!isNonResident && (
+                          <Button
+                            onClick={() => {
+                              addAgentNettRateMutation();
+                            }}
+                            loading={addAgentNettRateLoading}
+                            color="red"
+                            className=""
+                            variant="filled"
+                            disabled={!residentSliderValue}
+                          >
+                            Add nett rate
+                          </Button>
+                        )}
+                      </div>
+
+                      <Divider
+                        label="Or set custom rates"
+                        labelPosition="center"
+                        className="my-2"
+                      ></Divider>
+
+                      {otherAgentRates?.map((agent) => (
                         <div className="w-full" key={agent.id}>
-                          {!agent.start_date && !agent.end_date && (
-                            <div className="w-full px-3 flex justify-between items-center py-3 rounded-lg bg-green-50 border border-solid border-green-400">
-                              <div className="px-2 py-1 bg-white rounded-lg shadow-sm w-fit">
-                                <Text className="text-sm font-medium">
-                                  Nett rate
-                                </Text>
-                              </div>
+                          {agent.start_date &&
+                            agent.end_date &&
+                            !!agent.percentage &&
+                            isNonResident && (
+                              <div className="w-full px-3 flex justify-between items-center py-3 rounded-lg bg-blue-50 border border-solid border-blue-400">
+                                <div className="px-2 py-1 bg-white rounded-lg shadow-sm w-fit">
+                                  <Text className="text-sm font-medium">
+                                    {format(
+                                      new Date(agent.start_date),
+                                      "dd MMM"
+                                    )}{" "}
+                                    -{" "}
+                                    {format(new Date(agent.end_date), "dd MMM")}
+                                  </Text>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Text className="text-sm font-medium">
+                                    {agent.percentage}%
+                                  </Text>
 
-                              <div className="flex items-center gap-2">
-                                <Text className="text-sm medium">
-                                  {isNonResident
-                                    ? agent.percentage
-                                    : agent.resident_percentage}
-                                  %
-                                </Text>
-
-                                <ActionIcon
-                                  onClick={() => {
-                                    deleteAgentRate(agent.id);
-                                  }}
-                                  color="red"
-                                  size="sm"
-                                >
-                                  <IconTrash></IconTrash>
-                                </ActionIcon>
+                                  <ActionIcon
+                                    onClick={() => {
+                                      deleteAgentRate(agent.id);
+                                    }}
+                                    color="red"
+                                    size="sm"
+                                  >
+                                    <IconTrash></IconTrash>
+                                  </ActionIcon>
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            )}
 
-                          {agent.start_date && agent.end_date && (
-                            <div className="w-full px-3 flex justify-between items-center py-3 rounded-lg bg-blue-50 border border-solid border-blue-400">
-                              <div className="px-2 py-1 bg-white rounded-lg shadow-sm w-fit">
-                                <Text className="text-sm font-medium">
-                                  {format(new Date(agent.start_date), "dd MMM")}{" "}
-                                  - {format(new Date(agent.end_date), "dd MMM")}
-                                </Text>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Text className="text-sm font-medium">
-                                  {isNonResident
-                                    ? agent.percentage
-                                    : agent.resident_percentage}
-                                  %
-                                </Text>
+                          {agent.start_date &&
+                            agent.end_date &&
+                            !!agent.resident_percentage &&
+                            !isNonResident && (
+                              <div className="w-full px-3 flex justify-between items-center py-3 rounded-lg bg-blue-50 border border-solid border-blue-400">
+                                <div className="px-2 py-1 bg-white rounded-lg shadow-sm w-fit">
+                                  <Text className="text-sm font-medium">
+                                    {format(
+                                      new Date(agent.start_date),
+                                      "dd MMM"
+                                    )}{" "}
+                                    -{" "}
+                                    {format(new Date(agent.end_date), "dd MMM")}
+                                  </Text>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Text className="text-sm font-medium">
+                                    {agent.resident_percentage}%
+                                  </Text>
 
-                                <ActionIcon
-                                  onClick={() => {
-                                    deleteAgentRate(agent.id);
-                                  }}
-                                  color="red"
-                                  size="sm"
-                                >
-                                  <IconTrash></IconTrash>
-                                </ActionIcon>
+                                  <ActionIcon
+                                    onClick={() => {
+                                      deleteAgentRate(agent.id);
+                                    }}
+                                    color="red"
+                                    size="sm"
+                                  >
+                                    <IconTrash></IconTrash>
+                                  </ActionIcon>
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            )}
                         </div>
                       ))}
 
-                      {agents?.length === 0 && (
+                      {otherAgentRates?.length === 0 && (
                         <Text className="text-sm my-4 text-center font-bold">
-                          No discount rates added yet
+                          No additional discout added yet
                         </Text>
                       )}
-                    </div>
 
-                    <div className="mt-6 py-2 border-t border-solid border-b-0 border-x-0 border-gray-100">
                       <DatePickerInput
                         type="range"
                         value={date}
@@ -564,20 +781,131 @@ export default function Calculate() {
                         }}
                       />
 
+                      <div className="mt-2">
+                        <span className="text-sm text-gray-600">
+                          {!date[0] || !date[1]
+                            ? "Select date range to set custom rate"
+                            : "Slide to set custom rate"}
+                        </span>
+                        {isNonResident && (
+                          <Slider
+                            value={sliderValueCustomRate}
+                            className=""
+                            onChange={setSliderValueCustomRate}
+                            color="red"
+                            disabled={!date[0] || !date[1]}
+                            // labelAlwaysOn
+                          />
+                        )}
+
+                        {!isNonResident && (
+                          <Slider
+                            value={residentSliderValueCustomRate}
+                            className=""
+                            onChange={setResidentSliderValueCustomRate}
+                            color="red"
+                            disabled={!date[0] || !date[1]}
+                            // labelAlwaysOn
+                          />
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div></div>
+
+                        {isNonResident && (
+                          <Button
+                            onClick={() => {
+                              addAgentRateMutation();
+                            }}
+                            loading={addAgentRateLoading}
+                            color="red"
+                            className="mt-4"
+                            variant="filled"
+                            disabled={
+                              !date[0] || !date[1] || !sliderValueCustomRate
+                            }
+                          >
+                            Add custom rate
+                          </Button>
+                        )}
+
+                        {!isNonResident && (
+                          <Button
+                            onClick={() => {
+                              addAgentRateMutation();
+                            }}
+                            loading={addAgentRateLoading}
+                            color="red"
+                            className="mt-4"
+                            variant="filled"
+                            disabled={
+                              !date[0] ||
+                              !date[1] ||
+                              !residentSliderValueCustomRate
+                            }
+                          >
+                            Add custom rate
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* <div className="mt-6 py-2 border-t border-solid border-b-0 border-x-0 border-gray-100">
+                      <DatePickerInput
+                        type="range"
+                        value={date}
+                        onChange={(date) => {
+                          setDate(date);
+                        }}
+                        color="red"
+                        placeholder="Select date range"
+                        styles={{
+                          input: { paddingTop: 13, paddingBottom: 13 },
+                        }}
+                        labelProps={{ className: "font-semibold mb-1" }}
+                        rightSection={
+                          <IconSelector className="text-gray-500" />
+                        }
+                        className="w-full"
+                        minDate={new Date()}
+                        icon={<IconCalendar className="text-gray-500" />}
+                        numberOfColumns={2}
+                        autoSave="true"
+                        disabled={applyForAllDates}
+                        dropdownType="modal"
+                        modalProps={{
+                          closeOnClickOutside: true,
+                          overlayProps: {
+                            color: "#333",
+                            opacity: 0.4,
+                            zIndex: 201,
+                          },
+                        }}
+                      />
+
+                      <Divider
+                        label="Or"
+                        labelPosition="center"
+                        className="my-2"
+                      ></Divider>
+
                       <Checkbox
-                        label="Apply across all dates"
-                        className="mt-2"
+                        label="Set your default net rate"
+                        className="mt-2 mb-4"
                         color="red"
                         checked={applyForAllDates}
                         onChange={(event) => {
                           setApplyForAllDates(event.currentTarget.checked);
                         }}
                       ></Checkbox>
+                      <Divider className="my-2"></Divider>
 
+                      <span className="text-sm">Resident rates</span>
                       <Slider
-                        value={sliderValue}
-                        className="mt-4"
-                        onChange={setSliderValue}
+                        value={residentSliderValue}
+                        className=""
+                        onChange={setResidentSliderValue}
                         color="red"
                         // labelAlwaysOn
                       />
@@ -598,13 +926,12 @@ export default function Calculate() {
                           Add discount rate
                         </Button>
                       </div>
-                    </div>
+                    </div> */}
                   </div>
                   <div className="w-[calc(100%-400px)]">
                     <AgentPriceTable
                       agentRates={agents}
                       staySlug={selectedTab}
-                      token={token}
                       displayRackRates={displayRackRates}
                       setIsNonResident={setIsNonResident}
                       isNonResident={isNonResident}
@@ -744,7 +1071,6 @@ export default function Calculate() {
                             }
                             summarizedCalculation={summarizedCalculation}
                             agentRates={agents}
-                            token={token}
                           ></PrintSummary>
                         </div>
                       ))}
@@ -980,11 +1306,13 @@ export const getServerSideProps: GetServerSideProps = async ({
         },
       };
     }
-    const userSession = await Auth.currentSession();
-    const token = userSession.getAccessToken().getJwtToken();
+
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const ssrToken = accessToken.getJwtToken();
 
     await queryClient.fetchQuery<UserTypes | null>("user", () =>
-      getUser(token)
+      getUser(ssrToken)
     );
 
     return {

@@ -98,6 +98,7 @@ function SelectedRoomTableResident({
         let percentage = {
           standard: false,
           resident_rate: 0,
+          isResidentNettRate: false,
           start_date: "",
           end_date: "",
         };
@@ -113,9 +114,11 @@ function SelectedRoomTableResident({
               <div
                 className={
                   "relative px-5 z-0 py-4 " +
-                  (percentage.standard
+                  ((percentage.isResidentNettRate &&
+                    percentage.resident_rate > 0) ||
+                  (percentage.resident_rate > 0 && percentage.standard)
                     ? "bg-green-300"
-                    : !percentage.standard &&
+                    : !percentage.isResidentNettRate &&
                       !displayRackRates &&
                       percentage.resident_rate > 0
                     ? "bg-blue-400"
@@ -138,12 +141,16 @@ function SelectedRoomTableResident({
             return (
               <Tooltip
                 label={
-                  percentage.standard ? (
+                  (percentage.isResidentNettRate &&
+                    percentage.resident_rate > 0) ||
+                  (percentage.resident_rate > 0 && percentage.standard) ? (
                     <div className="text-center ">
                       <div className="text-sm">Nett Rate</div>
                       <div className="text-sm">{percentage.resident_rate}%</div>
                     </div>
-                  ) : percentage.start_date && percentage.end_date ? (
+                  ) : percentage.start_date &&
+                    percentage.end_date &&
+                    percentage.resident_rate > 0 ? (
                     <div className="text-center">
                       <div className="text-sm">
                         {format(new Date(percentage.start_date), "dd MMM")} -{" "}

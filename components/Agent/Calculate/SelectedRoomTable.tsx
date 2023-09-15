@@ -96,8 +96,9 @@ function SelectedRoomTable({
 
       ...uniqueDates.map((date) => {
         let percentage = {
-          standard: false,
           rate: 0,
+          standard: false,
+          isNonResidentNettRate: false,
           start_date: "",
           end_date: "",
         };
@@ -107,15 +108,21 @@ function SelectedRoomTable({
         }
         const rate = percentage.rate / 100;
 
+        // console.log(
+        //   "percentage.isNonResidentNettRate",
+        //   percentage.isNonResidentNettRate
+        // );
+
         return {
           header: () => {
             return (
               <div
                 className={
                   "relative px-5 z-0 py-4 " +
-                  (percentage.standard
+                  ((percentage.isNonResidentNettRate && percentage.rate) ||
+                  (percentage.rate > 0 && percentage.standard)
                     ? "bg-green-300"
-                    : !percentage.standard &&
+                    : !percentage.isNonResidentNettRate &&
                       !displayRackRates &&
                       percentage.rate > 0
                     ? "bg-blue-400"
@@ -138,7 +145,8 @@ function SelectedRoomTable({
             return (
               <Tooltip
                 label={
-                  percentage.standard ? (
+                  (percentage.isNonResidentNettRate && percentage.rate) ||
+                  (percentage.rate > 0 && percentage.standard) ? (
                     <div className="text-center ">
                       <div className="text-sm">Nett Rate</div>
                       <div className="text-sm">{percentage.rate}%</div>

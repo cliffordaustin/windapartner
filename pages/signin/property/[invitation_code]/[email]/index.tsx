@@ -42,17 +42,6 @@ function PartnerSignin(props: PaperProps) {
   const router = useRouter();
   const [type, toggle] = useToggle(["register", "login"]);
 
-  const [token, setToken] = useState("");
-
-  useEffect(() => {
-    Auth.currentSession().then((res) => {
-      let accessToken = res.getAccessToken();
-      let jwt = accessToken.getJwtToken();
-
-      setToken(jwt);
-    });
-  }, []);
-
   const [isLoading, setLoading] = React.useState(false);
 
   const [loginError, setLoginError] = React.useState(false);

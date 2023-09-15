@@ -34,17 +34,6 @@ export default function Summary({
   stays,
   agentRates,
 }: SummaryProps) {
-  const [token, setToken] = useState("");
-
-  useEffect(() => {
-    Auth.currentSession().then((res) => {
-      let accessToken = res.getAccessToken();
-      let jwt = accessToken.getJwtToken();
-
-      setToken(jwt);
-    });
-  }, []);
-
   const countRoomType = countRoomTypes(calculateStay.rooms);
 
   const currentStay = stays?.find((item) => item.id === calculateStay.id);
@@ -56,12 +45,10 @@ export default function Summary({
       getRoomTypes(
         currentStay,
         format(calculateStay.date[0] || new Date(), "yyyy-MM-dd"),
-        format(calculateStay.date[1] || new Date(), "yyyy-MM-dd"),
-        token
+        format(calculateStay.date[1] || new Date(), "yyyy-MM-dd")
       ),
     {
-      enabled:
-        calculateStay?.date[0] && calculateStay.date[1] && token ? true : false,
+      enabled: calculateStay?.date[0] && calculateStay.date[1] ? true : false,
     }
   );
 

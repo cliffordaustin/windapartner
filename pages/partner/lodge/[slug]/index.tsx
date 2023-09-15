@@ -139,30 +139,13 @@ export default function NavbarSimple() {
   const { classes, cx } = useStyles();
   const [active, setActive] = useState(0);
 
-  const [token, setToken] = useState("");
-
-  useEffect(() => {
-    Auth.currentSession().then((res) => {
-      let accessToken = res.getAccessToken();
-      let jwt = accessToken.getJwtToken();
-
-      setToken(jwt);
-    });
-  }, []);
-
   const router = useRouter();
 
-  const { data: stay } = useQuery<LodgeStay>(
-    "stay-email",
-    () => getStayEmail(router.query.slug as string, token),
-    { enabled: !!token }
+  const { data: stay } = useQuery<LodgeStay>("stay-email", () =>
+    getStayEmail(router.query.slug as string)
   );
 
-  const { data: user } = useQuery<UserTypes | null>(
-    "user",
-    () => getUser(token),
-    { enabled: !!token }
-  );
+  const { data: user } = useQuery<UserTypes | null>("user", () => getUser());
 
   const [date, setDate] = useState<[Date | null, Date | null]>([
     new Date(),
@@ -196,23 +179,6 @@ export default function NavbarSimple() {
       },
     }
   );
-
-  //   const links = data.map((item) => (
-  //     <a
-  //       className={cx(classes.link, {
-  //         [classes.linkActive]: item.label === active,
-  //       })}
-  //       href={item.link}
-  //       key={item.label}
-  //       onClick={(event) => {
-  //         event.preventDefault();
-  //         setActive(item.label);
-  //       }}
-  //     >
-  //       <item.icon className={classes.linkIcon} stroke={1.5} />
-  //       <span>{item.label}</span>
-  //     </a>
-  //   ));
 
   return (
     <div className="flex">
@@ -293,7 +259,6 @@ export default function NavbarSimple() {
               if (stay) {
                 deleteProperty({
                   slug: stay.slug,
-                  token: token,
                 });
               }
             }}
@@ -341,32 +306,20 @@ export default function NavbarSimple() {
             </div>
           </div>
           {active === 0 && (
-            <RoomPackagesEdit
-              date={date}
-              token={token}
-              stay={stay}
-            ></RoomPackagesEdit>
+            <RoomPackagesEdit date={date} stay={stay}></RoomPackagesEdit>
           )}
 
-          {active === 1 && <PriceEdit token={token} stay={stay}></PriceEdit>}
+          {active === 1 && <PriceEdit stay={stay}></PriceEdit>}
 
-          {active === 2 && (
-            <ActivityEdit token={token} stay={stay}></ActivityEdit>
-          )}
+          {active === 2 && <ActivityEdit stay={stay}></ActivityEdit>}
 
-          {active === 3 && (
-            <ParkFeesEdit token={token} stay={stay}></ParkFeesEdit>
-          )}
+          {active === 3 && <ParkFeesEdit stay={stay}></ParkFeesEdit>}
 
-          {active === 4 && (
-            <AgentEmailAccess token={token} stay={stay}></AgentEmailAccess>
-          )}
+          {active === 4 && <AgentEmailAccess stay={stay}></AgentEmailAccess>}
 
-          {active === 5 && <AddUser token={token} stay={stay}></AddUser>}
+          {active === 5 && <AddUser stay={stay}></AddUser>}
 
-          {active === 6 && (
-            <AboutRoomEdit token={token} stay={stay}></AboutRoomEdit>
-          )}
+          {active === 6 && <AboutRoomEdit stay={stay}></AboutRoomEdit>}
         </div>
       </ContextProvider>
     </div>
@@ -395,15 +348,17 @@ export const getServerSideProps: GetServerSideProps = async ({
         },
       };
     }
-    const userSession = await Auth.currentSession();
-    const token = userSession.getAccessToken().getJwtToken();
+
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const ssrToken = accessToken.getJwtToken();
 
     await queryClient.fetchQuery<LodgeStay | null>("stay-email", () =>
-      getStayEmail(query.slug as string, token)
+      getStayEmail(query.slug as string, ssrToken)
     );
 
     await queryClient.fetchQuery<UserTypes | null>("user", () =>
-      getUser(token)
+      getUser(ssrToken)
     );
 
     return {

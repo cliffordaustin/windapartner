@@ -23,26 +23,25 @@ import Cookies from "js-cookie";
 import React, { forwardRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import Share from "../ui/Share";
+import { Auth } from "aws-amplify";
 
 type AccessPropTypes = {
   stay: LodgeStay | undefined;
 };
 
 function Access({ stay }: AccessPropTypes) {
-  const token = Cookies.get("token");
-
   const { data: agentVerified, isLoading: isAgentVerifiedLoading } = useQuery<
     AgentStayType[]
-  >("all-agents-verified", () => getStayAgents(token, stay));
+  >("all-agents-verified", () => getStayAgents(stay));
 
   const { data: agentNotVerified, isLoading: isAgentNotVerifiedLoading } =
     useQuery<AgentStayType[]>("all-agents-not-verified", () =>
-      getStayAgentsNotVerified(token, stay)
+      getStayAgentsNotVerified(stay)
     );
 
   const { data: agents, isLoading: isAgentLoading } = useQuery<AgentType[]>(
     "all-agents",
-    () => getAllAgents(token)
+    () => getAllAgents()
   );
 
   const queryClient = useQueryClient();
@@ -88,6 +87,9 @@ function Access({ stay }: AccessPropTypes) {
   SelectItem.displayName = "SelectItem";
 
   const grantAccess = async () => {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
     for (const agentId of agentIds) {
       if (stay) {
         await axios.patch(
@@ -119,6 +121,9 @@ function Access({ stay }: AccessPropTypes) {
 
   const removeAccess = async (agentId: number) => {
     if (stay) {
+      const currentSession = await Auth.currentSession();
+      const accessToken = currentSession.getAccessToken();
+      const token = accessToken.getJwtToken();
       await axios.patch(
         `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/remove-agent/`,
         {
@@ -142,6 +147,9 @@ function Access({ stay }: AccessPropTypes) {
 
   const grantAccessFromRequest = async (id: number) => {
     if (stay) {
+      const currentSession = await Auth.currentSession();
+      const accessToken = currentSession.getAccessToken();
+      const token = accessToken.getJwtToken();
       await axios.patch(
         `${process.env.NEXT_PUBLIC_baseURL}/agent-access/${id}/`,
         {
@@ -158,6 +166,9 @@ function Access({ stay }: AccessPropTypes) {
 
   const removeAccessFromRequest = async (id: number) => {
     if (stay) {
+      const currentSession = await Auth.currentSession();
+      const accessToken = currentSession.getAccessToken();
+      const token = accessToken.getJwtToken();
       await axios.delete(
         `${process.env.NEXT_PUBLIC_baseURL}/agent-access/${id}/`,
         {

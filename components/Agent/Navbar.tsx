@@ -63,6 +63,7 @@ export default function Navbar({
       router.push({
         pathname: "/partner/agent",
         query: {
+          ...router.query,
           search: location,
         },
       });
@@ -70,6 +71,7 @@ export default function Navbar({
     } else {
       router.push({
         query: {
+          ...router.query,
           search: location,
         },
       });
@@ -117,6 +119,10 @@ export default function Navbar({
                       setLocation("");
                       router.push({
                         pathname: "/partner/agent",
+                        query: {
+                          ...router.query,
+                          search: "",
+                        },
                       });
                     }}
                     className="w-[15px] h-[15px] cursor-pointer flex items-center justify-center rounded-full bg-gray-800"

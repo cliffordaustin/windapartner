@@ -13,6 +13,7 @@ import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { IconPencil } from "@tabler/icons-react";
 import { IconTrash } from "@tabler/icons-react";
+import { Auth } from "aws-amplify";
 import axios from "axios";
 import Cookies from "js-cookie";
 import React from "react";
@@ -21,13 +22,15 @@ import { useMutation, useQueryClient } from "react-query";
 type ParkFeeProps = {
   fee: ParkFee;
   stay: LodgeStay | undefined;
-  token: string | undefined;
 };
 
-function ParkFee({ fee, stay, token }: ParkFeeProps) {
+function ParkFee({ fee, stay }: ParkFeeProps) {
   const queryClient = useQueryClient();
 
   const deleteParkFee = async () => {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
     await axios.delete(
       `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/${stay?.slug}/park-fees/${fee.id}/`,
       {
@@ -73,6 +76,9 @@ function ParkFee({ fee, stay, token }: ParkFeeProps) {
   });
 
   const editParkFees = async (values: ParkFeesValues) => {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
     await axios.patch(
       `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/${stay?.slug}/park-fees/${fee.id}/`,
       {
@@ -153,19 +159,15 @@ function ParkFee({ fee, stay, token }: ParkFeeProps) {
         opened={editModal}
         onClose={closeEditModal}
         title={"Edit fee"}
+        size="lg"
         classNames={{
           title: "text-lg font-bold",
-          close: "text-black hover:text-gray-700 hover:bg-gray-200",
-          header: "bg-gray-100",
+          close:
+            "text-black hover:text-gray-700 w-[40px] h-[30px] hover:bg-gray-100",
+          body: "max-h-[500px] overflow-y-scroll px-10 pb-8 w-full",
+          content: "rounded-2xl",
         }}
-        transitionProps={{ transition: "fade", duration: 200 }}
-        closeButtonProps={{
-          style: {
-            width: 30,
-            height: 30,
-          },
-          iconSize: 20,
-        }}
+        centered
       >
         <form
           className="flex flex-col gap-1"
@@ -237,7 +239,7 @@ function ParkFee({ fee, stay, token }: ParkFeeProps) {
             <Button onClick={closeEditModal} variant="default">
               Close
             </Button>
-            <Button disabled={editLoading} type="submit">
+            <Button color="red" disabled={editLoading} type="submit">
               Submit{" "}
               {editLoading && <Loader size="xs" color="gray" ml={5}></Loader>}
             </Button>

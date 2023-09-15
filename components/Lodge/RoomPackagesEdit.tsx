@@ -25,7 +25,6 @@ import { ContextProvider } from "@/context/LodgeDetailPage";
 type RoomPackagesEditProps = {
   date: [Date | null, Date | null];
   stay: LodgeStay | undefined;
-  token: string;
 };
 
 type GuestType = { name: string; description?: string };
@@ -46,7 +45,7 @@ type UniqueRoomsType = {
   infant_capacity: number;
 };
 
-function RoomPackagesEdit({ date, stay, token }: RoomPackagesEditProps) {
+function RoomPackagesEdit({ date, stay }: RoomPackagesEditProps) {
   const queryStr = stay ? stay.slug : "room-type";
 
   const { data: roomTypeList, isLoading: roomTypeListLoading } = useQuery(
@@ -55,10 +54,9 @@ function RoomPackagesEdit({ date, stay, token }: RoomPackagesEditProps) {
       getRoomTypes(
         stay,
         format(date[0] || new Date(), "yyyy-MM-dd"),
-        format(date[1] || new Date(), "yyyy-MM-dd"),
-        token
+        format(date[1] || new Date(), "yyyy-MM-dd")
       ),
-    { enabled: date[0] && date[1] && token ? true : false }
+    { enabled: date[0] && date[1] ? true : false }
   );
 
   const getGuestTypes = useCallback(
@@ -262,7 +260,7 @@ function RoomPackagesEdit({ date, stay, token }: RoomPackagesEditProps) {
           </Container>
         </Modal>
 
-        {uniqueRooms.length === 0 && (
+        {uniqueRooms.length === 0 && !roomTypeListLoading && (
           <div className="flex items-center justify-center">
             <Text className="mt-4 font-bold">No rooms and packages found</Text>
           </div>

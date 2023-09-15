@@ -18,17 +18,16 @@ import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { Auth } from "aws-amplify";
 
 type ParkFeesEditProps = {
   stay: LodgeStay | undefined;
-  token: string;
 };
 
-function ParkFeesEdit({ stay, token }: ParkFeesEditProps) {
+function ParkFeesEdit({ stay }: ParkFeesEditProps) {
   const { data: parkFees, isLoading } = useQuery(
     `park-fees-${stay?.slug}`,
-    () => getParkFees(stay, token),
-    { enabled: !!token }
+    () => getParkFees(stay)
   );
 
   const queryClient = useQueryClient();
@@ -60,6 +59,9 @@ function ParkFeesEdit({ stay, token }: ParkFeesEditProps) {
 
   const addParkFees = async (values: ParkFeesValues) => {
     if (stay) {
+      const currentSession = await Auth.currentSession();
+      const accessToken = currentSession.getAccessToken();
+      const token = accessToken.getJwtToken();
       await axios.post(
         `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/${stay.slug}/park-fees/`,
         {
@@ -110,20 +112,16 @@ function ParkFeesEdit({ stay, token }: ParkFeesEditProps) {
         <Modal
           opened={openParkFeesModal}
           onClose={closeParkFees}
-          title={"Park/Conservancy fees"}
+          title={"Add Park/Conservancy fees"}
+          size="lg"
           classNames={{
             title: "text-lg font-bold",
-            close: "text-black hover:text-gray-700 hover:bg-gray-200",
-            header: "bg-gray-100",
+            close:
+              "text-black hover:text-gray-700 w-[40px] h-[30px] hover:bg-gray-100",
+            body: "max-h-[500px] overflow-y-scroll px-10 pb-8 w-full",
+            content: "rounded-2xl",
           }}
-          transitionProps={{ transition: "fade", duration: 200 }}
-          closeButtonProps={{
-            style: {
-              width: 30,
-              height: 30,
-            },
-            iconSize: 20,
-          }}
+          centered
         >
           <form
             className="flex flex-col gap-1"
@@ -199,7 +197,7 @@ function ParkFeesEdit({ stay, token }: ParkFeesEditProps) {
               <Button onClick={closeParkFees} variant="default">
                 Close
               </Button>
-              <Button loading={addParkFeesLoading} type="submit">
+              <Button color="red" loading={addParkFeesLoading} type="submit">
                 Submit
               </Button>
             </Flex>
@@ -210,7 +208,7 @@ function ParkFeesEdit({ stay, token }: ParkFeesEditProps) {
           {parkFees && parkFees.length > 0 && (
             <div className="flex flex-col gap-3">
               {parkFees.map((fee, index) => (
-                <ParkFee token={token} stay={stay} fee={fee} key={index} />
+                <ParkFee stay={stay} fee={fee} key={index} />
               ))}
             </div>
           )}

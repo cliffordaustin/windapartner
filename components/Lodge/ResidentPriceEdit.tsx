@@ -1,5 +1,6 @@
 import { RoomAvailabilityResidentGuest, LodgeStay } from "@/utils/types";
 import { Button, Grid, Input, NumberInput, Popover, Text } from "@mantine/core";
+import { Auth } from "aws-amplify";
 import axios from "axios";
 import Cookies from "js-cookie";
 import React, { useEffect } from "react";
@@ -10,7 +11,6 @@ type ResidentPriceEditProps = {
   date: string;
   residentGuests: RoomAvailabilityResidentGuest[];
   stay: LodgeStay | undefined;
-  token: string | undefined;
 };
 
 function NonResidentPriceEdit({
@@ -18,7 +18,6 @@ function NonResidentPriceEdit({
   date,
   residentGuests,
   stay,
-  token,
 }: ResidentPriceEditProps) {
   const residentGuest: RoomAvailabilityResidentGuest | undefined =
     residentGuests.find(
@@ -35,6 +34,9 @@ function NonResidentPriceEdit({
 
   const updatePrice = async () => {
     if (newPrice && residentGuest) {
+      const currentSession = await Auth.currentSession();
+      const accessToken = currentSession.getAccessToken();
+      const token = accessToken.getJwtToken();
       await axios.patch(
         `${process.env.NEXT_PUBLIC_baseURL}/resident-guests/${residentGuest.id}/`,
         {

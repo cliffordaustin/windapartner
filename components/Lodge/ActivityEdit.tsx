@@ -19,17 +19,16 @@ import { useDisclosure } from "@mantine/hooks";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useForm } from "@mantine/form";
+import { Auth } from "aws-amplify";
 
 type ActivityEditProps = {
   stay: LodgeStay | undefined;
-  token: string;
 };
 
-function ActivityEdit({ stay, token }: ActivityEditProps) {
+function ActivityEdit({ stay }: ActivityEditProps) {
   const { data: activities, isLoading } = useQuery(
     `activities-${stay?.slug}`,
-    () => getStayActivities(stay, token),
-    { enabled: !!token }
+    () => getStayActivities(stay)
   );
 
   const queryClient = useQueryClient();
@@ -59,6 +58,9 @@ function ActivityEdit({ stay, token }: ActivityEditProps) {
 
   const addActivityFunc = async (values: ActivityValues) => {
     if (stay) {
+      const currentSession = await Auth.currentSession();
+      const accessToken = currentSession.getAccessToken();
+      const token = accessToken.getJwtToken();
       await axios.post(
         `${process.env.NEXT_PUBLIC_baseURL}/partner-stays/${stay.slug}/activities/`,
         {
@@ -111,19 +113,15 @@ function ActivityEdit({ stay, token }: ActivityEditProps) {
           opened={openActivityModal}
           onClose={closeActivity}
           title={"Activities/Extras"}
+          size="lg"
           classNames={{
             title: "text-lg font-bold",
-            close: "text-black hover:text-gray-700 hover:bg-gray-200",
-            header: "bg-gray-100",
+            close:
+              "text-black hover:text-gray-700 w-[40px] h-[30px] hover:bg-gray-100",
+            body: "max-h-[500px] overflow-y-scroll px-10 pb-8 w-full",
+            content: "rounded-2xl",
           }}
-          transitionProps={{ transition: "fade", duration: 200 }}
-          closeButtonProps={{
-            style: {
-              width: 30,
-              height: 30,
-            },
-            iconSize: 20,
-          }}
+          centered
         >
           <form
             className="flex flex-col gap-1"
@@ -189,7 +187,7 @@ function ActivityEdit({ stay, token }: ActivityEditProps) {
               <Button onClick={closeActivity} variant="default">
                 Close
               </Button>
-              <Button disabled={activityLoading} type="submit">
+              <Button color="red" disabled={activityLoading} type="submit">
                 Submit{" "}
                 {activityLoading && (
                   <Loader size="xs" color="gray" ml={5}></Loader>
@@ -203,7 +201,7 @@ function ActivityEdit({ stay, token }: ActivityEditProps) {
           {activities && activities.length > 0 && (
             <div className="flex flex-col gap-3">
               {activities.map((fee, index) => (
-                <Activity token={token} stay={stay} fee={fee} key={index} />
+                <Activity stay={stay} fee={fee} key={index} />
               ))}
             </div>
           )}

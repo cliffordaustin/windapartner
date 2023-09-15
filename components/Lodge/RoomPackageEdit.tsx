@@ -22,6 +22,7 @@ import { useMutation, useQueryClient } from "react-query";
 import AddRoomFirstPage from "./AddRoomFirstPage";
 import AddRoomSecondPage from "./AddRoomSecondPage";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
+import { Auth } from "aws-amplify";
 
 type PackageType = {
   id: number;
@@ -76,12 +77,14 @@ function RoomPackageEdit({ index, room, stay }: RoomPackageEditProps) {
     number | undefined | ""
   >(room.infant_capacity);
 
-  const token = Cookies.get("token");
   const queryClient = useQueryClient();
 
   const submit = async () => {
     if (stay) {
       for (const packageItem of packages || []) {
+        const currentSession = await Auth.currentSession();
+        const accessToken = currentSession.getAccessToken();
+        const token = accessToken.getJwtToken();
         await axios.patch(
           `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/room-detail-types/${packageItem.id}/`,
           {
@@ -105,6 +108,9 @@ function RoomPackageEdit({ index, room, stay }: RoomPackageEditProps) {
   const deleteRoom = async () => {
     if (stay) {
       for (const packageItem of packages || []) {
+        const currentSession = await Auth.currentSession();
+        const accessToken = currentSession.getAccessToken();
+        const token = accessToken.getJwtToken();
         await axios.delete(
           `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/room-detail-types/${packageItem.id}/`,
           {
@@ -119,6 +125,9 @@ function RoomPackageEdit({ index, room, stay }: RoomPackageEditProps) {
 
   const deletePackage = async (id: number) => {
     if (stay) {
+      const currentSession = await Auth.currentSession();
+      const accessToken = currentSession.getAccessToken();
+      const token = accessToken.getJwtToken();
       await axios.delete(
         `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/room-detail-types/${id}/`,
         {
@@ -221,18 +230,13 @@ function RoomPackageEdit({ index, room, stay }: RoomPackageEditProps) {
         title={"Edit room and package"}
         classNames={{
           title: "text-lg font-bold",
-          close: "text-black hover:text-gray-700 hover:bg-gray-200",
-          header: "bg-gray-100",
+          close:
+            "text-black hover:text-gray-700 w-[40px] h-[30px] hover:bg-gray-100",
+          body: "max-h-[500px] overflow-y-scroll px-10 pb-8 w-full",
+          content: "rounded-2xl",
         }}
-        transitionProps={{ transition: "fade", duration: 200 }}
-        closeButtonProps={{
-          style: {
-            width: 30,
-            height: 30,
-          },
-          iconSize: 20,
-        }}
-        size="lg"
+        centered
+        size="xl"
       >
         <Flex direction="column" mt={10} gap={4}>
           <TextInput

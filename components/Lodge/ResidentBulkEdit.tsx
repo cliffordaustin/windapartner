@@ -4,6 +4,7 @@ import {
   LodgeStay,
 } from "@/utils/types";
 import { Button, Flex, NumberInput, Radio, TextInput } from "@mantine/core";
+import { Auth } from "aws-amplify";
 import axios, { AxiosResponse } from "axios";
 import { format } from "date-fns";
 import Cookies from "js-cookie";
@@ -27,7 +28,6 @@ type BulkEditProps = {
   selectedRoomType: RoomType | undefined;
   stay: LodgeStay | undefined;
   closeModal: () => void;
-  token: string | undefined;
 };
 
 function ResidentBulkEdit({
@@ -40,7 +40,6 @@ function ResidentBulkEdit({
   setSelectedResidentGuestType,
   stay,
   closeModal,
-  token,
 }: BulkEditProps) {
   const [guestTypeValue, setGuestTypeValue] = React.useState<string>(guestType);
   const [descriptionValue, setDescriptionValue] =
@@ -60,6 +59,9 @@ function ResidentBulkEdit({
   };
 
   const updateDate = async () => {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
     if (selectedRoomType && value === "date") {
       for (const room of selectedRoomType.room_resident_availabilities) {
         const residentGuest: RoomAvailabilityResidentGuest | undefined =

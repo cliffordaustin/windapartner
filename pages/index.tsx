@@ -20,40 +20,6 @@ export default function Home({ signOut }: { signOut: () => void }) {
   const { scrollIntoView, targetRef } = useScrollIntoView<HTMLDivElement>({
     offset: 60,
   });
-
-  // const COGNITO_URL = `https://cognito-idp.${awsExports.aws_project_region}.amazonaws.com/`;
-
-  // const authentication = async (access_token: string) => {
-  //   try {
-  //     const accessToken = access_token;
-
-  //     const { data } = await axios.post(
-  //       COGNITO_URL,
-  //       {
-  //         AccessToken: accessToken,
-  //       },
-  //       {
-  //         headers: {
-  //           "Content-Type": "application/x-amz-json-1.1",
-  //           "X-Amz-Target": "AWSCognitoIdentityProviderService.GetUser",
-  //         },
-  //       }
-  //     );
-  //     console.log(data);
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   Auth.currentSession().then((res) => {
-  //     let accessToken = res.getAccessToken();
-  //     let jwt = accessToken.getJwtToken();
-
-  //     console.log(jwt);
-  //   });
-  // }, []);
-
   return (
     <div className="overflow-x-hidden">
       <Head>

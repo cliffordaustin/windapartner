@@ -1,5 +1,6 @@
 import { LodgeStay, stayImages } from "@/utils/types";
 import { Button, Flex, Loader, Text } from "@mantine/core";
+import { Auth } from "aws-amplify";
 import axios from "axios";
 import Cookies from "js-cookie";
 import Image from "next/image";
@@ -9,10 +10,9 @@ import { useMutation, useQueryClient } from "react-query";
 type StayImagesProps = {
   stay: LodgeStay;
   image: stayImages;
-  token: string | undefined;
 };
 
-function StayImages({ stay, image, token }: StayImagesProps) {
+function StayImages({ stay, image }: StayImagesProps) {
   const queryClient = useQueryClient();
 
   const getImageName = (url: string) => {
@@ -25,6 +25,9 @@ function StayImages({ stay, image, token }: StayImagesProps) {
   };
 
   const deleteImage = async (index: number) => {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
     await axios.delete(
       `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay.slug}/images/${index}/`,
       {

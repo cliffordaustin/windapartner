@@ -55,37 +55,55 @@ import { API, Auth, withSSRContext } from "aws-amplify";
 import SmallImage from "@/components/Agent/SmallImage";
 import SelectedStay from "@/components/Agent/SelectedStay";
 
+const TokenRefreshInterval = 60 * 1000;
+
 export default function AgentPage() {
-  const [token, setToken] = useState("");
+  // const [token, setToken] = useState("");
 
-  useEffect(() => {
-    Auth.currentSession().then((res) => {
-      let accessToken = res.getAccessToken();
-      let jwt = accessToken.getJwtToken();
+  // const refreshToken = async () => {
+  //   try {
+  //     const currentSession = await Auth.currentSession();
+  //     const accessToken = currentSession.getAccessToken();
+  //     const jwt = accessToken.getJwtToken();
+  //     setToken(jwt);
+  //   } catch (error) {
+  //     // Handle token refresh error, e.g., user is not authenticated
+  //     console.error("Token refresh error:", error);
+  //   }
+  // };
 
-      setToken(jwt);
-    });
-  }, []);
+  // useEffect(() => {
+  //   refreshToken(); // Initial token fetch
+
+  //   const refreshInterval = setInterval(refreshToken, TokenRefreshInterval);
+
+  //   return () => {
+  //     clearInterval(refreshInterval);
+  //   };
+  // }, []);
 
   const router: NextRouter = useRouter();
 
-  const { data: allPartnerStays, isLoading: allPartnerStaysLoading } =
-    useQuery<getPartnerStaysType>(
-      "all-partner-stays",
-      () =>
-        getPartnerAllStays(
-          router.query.search as string,
-          Number(router.query.second_page || 1),
-          token
-        ),
-      { enabled: !!token }
-    );
-
-  const { data: user } = useQuery<UserTypes | null>(
-    "user",
-    () => getUser(token),
-    { enabled: !!token }
+  const {
+    data: allPartnerStays,
+    isLoading: allPartnerStaysLoading,
+    refetch,
+  } = useQuery<getPartnerStaysType>(
+    "all-partner-stays",
+    () =>
+      getPartnerAllStays(
+        router.query.search as string,
+        router.query.contracts as string,
+        Number(router.query.page || 1)
+      ),
+    { enabled: false }
   );
+
+  const { data: user } = useQuery<UserTypes | null>("user", () => getUser());
+
+  useEffect(() => {
+    refetch();
+  }, [router.query.search, router.query.contracts, router.query.page]);
 
   const { state, setState } = useContext(Context);
 
@@ -96,25 +114,23 @@ export default function AgentPage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    if (token) {
-      setIsLoading(true);
+    setIsLoading(true);
 
-      const ids = localStorage.getItem("stayIds");
-      let newIds = ids?.replace(/[\[\]']+/g, "");
+    const ids = localStorage.getItem("stayIds");
+    let newIds = ids?.replace(/[\[\]']+/g, "");
 
-      newIds = newIds || "0";
+    newIds = newIds || "0";
 
-      const getStay = getDetailPartnerStays(newIds, token);
-      getStay
-        .then((res) => {
-          setAddedStays(res);
-          setIsLoading(false);
-        })
-        .catch((err) => {
-          setIsLoading(false);
-        });
-    }
-  }, [itemIds, token]);
+    const getStay = getDetailPartnerStays(newIds);
+    getStay
+      .then((res) => {
+        setAddedStays(res);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        setIsLoading(false);
+      });
+  }, [itemIds]);
 
   useEffect(() => {
     const storedItemIds = localStorage.getItem("stayIds");
@@ -245,28 +261,28 @@ export default function AgentPage() {
           </>
         )}
 
-        <div className="max-w-[640px] mx-auto mt-4 px-4 py-6 border border-solid rounded-lg border-gray-200 flex items-center">
-          <div className="w-[150px] px-4 border-r border-y-0 border-l-0 border-solid border-gray-200">
+        <div className="w-fit gap-8 mx-auto mt-4 px-8 py-6 border border-solid rounded-lg border-gray-200 flex items-center">
+          {/* <div className="w-[150px] px-4 border-r border-y-0 border-l-0 border-solid border-gray-200">
             <Text className="font-bold">My contracts</Text>
-          </div>
-          <div className="px-4 flex gap-7 items-center">
-            <Text size="sm" className="text-gray-500">
-              View only the properties you have a contract with
-            </Text>
+          </div> */}
 
-            <Switch
-              color="red"
-              checked={!showListOfStaysWithoutAccess}
-              onChange={() => {
-                setShowListOfStaysWithoutAccess((prev) => !prev);
-                router.replace({
-                  query: {
-                    contracts: showListOfStaysWithoutAccess ? "1" : "",
-                  },
-                });
-              }}
-            ></Switch>
-          </div>
+          <Text size="md" className="text-gray-500">
+            View only the properties you have a contract with.
+          </Text>
+
+          <Switch
+            color="red"
+            checked={!showListOfStaysWithoutAccess}
+            onChange={() => {
+              setShowListOfStaysWithoutAccess((prev) => !prev);
+              router.push({
+                query: {
+                  search: router.query.search as string,
+                  contracts: showListOfStaysWithoutAccess ? "1" : "",
+                },
+              });
+            }}
+          ></Switch>
         </div>
         <div className="md:px-12 max-w-[1440px] mt-4 mx-auto px-6">
           {/* {!router.query.search &&
@@ -325,16 +341,17 @@ export default function AgentPage() {
           <Pagination
             radius="lg"
             color="red"
-            className="my-8"
+            className="mt-4 mb-8"
             total={allPartnerStays.total_pages}
             position="center"
             value={Number(router.query.page || 1)}
             onChange={(page) => {
-              router.push(
-                `/partner/agent?page=${page}&search=${
-                  router.query.search || ""
-                }`
-              );
+              router.push({
+                query: {
+                  ...router.query,
+                  page: page,
+                },
+              });
             }}
           />
         )}
@@ -365,15 +382,22 @@ export const getServerSideProps: GetServerSideProps = async ({
         },
       };
     }
-    const userSession = await Auth.currentSession();
-    const token = userSession.getAccessToken().getJwtToken();
 
-    await queryClient.fetchQuery<getPartnerStaysType>("all-partner-stays", () =>
-      getPartnerAllStays(query.search as string, Number(query.page || 1), token)
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const ssrToken = accessToken.getJwtToken();
+
+    await queryClient.fetchQuery<getPartnerStaysType>("partner-stays", () =>
+      getPartnerAllStays(
+        query.search as string,
+        query.contracts as string,
+        Number(query.page || 1),
+        ssrToken
+      )
     );
 
     await queryClient.fetchQuery<UserTypes | null>("user", () =>
-      getUser(token)
+      getUser(ssrToken)
     );
 
     return {

@@ -18,13 +18,13 @@ import Cookies from "js-cookie";
 import { useForm } from "@mantine/form";
 import axios from "axios";
 import StayImages from "./StayImages";
+import { Auth } from "aws-amplify";
 
 type RoomResidentPriceEditProps = {
   stay: LodgeStay | undefined;
-  token: string;
 };
 
-function AboutRoomEdit({ stay, token }: RoomResidentPriceEditProps) {
+function AboutRoomEdit({ stay }: RoomResidentPriceEditProps) {
   const queryClient = useQueryClient();
 
   type FormValues = {
@@ -58,6 +58,9 @@ function AboutRoomEdit({ stay, token }: RoomResidentPriceEditProps) {
   const [noFiles, setNoFiles] = React.useState(false);
 
   const editProperty = async (values: FormValues) => {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
     await axios.patch(
       `${process.env.NEXT_PUBLIC_baseURL}/user-stays-email/${stay?.slug}/`,
       {
@@ -162,12 +165,7 @@ function AboutRoomEdit({ stay, token }: RoomResidentPriceEditProps) {
 
           <Flex direction="column" mt={8} gap={3}>
             {stay?.stay_images.map((image, index) => (
-              <StayImages
-                stay={stay}
-                image={image}
-                token={token}
-                key={index}
-              ></StayImages>
+              <StayImages stay={stay} image={image} key={index}></StayImages>
             ))}
           </Flex>
 
@@ -189,7 +187,7 @@ function AboutRoomEdit({ stay, token }: RoomResidentPriceEditProps) {
           />
 
           <Flex gap={8} justify="right" mt={6}>
-            <Button loading={editLoading} type="submit">
+            <Button color="red" loading={editLoading} type="submit">
               Submit
             </Button>
           </Flex>
