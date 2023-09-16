@@ -437,7 +437,7 @@ export default function Calculate() {
                             className="text-black"
                             variant="white"
                           >
-                            Edit discount rates
+                            Add Nett Rates
                           </Button>
                         </div>
                       </div>

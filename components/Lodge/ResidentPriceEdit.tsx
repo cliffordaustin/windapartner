@@ -11,6 +11,7 @@ type ResidentPriceEditProps = {
   date: string;
   residentGuests: RoomAvailabilityResidentGuest[];
   stay: LodgeStay | undefined;
+  residentRate: number;
 };
 
 function NonResidentPriceEdit({
@@ -18,6 +19,7 @@ function NonResidentPriceEdit({
   date,
   residentGuests,
   stay,
+  residentRate,
 }: ResidentPriceEditProps) {
   const residentGuest: RoomAvailabilityResidentGuest | undefined =
     residentGuests.find(
@@ -63,6 +65,9 @@ function NonResidentPriceEdit({
       },
     }
   );
+  const totalPrice =
+    residentGuest &&
+    residentGuest.price + residentGuest.price * (residentRate / 100);
   return (
     <Grid.Col
       className="border-t-0 cursor-pointer hover:shadow-lg border-r border-l-0 border-b border-solid border-gray-300"
@@ -83,7 +88,7 @@ function NonResidentPriceEdit({
           <div className="p-2">
             <Text weight={500}>{date}</Text>
             <Text mt={6} size="sm">
-              {residentGuest ? "KES" + residentGuest.price : "N/A"}
+              {totalPrice ? "KES" + totalPrice.toFixed(2) : "N/A"}
             </Text>
           </div>
         </Popover.Target>

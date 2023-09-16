@@ -1,6 +1,10 @@
 import { getRoomTypes } from "@/pages/api/stays";
 import pricing from "@/utils/calculation";
-import { RoomType, LodgeStay } from "@/utils/types";
+import {
+  RoomType,
+  LodgeStay,
+  RoomAvailabilityResidentGuest,
+} from "@/utils/types";
 import {
   Button,
   Container,
@@ -10,6 +14,7 @@ import {
   Modal,
   Popover,
   ScrollArea,
+  Slider,
   Switch,
   Text,
   Tooltip,
@@ -17,13 +22,15 @@ import {
 import { IconCalendar, IconSelector } from "@tabler/icons-react";
 import { format } from "date-fns";
 import React, { useEffect, useState } from "react";
-import { useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import NonResidentPriceEdit from "./NonResidentPriceEdit";
 import { useDisclosure } from "@mantine/hooks";
 import NonResidentBulkEdit from "./NonResidentBulkEdit";
 import ResidentPriceEdit from "./ResidentPriceEdit";
 import ResidentBulkEdit from "./ResidentBulkEdit";
 import { DatePickerInput } from "@mantine/dates";
+import axios, { AxiosResponse } from "axios";
+import { Auth } from "aws-amplify";
 
 type PriceEditProps = {
   stay: LodgeStay | undefined;
@@ -173,6 +180,83 @@ function PriceEdit({ stay }: PriceEditProps) {
     React.useState(false);
   const [isNonResidentDropdownOpen, setIsNonResidentDropdownOpen] =
     React.useState(false);
+
+  const [residentRate, setResidentRate] = useState(0);
+
+  const [nonResidentRate, setNonResidentRate] = useState(0);
+
+  const updateAllPricing = async () => {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
+    const room_types: AxiosResponse<any> = await axios.get(
+      `${process.env.NEXT_PUBLIC_baseURL}/stays/${stay?.slug}/room-types/`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const room_types_results: RoomType[] | undefined = room_types.data.results;
+
+    if (room_types_results) {
+      for (const room of room_types_results) {
+        for (const roomAvailability of room.room_non_resident_availabilities) {
+          for (const nonResidentGuest of roomAvailability.room_non_resident_guest_availabilities) {
+            const newPrice =
+              nonResidentGuest.price +
+              nonResidentGuest.price * (nonResidentRate / 100);
+
+            await axios.patch(
+              `${process.env.NEXT_PUBLIC_baseURL}/nonresident-guests/${nonResidentGuest.id}/`,
+              {
+                price: newPrice,
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+          }
+        }
+
+        for (const roomAvailability of room.room_resident_availabilities) {
+          for (const residentGuest of roomAvailability.room_resident_guest_availabilities) {
+            const newPrice =
+              residentGuest.price + residentGuest.price * (residentRate / 100);
+
+            await axios.patch(
+              `${process.env.NEXT_PUBLIC_baseURL}/resident-guests/${residentGuest.id}/`,
+              {
+                price: newPrice,
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+          }
+        }
+      }
+    }
+  };
+
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: update, isLoading: updateLoading } = useMutation(
+    updateAllPricing,
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(queryStr);
+        setSelectedNonResidentGuestType(undefined);
+        setResidentRate(0);
+        setNonResidentRate(0);
+      },
+    }
+  );
 
   return (
     <ScrollArea className="w-full h-[85vh] px-5 pt-5">
@@ -575,6 +659,7 @@ function PriceEdit({ stay }: PriceEditProps) {
                   (guest, index) => (
                     <NonResidentPriceEdit
                       key={guest.id}
+                      nonResidentRate={nonResidentRate}
                       date={format(new Date(guest.date), "dd MMM yyyy")}
                       guestType={selectedNonResidentGuestType?.name || ""}
                       nonResidentGuests={
@@ -598,6 +683,7 @@ function PriceEdit({ stay }: PriceEditProps) {
                   (guest, index) => (
                     <ResidentPriceEdit
                       key={guest.id}
+                      residentRate={residentRate}
                       date={format(new Date(guest.date), "dd MMM yyyy")}
                       guestType={selectedResidentGuestType?.name || ""}
                       residentGuests={guest.room_resident_guest_availabilities}
@@ -672,6 +758,40 @@ function PriceEdit({ stay }: PriceEditProps) {
               </Button>
             </div>
           )}
+      </div>
+
+      <div className="flex flex-col">
+        <div className="my-2">
+          <span className="text-sm text-gray-600">Non-resident Rate</span>
+          <Slider
+            value={nonResidentRate}
+            className=""
+            onChange={setNonResidentRate}
+            color="red"
+          />
+        </div>
+        <div className="">
+          <span className="text-sm text-gray-600">Resident Rate</span>
+          <Slider
+            value={residentRate}
+            className=""
+            onChange={setResidentRate}
+            color="red"
+          />
+        </div>
+      </div>
+
+      <div className="flex justify-between items-center">
+        <div></div>
+        <Button
+          loading={updateLoading}
+          color="red"
+          onClick={() => {
+            update();
+          }}
+        >
+          Update price
+        </Button>
       </div>
     </ScrollArea>
   );
