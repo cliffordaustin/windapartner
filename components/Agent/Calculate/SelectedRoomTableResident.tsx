@@ -36,6 +36,7 @@ type SelectedRoomTableType = {
   guestType: string;
   agentRates: AgentDiscountRateType[] | undefined;
   displayRackRates: boolean;
+  date: [Date | null, Date | null];
 };
 
 type RoomAvailabilityType = {
@@ -54,6 +55,7 @@ function SelectedRoomTableResident({
   guestType,
   agentRates,
   displayRackRates,
+  date,
 }: SelectedRoomTableType) {
   const data: FormatDateType[] = useMemo(
     () =>
@@ -79,19 +81,29 @@ function SelectedRoomTableResident({
     [agentRates, guestType, room]
   );
 
-  let uniqueDates = data.reduce((accumulator: string[], current) => {
-    const dates = current.roomAvailability.map((item) => item.date);
-    return [...accumulator, ...dates];
-  }, []);
+  let uniqueDates: string[] = [];
 
-  uniqueDates = [...new Set(uniqueDates)];
+  // get all the dates between price start and end date and store in uniqueDates
+  const startDate = date[0] ? new Date(date[0]) : null;
+  const endDate = date[1] ? new Date(date[1]) : null;
+
+  if (startDate && endDate) {
+    let currentDate = startDate;
+    while (currentDate < endDate) {
+      uniqueDates.push(format(currentDate, "yyyy-MM-dd"));
+      currentDate = new Date(currentDate.setDate(currentDate.getDate() + 1));
+    }
+  }
 
   const columns = React.useMemo<ColumnDef<FormatDateType>[]>(
     () => [
       {
-        header: () => room.name,
+        header: () => "",
         accessorKey: "packageName" as const,
-        cell: ({ getValue }) => getValue(),
+        cell: ({ getValue }) => {
+          const value = getValue();
+          return <div className="w-[150px]">{value as string}</div>;
+        },
       },
 
       ...uniqueDates.map((date) => {
@@ -109,26 +121,27 @@ function SelectedRoomTableResident({
         const rate = percentage.resident_rate / 100;
 
         return {
-          header: () => {
-            return (
-              <div
-                className={
-                  "relative px-5 z-0 py-4 " +
-                  ((percentage.isResidentNettRate &&
-                    percentage.resident_rate > 0) ||
-                  (percentage.resident_rate > 0 && percentage.standard)
-                    ? "bg-green-300"
-                    : !percentage.isResidentNettRate &&
-                      !displayRackRates &&
-                      percentage.resident_rate > 0
-                    ? "bg-blue-400"
-                    : "bg-gray-300")
-                }
-              >
-                <span>{format(new Date(date), "dd MMM")}</span>
-              </div>
-            );
-          },
+          // header: () => {
+          //   return (
+          //     <div
+          //       className={
+          //         "relative px-5 z-0 py-4 " +
+          //         ((percentage.isResidentNettRate &&
+          //           percentage.resident_rate > 0) ||
+          //         (percentage.resident_rate > 0 && percentage.standard)
+          //           ? "bg-green-300"
+          //           : !percentage.isResidentNettRate &&
+          //             !displayRackRates &&
+          //             percentage.resident_rate > 0
+          //           ? "bg-blue-400"
+          //           : "bg-gray-300")
+          //       }
+          //     >
+          //       <span>{format(new Date(date), "dd MMM")}</span>
+          //     </div>
+          //   );
+          // },
+          header: "",
           accessorKey: `${date}` as const,
           cell: ({ row }: { row: Row<FormatDateType> }) => {
             const roomAvailability = row.original.roomAvailability.find(
@@ -168,7 +181,12 @@ function SelectedRoomTableResident({
               >
                 <div
                   className={
-                    "py-4 border-b-4 relative z-0 border-solid border-x-0 border-t-0 border-transparent text-center px-4"
+                    "py-4 border-b-4 relative z-0 border-solid border-x-0 border-t-0 border-transparent text-center w-[120px] " +
+                    (!percentage.standard &&
+                    !displayRackRates &&
+                    percentage.resident_rate > 0
+                      ? "bg-blue-50"
+                      : "")
                   }
                 >
                   KES{totalPrice.toFixed(2)}
@@ -188,13 +206,15 @@ function SelectedRoomTableResident({
     getCoreRowModel: getCoreRowModel(),
   });
   return (
-    <ScrollArea type="never">
+    <div>
       <style jsx>{`
         table {
           border-collapse: collapse;
           border-spacing: 0; /* This removes the space between table rows */
-          width: 100%;
-          margin-bottom: 20px;
+           {
+            /* width: 100%;
+          margin-bottom: 20px; */
+          }
         }
 
         table,
@@ -271,7 +291,7 @@ function SelectedRoomTableResident({
           ))}
         </tbody>
       </table>
-    </ScrollArea>
+    </div>
   );
 }
 

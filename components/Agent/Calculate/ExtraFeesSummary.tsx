@@ -51,7 +51,10 @@ export default function ExtraFeesSummary({
                 : fee.guestType === "Non-resident"
                 ? "$"
                 : ""}
-              {price.toLocaleString()}
+              {price.toLocaleString(undefined, {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2,
+              })}
             </Text>
           )}
         </Flex>

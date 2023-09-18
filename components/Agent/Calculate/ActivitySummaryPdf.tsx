@@ -28,7 +28,11 @@ export default function ActivitiesSummaryPdf({
           {activity.name}
         </Text>
         <Text style={{ fontSize: 12, fontWeight: 500, color: "gray" }}>
-          ${price.toLocaleString()}
+          $
+          {price.toLocaleString(undefined, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2,
+          })}
         </Text>
       </View>
     </View>

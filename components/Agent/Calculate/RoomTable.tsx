@@ -7,6 +7,9 @@ import React, { useMemo } from "react";
 import SelectedRoomTable from "./SelectedRoomTable";
 import { AgentDiscountRateType } from "@/pages/api/stays";
 import SelectedRoomTableResident from "./SelectedRoomTableResident";
+import DateTable from "./DateTable";
+import { Accordion, Divider, ScrollArea } from "@mantine/core";
+import { ScrollSync, ScrollSyncPane } from "react-scroll-sync";
 
 type RoomTableType = {
   roomTypes: RoomType[] | undefined;
@@ -14,6 +17,7 @@ type RoomTableType = {
   guestType: string;
   agentRates: AgentDiscountRateType[] | undefined;
   displayRackRates: boolean;
+  date: [Date | null, Date | null];
 };
 type PackagesType = {
   name: string;
@@ -35,6 +39,7 @@ export default function RoomTable({
   guestType,
   agentRates,
   displayRackRates,
+  date,
 }: RoomTableType) {
   const uniqueRooms: UniqueRoomsType[] = useMemo(
     () =>
@@ -73,28 +78,80 @@ export default function RoomTable({
   );
 
   return (
-    <div className="flex flex-col gap-3">
-      {isNonResident &&
-        uniqueRooms.map((room, index) => (
-          <SelectedRoomTable
-            agentRates={agentRates}
-            key={index}
-            room={room}
-            guestType={guestType}
-            displayRackRates={displayRackRates}
-          />
-        ))}
+    <>
+      <ScrollSync>
+        <div>
+          <ScrollSyncPane>
+            <div style={{ overflow: "auto" }} className="my-2 hide-scrollbar">
+              <DateTable isNonResident={isNonResident} date={date} />
+            </div>
+          </ScrollSyncPane>
 
-      {!isNonResident &&
-        uniqueRooms.map((room, index) => (
-          <SelectedRoomTableResident
-            agentRates={agentRates}
-            key={index}
-            room={room}
-            guestType={guestType}
-            displayRackRates={displayRackRates}
-          />
-        ))}
-    </div>
+          <Accordion
+            variant="separated"
+            className="!p-0"
+            defaultValue={uniqueRooms[0]?.name || ""}
+            classNames={{
+              content: "p-0",
+              // item: "border-none",
+              // control:
+              //   "border-t border-x border-b-0 border-solid border-gray-300",
+            }}
+          >
+            {isNonResident &&
+              uniqueRooms.map((room, index) => (
+                <Accordion.Item key={index} value={room.name || ""}>
+                  <Accordion.Control>
+                    <span className="font-semibold text-sm">{room.name}</span>
+                  </Accordion.Control>
+                  <Accordion.Panel className="!p-0">
+                    <ScrollSyncPane>
+                      <div
+                        style={{ overflow: "auto" }}
+                        className="hide-scrollbar"
+                      >
+                        <SelectedRoomTable
+                          agentRates={agentRates}
+                          key={index}
+                          room={room}
+                          date={date}
+                          guestType={guestType}
+                          displayRackRates={displayRackRates}
+                        />
+                      </div>
+                    </ScrollSyncPane>
+                  </Accordion.Panel>
+                </Accordion.Item>
+              ))}
+
+            {!isNonResident &&
+              uniqueRooms.map((room, index) => (
+                <Accordion.Item key={index} value={room.name || ""}>
+                  <Accordion.Control>
+                    <span className="font-semibold text-sm">{room.name}</span>
+                  </Accordion.Control>
+                  <Accordion.Panel className="!p-0">
+                    <ScrollSyncPane>
+                      <div
+                        style={{ overflow: "auto" }}
+                        className="hide-scrollbar"
+                      >
+                        <SelectedRoomTableResident
+                          agentRates={agentRates}
+                          key={index}
+                          room={room}
+                          date={date}
+                          guestType={guestType}
+                          displayRackRates={displayRackRates}
+                        />
+                      </div>
+                    </ScrollSyncPane>
+                  </Accordion.Panel>
+                </Accordion.Item>
+              ))}
+          </Accordion>
+        </div>
+      </ScrollSync>
+    </>
   );
 }

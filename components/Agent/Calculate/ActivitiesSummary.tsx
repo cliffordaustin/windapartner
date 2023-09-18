@@ -32,7 +32,11 @@ export default function ActivitiesSummary({
           </Text>
           {!summarizedCalculation && (
             <Text size="sm" className="text-gray-600" weight={500}>
-              ${price.toLocaleString()}
+              $
+              {price.toLocaleString(undefined, {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2,
+              })}
             </Text>
           )}
         </div>

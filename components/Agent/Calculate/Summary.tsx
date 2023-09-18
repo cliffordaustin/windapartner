@@ -319,7 +319,10 @@ export default function Summary({
 
                     <Text size="sm" weight={600}>
                       {totalNonResidentPrice
-                        ? `$ ${totalNonResidentPrice.toLocaleString()}`
+                        ? `$ ${totalNonResidentPrice.toLocaleString(undefined, {
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 2,
+                          })}`
                         : ""}
                     </Text>
                   </Flex>
@@ -350,7 +353,13 @@ export default function Summary({
 
                     <Text size="sm" weight={600}>
                       {totalNonResidentParkFees
-                        ? `$ ${totalNonResidentParkFees.toLocaleString()}`
+                        ? `$ ${totalNonResidentParkFees.toLocaleString(
+                            undefined,
+                            {
+                              minimumFractionDigits: 0,
+                              maximumFractionDigits: 2,
+                            }
+                          )}`
                         : ""}{" "}
                     </Text>
                   </Flex>
@@ -377,7 +386,10 @@ export default function Summary({
 
                     <Text size="sm" weight={600}>
                       {activityTotalPrice
-                        ? `$ ${activityTotalPrice.toLocaleString()}`
+                        ? `$ ${activityTotalPrice.toLocaleString(undefined, {
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 2,
+                          })}`
                         : ""}
                     </Text>
                   </Flex>
@@ -411,7 +423,13 @@ export default function Summary({
 
                     <Text size="sm" weight={600}>
                       {totalNonResidentExtraFees
-                        ? `$ ${totalNonResidentExtraFees.toLocaleString()}`
+                        ? `$ ${totalNonResidentExtraFees.toLocaleString(
+                            undefined,
+                            {
+                              minimumFractionDigits: 0,
+                              maximumFractionDigits: 2,
+                            }
+                          )}`
                         : ""}
                     </Text>
                   </Flex>
@@ -469,7 +487,13 @@ export default function Summary({
                   </Text>
                   <Text size="lg" weight={700}>
                     {nonResidentFullTotalPrice
-                      ? `$ ${nonResidentFullTotalPrice.toLocaleString()}`
+                      ? `$ ${nonResidentFullTotalPrice.toLocaleString(
+                          undefined,
+                          {
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 2,
+                          }
+                        )}`
                       : ""}
                   </Text>
                 </div>
@@ -556,7 +580,10 @@ export default function Summary({
 
                     <Text size="sm" weight={600}>
                       {totalResidentPrice
-                        ? `KES ${totalResidentPrice.toLocaleString()}`
+                        ? `KES ${totalResidentPrice.toLocaleString(undefined, {
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 2,
+                          })}`
                         : ""}{" "}
                     </Text>
                   </Flex>
@@ -587,7 +614,13 @@ export default function Summary({
 
                     <Text size="sm" weight={600}>
                       {totalResidentParkFees
-                        ? `KES ${totalResidentParkFees.toLocaleString()}`
+                        ? `KES ${totalResidentParkFees.toLocaleString(
+                            undefined,
+                            {
+                              minimumFractionDigits: 0,
+                              maximumFractionDigits: 2,
+                            }
+                          )}`
                         : ""}{" "}
                     </Text>
                   </Flex>
@@ -614,7 +647,13 @@ export default function Summary({
 
                     <Text size="sm" weight={600}>
                       {activityResidentTotalPrice
-                        ? `KES ${activityResidentTotalPrice.toLocaleString()}`
+                        ? `KES ${activityResidentTotalPrice.toLocaleString(
+                            undefined,
+                            {
+                              minimumFractionDigits: 0,
+                              maximumFractionDigits: 2,
+                            }
+                          )}`
                         : ""}
                     </Text>
                   </Flex>
@@ -648,7 +687,13 @@ export default function Summary({
 
                     <Text size="sm" weight={600}>
                       {totalResidentExtraFees
-                        ? `KES ${totalResidentExtraFees.toLocaleString()}`
+                        ? `KES ${totalResidentExtraFees.toLocaleString(
+                            undefined,
+                            {
+                              minimumFractionDigits: 0,
+                              maximumFractionDigits: 2,
+                            }
+                          )}`
                         : ""}{" "}
                     </Text>
                   </Flex>
@@ -706,7 +751,13 @@ export default function Summary({
                   </Text>
                   <Text size="lg" weight={700}>
                     {residentFullTotalPrice
-                      ? `KES ${residentFullTotalPrice.toLocaleString()}`
+                      ? `KES ${residentFullTotalPrice.toLocaleString(
+                          undefined,
+                          {
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 2,
+                          }
+                        )}`
                       : ""}{" "}
                   </Text>
                 </div>

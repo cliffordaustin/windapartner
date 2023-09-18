@@ -91,7 +91,10 @@ export default function NonResidentFeesSummaryPdf({
                     ? totalGuests.nonResidentTeens
                     : 0) *
                   nights
-                ).toLocaleString()}
+                ).toLocaleString(undefined, {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 2,
+                })}
               </Text>
             )}
           </View>

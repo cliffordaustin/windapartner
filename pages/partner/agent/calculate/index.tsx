@@ -668,7 +668,7 @@ export default function Calculate() {
                       </div>
 
                       <Divider
-                        label="Or set custom rates"
+                        label="or set additional discounts"
                         labelPosition="center"
                         className="my-2"
                       ></Divider>
@@ -929,10 +929,23 @@ export default function Calculate() {
                     </div> */}
                   </div>
                   <div className="w-[calc(100%-400px)]">
+                    <div className="w-fit mb-4 mx-auto border rounded-lg border-solid border-gray-200 px-6 py-3 flex items-center gap-6">
+                      <span className="text-sm">
+                        Toggle to view resident rate
+                      </span>
+                      <Switch
+                        checked={!isNonResident}
+                        onChange={() => {
+                          setIsNonResident(!isNonResident);
+                        }}
+                        color="red"
+                      ></Switch>
+                    </div>
                     <AgentPriceTable
                       agentRates={agents}
                       staySlug={selectedTab}
                       displayRackRates={displayRackRates}
+                      setDisplayRackRate={setDisplayRackRates}
                       setIsNonResident={setIsNonResident}
                       isNonResident={isNonResident}
                     />
@@ -1085,7 +1098,13 @@ export default function Calculate() {
                             </Text>
                             <Text size="lg" weight={700}>
                               {totalNonResidentSum
-                                ? `$ ${totalNonResidentSum.toLocaleString()}`
+                                ? `$ ${totalNonResidentSum.toLocaleString(
+                                    undefined,
+                                    {
+                                      minimumFractionDigits: 0,
+                                      maximumFractionDigits: 2,
+                                    }
+                                  )}`
                                 : ""}
                             </Text>
                           </div>
@@ -1097,7 +1116,13 @@ export default function Calculate() {
                             </Text>
                             <Text size="lg" weight={700}>
                               {totalResidentSum
-                                ? `KES ${totalResidentSum.toLocaleString()}`
+                                ? `KES ${totalResidentSum.toLocaleString(
+                                    undefined,
+                                    {
+                                      minimumFractionDigits: 0,
+                                      maximumFractionDigits: 2,
+                                    }
+                                  )}`
                                 : ""}
                             </Text>
                           </div>

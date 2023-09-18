@@ -85,7 +85,10 @@ export default function FeesSummaryPdf({
                     ? totalGuests.residentTeens
                     : 0) *
                   nights
-                ).toLocaleString()}
+                ).toLocaleString(undefined, {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 2,
+                })}
               </Text>
             )}
           </View>

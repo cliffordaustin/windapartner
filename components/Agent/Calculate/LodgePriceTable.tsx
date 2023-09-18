@@ -25,8 +25,6 @@ type AgentPriceTableType = {
   agentRates: AgentDiscountRateType[] | undefined;
   displayRackRates: boolean;
   isNonResident: boolean;
-  setIsNonResident: (isNonResident: boolean) => void;
-  setDisplayRackRate: (displayRackRate: boolean) => void;
 };
 
 export default function AgentPriceTable({
@@ -34,8 +32,6 @@ export default function AgentPriceTable({
   agentRates,
   displayRackRates,
   isNonResident,
-  setIsNonResident,
-  setDisplayRackRate,
 }: AgentPriceTableType) {
   const [date, setDate] = useState<[Date | null, Date | null]>([
     new Date(),
@@ -183,14 +179,6 @@ export default function AgentPriceTable({
             </ScrollArea.Autosize>
           </Popover.Dropdown>
         </Popover>
-
-        <Switch
-          className="mt-[22px]"
-          label="Display rack rates"
-          color="red"
-          checked={displayRackRates}
-          onChange={(event) => setDisplayRackRate(event.currentTarget.checked)}
-        />
       </div>
       <Divider className="mb-5" />
       {!roomTypesLoading && date[0] && date[1] && (

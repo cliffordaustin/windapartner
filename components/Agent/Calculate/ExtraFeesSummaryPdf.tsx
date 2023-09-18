@@ -56,7 +56,10 @@ export default function ExtraFeesSummaryPdf({
             : fee.guestType === "Non-resident"
             ? "$"
             : ""}
-          {price.toLocaleString()}{" "}
+          {price.toLocaleString(undefined, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2,
+          })}{" "}
         </Text>
       )}
     </View>

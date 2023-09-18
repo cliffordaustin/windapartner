@@ -20,11 +20,19 @@ export default function Price({ price, className = "" }: PriceProps) {
     <div>
       {countryCode === "KES" && kesPriceRate ? (
         <h1 className={"font-bold " + className}>
-          KES{Math.round(price * kesPriceRate).toLocaleString()}
+          KES
+          {Math.round(price * kesPriceRate).toLocaleString(undefined, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2,
+          })}
         </h1>
       ) : (
         <h1 className={"font-bold " + className}>
-          ${Math.round(price).toLocaleString()}
+          $
+          {Math.round(price).toLocaleString(undefined, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2,
+          })}
         </h1>
       )}
     </div>

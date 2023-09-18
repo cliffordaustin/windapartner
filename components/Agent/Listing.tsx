@@ -11,6 +11,7 @@ import Image from "next/image";
 import { Mixpanel } from "@/utils/mixpanelconfig";
 import { useDisclosure } from "@mantine/hooks";
 import { useMutation, useQueryClient } from "react-query";
+import { Icon } from "@iconify/react";
 
 const useStyles = createStyles(() => ({
   control: {
@@ -156,12 +157,11 @@ export default function Listing({ stay, withoutAccess = false }: ListingProps) {
             </Carousel.Slide>
           ))}
         </Carousel>
-        {/* {stay.agent_access_request_made &&
-          !stay.agent_access_request_approved && (
-            <Text className="absolute bottom-16 font-bold left-2">
-              Access request has been sent.
-            </Text>
-          )} */}
+        {!withoutAccess && (
+          <div className="absolute flex items-center justify-center top-4 left-3 w-[30px] h-[30px] bg-white rounded-full shadow-lg">
+            <Icon className="w-5 h-5" icon="jam:document" />
+          </div>
+        )}
       </div>
 
       {isAdded ? (

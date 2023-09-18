@@ -30,7 +30,10 @@ export default function NonResidentFeesSummary({
                 $
                 {(
                   pricing.getNonResidentTotalPriceOtherFee(rooms, item) * nights
-                ).toLocaleString()}
+                ).toLocaleString(undefined, {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 2,
+                })}
               </Text>
             )}
           </div>

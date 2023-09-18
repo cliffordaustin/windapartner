@@ -68,7 +68,10 @@ export default function GuestsSummary({
                       !!includeClientInCalculation,
                       commission || 0
                     )
-                    .toLocaleString()}
+                    .toLocaleString(undefined, {
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 2,
+                    })}
               </Text>
             )}
           </Flex>
