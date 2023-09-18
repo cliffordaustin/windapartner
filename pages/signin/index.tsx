@@ -159,6 +159,9 @@ function PartnerSignin(props: PaperProps) {
           let accessToken = res.getAccessToken();
           let jwt = accessToken.getJwtToken();
 
+          console.log("jwt", jwt);
+          console.log("accessToken", accessToken);
+
           await axios.get(`${process.env.NEXT_PUBLIC_baseURL}/user-profile/`, {
             headers: {
               Authorization: "Bearer " + jwt,
