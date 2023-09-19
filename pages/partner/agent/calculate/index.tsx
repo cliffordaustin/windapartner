@@ -745,7 +745,7 @@ export default function Calculate() {
 
                       {otherAgentRates?.length === 0 && (
                         <Text className="text-sm my-4 text-center font-bold">
-                          No additional discout added yet
+                          No additional discount added yet
                         </Text>
                       )}
 
