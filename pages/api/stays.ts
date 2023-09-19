@@ -60,7 +60,7 @@ export type AgentStayType = {
   user: {
     first_name: string;
     last_name: string;
-    email: string;
+    primary_email: string;
     profile_pic: string | null;
   };
   approved: boolean;
@@ -71,7 +71,7 @@ export type UserAgentStayType = {
   user: {
     first_name: string;
     last_name: string;
-    email: string;
+    primary_email: string;
     profile_pic: string | null;
   };
 };

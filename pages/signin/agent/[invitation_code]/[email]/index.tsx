@@ -30,7 +30,7 @@ import { confirmSignUp } from "@/utils/confirmSignup";
 import { resendConfirmationCode } from "@/utils/resendConfirmationCode";
 import { Auth, withSSRContext } from "aws-amplify";
 import { AuthErrorStrings } from "@aws-amplify/auth";
-import { IconAlertCircle } from "@tabler/icons-react";
+import { IconAlertCircle, IconInfoCircle } from "@tabler/icons-react";
 import { signIn } from "@/utils/signin";
 import { GetServerSideProps } from "next";
 
@@ -59,6 +59,8 @@ function PartnerSignin(props: PaperProps) {
 
   const form = useForm({
     initialValues: {
+      first_name: "",
+      last_name: "",
       email: "",
       password: "",
       retypePassword: "",
@@ -75,6 +77,8 @@ function PartnerSignin(props: PaperProps) {
   }, [router.query.email]);
 
   const [showVerifyEmail, setShowVerifyEmail] = React.useState(false);
+
+  const [showUserFullName, setShowUserFullName] = React.useState(false);
 
   const [code, setCode] = React.useState("");
 
@@ -185,11 +189,10 @@ function PartnerSignin(props: PaperProps) {
               Authorization: "Bearer " + jwt,
             },
           });
-
           await addAgentFromInviteView(jwt);
-
+          setShowUserFullName(true);
           setCodeLoading(false);
-          router.push("/partner/agent");
+          setShowVerifyEmail(false);
         })
         .catch((err) => {
           setCodeLoading(false);
@@ -198,6 +201,45 @@ function PartnerSignin(props: PaperProps) {
     } catch (error: any) {
       setCodeLoading(false);
       setShowErrorAlert(error.message);
+    }
+  };
+
+  const [updateUserProfileLoading, setUpdateUserProfileLoading] =
+    React.useState(false);
+
+  const updateUserProfile = async () => {
+    const user = await Auth.currentAuthenticatedUser();
+
+    try {
+      setUpdateUserProfileLoading(true);
+      await Auth.updateUserAttributes(user, {
+        given_name: form.values.first_name,
+        family_name: form.values.last_name,
+      });
+
+      await Auth.currentSession().then(async (res) => {
+        let accessToken = res.getAccessToken();
+        let jwt = accessToken.getJwtToken();
+
+        await axios.post(
+          `${process.env.NEXT_PUBLIC_baseURL}/update-userprofile/`,
+          {
+            first_name: form.values.first_name,
+            last_name: form.values.last_name,
+            primary_email: user.attributes.email,
+          },
+          {
+            headers: {
+              Authorization: "Bearer " + jwt,
+            },
+          }
+        );
+
+        router.push("/partner/agent");
+      });
+    } catch (error) {
+      setUpdateUserProfileLoading(false);
+      setShowErrorAlert("An error occured. Please try again");
     }
   };
 
@@ -228,23 +270,6 @@ function PartnerSignin(props: PaperProps) {
       }
     }
   };
-
-  const [googleLoading, setGoogleLoading] = React.useState(false);
-
-  const googleSocialLogin = useGoogleLogin({
-    onSuccess: async (user) => {
-      setGoogleLoading(true);
-      await signinWithGoogle(user.access_token, false);
-      router.push((router.query.redirect as string) || "/partner/lodge");
-    },
-    onError: (error) => {
-      setGoogleLoading(false);
-      notifications.show({
-        title: "Error",
-        message: "Something went wrong",
-      });
-    },
-  });
 
   const forgotPasswordSchema = Yup.object().shape({
     password: Yup.string().required("Password is required"),
@@ -357,137 +382,142 @@ function PartnerSignin(props: PaperProps) {
         </Alert>
       )}
 
-      {!showVerifyEmail && !userNotConfirmed && !showForgotPasswordView && (
-        <div
-          className={
-            "flex flex-col px-4 sm:px-0 items-center overflow-y-scroll justify-center " +
-            (showErrorAlert ? "mt-[20px]" : "mt-[40px]")
-          }
-        >
-          <div className="w-full sm:w-[400px]">
-            {loginError ? (
-              <div className="text-white sticky top-0 z-40 right-0 w-full mb-4 text-sm py-3 rounded-lg text-center px-4 bg-red-500 font-bold">
-                We couldn’t find an account matching the email or password you
-                entered. Please check your email or password and try again.
-              </div>
-            ) : null}
+      {!showVerifyEmail &&
+        !userNotConfirmed &&
+        !showForgotPasswordView &&
+        !showUserFullName && (
+          <div
+            className={
+              "flex flex-col px-4 sm:px-0 items-center overflow-y-scroll justify-center " +
+              (showErrorAlert ? "mt-[20px]" : "mt-[40px]")
+            }
+          >
+            <div className="w-full sm:w-[400px]">
+              {loginError ? (
+                <div className="text-white sticky top-0 z-40 right-0 w-full mb-4 text-sm py-3 rounded-lg text-center px-4 bg-red-500 font-bold">
+                  We couldn’t find an account matching the email or password you
+                  entered. Please check your email or password and try again.
+                </div>
+              ) : null}
 
-            {notAPartnerError ? (
-              <div className="text-white sticky top-0 z-40 right-0 w-full mb-4 text-sm py-3 rounded-lg text-center px-4 bg-red-500 font-bold">
-                User is not a lodge. Please register as a lodge. Go to the{" "}
-                <Link className="text-white" href={`/partner/signin/agent`}>
-                  agent login page
-                </Link>{" "}
-                if you are trying to login as an agent.
-              </div>
-            ) : null}
+              {notAPartnerError ? (
+                <div className="text-white sticky top-0 z-40 right-0 w-full mb-4 text-sm py-3 rounded-lg text-center px-4 bg-red-500 font-bold">
+                  User is not a lodge. Please register as a lodge. Go to the{" "}
+                  <Link className="text-white" href={`/partner/signin/agent`}>
+                    agent login page
+                  </Link>{" "}
+                  if you are trying to login as an agent.
+                </div>
+              ) : null}
 
-            {type === "login" && (
-              <Text className="text-2xl mb-4" weight={700}>
-                Sign in to your account
-              </Text>
-            )}
+              {type === "login" && (
+                <Text className="text-2xl mb-4" weight={700}>
+                  Sign in to your account
+                </Text>
+              )}
 
-            {type === "register" && (
-              <Text className="text-2xl mb-4" weight={700}>
-                Create your free account
-              </Text>
-            )}
+              {type === "register" && (
+                <Text className="text-2xl mb-4" weight={700}>
+                  Create your free account
+                </Text>
+              )}
 
-            <form onSubmit={form.onSubmit(() => {})}>
-              <Stack spacing={4}>
-                <TextInput
-                  required
-                  label="Email"
-                  placeholder="hello@gmail.com"
-                  size="lg"
-                  value={form.values.email}
-                  onChange={(event) =>
-                    form.setFieldValue("email", event.currentTarget.value)
-                  }
-                  error={form.errors.email}
-                  radius="sm"
-                  disabled
-                />
+              <form onSubmit={form.onSubmit(() => {})}>
+                <Stack spacing={4}>
+                  <TextInput
+                    required
+                    label="Email"
+                    placeholder="hello@gmail.com"
+                    size="lg"
+                    value={form.values.email}
+                    onChange={(event) =>
+                      form.setFieldValue("email", event.currentTarget.value)
+                    }
+                    error={form.errors.email}
+                    radius="sm"
+                    disabled
+                  />
 
-                <PasswordInput
-                  required
-                  label="Password"
-                  placeholder="Your password"
-                  size="lg"
-                  mt={4}
-                  value={form.values.password}
-                  onChange={(event) =>
-                    form.setFieldValue("password", event.currentTarget.value)
-                  }
-                  error={form.errors.password}
-                  radius="sm"
-                />
-
-                {type === "register" && (
                   <PasswordInput
                     required
-                    label="Confirm password"
-                    placeholder="Re-type password"
-                    value={form.values.retypePassword}
+                    label="Password"
+                    placeholder="Your password"
                     size="lg"
                     mt={4}
+                    value={form.values.password}
                     onChange={(event) =>
-                      form.setFieldValue(
-                        "retypePassword",
-                        event.currentTarget.value
-                      )
+                      form.setFieldValue("password", event.currentTarget.value)
                     }
-                    error={form.errors.retypePassword}
+                    error={form.errors.password}
                     radius="sm"
                   />
-                )}
 
-                {type === "login" && (
-                  <Group position="right">
-                    <Anchor
-                      component="button"
-                      type="button"
-                      color="dimmed"
-                      size="sm"
-                      onClick={() => {
-                        setShowForgotPasswordView(true);
-                      }}
-                    >
-                      Forgot password?
-                    </Anchor>
-                  </Group>
-                )}
-              </Stack>
+                  {type === "register" && (
+                    <PasswordInput
+                      required
+                      label="Confirm password"
+                      placeholder="Re-type password"
+                      value={form.values.retypePassword}
+                      size="lg"
+                      mt={4}
+                      onChange={(event) =>
+                        form.setFieldValue(
+                          "retypePassword",
+                          event.currentTarget.value
+                        )
+                      }
+                      error={form.errors.retypePassword}
+                      radius="sm"
+                    />
+                  )}
 
-              <div className="flex items-center gap-3 mt-4 flex-col">
-                <Button
-                  onClick={() => submit()}
-                  color="red"
-                  type="submit"
-                  size="lg"
-                  radius="sm"
-                  className="w-full"
-                  disabled={isLoading}
-                >
-                  {type === "login" ? "Login" : "Create account"}
-                  {isLoading && <Loader size="xs" color="gray" ml={5}></Loader>}
-                </Button>
-                <Anchor
-                  component="button"
-                  type="button"
-                  color="dimmed"
-                  onClick={() => toggle()}
-                  size="sm"
-                >
-                  {type === "register"
-                    ? "Already have an account? Login"
-                    : "Don't have an account? Register"}
-                </Anchor>
-              </div>
-            </form>
+                  {type === "login" && (
+                    <Group position="right">
+                      <Anchor
+                        component="button"
+                        type="button"
+                        color="dimmed"
+                        size="sm"
+                        onClick={() => {
+                          setShowForgotPasswordView(true);
+                        }}
+                      >
+                        Forgot password?
+                      </Anchor>
+                    </Group>
+                  )}
+                </Stack>
 
-            {/* <Divider labelPosition="center" my={8} label="or" />
+                <div className="flex items-center gap-3 mt-4 flex-col">
+                  <Button
+                    onClick={() => submit()}
+                    color="red"
+                    type="submit"
+                    size="lg"
+                    radius="sm"
+                    className="w-full"
+                    disabled={isLoading}
+                  >
+                    {type === "login" ? "Login" : "Create account"}
+                    {isLoading && (
+                      <Loader size="xs" color="gray" ml={5}></Loader>
+                    )}
+                  </Button>
+                  <Anchor
+                    component="button"
+                    type="button"
+                    color="dimmed"
+                    onClick={() => toggle()}
+                    size="sm"
+                  >
+                    {type === "register"
+                      ? "Already have an account? Login"
+                      : "Don't have an account? Register"}
+                  </Anchor>
+                </div>
+              </form>
+
+              {/* <Divider labelPosition="center" my={8} label="or" />
 
             <Button
               onClick={() => {
@@ -532,7 +562,7 @@ function PartnerSignin(props: PaperProps) {
               Continue with Google
             </Button> */}
 
-            {/* <Anchor
+              {/* <Anchor
         component="button"
         type="button"
         color="dimmed"
@@ -545,202 +575,350 @@ function PartnerSignin(props: PaperProps) {
       >
         Forgot password?
       </Anchor> */}
-          </div>
-        </div>
-      )}
-
-      {(showVerifyEmail || userNotConfirmed) && !showForgotPasswordView && (
-        <div
-          className={
-            "flex flex-col items-center px-4 sm:px-0 overflow-y-scroll justify-center " +
-            (showErrorAlert ? "mt-[20px]" : "mt-[40px]")
-          }
-        >
-          <div className="w-full sm:w-[400px]">
-            <Text className="text-2xl text-center mb-2" weight={700}>
-              {userNotConfirmed ? "We Emailed You" : "Verify Your Email"}
-            </Text>
-
-            <Text size="sm" color="dimmed" className="mb-4 text-center">
-              {userNotConfirmed
-                ? "Your code is on the way. To log in, enter the code we sent you. It may take a minute to arrive."
-                : `
-                Your code is on the way. To log in, enter the code we emailed to
-              ${form.values.email}. It may take a minute to arrive.`}
-            </Text>
-
-            <Group position="center">
-              <PinInput
-                required
-                length={6}
-                size="lg"
-                type="number"
-                onChange={(value) => setCode(value)}
-              ></PinInput>
-            </Group>
-
-            <div className="mt-6 flex flex-col gap-3 items-center">
-              <Button
-                size="lg"
-                className="w-full"
-                disabled={code.length !== 6}
-                loading={codeLoading}
-                onClick={() => {
-                  verifyCode();
-                }}
-                color="red"
-              >
-                Confirm
-              </Button>
-              <Button
-                size="lg"
-                className="w-full"
-                loading={resendCodeLoading}
-                variant="default"
-                onClick={() => {
-                  resendCode();
-                }}
-                color="dimmed"
-              >
-                Resend code
-              </Button>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {!showVerifyEmail && !userNotConfirmed && showForgotPasswordView && (
-        <div
-          className={
-            "flex flex-col items-center px-4 sm:px-0 overflow-y-scroll justify-center " +
-            (showErrorAlert ? "mt-[20px]" : "mt-[40px]")
-          }
-        >
-          <div className="w-full sm:w-[400px]">
-            <Text className="text-2xl text-center mb-2" weight={700}>
-              Reset Password
-            </Text>
-            {!showForgotPasswordProcess && (
-              <>
-                <TextInput
+      {(showVerifyEmail || userNotConfirmed) &&
+        !showForgotPasswordView &&
+        !showUserFullName && (
+          <div
+            className={
+              "flex flex-col items-center px-4 sm:px-0 overflow-y-scroll justify-center " +
+              (showErrorAlert ? "mt-[20px]" : "mt-[40px]")
+            }
+          >
+            <div className="w-full sm:w-[400px]">
+              <Text className="text-2xl text-center mb-2" weight={700}>
+                {userNotConfirmed ? "We Emailed You" : "Verify Your Email"}
+              </Text>
+
+              <Text size="sm" color="dimmed" className="mb-4 text-center">
+                {userNotConfirmed
+                  ? "Your code is on the way. To log in, enter the code we sent you. It may take a minute to arrive."
+                  : `
+                Your code is on the way. To log in, enter the code we emailed to
+              ${form.values.email}. It may take a minute to arrive.`}
+              </Text>
+
+              <Group position="center">
+                <PinInput
                   required
-                  label="Email"
-                  placeholder="hello@gmail.com"
+                  length={6}
                   size="lg"
-                  value={form.values.email}
-                  onChange={(event) =>
-                    form.setFieldValue("email", event.currentTarget.value)
-                  }
-                  error={form.errors.email}
-                  radius="sm"
-                />
-                <div className="mt-6 flex flex-col gap-3 items-center">
-                  <Button
-                    size="lg"
-                    className="w-full"
-                    disabled={!form.values.email}
-                    loading={resetPasswordLoading}
-                    onClick={() => {
-                      sendResetPassword();
-                    }}
-                    color="red"
-                  >
-                    Send code
-                  </Button>
-                  <Button
-                    size="lg"
-                    className="w-full"
-                    loading={resendCodeLoading}
-                    variant="default"
-                    onClick={() => {
-                      setShowForgotPasswordView(false);
-                    }}
-                    color="dimmed"
-                  >
-                    Back to login
-                  </Button>
-                </div>
-              </>
-            )}
+                  type="number"
+                  onChange={(value) => setCode(value)}
+                ></PinInput>
+              </Group>
 
-            {showForgotPasswordProcess && (
-              <form onSubmit={forgotPasswordForm.onSubmit(() => {})}>
-                <Group position="center">
-                  <PinInput
-                    required
-                    length={6}
-                    size="lg"
-                    type="number"
-                    onChange={(value) => setForgotPasswordCode(value)}
-                  ></PinInput>
-                </Group>
-
-                <PasswordInput
-                  required
-                  label="Password"
-                  placeholder="Your password"
+              <div className="mt-6 flex flex-col gap-3 items-center">
+                <Button
                   size="lg"
-                  mt={4}
-                  value={forgotPasswordForm.values.password}
-                  onChange={(event) =>
-                    forgotPasswordForm.setFieldValue(
-                      "password",
-                      event.currentTarget.value
-                    )
-                  }
-                  error={forgotPasswordForm.errors.password}
-                  radius="sm"
-                />
-
-                <PasswordInput
-                  required
-                  label="Confirm password"
-                  placeholder="Re-type password"
-                  value={forgotPasswordForm.values.retypePassword}
+                  className="w-full"
+                  disabled={code.length !== 6}
+                  loading={codeLoading}
+                  onClick={() => {
+                    verifyCode();
+                  }}
+                  color="red"
+                >
+                  Confirm
+                </Button>
+                <Button
                   size="lg"
-                  mt={4}
-                  onChange={(event) =>
-                    forgotPasswordForm.setFieldValue(
-                      "retypePassword",
-                      event.currentTarget.value
-                    )
-                  }
-                  error={forgotPasswordForm.errors.retypePassword}
-                  radius="sm"
-                />
-                <div className="mt-6 flex flex-col gap-3 items-center">
-                  <Button
-                    size="lg"
-                    onClick={() => {
-                      submitForgotPassord();
-                    }}
-                    className="w-full"
-                    loading={resetPasswordLoading}
-                    disabled={forgotPasswordCode.length !== 6}
-                    type="submit"
-                    color="red"
-                  >
-                    Submit
-                  </Button>
-                  <Button
-                    size="lg"
-                    className="w-full"
-                    loading={resendCodeLoading}
-                    variant="default"
-                    onClick={() => {
-                      setShowForgotPasswordView(false);
-                      setShowForgotPasswordProcess(false);
-                    }}
-                    color="dimmed"
-                  >
-                    Back to login
-                  </Button>
-                </div>
-              </form>
-            )}
+                  className="w-full"
+                  loading={resendCodeLoading}
+                  variant="default"
+                  onClick={() => {
+                    resendCode();
+                  }}
+                  color="dimmed"
+                >
+                  Resend code
+                </Button>
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+
+      {!showVerifyEmail &&
+        !userNotConfirmed &&
+        showForgotPasswordView &&
+        !showUserFullName && (
+          <div
+            className={
+              "flex flex-col items-center px-4 sm:px-0 overflow-y-scroll justify-center " +
+              (showErrorAlert ? "mt-[20px]" : "mt-[40px]")
+            }
+          >
+            <div className="w-full sm:w-[400px]">
+              <Text className="text-2xl text-center mb-2" weight={700}>
+                Reset Password
+              </Text>
+              {!showForgotPasswordProcess && (
+                <>
+                  <TextInput
+                    required
+                    label="Email"
+                    placeholder="hello@gmail.com"
+                    size="lg"
+                    value={form.values.email}
+                    onChange={(event) =>
+                      form.setFieldValue("email", event.currentTarget.value)
+                    }
+                    error={form.errors.email}
+                    radius="sm"
+                  />
+                  <div className="mt-6 flex flex-col gap-3 items-center">
+                    <Button
+                      size="lg"
+                      className="w-full"
+                      disabled={!form.values.email}
+                      loading={resetPasswordLoading}
+                      onClick={() => {
+                        sendResetPassword();
+                      }}
+                      color="red"
+                    >
+                      Send code
+                    </Button>
+                    <Button
+                      size="lg"
+                      className="w-full"
+                      loading={resendCodeLoading}
+                      variant="default"
+                      onClick={() => {
+                        setShowForgotPasswordView(false);
+                      }}
+                      color="dimmed"
+                    >
+                      Back to login
+                    </Button>
+                  </div>
+                </>
+              )}
+
+              {showForgotPasswordProcess && (
+                <form onSubmit={forgotPasswordForm.onSubmit(() => {})}>
+                  <Group position="center">
+                    <PinInput
+                      required
+                      length={6}
+                      size="lg"
+                      type="number"
+                      onChange={(value) => setForgotPasswordCode(value)}
+                    ></PinInput>
+                  </Group>
+
+                  <PasswordInput
+                    required
+                    label="Password"
+                    placeholder="Your password"
+                    size="lg"
+                    mt={4}
+                    value={forgotPasswordForm.values.password}
+                    onChange={(event) =>
+                      forgotPasswordForm.setFieldValue(
+                        "password",
+                        event.currentTarget.value
+                      )
+                    }
+                    error={forgotPasswordForm.errors.password}
+                    radius="sm"
+                  />
+
+                  <PasswordInput
+                    required
+                    label="Confirm password"
+                    placeholder="Re-type password"
+                    value={forgotPasswordForm.values.retypePassword}
+                    size="lg"
+                    mt={4}
+                    onChange={(event) =>
+                      forgotPasswordForm.setFieldValue(
+                        "retypePassword",
+                        event.currentTarget.value
+                      )
+                    }
+                    error={forgotPasswordForm.errors.retypePassword}
+                    radius="sm"
+                  />
+                  <div className="mt-6 flex flex-col gap-3 items-center">
+                    <Button
+                      size="lg"
+                      onClick={() => {
+                        submitForgotPassord();
+                      }}
+                      className="w-full"
+                      loading={resetPasswordLoading}
+                      disabled={forgotPasswordCode.length !== 6}
+                      type="submit"
+                      color="red"
+                    >
+                      Submit
+                    </Button>
+                    <Button
+                      size="lg"
+                      className="w-full"
+                      loading={resendCodeLoading}
+                      variant="default"
+                      onClick={() => {
+                        setShowForgotPasswordView(false);
+                        setShowForgotPasswordProcess(false);
+                      }}
+                      color="dimmed"
+                    >
+                      Back to login
+                    </Button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        )}
+
+      {!showVerifyEmail &&
+        !userNotConfirmed &&
+        !showForgotPasswordView &&
+        showUserFullName && (
+          <div
+            className={
+              "flex flex-col items-center px-4 sm:px-0 overflow-y-scroll justify-center " +
+              (showErrorAlert ? "mt-[20px]" : "mt-[40px]")
+            }
+          >
+            <div className="w-full sm:w-[400px]">
+              <Text className="text-2xl" weight={700}>
+                Welcome to SafariPricer
+              </Text>
+
+              <Text className="text-sm mb-4" color="dimmed">
+                To start, what&apos;s your name?
+              </Text>
+
+              <TextInput
+                required
+                label="First name"
+                placeholder="Enter your first name"
+                size="lg"
+                value={form.values.first_name}
+                onChange={(event) =>
+                  form.setFieldValue("first_name", event.currentTarget.value)
+                }
+                error={form.errors.first_name}
+                radius="sm"
+              />
+              <TextInput
+                label="Last name"
+                placeholder="Enter your last name"
+                size="lg"
+                value={form.values.last_name}
+                onChange={(event) =>
+                  form.setFieldValue("last_name", event.currentTarget.value)
+                }
+                className="mt-2"
+                error={form.errors.last_name}
+                radius="sm"
+              />
+              <div className="mt-6">
+                <Button
+                  size="lg"
+                  className="w-full"
+                  loading={updateUserProfileLoading}
+                  onClick={() => {
+                    updateUserProfile();
+                  }}
+                  color="red"
+                >
+                  Continue
+                </Button>
+              </div>
+
+              {showForgotPasswordProcess && (
+                <form onSubmit={forgotPasswordForm.onSubmit(() => {})}>
+                  <Group position="center">
+                    <PinInput
+                      required
+                      length={6}
+                      size="lg"
+                      type="number"
+                      onChange={(value) => setForgotPasswordCode(value)}
+                    ></PinInput>
+                  </Group>
+
+                  <PasswordInput
+                    required
+                    label="Password"
+                    placeholder="Your password"
+                    size="lg"
+                    mt={4}
+                    value={forgotPasswordForm.values.password}
+                    onChange={(event) =>
+                      forgotPasswordForm.setFieldValue(
+                        "password",
+                        event.currentTarget.value
+                      )
+                    }
+                    error={forgotPasswordForm.errors.password}
+                    radius="sm"
+                  />
+
+                  <div className="flex items-center gap-1">
+                    <IconInfoCircle className="text-gray-500" size="0.8rem" />
+                    <span className="text-gray-500 text-sm">
+                      Passwords must be at least 8 characters.
+                    </span>
+                  </div>
+
+                  <PasswordInput
+                    required
+                    label="Confirm password"
+                    placeholder="Re-type password"
+                    value={forgotPasswordForm.values.retypePassword}
+                    size="lg"
+                    mt={4}
+                    onChange={(event) =>
+                      forgotPasswordForm.setFieldValue(
+                        "retypePassword",
+                        event.currentTarget.value
+                      )
+                    }
+                    error={forgotPasswordForm.errors.retypePassword}
+                    radius="sm"
+                  />
+                  <div className="mt-6 flex flex-col gap-3 items-center">
+                    <Button
+                      size="lg"
+                      onClick={() => {
+                        submitForgotPassord();
+                      }}
+                      className="w-full"
+                      loading={resetPasswordLoading}
+                      disabled={forgotPasswordCode.length !== 6}
+                      type="submit"
+                      color="red"
+                    >
+                      Submit
+                    </Button>
+                    <Button
+                      size="lg"
+                      className="w-full"
+                      loading={resendCodeLoading}
+                      variant="default"
+                      onClick={() => {
+                        setShowForgotPasswordView(false);
+                        setShowForgotPasswordProcess(false);
+                      }}
+                      color="dimmed"
+                    >
+                      Back to login
+                    </Button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        )}
     </>
   );
 }

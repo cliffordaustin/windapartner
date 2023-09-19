@@ -313,7 +313,7 @@ function AgentEmailAccess({ stay }: AgentEmailAccessPropTypes) {
                             (agent.user.last_name || "")}
                         </Text>
                         <Text size="xs" color="dimmed">
-                          {agent.user.email}
+                          {agent.user.primary_email}
                         </Text>
                       </div>
                     </Group>
@@ -350,7 +350,7 @@ function AgentEmailAccess({ stay }: AgentEmailAccessPropTypes) {
                             (agent.user.last_name || "")}
                         </Text>
                         <Text size="xs" color="dimmed">
-                          {agent.user.email}
+                          {agent.user.primary_email}
                         </Text>
                       </div>
                     </Group>
