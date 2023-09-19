@@ -47,10 +47,10 @@ function AgentEmailAccess({ stay }: AgentEmailAccessPropTypes) {
       getStayAgentsNotVerified(stay)
     );
 
-  const { data: userAgentsByEmail, isLoading: userAgentsByEmailLoading } =
-    useQuery<UserAgentStayType[]>("user-agents-email", () =>
-      getStayAgentsByEmailUser(stay)
-    );
+  // const { data: userAgentsByEmail, isLoading: userAgentsByEmailLoading } =
+  //   useQuery<UserAgentStayType[]>("user-agents-email", () =>
+  //     getStayAgentsByEmailUser(stay)
+  //   );
 
   const { data: notUserAgentsByEmail, isLoading: notUserAgentsByEmailLoading } =
     useQuery<NotUserAgentStayType[]>("not-user-agents-email", () =>
@@ -167,8 +167,7 @@ function AgentEmailAccess({ stay }: AgentEmailAccessPropTypes) {
       },
     });
 
-  const lenApprovedAgents =
-    (agentVerified?.length || 0) + (userAgentsByEmail?.length || 0);
+  const lenApprovedAgents = agentVerified?.length || 0;
 
   const removeUserAgentAccess = async (id: number) => {
     const currentSession = await Auth.currentSession();
@@ -313,7 +312,7 @@ function AgentEmailAccess({ stay }: AgentEmailAccessPropTypes) {
                             (agent.user.last_name || "")}
                         </Text>
                         <Text size="xs" color="dimmed">
-                          {agent.user.email}
+                          {agent.user.primary_email}
                         </Text>
                       </div>
                     </Group>
@@ -338,7 +337,7 @@ function AgentEmailAccess({ stay }: AgentEmailAccessPropTypes) {
                   </Flex>
                 ))}
 
-                {userAgentsByEmail?.map((agent) => (
+                {/* {userAgentsByEmail?.map((agent) => (
                   <Flex justify="space-between" key={agent.id} align="center">
                     <Group key={agent.id} noWrap>
                       <Avatar radius="xl" src={agent.user.profile_pic} />
@@ -350,7 +349,7 @@ function AgentEmailAccess({ stay }: AgentEmailAccessPropTypes) {
                             (agent.user.last_name || "")}
                         </Text>
                         <Text size="xs" color="dimmed">
-                          {agent.user.email}
+                          {agent.user.primary_email}
                         </Text>
                       </div>
                     </Group>
@@ -373,7 +372,7 @@ function AgentEmailAccess({ stay }: AgentEmailAccessPropTypes) {
                       Remove access
                     </Button>
                   </Flex>
-                ))}
+                ))} */}
               </Flex>
             </div>
           </div>

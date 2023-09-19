@@ -437,7 +437,9 @@ export default function Calculate() {
                             className="text-black"
                             variant="white"
                           >
-                            Add Nett Rates
+                            {!stay.has_property_access
+                              ? "Add nett rates"
+                              : "Edit nett rates"}
                           </Button>
                         </div>
                       </div>
