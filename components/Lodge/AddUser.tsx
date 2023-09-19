@@ -336,7 +336,7 @@ function AddUser({ stay }: AddUserPropTypes) {
                             (property.user.last_name || "")}
                         </Text>
                         <Text size="xs" color="dimmed">
-                          {property.user.email}
+                          {property.user.primary_email}
                         </Text>
                       </div>
                     </Group>
