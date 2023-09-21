@@ -9,9 +9,16 @@ import {
   ScrollArea,
   Text,
   TextInput,
+  Tooltip,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconPlus, IconShare2, IconX } from "@tabler/icons-react";
+import {
+  IconPlus,
+  IconSend,
+  IconShare2,
+  IconUserMinus,
+  IconX,
+} from "@tabler/icons-react";
 import React, { use, useEffect, useState } from "react";
 import Share from "../ui/Share";
 import { LodgeStay } from "@/utils/types";
@@ -30,6 +37,7 @@ import {
   getStayAgentsNotVerified,
 } from "@/pages/api/stays";
 import { Auth } from "aws-amplify";
+import { Icon } from "@iconify/react";
 
 type AgentEmailAccessPropTypes = {
   stay: LodgeStay | undefined;
@@ -201,6 +209,29 @@ function AgentEmailAccess({ stay }: AgentEmailAccessPropTypes) {
     },
   });
 
+  const resendInvitation = async (id: number, email: string) => {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
+    await axios.post(
+      `${process.env.NEXT_PUBLIC_baseURL}/resend-agents-email/`,
+      {
+        encoded_email: Buffer.from(email).toString("base64"),
+        agent_id: id,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    notifications.show({
+      title: "Success",
+      message: "Invitation sent successfully.",
+    });
+  };
+
   const totalAgents = (notUserAgentsByEmail?.length || 0) + lenApprovedAgents;
   return (
     <ScrollArea className="w-full h-[85vh] rounded-xl px-5 pt-5">
@@ -251,91 +282,118 @@ function AgentEmailAccess({ stay }: AgentEmailAccessPropTypes) {
         )}
 
         {totalAgents > 0 && (
-          <div className="mt-4 flex flex-col gap-3">
-            <div className="flex flex-col gap-1">
-              {/* {notUserAgentsByEmail && notUserAgentsByEmail?.length > 0 && (
-                <Text className="font-semibold" size="md">
-                  Invitation pending
-                </Text>
-              )} */}
-
-              <Flex gap={5} direction="column">
-                {notUserAgentsByEmail?.map((agent) => (
-                  <Flex justify="space-between" key={agent.id} align="center">
-                    <Group key={agent.id} noWrap>
-                      <div>
-                        <Text size="sm" className="font-normal text-gray-500">
-                          {agent.email}
-                        </Text>
-                      </div>
-                    </Group>
-
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedRemoveNotUserAgentId(agent.id);
-                        removeNotUserAgentAccessMutation(agent.id);
-                      }}
-                      color="red"
-                      variant="subtle"
-                      className="px-1"
-                      size="xs"
-                      loading={
-                        removeNotUserAgentAccessLoading &&
-                        selectedRemoveNotUserAgentId === agent.id
-                      }
-                    >
-                      cancel invite
-                    </Button>
-                  </Flex>
-                ))}
-              </Flex>
-            </div>
-
-            <div className="flex flex-col gap-2">
+          <div className="mt-4 flex flex-col">
+            <div className="flex flex-col ">
               {/* {lenApprovedAgents > 0 && (
                 <Text className="font-semibold" size="md">
                   Approved agents
                 </Text>
               )} */}
 
-              <Flex gap={5} direction="column">
-                {agentVerified?.map((agent) => (
-                  <Flex justify="space-between" key={agent.id} align="center">
-                    <Group key={agent.id} noWrap>
-                      <Avatar radius="xl" src={agent.user.profile_pic} />
-
-                      <div>
-                        <Text>
-                          {(agent.user.first_name || "") +
-                            " " +
-                            (agent.user.last_name || "")}
-                        </Text>
-                        <Text size="xs" color="dimmed">
-                          {agent.user.primary_email}
-                        </Text>
-                      </div>
-                    </Group>
-
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedRemoveAgentId(agent.id);
-                        removeAccessMutation(agent.id);
-                      }}
-                      color="red"
-                      variant="subtle"
-                      className="px-1"
-                      size="xs"
-                      loading={
-                        removeAccessLoading &&
-                        selectedRemoveAgentId === agent.id
-                      }
+              <Flex
+                gap={5}
+                direction="column"
+                className="border-b border-solid border-gray-200 border-x-0 border-t-0"
+              >
+                {agentVerified?.map((agent) => {
+                  const fullName =
+                    (agent.user?.first_name || "") +
+                    " " +
+                    (agent.user?.last_name || "");
+                  return (
+                    <Flex
+                      justify="space-between"
+                      className="py-2 border-t border-b-0 border-x-0 border-solid border-gray-200"
+                      key={agent.id}
+                      align="center"
                     >
-                      Remove access
-                    </Button>
-                  </Flex>
-                ))}
+                      <Group key={agent.id} noWrap>
+                        {agent.user && agent.user.profile_pic && (
+                          <div className="relative w-9 h-9 rounded-full">
+                            <Avatar
+                              radius="md"
+                              src={agent.user?.profile_pic}
+                              alt="profile image of a agent.user"
+                            />
+                          </div>
+                        )}
+
+                        {agent.user && !agent.user.profile_pic && (
+                          <Avatar color="red" radius="md">
+                            {fullName
+                              .split(" ")
+                              .map((name) => name[0])
+                              .join("")
+                              .toUpperCase()}
+                          </Avatar>
+                        )}
+
+                        {agent.user && !agent.user.profile_pic && !fullName && (
+                          <Avatar radius="md"></Avatar>
+                        )}
+
+                        <div className="flex items-center gap-2">
+                          <Text className="font-semibold">
+                            {(agent.user.first_name || "") +
+                              " " +
+                              (agent.user.last_name || "")}
+                          </Text>
+                          <Text size="sm" color="dimmed">
+                            {agent.user.primary_email}
+                          </Text>
+                        </div>
+                      </Group>
+
+                      {/* <IconUserMinus
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedRemoveAgentId(agent.id);
+                          removeAccessMutation(agent.id);
+                        }}
+                        color="red"
+                      ></IconUserMinus> */}
+
+                      <Tooltip
+                        label="Remove account"
+                        withArrow
+                        position="bottom"
+                      >
+                        <div
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedRemoveAgentId(agent.id);
+                            removeAccessMutation(agent.id);
+                          }}
+                          className="w-10 hover:bg-red-50 transition-all duration-300 h-10 rounded-lg flex items-center justify-center"
+                        >
+                          <Icon
+                            color="red"
+                            className="w-6 h-6 cursor-pointer"
+                            icon="la:user-minus"
+                          ></Icon>
+                        </div>
+                      </Tooltip>
+
+                      {/* <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedRemoveAgentId(agent.id);
+                          removeAccessMutation(agent.id);
+                        }}
+                        color="red"
+                        variant="subtle"
+                        className="px-1"
+                        size="xs"
+                        loading={
+                          removeAccessLoading &&
+                          selectedRemoveAgentId === agent.id
+                        }
+                      >
+                        Remove access
+                      </Button> */}
+                    </Flex>
+                  );
+                })}
 
                 {/* {userAgentsByEmail?.map((agent) => (
                   <Flex justify="space-between" key={agent.id} align="center">
@@ -373,6 +431,85 @@ function AgentEmailAccess({ stay }: AgentEmailAccessPropTypes) {
                     </Button>
                   </Flex>
                 ))} */}
+              </Flex>
+
+              <Flex className="" gap={5} direction="column">
+                {notUserAgentsByEmail?.map((agent) => (
+                  <Flex
+                    className="py-2 border-b border-t-0 border-x-0 border-solid border-gray-200"
+                    justify="space-between"
+                    key={agent.id}
+                    align="center"
+                  >
+                    <Group key={agent.id} noWrap>
+                      <Avatar radius="md"></Avatar>
+                      <div>
+                        <Text size="sm" className="font-normal text-gray-500">
+                          {agent.email}
+                        </Text>
+                      </div>
+                    </Group>
+
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-1">
+                        <Text className="text-sm">Invitation pending</Text>
+                        <Tooltip
+                          label="Resend invitation"
+                          withArrow
+                          position="bottom"
+                        >
+                          <div
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              resendInvitation(agent.id, agent.email);
+                            }}
+                            className="w-7 bg-blue-50 cursor-pointer hover:bg-blue-100 transition-all duration-300 h-7 rounded-lg flex items-center justify-center"
+                          >
+                            <IconSend color="blue" size={17}></IconSend>
+                          </div>
+                        </Tooltip>
+                      </div>
+                      <Tooltip
+                        label="Cancel invite"
+                        withArrow
+                        position="bottom"
+                      >
+                        <div
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedRemoveNotUserAgentId(agent.id);
+                            removeNotUserAgentAccessMutation(agent.id);
+                          }}
+                          className="w-10 hover:bg-red-50 transition-all duration-300 h-10 rounded-lg flex items-center justify-center"
+                        >
+                          <Icon
+                            color="red"
+                            className="w-6 h-6 cursor-pointer"
+                            icon="la:user-minus"
+                          ></Icon>
+                        </div>
+                      </Tooltip>
+                    </div>
+
+                    {/* <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedRemoveNotUserAgentId(agent.id);
+                        removeNotUserAgentAccessMutation(agent.id);
+                      }}
+                      color="red"
+                      variant="subtle"
+                      className="px-1"
+                      size="xs"
+                      loading={
+                        removeNotUserAgentAccessLoading &&
+                        selectedRemoveNotUserAgentId === agent.id
+                      }
+                    >
+                      cancel invite
+                    </Button> */}
+                  </Flex>
+                ))}
               </Flex>
             </div>
           </div>

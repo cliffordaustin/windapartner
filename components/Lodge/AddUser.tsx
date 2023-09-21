@@ -9,9 +9,10 @@ import {
   ScrollArea,
   Text,
   TextInput,
+  Tooltip,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconPlus, IconShare2 } from "@tabler/icons-react";
+import { IconPlus, IconSend, IconShare2 } from "@tabler/icons-react";
 import React from "react";
 import Share from "../ui/Share";
 import { useForm } from "@mantine/form";
@@ -25,6 +26,8 @@ import Cookies from "js-cookie";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import axios from "axios";
 import { Auth } from "aws-amplify";
+import { Icon } from "@iconify/react";
+import { notifications } from "@mantine/notifications";
 
 type AddUserPropTypes = {
   stay: LodgeStay | undefined;
@@ -122,6 +125,29 @@ function AddUser({ stay }: AddUserPropTypes) {
     openedPropertyAccess,
     { open: openPropertyAccess, close: closePropertyAccess },
   ] = useDisclosure(false);
+
+  const resendInvitation = async (id: number, email: string) => {
+    const currentSession = await Auth.currentSession();
+    const accessToken = currentSession.getAccessToken();
+    const token = accessToken.getJwtToken();
+    await axios.post(
+      `${process.env.NEXT_PUBLIC_baseURL}/resend-property-email/`,
+      {
+        property_access_id: id,
+        encoded_email: Buffer.from(email).toString("base64"),
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    notifications.show({
+      title: "Success",
+      message: "Invitation sent successfully.",
+    });
+  };
 
   return (
     <ScrollArea className="w-full h-[85vh] px-5 pt-5">
@@ -268,7 +294,7 @@ function AddUser({ stay }: AddUserPropTypes) {
 
         {totalAgents > 0 && (
           <div className="mt-4 flex flex-col gap-3">
-            <div className="flex flex-col gap-1">
+            {/* <div className="flex flex-col gap-1">
               {propertAccessNotUser && propertAccessNotUser?.length > 0 && (
                 <Text className="font-semibold" size="md">
                   Invitation pending
@@ -310,54 +336,187 @@ function AddUser({ stay }: AddUserPropTypes) {
                   </Flex>
                 ))}
               </Flex>
-            </div>
+            </div> */}
 
-            <div className="flex flex-col gap-2">
-              {propertAccess && propertAccess?.length > 0 && (
+            <div className="flex flex-col">
+              {/* {propertAccess && propertAccess?.length > 0 && (
                 <Text className="font-semibold" size="md">
                   Approved users
                 </Text>
-              )}
+              )} */}
+
+              <Flex
+                className="border-b border-solid border-gray-200 border-x-0 border-t-0"
+                gap={5}
+                direction="column"
+              >
+                {propertAccess?.map((property) => {
+                  const fullName =
+                    (property.user?.first_name || "") +
+                    " " +
+                    (property.user?.last_name || "");
+                  return (
+                    <Flex
+                      justify="space-between"
+                      className="py-2 border-t border-b-0 border-x-0 border-solid border-gray-200"
+                      key={property.id}
+                      align="center"
+                    >
+                      <Group key={property.id} noWrap>
+                        {property.user && property.user.profile_pic && (
+                          <div className="relative w-9 h-9 rounded-full">
+                            <Avatar
+                              radius="md"
+                              src={property.user?.profile_pic}
+                              alt="profile image of a agent.user"
+                            />
+                          </div>
+                        )}
+
+                        {property.user && !property.user.profile_pic && (
+                          <Avatar color="red" radius="md">
+                            {fullName
+                              .split(" ")
+                              .map((name) => name[0])
+                              .join("")
+                              .toUpperCase()}
+                          </Avatar>
+                        )}
+
+                        {property.user &&
+                          !property.user.profile_pic &&
+                          !fullName && <Avatar radius="md"></Avatar>}
+
+                        <div className="flex items-center gap-2">
+                          <Text>
+                            {(property.user.first_name || "") +
+                              " " +
+                              (property.user.last_name || "")}
+                          </Text>
+                          <Text size="sm" color="dimmed">
+                            {property.user.primary_email}
+                          </Text>
+                        </div>
+                      </Group>
+
+                      <Tooltip
+                        label="Remove account"
+                        withArrow
+                        position="bottom"
+                      >
+                        <div
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedPropertyAccessUserId(property.id);
+                            removePropertyAccessMutation(property.id);
+                          }}
+                          className="w-10 hover:bg-red-50 transition-all duration-300 h-10 rounded-lg flex items-center justify-center"
+                        >
+                          <Icon
+                            color="red"
+                            className="w-6 h-6 cursor-pointer"
+                            icon="la:user-minus"
+                          ></Icon>
+                        </div>
+                      </Tooltip>
+
+                      {/* <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedPropertyAccessUserId(property.id);
+                          removePropertyAccessMutation(property.id);
+                        }}
+                        color="red"
+                        variant="subtle"
+                        className="px-1"
+                        size="xs"
+                        loading={
+                          removePropertyAccessLoading &&
+                          selectedPropertyAccessUserId === property.id
+                        }
+                      >
+                        Remove access
+                      </Button> */}
+                    </Flex>
+                  );
+                })}
+              </Flex>
 
               <Flex gap={5} direction="column">
-                {propertAccess?.map((property) => (
+                {propertAccessNotUser?.map((property) => (
                   <Flex
                     justify="space-between"
+                    className="py-2 border-b border-t-0 border-x-0 border-solid border-gray-200"
                     key={property.id}
                     align="center"
                   >
                     <Group key={property.id} noWrap>
-                      <Avatar radius="xl" src={property.user.profile_pic} />
-
+                      <Avatar radius="md"></Avatar>
                       <div>
-                        <Text>
-                          {(property.user.first_name || "") +
-                            " " +
-                            (property.user.last_name || "")}
-                        </Text>
-                        <Text size="xs" color="dimmed">
-                          {property.user.primary_email}
+                        <Text size="sm" color="dimmed">
+                          {property.email}
                         </Text>
                       </div>
                     </Group>
 
-                    <Button
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-1">
+                        <Text className="text-sm">Invitation pending</Text>
+                        <Tooltip
+                          label="Resend invitation"
+                          withArrow
+                          position="bottom"
+                        >
+                          <div
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              resendInvitation(property.id, property.email);
+                            }}
+                            className="w-7 bg-blue-50 cursor-pointer hover:bg-blue-100 transition-all duration-300 h-7 rounded-lg flex items-center justify-center"
+                          >
+                            <IconSend color="blue" size={17}></IconSend>
+                          </div>
+                        </Tooltip>
+                      </div>
+                      <Tooltip
+                        label="Cancel invite"
+                        withArrow
+                        position="bottom"
+                      >
+                        <div
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedPropertyAccessUserId(property.id);
+                            removePropertyAccessNotUserMutation(property.id);
+                          }}
+                          className="w-10 hover:bg-red-50 transition-all duration-300 h-10 rounded-lg flex items-center justify-center"
+                        >
+                          <Icon
+                            color="red"
+                            className="w-6 h-6 cursor-pointer"
+                            icon="la:user-minus"
+                          ></Icon>
+                        </div>
+                      </Tooltip>
+                    </div>
+
+                    {/* <Button
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedPropertyAccessUserId(property.id);
-                        removePropertyAccessMutation(property.id);
+                        removePropertyAccessNotUserMutation(property.id);
                       }}
                       color="red"
                       variant="subtle"
                       className="px-1"
                       size="xs"
                       loading={
-                        removePropertyAccessLoading &&
+                        removePropertyAccessNotUserLoading &&
                         selectedPropertyAccessUserId === property.id
                       }
                     >
-                      Remove access
-                    </Button>
+                      cancel invite
+                    </Button> */}
                   </Flex>
                 ))}
               </Flex>

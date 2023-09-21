@@ -232,25 +232,25 @@ export default function NavbarSimple() {
         onClose={closeDelteModal}
         title={"Delete property"}
         classNames={{
-          title: "text-xl font-bold",
-          close: "text-black hover:text-gray-700 hover:bg-gray-200",
-          header: "bg-gray-100",
+          title: "text-lg font-bold",
+          close:
+            "text-black hover:text-gray-700 w-[40px] h-[30px] hover:bg-gray-100",
+          body: "max-h-[500px] overflow-y-scroll px-10 pb-8 w-full",
+          content: "rounded-2xl",
         }}
-        transitionProps={{ transition: "fade", duration: 200 }}
-        closeButtonProps={{
-          style: {
-            width: 30,
-            height: 30,
-          },
-          iconSize: 20,
-        }}
+        centered
       >
         <p>
           Are you sure you want to delete this property? All rates associated to
           this property will also be deleted. This action cannot be undone.
         </p>
-        <Flex justify="flex-end" mt={12} gap={6} align="center">
-          <Button onClick={closeDelteModal} variant="default">
+        <Flex justify="space-between" mt={20} gap={6} align="center">
+          <Button
+            onClick={closeDelteModal}
+            variant="light"
+            color="gray"
+            size="sm"
+          >
             Close
           </Button>
 
