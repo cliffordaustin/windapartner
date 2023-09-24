@@ -333,7 +333,7 @@ function AgentEmailAccess({ stay }: AgentEmailAccessPropTypes) {
                         )}
 
                         <div className="flex items-center gap-2">
-                          <Text className="font-semibold">
+                          <Text className="">
                             {(agent.user.first_name || "") +
                               " " +
                               (agent.user.last_name || "")}
