@@ -48,13 +48,13 @@ export default function Home({ signOut }: { signOut: () => void }) {
           </Link>
 
           <div className="flex items-center gap-4">
-            <div className="flex flex-col items-center gap-1">
+            {/* <div className="flex flex-col items-center gap-1">
               <Link className="text-white font-bold no-underline" href="/">
                 For Properties
               </Link>
               <div className="h-[1.5px] w-[16px] bg-white"></div>
-            </div>
-            <div className="flex flex-col items-center gap-1">
+            </div> */}
+            {/* <div className="flex flex-col items-center gap-1">
               <Link
                 className="text-white font-bold opacity-80 hover:opacity-100 no-underline"
                 href="/for-agents"
@@ -62,7 +62,7 @@ export default function Home({ signOut }: { signOut: () => void }) {
                 For Agents
               </Link>
               <div></div>
-            </div>
+            </div> */}
           </div>
 
           <div className="flex items-center gap-3">
