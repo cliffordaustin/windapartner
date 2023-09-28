@@ -334,6 +334,14 @@ function PartnerSignin(props: PaperProps) {
     }
   };
 
+  useEffect(() => {
+    const userIsAuthenticated = Auth.currentAuthenticatedUser()
+      .then(() => true)
+      .catch(() => false);
+
+    console.log("userIsAuthenticated", userIsAuthenticated);
+  });
+
   return (
     <>
       <div className="border-b border-x-0 w-full h-[70px] border-t-0 flex items-center bg-gray-50 justify-between px-6 border-solid border-b-gray-200">

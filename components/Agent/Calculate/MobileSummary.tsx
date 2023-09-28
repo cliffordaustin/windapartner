@@ -7,7 +7,7 @@ import {
 import { AgentDiscountRateType, getRoomTypes } from "@/pages/api/stays";
 import pricing, { countRoomTypes } from "@/utils/calculation";
 import { AgentStay } from "@/utils/types";
-import { Divider, Flex, Tabs, Text } from "@mantine/core";
+import { Button, Divider, Flex, Tabs, Text } from "@mantine/core";
 import { IconCalculator, IconCalendarEvent } from "@tabler/icons-react";
 import moment from "moment";
 import { useQuery } from "react-query";
@@ -27,14 +27,14 @@ type SummaryProps = {
   calculateStay: StateType;
   stays?: AgentStay[];
   agentRates: AgentDiscountRateType[] | undefined;
-  updateTotals: (id: number, total: number, isResident: boolean) => void;
+  open: () => void;
 };
 
-export default function Summary({
+export default function MobileSummary({
   calculateStay,
   stays,
-  updateTotals,
   agentRates,
+  open,
 }: SummaryProps) {
   const countRoomType = countRoomTypes(calculateStay.rooms);
 
@@ -137,19 +137,6 @@ export default function Summary({
     nights
   );
 
-  useEffect(() => {
-    updateTotals(calculateStay.id, residentFullTotalPrice, true);
-    updateTotals(calculateStay.id, nonResidentFullTotalPrice, false);
-  }, [
-    calculateStay.rooms,
-    calculateStay.extraFee,
-    calculateStay.activityFee,
-    calculateStay.residentCommission,
-    calculateStay.nonResidentCommission,
-    calculateStay.date[0],
-    calculateStay.date[1],
-  ]);
-
   const totalResidentPrice = calculateStay.rooms.reduce((acc, room) => {
     const countResidentGuestTypes = pricing.countResidentGuestTypesWithPrice(
       room.residentGuests,
@@ -207,14 +194,14 @@ export default function Summary({
   return (
     <Tabs
       color="red"
-      variant="outline"
+      //   variant="outline"
       defaultValue={
         residentFullTotalPrice && !nonResidentFullTotalPrice
           ? "resident"
           : "non-resident"
       }
     >
-      <Tabs.List className="fixed md:w-[32.6%] bg-white" grow>
+      <Tabs.List className="w-full left-0 bg-white" grow>
         <Tabs.Tab
           onClick={() => {
             Mixpanel.track("User switched to the non-resident tab", {
@@ -254,10 +241,10 @@ export default function Summary({
 
       <Tabs.Panel value="non-resident">
         <div className="">
-          <div className="w-full px-4 py-4">
-            <Text className="font-bold mt-10" mb={8}>
+          <div className="w-full px-5 py-4">
+            {/* <Text className="font-bold mt-10" mb={8}>
               {calculateStay.name}
-            </Text>
+            </Text> */}
             {calculateStay.date[0] && calculateStay.date[1] && (
               <>
                 <div className="flex justify-between gap-8">
@@ -269,8 +256,8 @@ export default function Summary({
 
                     <Text size="sm" weight={700} ml={4}>
                       {/* {moment(
-                          calculateStay.date[0]
-                        ).format("DD MMM YYYY")} */}
+                            calculateStay.date[0]
+                          ).format("DD MMM YYYY")} */}
 
                       {format(calculateStay.date[0], "dd MMM yyyy")}
                     </Text>
@@ -284,8 +271,8 @@ export default function Summary({
 
                     <Text size="sm" weight={700} ml={4}>
                       {/* {moment(
-                          calculateStay.date[1]?.toLocaleDateString()
-                        ).format("DD MMM YYYY")} */}
+                            calculateStay.date[1]?.toLocaleDateString()
+                          ).format("DD MMM YYYY")} */}
 
                       {format(calculateStay.date[1], "dd MMM yyyy")}
                     </Text>
@@ -493,7 +480,7 @@ export default function Summary({
             totalNumberOfNonResidentGuests > 0 &&
             !!calculateStay.rooms[0].name &&
             !!nonResidentFullTotalPrice && (
-              <div className="sticky flex items-center py-1 px-2 left-4 bottom-0 w-full bg-white border-x-transparent border-b-transparent shadow-md border-t border-t-gray-200 border-solid h-[60px]">
+              <div className="sticky flex items-center justify-between py-1 px-5 left-0 bottom-0 w-full bg-white border-x-transparent border-b-transparent shadow-md border-t border-t-gray-200 border-solid h-[60px]">
                 <div className="flex flex-col">
                   <Text className="text-gray-400" size="xs">
                     TOTAL
@@ -510,6 +497,18 @@ export default function Summary({
                       : ""}
                   </Text>
                 </div>
+
+                <Button
+                  onClick={() => {
+                    open();
+                  }}
+                  className="flex w-fit justify-center items-center font-semibold p-2 px-4 rounded-md cursor-pointer"
+                  size="sm"
+                  color="red"
+                >
+                  <IconCalculator></IconCalculator>
+                  <span className="ml-1.5">Print quote</span>
+                </Button>
               </div>
             )}
         </div>
@@ -517,10 +516,10 @@ export default function Summary({
 
       <Tabs.Panel value="resident">
         <div className="">
-          <div className="w-full px-4 py-4">
-            <Text className="font-bold mt-10" mb={8}>
+          <div className="w-full px-5 py-4">
+            {/* <Text className="font-bold mt-10" mb={8}>
               {calculateStay.name}
-            </Text>
+            </Text> */}
             {calculateStay.date[0] && calculateStay.date[1] && (
               <>
                 <div className="flex justify-between gap-8">
@@ -755,7 +754,7 @@ export default function Summary({
             totalNumberOfGuests > 0 &&
             !!calculateStay.rooms[0].name &&
             !!residentFullTotalPrice && (
-              <div className="sticky flex items-center py-1 px-2 left-4 bottom-0 w-full bg-white border-x-transparent border-b-transparent shadow-md border-t border-t-gray-200 border-solid h-[60px]">
+              <div className="sticky flex items-center justify-between py-1 px-5 left-4 bottom-0 w-full bg-white border-x-transparent border-b-transparent shadow-md border-t border-t-gray-200 border-solid h-[60px]">
                 <div className="flex flex-col">
                   <Text className="text-gray-400" size="xs">
                     TOTAL
@@ -772,6 +771,18 @@ export default function Summary({
                       : ""}{" "}
                   </Text>
                 </div>
+
+                <Button
+                  onClick={() => {
+                    open();
+                  }}
+                  className="flex w-fit justify-center items-center font-semibold p-2 px-4 rounded-md cursor-pointer"
+                  size="sm"
+                  color="red"
+                >
+                  <IconCalculator></IconCalculator>
+                  <span className="ml-1.5">Print quote</span>
+                </Button>
               </div>
             )}
         </div>

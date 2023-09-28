@@ -147,7 +147,7 @@ export default function AgentPage() {
 
   return (
     <div className="relative">
-      <div className="border-b border-x-0 border-t-0 border-solid border-b-gray-200">
+      <div className="border-b sticky top-0 bg-white z-20 border-x-0 border-t-0 border-solid border-b-gray-200">
         <Navbar user={user}></Navbar>
       </div>
 
@@ -260,29 +260,30 @@ export default function AgentPage() {
             </div>
           </>
         )}
-
-        <div className="w-fit gap-8 mx-auto mt-4 px-8 py-6 border border-solid rounded-lg border-gray-200 flex items-center">
-          {/* <div className="w-[150px] px-4 border-r border-y-0 border-l-0 border-solid border-gray-200">
+        <div className="px-4">
+          <div className="gap-2 w-fit mx-auto md:gap-8 mt-4 px-4 md:px-8 py-5 mdpy-6 border border-solid rounded-lg border-gray-200 flex items-center justify-between">
+            {/* <div className="w-[150px] px-4 border-r border-y-0 border-l-0 border-solid border-gray-200">
             <Text className="font-bold">My contracts</Text>
           </div> */}
 
-          <Text size="md" className="text-gray-500">
-            View only the properties you have a contract with.
-          </Text>
+            <Text className="text-gray-500 text-sm md:text-base">
+              View only the properties you have contract with.
+            </Text>
 
-          <Switch
-            color="red"
-            checked={!showListOfStaysWithoutAccess}
-            onChange={() => {
-              setShowListOfStaysWithoutAccess((prev) => !prev);
-              router.push({
-                query: {
-                  search: router.query.search as string,
-                  contracts: showListOfStaysWithoutAccess ? "1" : "",
-                },
-              });
-            }}
-          ></Switch>
+            <Switch
+              color="red"
+              checked={!showListOfStaysWithoutAccess}
+              onChange={() => {
+                setShowListOfStaysWithoutAccess((prev) => !prev);
+                router.push({
+                  query: {
+                    search: router.query.search as string,
+                    contracts: showListOfStaysWithoutAccess ? "1" : "",
+                  },
+                });
+              }}
+            ></Switch>
+          </div>
         </div>
         <div className="md:px-12 max-w-[1440px] mt-4 mx-auto px-6">
           {/* {!router.query.search &&

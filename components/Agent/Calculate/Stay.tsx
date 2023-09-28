@@ -8,6 +8,7 @@ import {
   Switch,
   NumberInput,
   Container,
+  Anchor,
 } from "@mantine/core";
 import { DateInput, DatePicker, DatePickerInput } from "@mantine/dates";
 import {
@@ -238,6 +239,7 @@ export function Stay({ stay, index, agentRates }: StayProps) {
             }
           }}
           color="red"
+          dropdownType="modal"
           label="Pick date range"
           placeholder="Select dates"
           styles={{ input: { paddingTop: 13, paddingBottom: 13 } }}
@@ -250,11 +252,27 @@ export function Stay({ stay, index, agentRates }: StayProps) {
           autoSave="true"
         />
 
-        {rooms?.map((room, index) => (
-          <Room index={index} key={index} stay={stay} room={room}></Room>
-        ))}
+        <div className="relative">
+          {rooms?.map((room, index) => (
+            <Room index={index} key={index} stay={stay} room={room}></Room>
+          ))}
 
-        <Flex
+          <Anchor
+            component="button"
+            type="button"
+            color="blue"
+            size="sm"
+            onClick={() => {
+              addRoom();
+            }}
+            className="flex absolute bottom-0 items-center gap-1"
+          >
+            <IconPlus size="1rem"></IconPlus>
+            <Text size="sm">Add a room</Text>
+          </Anchor>
+        </div>
+
+        {/* <Flex
           onClick={() => {
             addRoom();
           }}
@@ -267,7 +285,7 @@ export function Stay({ stay, index, agentRates }: StayProps) {
           <Text color="red" size="sm">
             Add a room
           </Text>
-        </Flex>
+        </Flex> */}
 
         {stay.activity_fees.length > 0 && (
           <>
@@ -290,37 +308,52 @@ export function Stay({ stay, index, agentRates }: StayProps) {
         <Text size="md" weight={600}>
           Extra fees
         </Text>
+        <div className="relative">
+          {extraFees?.map((fee, index) => (
+            <ExtraFees
+              key={index}
+              index={index}
+              fee={fee}
+              stay={stay}
+            ></ExtraFees>
+          ))}
 
-        {extraFees?.map((fee, index) => (
-          <ExtraFees
-            key={index}
-            index={index}
-            fee={fee}
-            stay={stay}
-          ></ExtraFees>
-        ))}
+          <Anchor
+            component="button"
+            type="button"
+            color="blue"
+            size="sm"
+            onClick={() => {
+              addFee();
+            }}
+            className="flex absolute bottom-0 items-center gap-1"
+          >
+            <IconPlus size="1rem"></IconPlus>
+            <Text size="sm">Add a fee</Text>
+          </Anchor>
 
-        <Flex
-          onClick={() => {
-            addFee();
-          }}
-          className="cursor-pointer w-fit"
-          mt={12}
-          gap={2}
-          align={"center"}
-        >
-          <IconPlus color="red" size="1rem"></IconPlus>
-          <Text color="red" size="sm">
-            Add a fee
-          </Text>
-        </Flex>
+          {/* <Flex
+            onClick={() => {
+              addFee();
+            }}
+            className="cursor-pointer w-fit"
+            mt={12}
+            gap={2}
+            align={"center"}
+          >
+            <IconPlus color="red" size="1rem"></IconPlus>
+            <Text color="red" size="sm">
+              Add a fee
+            </Text>
+          </Flex> */}
+        </div>
 
         <Divider mt={16} mb={16} />
         <Text size="md" weight={600}>
           Commission
         </Text>
 
-        <Flex mt={4} gap={16} align={"center"}>
+        <Flex mt={4} gap={16} className="items-end">
           <NumberInput
             value={nonResidentCommission}
             onChange={(value) => {

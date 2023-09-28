@@ -6,7 +6,15 @@ import axios, { AxiosError } from "axios";
 import { dehydrate, QueryClient, useMutation, useQuery } from "react-query";
 import Cookies from "js-cookie";
 import Navbar from "@/components/Agent/Navbar";
-import { use, useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  use,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Stay } from "@/utils/types";
 import {
   AgentDiscountRateType,
@@ -15,12 +23,14 @@ import {
 } from "@/pages/api/stays";
 import { useRouter } from "next/router";
 import {
+  Accordion,
   ActionIcon,
   Alert,
   Anchor,
   Button,
   Checkbox,
   Divider,
+  Drawer,
   FileInput,
   Flex,
   Grid,
@@ -44,6 +54,7 @@ import {
   IconAlertCircle,
   IconCalculator,
   IconCalendar,
+  IconChevronUp,
   IconGraph,
   IconSelector,
   IconTrash,
@@ -63,6 +74,7 @@ import { DatePickerInput } from "@mantine/dates";
 import { format } from "date-fns";
 import AgentPriceTable from "@/components/Agent/Calculate/AgentPriceTable";
 import RequestAccess from "@/components/Agent/Calculate/RequestAccess";
+import MobileSummary from "@/components/Agent/Calculate/MobileSummary";
 
 export default function Calculate() {
   const router = useRouter();
@@ -233,13 +245,23 @@ export default function Calculate() {
   const [residentSliderValueCustomRate, setResidentSliderValueCustomRate] =
     useState(0);
 
+  const getInitialSelectedTab = useCallback((data: Stay[] | undefined) => {
+    if (data && data.length > 0) {
+      return data[0].slug;
+    }
+    return null;
+  }, []);
+
+  const initialSelectedTab = useMemo(
+    () => getInitialSelectedTab(stays),
+    [stays]
+  );
+
   const [selectedTab, setSelectedTab] = useState<string | null>("");
 
   useEffect(() => {
-    if (stays && stays.length > 0) {
-      setSelectedTab(stays[0].slug);
-    }
-  }, [stays]);
+    setSelectedTab(initialSelectedTab);
+  }, [initialSelectedTab]);
 
   useEffect(() => {
     if (selectedTab) {
@@ -344,41 +366,121 @@ export default function Calculate() {
     { open: openRequestContractModal, close: closeRequestContractModal },
   ] = useDisclosure(false);
 
+  const [drawerOpened, { open: openDrawer, close: closeDrawer }] =
+    useDisclosure(false);
+
   return (
-    <div>
+    <div className="relative">
       <div className="border-b sticky top-0 z-10 bg-white left-0 right-0 border-x-0 border-t-0 border-solid border-b-gray-200">
         <Navbar user={user} calculatePage={true}></Navbar>
       </div>
 
       {!isStayLoading && (
-        <div className="md:px-12 relative max-w-[1440px] mx-auto px-6 mt-4">
+        <div className="px-6 lg:px-12 relative max-w-[1440px] mx-auto mt-4 mb-16">
           {stays && stays.length > 0 && (
             <Tabs
               color="red"
               defaultValue={stays[0].slug}
-              className="w-[64%] mb-4"
+              className="w-full mb-4"
               onTabChange={(value) => {
                 setSelectedTab(value);
               }}
               keepMounted={false}
             >
-              <ScrollArea>
-                <div className="flex w-full ">
-                  <Tabs.List className="!flex-none ">
-                    {stays?.map((stay, index) => (
-                      <Tabs.Tab
-                        onClick={() => {
-                          Mixpanel.track("Switched to a different tab", {
-                            property: stay.property_name,
-                          });
-                        }}
-                        value={stay.slug}
-                        key={index}
+              <div className="md:hidden">
+                {state.map((item, index) => (
+                  <Tabs.Panel
+                    key={index}
+                    value={item.slug}
+                    className="w-full fixed z-10 bg-white bottom-0 left-0"
+                  >
+                    <div className="w-full bg-white shadow-lg bottom-0 z-20 flex px-6 py-3 items-center justify-between rounded-t-xl border border-gray-200 border-solid">
+                      {/* <Text className="font-semibold text-base">
+                      {stays?.length} properties
+                    </Text> */}
+                      <div className="flex items-center gap-1">
+                        <Text size="lg" weight={700}>
+                          {!!totalNonResidentSum &&
+                            `$ ${totalNonResidentSum.toLocaleString(undefined, {
+                              minimumFractionDigits: 0,
+                              maximumFractionDigits: 2,
+                            })}`}
+                        </Text>{" "}
+                        {!!totalNonResidentSum && !!totalResidentSum && (
+                          <Text color="dimmed" size="xl">
+                            /
+                          </Text>
+                        )}
+                        <Text size="lg" weight={700}>
+                          {!!totalResidentSum &&
+                            `KES ${totalResidentSum.toLocaleString(undefined, {
+                              minimumFractionDigits: 0,
+                              maximumFractionDigits: 2,
+                            })}`}
+                        </Text>
+                        {!totalNonResidentSum && !totalResidentSum && (
+                          <Text size="sm">
+                            Select dates and rooms to view your rate
+                          </Text>
+                        )}
+                      </div>
+                      <div
+                        onClick={openDrawer}
+                        className="w-[30px] cursor-pointer h-[30px] border border-solid border-gray-200 rounded-full flex items-center justify-center"
                       >
-                        <div className="flex items-center gap-1.5">
-                          <span>{stay.property_name}</span>
+                        <IconChevronUp size={17}></IconChevronUp>
+                      </div>
+                    </div>
 
-                          {/* <ActionIcon
+                    <Drawer
+                      opened={drawerOpened}
+                      onClose={closeDrawer}
+                      title={item.name}
+                      closeButtonProps={{
+                        style: {
+                          width: 30,
+                          height: 30,
+                        },
+                      }}
+                      classNames={{
+                        title: "font-bold",
+                        body: "px-0 py-0",
+                      }}
+                      position="bottom"
+                      overlayProps={{ opacity: 0.5, blur: 4 }}
+                    >
+                      <MobileSummary
+                        agentRates={agents}
+                        stays={stays}
+                        calculateStay={item}
+                        open={() => {
+                          closeDrawer();
+                          open();
+                        }}
+                      ></MobileSummary>
+                    </Drawer>
+                  </Tabs.Panel>
+                ))}
+              </div>
+              <div className="flex gap-4 justify-between">
+                <div className="w-full md:w-[60%]">
+                  <ScrollArea>
+                    <div className="flex w-full ">
+                      <Tabs.List className="!flex-none ">
+                        {stays?.map((stay, index) => (
+                          <Tabs.Tab
+                            onClick={() => {
+                              Mixpanel.track("Switched to a different tab", {
+                                property: stay.property_name,
+                              });
+                            }}
+                            value={stay.slug}
+                            key={index}
+                          >
+                            <div className="flex items-center gap-1.5">
+                              <span>{stay.property_name}</span>
+
+                              {/* <ActionIcon
                             onClick={(e) => {
                               e.stopPropagation();
                               handleRemoveItemClick(stay.id);
@@ -391,469 +493,468 @@ export default function Calculate() {
                           >
                             <IconX></IconX>
                           </ActionIcon> */}
-                        </div>
-                      </Tabs.Tab>
-                    ))}
+                            </div>
+                          </Tabs.Tab>
+                        ))}
 
-                    {/* <Tabs.Tab value="summary">Summary</Tabs.Tab> */}
-                  </Tabs.List>
-                </div>
-              </ScrollArea>
-
-              <div className="w-full mt-4 flex flex-col gap-4">
-                {stays?.map((stay, index) => (
-                  <Tabs.Panel key={index} value={stay.slug} pt="xs">
-                    <Alert
-                      icon={<IconAlertCircle size="1rem" />}
-                      title="Discount rates"
-                      className="w-full mx-auto"
-                      color="yellow"
-                      // withCloseButton
-                      onClose={() => {}}
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <Text>
-                          {agents && agents.length > 0
-                            ? "You are now viewing nett rates."
-                            : "You are now viewing rack rates."}
-                        </Text>
-                        <div className="flex items-center gap-3">
-                          {!stay.has_property_access && (
-                            <Button
-                              onClick={() => {
-                                openRequestContractModal();
-                              }}
-                              className="text-black"
-                              variant="light"
-                              color="gray"
-                            >
-                              Request contract
-                            </Button>
-                          )}
-                          <Button
-                            onClick={() => {
-                              openDiscountRateModalOpen();
-                            }}
-                            className="text-black"
-                            variant="white"
-                          >
-                            {!stay.has_property_access
-                              ? "Add nett rates"
-                              : "Edit nett rates"}
-                          </Button>
-                        </div>
-                      </div>
-                    </Alert>
-                    <CalculateStay
-                      agentRates={agents}
-                      stay={stay}
-                      index={index}
-                    ></CalculateStay>
-                  </Tabs.Panel>
-                ))}
-              </div>
-              <Modal
-                opened={requestContractModal}
-                onClose={closeRequestContractModal}
-                title={"Request contract rates"}
-                size="lg"
-                classNames={{
-                  title: "text-lg font-bold",
-                  close:
-                    "text-black hover:text-gray-700 w-[40px] h-[30px] hover:bg-gray-100",
-                  body: "max-h-[500px] overflow-y-scroll px-10 pb-8 w-full",
-                  content: "rounded-2xl",
-                }}
-                centered
-              >
-                <RequestAccess staySlug={stayIds}></RequestAccess>
-              </Modal>
-
-              <Modal
-                opened={discountRateModalOpened}
-                onClose={closeDiscountRateModalOpen}
-                title=""
-                classNames={{
-                  title: "text-xl font-semibold",
-                  close: "text-black hover:text-gray-700 hover:bg-gray-200",
-                }}
-                fullScreen
-                transitionProps={{ transition: "slide-up", duration: 200 }}
-                closeButtonProps={{
-                  style: {
-                    width: 30,
-                    height: 30,
-                  },
-                  iconSize: 20,
-                }}
-              >
-                <div className="flex gap-6">
-                  <div className="w-[400px] border border-solid border-gray-200 px-4 bg-white rounded-xl py-4 shadow-round">
-                    <Text className="font-bold text-base">
-                      {isNonResident ? "Non-resident" : "Resident"} Rates
-                    </Text>
-                    {/* <div className="flex justify-between mt-4">
-                      <div></div>
-                      <div className="flex flex-col gap-2">
-                        <div className="flex items-center gap-1">
-                          <div className="w-[10px] h-[10px] bg-green-500"></div>
-                          <Text size="sm">
-                            Default rate given to you by a property
-                          </Text>
-                        </div>
-
-                        <div className="flex items-center gap-1">
-                          <div className="w-[10px] h-[10px] bg-blue-500"></div>
-                          <Text size="sm">
-                            Rates given to you on special occasions
-                          </Text>
-                        </div>
-                      </div>
-                    </div> */}
-                    {/* <p>
-                      Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                      Excepturi eveniet illo id delectus qui molestias dolore,
-                      dolor iusto cum! Laboriosam, id impedit? Exercitationem,
-                      corrupti quae? Libero asperiores excepturi doloribus
-                      corrupti?
-                    </p> */}
-
-                    <div className="flex flex-col gap-2 mt-4">
-                      {/* <div className="w-full px-3 flex justify-between items-center py-3 rounded-lg bg-green-100 border border-solid border-green-400">
-                        <div className="px-1 py-1 bg-green-300 w-fit">
-                          <Text className="text-sm">Standard rate</Text>
-                        </div>
-                        <Text className="text-sm">10%</Text>
-                      </div>
-
-                      <div className="w-full px-3 flex justify-between items-center py-3 rounded-lg bg-blue-100 border border-solid border-blue-400">
-                        <div className="px-1 py-1 bg-blue-300 w-fit">
-                          <Text className="text-sm">2nd sep - 14th oct</Text>
-                        </div>
-                        <Text className="text-sm">14%</Text>
-                      </div> */}
-
-                      {agentNetRate &&
-                        !agentNetRate.start_date &&
-                        !agentNetRate.end_date && (
-                          <div>
-                            {isNonResident && !!agentNetRate.percentage && (
-                              <div className="w-full px-3 flex justify-between items-center py-3 rounded-lg bg-green-50 border border-solid border-green-400">
-                                <div className="px-2 py-1 bg-white rounded-lg shadow-sm w-fit">
-                                  <Text className="text-sm font-medium">
-                                    Nett rate
-                                  </Text>
-                                </div>
-
-                                <div className="flex items-center gap-2">
-                                  <Text className="text-sm medium">
-                                    {agentNetRate.percentage}%
-                                  </Text>
-
-                                  <ActionIcon
-                                    onClick={() => {
-                                      deleteAgentRate(agentNetRate.id);
-                                    }}
-                                    color="red"
-                                    size="sm"
-                                  >
-                                    <IconTrash></IconTrash>
-                                  </ActionIcon>
-                                </div>
-                              </div>
-                            )}
-
-                            {!isNonResident &&
-                              !!agentNetRate.resident_percentage && (
-                                <div className="w-full px-3 flex justify-between items-center py-3 rounded-lg bg-green-50 border border-solid border-green-400">
-                                  <div className="px-2 py-1 bg-white rounded-lg shadow-sm w-fit">
-                                    <Text className="text-sm font-medium">
-                                      Nett rate
-                                    </Text>
-                                  </div>
-
-                                  <div className="flex items-center gap-2">
-                                    <Text className="text-sm medium">
-                                      {agentNetRate.resident_percentage}%
-                                    </Text>
-
-                                    <ActionIcon
-                                      onClick={() => {
-                                        deleteAgentRate(agentNetRate.id);
-                                      }}
-                                      color="red"
-                                      size="sm"
-                                    >
-                                      <IconTrash></IconTrash>
-                                    </ActionIcon>
-                                  </div>
-                                </div>
-                              )}
-                          </div>
-                        )}
-
-                      {isNonResident &&
-                        (!agentNetRate || !agentNetRate.percentage) && (
-                          <Text className="text-sm text-center font-bold">
-                            No nett rate added yet
-                          </Text>
-                        )}
-
-                      {!isNonResident &&
-                        (!agentNetRate ||
-                          !agentNetRate.resident_percentage) && (
-                          <Text className="text-sm text-center font-bold">
-                            No nett rate added yet
-                          </Text>
-                        )}
-
-                      {isNonResident && (
-                        <div className="my-2">
-                          <span className="text-sm text-gray-600">
-                            Slide to set rate
-                          </span>
-                          <Slider
-                            value={sliderValue}
-                            className=""
-                            onChange={setSliderValue}
-                            color="red"
-                          />
-                        </div>
-                      )}
-
-                      {!isNonResident && (
-                        <div className="my-2">
-                          <span className="text-sm text-gray-600">
-                            Slide to set rate
-                          </span>
-                          <Slider
-                            value={residentSliderValue}
-                            className=""
-                            onChange={setResidentSliderValue}
-                            color="red"
-                          />
-                        </div>
-                      )}
-
-                      <div className="flex items-center justify-between">
-                        <div></div>
-
-                        {isNonResident && (
-                          <Button
-                            onClick={() => {
-                              addAgentNettRateMutation();
-                            }}
-                            loading={addAgentNettRateLoading}
-                            color="red"
-                            className=""
-                            variant="filled"
-                            disabled={!sliderValue}
-                          >
-                            Add nett rate
-                          </Button>
-                        )}
-
-                        {!isNonResident && (
-                          <Button
-                            onClick={() => {
-                              addAgentNettRateMutation();
-                            }}
-                            loading={addAgentNettRateLoading}
-                            color="red"
-                            className=""
-                            variant="filled"
-                            disabled={!residentSliderValue}
-                          >
-                            Add nett rate
-                          </Button>
-                        )}
-                      </div>
-
-                      <Divider
-                        label="or set additional discounts"
-                        labelPosition="center"
-                        className="my-2"
-                      ></Divider>
-
-                      {otherAgentRates?.map((agent) => (
-                        <div className="w-full" key={agent.id}>
-                          {agent.start_date &&
-                            agent.end_date &&
-                            !!agent.percentage &&
-                            isNonResident && (
-                              <div className="w-full px-3 flex justify-between items-center py-3 rounded-lg bg-blue-50 border border-solid border-blue-400">
-                                <div className="px-2 py-1 bg-white rounded-lg shadow-sm w-fit">
-                                  <Text className="text-sm font-medium">
-                                    {format(
-                                      new Date(agent.start_date),
-                                      "dd MMM"
-                                    )}{" "}
-                                    -{" "}
-                                    {format(new Date(agent.end_date), "dd MMM")}
-                                  </Text>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Text className="text-sm font-medium">
-                                    {agent.percentage}%
-                                  </Text>
-
-                                  <ActionIcon
-                                    onClick={() => {
-                                      deleteAgentRate(agent.id);
-                                    }}
-                                    color="red"
-                                    size="sm"
-                                  >
-                                    <IconTrash></IconTrash>
-                                  </ActionIcon>
-                                </div>
-                              </div>
-                            )}
-
-                          {agent.start_date &&
-                            agent.end_date &&
-                            !!agent.resident_percentage &&
-                            !isNonResident && (
-                              <div className="w-full px-3 flex justify-between items-center py-3 rounded-lg bg-blue-50 border border-solid border-blue-400">
-                                <div className="px-2 py-1 bg-white rounded-lg shadow-sm w-fit">
-                                  <Text className="text-sm font-medium">
-                                    {format(
-                                      new Date(agent.start_date),
-                                      "dd MMM"
-                                    )}{" "}
-                                    -{" "}
-                                    {format(new Date(agent.end_date), "dd MMM")}
-                                  </Text>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Text className="text-sm font-medium">
-                                    {agent.resident_percentage}%
-                                  </Text>
-
-                                  <ActionIcon
-                                    onClick={() => {
-                                      deleteAgentRate(agent.id);
-                                    }}
-                                    color="red"
-                                    size="sm"
-                                  >
-                                    <IconTrash></IconTrash>
-                                  </ActionIcon>
-                                </div>
-                              </div>
-                            )}
-                        </div>
-                      ))}
-
-                      {otherAgentRates?.length === 0 && (
-                        <Text className="text-sm my-4 text-center font-bold">
-                          No additional discount added yet
-                        </Text>
-                      )}
-
-                      <DatePickerInput
-                        type="range"
-                        value={date}
-                        onChange={(date) => {
-                          setDate(date);
-                        }}
-                        color="red"
-                        placeholder="Select date range"
-                        styles={{
-                          input: { paddingTop: 13, paddingBottom: 13 },
-                        }}
-                        labelProps={{ className: "font-semibold mb-1" }}
-                        rightSection={
-                          <IconSelector className="text-gray-500" />
-                        }
-                        className="w-full"
-                        minDate={new Date()}
-                        icon={<IconCalendar className="text-gray-500" />}
-                        numberOfColumns={2}
-                        autoSave="true"
-                        disabled={applyForAllDates}
-                        dropdownType="modal"
-                        modalProps={{
-                          closeOnClickOutside: true,
-                          overlayProps: {
-                            color: "#333",
-                            opacity: 0.4,
-                            zIndex: 201,
-                          },
-                        }}
-                      />
-
-                      <div className="mt-2">
-                        <span className="text-sm text-gray-600">
-                          {!date[0] || !date[1]
-                            ? "Select date range to set custom rate"
-                            : "Slide to set custom rate"}
-                        </span>
-                        {isNonResident && (
-                          <Slider
-                            value={sliderValueCustomRate}
-                            className=""
-                            onChange={setSliderValueCustomRate}
-                            color="red"
-                            disabled={!date[0] || !date[1]}
-                            // labelAlwaysOn
-                          />
-                        )}
-
-                        {!isNonResident && (
-                          <Slider
-                            value={residentSliderValueCustomRate}
-                            className=""
-                            onChange={setResidentSliderValueCustomRate}
-                            color="red"
-                            disabled={!date[0] || !date[1]}
-                            // labelAlwaysOn
-                          />
-                        )}
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div></div>
-
-                        {isNonResident && (
-                          <Button
-                            onClick={() => {
-                              addAgentRateMutation();
-                            }}
-                            loading={addAgentRateLoading}
-                            color="red"
-                            className="mt-4"
-                            variant="filled"
-                            disabled={
-                              !date[0] || !date[1] || !sliderValueCustomRate
-                            }
-                          >
-                            Add custom rate
-                          </Button>
-                        )}
-
-                        {!isNonResident && (
-                          <Button
-                            onClick={() => {
-                              addAgentRateMutation();
-                            }}
-                            loading={addAgentRateLoading}
-                            color="red"
-                            className="mt-4"
-                            variant="filled"
-                            disabled={
-                              !date[0] ||
-                              !date[1] ||
-                              !residentSliderValueCustomRate
-                            }
-                          >
-                            Add custom rate
-                          </Button>
-                        )}
-                      </div>
+                        {/* <Tabs.Tab value="summary">Summary</Tabs.Tab> */}
+                      </Tabs.List>
                     </div>
+                  </ScrollArea>
 
-                    {/* <div className="mt-6 py-2 border-t border-solid border-b-0 border-x-0 border-gray-100">
+                  <div className="mt-4 flex flex-col gap-4">
+                    {stays?.map((stay, index) => (
+                      <Tabs.Panel key={index} value={stay.slug} pt="xs">
+                        <Alert
+                          icon={<IconAlertCircle size="1rem" />}
+                          classNames={{
+                            wrapper: "items-center",
+                          }}
+                          className="w-full mx-auto"
+                          color="yellow"
+                          // withCloseButton
+                          onClose={() => {}}
+                        >
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <Text>
+                              {agents && agents.length > 0
+                                ? "Please note, the rates shown are nett"
+                                : "Please note, the rates shown are rack. To view nett rates,"}
+                            </Text>
+                            <div className="flex items-center gap-3">
+                              {/* {!stay.has_property_access && (
+                                <Button
+                                  onClick={() => {
+                                    openRequestContractModal();
+                                  }}
+                                  className="text-black"
+                                  variant="light"
+                                  color="gray"
+                                >
+                                  Request contract
+                                </Button>
+                              )} */}
+                              <Button
+                                onClick={() => {
+                                  openDiscountRateModalOpen();
+                                }}
+                                className="text-black"
+                                variant="white"
+                              >
+                                {!stay.has_property_access
+                                  ? "Add own nett rates"
+                                  : "Edit nett rates"}
+                              </Button>
+                            </div>
+                          </div>
+                        </Alert>
+                        <CalculateStay
+                          agentRates={agents}
+                          stay={stay}
+                          index={index}
+                        ></CalculateStay>
+
+                        <Modal
+                          opened={discountRateModalOpened}
+                          onClose={closeDiscountRateModalOpen}
+                          title={stay.property_name}
+                          classNames={{
+                            title: "text-lg font-semibold",
+                            close:
+                              "text-black hover:text-gray-700 hover:bg-gray-200",
+                          }}
+                          fullScreen
+                          transitionProps={{
+                            transition: "slide-up",
+                            duration: 200,
+                          }}
+                          closeButtonProps={{
+                            style: {
+                              width: 30,
+                              height: 30,
+                            },
+                            iconSize: 20,
+                          }}
+                        >
+                          <div className="flex md:flex-row flex-col gap-6">
+                            <div className="md:w-[400px] w-full h-fit border md:order-1 order-2 border-solid border-gray-200 px-4 bg-white rounded-xl py-4 shadow-round">
+                              <Text className="font-bold text-base">
+                                {isNonResident ? "Non-resident" : "Resident"}{" "}
+                                Rates
+                              </Text>
+
+                              <div className="flex flex-col gap-2 mt-4">
+                                {agentNetRate &&
+                                  !agentNetRate.start_date &&
+                                  !agentNetRate.end_date && (
+                                    <div>
+                                      {isNonResident &&
+                                        !!agentNetRate.percentage && (
+                                          <div className="w-full px-3 flex justify-between items-center py-3 rounded-lg bg-green-50 border border-solid border-green-400">
+                                            <div className="px-2 py-1 bg-white rounded-lg shadow-sm w-fit">
+                                              <Text className="text-sm font-medium">
+                                                Nett rate
+                                              </Text>
+                                            </div>
+
+                                            <div className="flex items-center gap-2">
+                                              <Text className="text-sm medium">
+                                                {agentNetRate.percentage}%
+                                              </Text>
+
+                                              <ActionIcon
+                                                onClick={() => {
+                                                  deleteAgentRate(
+                                                    agentNetRate.id
+                                                  );
+                                                }}
+                                                color="red"
+                                                size="sm"
+                                              >
+                                                <IconTrash></IconTrash>
+                                              </ActionIcon>
+                                            </div>
+                                          </div>
+                                        )}
+
+                                      {!isNonResident &&
+                                        !!agentNetRate.resident_percentage && (
+                                          <div className="w-full px-3 flex justify-between items-center py-3 rounded-lg bg-green-50 border border-solid border-green-400">
+                                            <div className="px-2 py-1 bg-white rounded-lg shadow-sm w-fit">
+                                              <Text className="text-sm font-medium">
+                                                Nett rate
+                                              </Text>
+                                            </div>
+
+                                            <div className="flex items-center gap-2">
+                                              <Text className="text-sm medium">
+                                                {
+                                                  agentNetRate.resident_percentage
+                                                }
+                                                %
+                                              </Text>
+
+                                              <ActionIcon
+                                                onClick={() => {
+                                                  deleteAgentRate(
+                                                    agentNetRate.id
+                                                  );
+                                                }}
+                                                color="red"
+                                                size="sm"
+                                              >
+                                                <IconTrash></IconTrash>
+                                              </ActionIcon>
+                                            </div>
+                                          </div>
+                                        )}
+                                    </div>
+                                  )}
+
+                                {isNonResident &&
+                                  (!agentNetRate ||
+                                    !agentNetRate.percentage) && (
+                                    <Text className="text-sm text-center font-bold">
+                                      No nett rate added yet
+                                    </Text>
+                                  )}
+
+                                {!isNonResident &&
+                                  (!agentNetRate ||
+                                    !agentNetRate.resident_percentage) && (
+                                    <Text className="text-sm text-center font-bold">
+                                      No nett rate added yet
+                                    </Text>
+                                  )}
+
+                                {isNonResident && (
+                                  <div className="my-2">
+                                    <span className="text-sm text-gray-600">
+                                      Slide to set rate
+                                    </span>
+                                    <Slider
+                                      value={sliderValue}
+                                      label={(label) => `${label}%`}
+                                      className=""
+                                      onChange={setSliderValue}
+                                      color="red"
+                                    />
+                                  </div>
+                                )}
+
+                                {!isNonResident && (
+                                  <div className="my-2">
+                                    <span className="text-sm text-gray-600">
+                                      Slide to set rate
+                                    </span>
+                                    <Slider
+                                      value={residentSliderValue}
+                                      label={(label) => `${label}%`}
+                                      className=""
+                                      onChange={setResidentSliderValue}
+                                      color="red"
+                                    />
+                                  </div>
+                                )}
+
+                                <div className="flex items-center justify-between">
+                                  <div></div>
+
+                                  {isNonResident && (
+                                    <Button
+                                      onClick={() => {
+                                        addAgentNettRateMutation();
+                                      }}
+                                      loading={addAgentNettRateLoading}
+                                      color="red"
+                                      className=""
+                                      variant="filled"
+                                      disabled={!sliderValue}
+                                    >
+                                      Add nett rate
+                                    </Button>
+                                  )}
+
+                                  {!isNonResident && (
+                                    <Button
+                                      onClick={() => {
+                                        addAgentNettRateMutation();
+                                      }}
+                                      loading={addAgentNettRateLoading}
+                                      color="red"
+                                      className=""
+                                      variant="filled"
+                                      disabled={!residentSliderValue}
+                                    >
+                                      Add nett rate
+                                    </Button>
+                                  )}
+                                </div>
+
+                                <Divider
+                                  label="Or"
+                                  labelPosition="center"
+                                  className="my-2"
+                                ></Divider>
+
+                                <Accordion
+                                  variant="contained"
+                                  className="w-full"
+                                >
+                                  <Accordion.Item value="1">
+                                    <Accordion.Control>
+                                      <Text className="font-semibold text-sm">
+                                        set additional discounts
+                                      </Text>
+                                    </Accordion.Control>
+                                    <Accordion.Panel>
+                                      {otherAgentRates?.map((agent) => (
+                                        <div className="w-full" key={agent.id}>
+                                          {agent.start_date &&
+                                            agent.end_date &&
+                                            !!agent.percentage &&
+                                            isNonResident && (
+                                              <div className="w-full px-3 flex justify-between items-center py-3 rounded-lg bg-blue-50 border border-solid border-blue-400">
+                                                <div className="px-2 py-1 bg-white rounded-lg shadow-sm w-fit">
+                                                  <Text className="text-sm font-medium">
+                                                    {format(
+                                                      new Date(
+                                                        agent.start_date
+                                                      ),
+                                                      "dd MMM"
+                                                    )}{" "}
+                                                    -{" "}
+                                                    {format(
+                                                      new Date(agent.end_date),
+                                                      "dd MMM"
+                                                    )}
+                                                  </Text>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                  <Text className="text-sm font-medium">
+                                                    {agent.percentage}%
+                                                  </Text>
+
+                                                  <ActionIcon
+                                                    onClick={() => {
+                                                      deleteAgentRate(agent.id);
+                                                    }}
+                                                    color="red"
+                                                    size="sm"
+                                                  >
+                                                    <IconTrash></IconTrash>
+                                                  </ActionIcon>
+                                                </div>
+                                              </div>
+                                            )}
+
+                                          {agent.start_date &&
+                                            agent.end_date &&
+                                            !!agent.resident_percentage &&
+                                            !isNonResident && (
+                                              <div className="w-full px-3 flex justify-between items-center py-3 rounded-lg bg-blue-50 border border-solid border-blue-400">
+                                                <div className="px-2 py-1 bg-white rounded-lg shadow-sm w-fit">
+                                                  <Text className="text-sm font-medium">
+                                                    {format(
+                                                      new Date(
+                                                        agent.start_date
+                                                      ),
+                                                      "dd MMM"
+                                                    )}{" "}
+                                                    -{" "}
+                                                    {format(
+                                                      new Date(agent.end_date),
+                                                      "dd MMM"
+                                                    )}
+                                                  </Text>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                  <Text className="text-sm font-medium">
+                                                    {agent.resident_percentage}%
+                                                  </Text>
+
+                                                  <ActionIcon
+                                                    onClick={() => {
+                                                      deleteAgentRate(agent.id);
+                                                    }}
+                                                    color="red"
+                                                    size="sm"
+                                                  >
+                                                    <IconTrash></IconTrash>
+                                                  </ActionIcon>
+                                                </div>
+                                              </div>
+                                            )}
+                                        </div>
+                                      ))}
+
+                                      {otherAgentRates?.length === 0 && (
+                                        <Text className="text-sm my-4 text-center font-bold">
+                                          No additional discount added yet
+                                        </Text>
+                                      )}
+
+                                      <DatePickerInput
+                                        type="range"
+                                        value={date}
+                                        onChange={(date) => {
+                                          setDate(date);
+                                        }}
+                                        color="red"
+                                        placeholder="Select date range"
+                                        styles={{
+                                          input: {
+                                            paddingTop: 13,
+                                            paddingBottom: 13,
+                                          },
+                                        }}
+                                        labelProps={{
+                                          className: "font-semibold mb-1",
+                                        }}
+                                        rightSection={
+                                          <IconSelector className="text-gray-500" />
+                                        }
+                                        className="w-full mt-2"
+                                        minDate={new Date()}
+                                        icon={
+                                          <IconCalendar className="text-gray-500" />
+                                        }
+                                        numberOfColumns={2}
+                                        autoSave="true"
+                                        disabled={applyForAllDates}
+                                        dropdownType="modal"
+                                        modalProps={{
+                                          closeOnClickOutside: true,
+                                          overlayProps: {
+                                            color: "#333",
+                                            opacity: 0.4,
+                                            zIndex: 201,
+                                          },
+                                        }}
+                                      />
+
+                                      <div className="mt-2">
+                                        <span className="text-sm text-gray-600">
+                                          {!date[0] || !date[1]
+                                            ? "Select date range to set custom rate"
+                                            : "Slide to set custom rate"}
+                                        </span>
+                                        {isNonResident && (
+                                          <Slider
+                                            value={sliderValueCustomRate}
+                                            label={(label) => `${label}%`}
+                                            className=""
+                                            onChange={setSliderValueCustomRate}
+                                            color="red"
+                                            disabled={!date[0] || !date[1]}
+                                            // labelAlwaysOn
+                                          />
+                                        )}
+
+                                        {!isNonResident && (
+                                          <Slider
+                                            value={
+                                              residentSliderValueCustomRate
+                                            }
+                                            label={(label) => `${label}%`}
+                                            className=""
+                                            onChange={
+                                              setResidentSliderValueCustomRate
+                                            }
+                                            color="red"
+                                            disabled={!date[0] || !date[1]}
+                                            // labelAlwaysOn
+                                          />
+                                        )}
+                                      </div>
+
+                                      <div className="flex items-center justify-between">
+                                        <div></div>
+
+                                        {isNonResident && (
+                                          <Button
+                                            onClick={() => {
+                                              addAgentRateMutation();
+                                            }}
+                                            loading={addAgentRateLoading}
+                                            color="red"
+                                            className="mt-4"
+                                            variant="filled"
+                                            disabled={
+                                              !date[0] ||
+                                              !date[1] ||
+                                              !sliderValueCustomRate
+                                            }
+                                          >
+                                            Add custom rate
+                                          </Button>
+                                        )}
+
+                                        {!isNonResident && (
+                                          <Button
+                                            onClick={() => {
+                                              addAgentRateMutation();
+                                            }}
+                                            loading={addAgentRateLoading}
+                                            color="red"
+                                            className="mt-4"
+                                            variant="filled"
+                                            disabled={
+                                              !date[0] ||
+                                              !date[1] ||
+                                              !residentSliderValueCustomRate
+                                            }
+                                          >
+                                            Add custom rate
+                                          </Button>
+                                        )}
+                                      </div>
+                                    </Accordion.Panel>
+                                  </Accordion.Item>
+                                </Accordion>
+                              </div>
+
+                              {/* <div className="mt-6 py-2 border-t border-solid border-b-0 border-x-0 border-gray-100">
                       <DatePickerInput
                         type="range"
                         value={date}
@@ -929,225 +1030,298 @@ export default function Calculate() {
                         </Button>
                       </div>
                     </div> */}
-                  </div>
-                  <div className="w-[calc(100%-400px)]">
-                    <div className="w-fit mb-4 mx-auto border rounded-lg border-solid border-gray-200 px-6 py-3 flex items-center gap-6">
-                      <span className="text-sm">
-                        Toggle to view resident rate
-                      </span>
-                      <Switch
-                        checked={!isNonResident}
-                        onChange={() => {
-                          setIsNonResident(!isNonResident);
-                        }}
-                        color="red"
-                      ></Switch>
-                    </div>
-                    <AgentPriceTable
-                      agentRates={agents}
-                      staySlug={selectedTab}
-                      displayRackRates={displayRackRates}
-                      setDisplayRackRate={setDisplayRackRates}
-                      setIsNonResident={setIsNonResident}
-                      isNonResident={isNonResident}
-                    />
+                            </div>
+                            <div className="md:w-[calc(100%-400px)] w-full md:order-2 order-1">
+                              <div className="w-fit mb-4 mx-auto border rounded-lg border-solid border-gray-200 px-6 py-3 flex items-center gap-6">
+                                <span className="text-sm">
+                                  Toggle to view resident rate
+                                </span>
+                                <Switch
+                                  checked={!isNonResident}
+                                  onChange={() => {
+                                    setIsNonResident(!isNonResident);
+                                  }}
+                                  color="red"
+                                ></Switch>
+                              </div>
+                              <AgentPriceTable
+                                agentRates={agents}
+                                staySlug={selectedTab}
+                                displayRackRates={displayRackRates}
+                                setDisplayRackRate={setDisplayRackRates}
+                                setIsNonResident={setIsNonResident}
+                                isNonResident={isNonResident}
+                              />
+                            </div>
+                          </div>
+                        </Modal>
+                      </Tabs.Panel>
+                    ))}
                   </div>
                 </div>
-              </Modal>
 
-              <Modal
-                opened={opened}
-                onClose={close}
-                title="Print Quotation"
-                classNames={{
-                  title: "text-xl font-semibold",
-                  close: "text-black hover:text-gray-700 hover:bg-gray-200",
-                  header: "bg-gray-100",
-                }}
-                fullScreen
-                transitionProps={{ transition: "fade", duration: 200 }}
-                closeButtonProps={{
-                  style: {
-                    width: 30,
-                    height: 30,
-                  },
-                  iconSize: 20,
-                }}
-              >
-                <Flex
-                  mt={6}
-                  className="relative w-[1080px] mx-auto"
-                  justify="space-between"
-                >
-                  <div className="w-[300px] fixed z-40 top-[75px]">
-                    <Checkbox
-                      label="Download itemized quote for client"
-                      checked={includeClientInCalculation}
-                      onChange={(event) =>
-                        setIncludeResidentInCalculation(
-                          event.currentTarget.checked
-                        )
-                      }
+                <div className="w-[33%] fixed top-[90px] md:block hidden right-6 lg:right-12">
+                  <div className="overflow-y-scroll h-[410px] mt-4 flex flex-col gap-4 shadow-lg border border-solid border-gray-100 rounded-xl">
+                    {state.map((item, index) => (
+                      <Tabs.Panel
+                        key={index}
+                        value={item.slug}
+                        className="h-[500px]"
+                      >
+                        <Summary
+                          agentRates={agents}
+                          stays={stays}
+                          calculateStay={item}
+                          updateTotals={updateTotals}
+                        ></Summary>
+                      </Tabs.Panel>
+                    ))}
+                  </div>
+
+                  <Flex mt={18} className="w-full" gap={10}>
+                    <Button
                       onClick={() => {
-                        Mixpanel.track("User selected itemized quote");
+                        open();
+                        Mixpanel.track("User clicked on print quote");
                       }}
-                    ></Checkbox>
+                      className="flex w-full justify-center items-center font-semibold p-2 rounded-md cursor-pointer"
+                      size="sm"
+                      color="red"
+                    >
+                      <IconCalculator></IconCalculator>
+                      <span className="ml-1.5">Print quote</span>
+                    </Button>
 
-                    <Checkbox
-                      label="Download summary quote for client"
-                      mt={12}
-                      mb={8}
-                      checked={summarizedCalculation}
-                      onChange={(event) =>
-                        setSummarizedCalculation(event.currentTarget.checked)
-                      }
-                      onClick={() => {
-                        Mixpanel.track("User selected summarized quote");
-                      }}
-                    ></Checkbox>
+                    {stays.map((item, index) => (
+                      <Tabs.Panel
+                        className="w-full"
+                        key={index}
+                        value={item.slug}
+                      >
+                        {item.lodge_price_data_pdf && (
+                          <Button
+                            onClick={() => {
+                              Mixpanel.track("User checked contract rates", {
+                                property: item.property_name,
+                              });
+                              handleDownloadClick(
+                                item.lodge_price_data_pdf,
+                                item.property_name
+                              );
+                            }}
+                            className="flex w-full justify-center items-center gap-8 font-semibold p-2 rounded-md cursor-pointer"
+                            size="sm"
+                            color="red"
+                            variant="outline"
+                          >
+                            <IconGraph></IconGraph>
+                            <span className="ml-1.5">Contract rates</span>
+                          </Button>
+                        )}
+                      </Tabs.Panel>
+                    ))}
+                  </Flex>
+                </div>
+              </div>
+            </Tabs>
+          )}
+        </div>
+      )}
 
-                    <Divider my="xs" label="STYLE" labelPosition="center" />
+      <Modal
+        opened={requestContractModal}
+        onClose={closeRequestContractModal}
+        title={"Request contract rates"}
+        size="lg"
+        classNames={{
+          title: "text-lg font-bold",
+          close:
+            "text-black hover:text-gray-700 w-[40px] h-[30px] hover:bg-gray-100",
+          body: "max-h-[500px] overflow-y-scroll px-10 pb-8 w-full",
+          content: "rounded-2xl",
+        }}
+        centered
+      >
+        <RequestAccess staySlug={stayIds}></RequestAccess>
+      </Modal>
 
-                    <FileInput
-                      label="Your logo"
-                      placeholder="Select one image"
-                      accept="image/png, image/jpeg, image/jpg"
-                      name="files"
-                      icon={<IconUpload size={rem(14)} />}
-                      onChange={(payload: File) => {
-                        setFiles(payload);
-                      }}
-                      required
-                      clearable
+      <Modal
+        opened={opened}
+        onClose={close}
+        title="Print Quotation"
+        classNames={{
+          title: "text-xl font-bold",
+          close: "text-black hover:text-gray-700 hover:bg-gray-200",
+          header: "border-b border-x-0 border-t-0 border-gray-200 border-solid",
+        }}
+        fullScreen
+        transitionProps={{ transition: "fade", duration: 200 }}
+        closeButtonProps={{
+          style: {
+            width: 30,
+            height: 30,
+          },
+          iconSize: 20,
+        }}
+      >
+        <div className="relative mt-4 flex justify-between md:flex-row flex-col max-w-[1080px] mx-auto">
+          <div className="w-full md:w-[300px] md:fixed z-40 top-[100px]">
+            <Checkbox
+              label="Download itemized quote for client"
+              checked={includeClientInCalculation}
+              onChange={(event) =>
+                setIncludeResidentInCalculation(event.currentTarget.checked)
+              }
+              onClick={() => {
+                Mixpanel.track("User selected itemized quote");
+              }}
+            ></Checkbox>
+
+            <Checkbox
+              label="Download summary quote for client"
+              mt={12}
+              mb={8}
+              checked={summarizedCalculation}
+              onChange={(event) =>
+                setSummarizedCalculation(event.currentTarget.checked)
+              }
+              onClick={() => {
+                Mixpanel.track("User selected summarized quote");
+              }}
+            ></Checkbox>
+
+            <Divider my="xs" label="STYLE" labelPosition="center" />
+
+            <FileInput
+              label="Your logo"
+              placeholder="Select one image"
+              accept="image/png, image/jpeg, image/jpg"
+              name="files"
+              icon={<IconUpload size={rem(14)} />}
+              onChange={(payload: File) => {
+                setFiles(payload);
+              }}
+              required
+              clearable
+            />
+          </div>
+
+          <div className="w-full md:w-[65%] lg:w-[75%] md:pl-12 flex md:absolute right-0 flex-col gap-5">
+            {!sumOfResidentCommission &&
+              !sumOfNonResidentCommission &&
+              (includeClientInCalculation || summarizedCalculation) && (
+                <Alert icon={<IconAlertCircle size="1rem" />} color="yellow">
+                  No commission has been added yet.
+                </Alert>
+              )}
+
+            <Button
+              onClick={() => {
+                handlePrint();
+                Mixpanel.track("User printed quotation!!!");
+              }}
+              pos={"absolute"}
+              right={0}
+              top={30}
+              color="red"
+              className="hidden md:block"
+            >
+              Print Quotation
+            </Button>
+            <div className="mb-12" ref={componentRef}>
+              <div className="flex mt-4 items-center justify-center">
+                <div className="flex items-center gap-2">
+                  {files && (
+                    <Image
+                      src={files ? URL.createObjectURL(files) : ""}
+                      alt="logo"
+                      className="object-contain"
+                      width={120}
+                      height={60}
                     />
+                  )}
+                </div>
+              </div>
 
-                    {/* <Select
-                      label="Select a style"
-                      placeholder="Pick one"
-                      value={style}
-                      mt={10}
-                      onChange={(value) => setStyle(value)}
-                      data={[
-                        { value: "default", label: "Default" },
-                        { value: "style1", label: "Style 1" },
-                        { value: "style2", label: "Style 2" },
-                        { value: "style3", label: "Style 3" },
-                      ]}
-                    /> */}
+              <div className="flex items-center justify-between">
+                <div></div>
+                <Button
+                  onClick={() => {
+                    handlePrint();
+                    Mixpanel.track("User printed quotation!!!");
+                  }}
+                  color="red"
+                  className="md:hidden"
+                >
+                  Print Quotation
+                </Button>
+              </div>
+
+              {state.map((item, index) => (
+                <div key={index} className="w-full">
+                  <PrintSummary
+                    stays={stays}
+                    calculateStay={item}
+                    updateTotals={updateTotals}
+                    includeClientInCalculation={includeClientInCalculation}
+                    summarizedCalculation={summarizedCalculation}
+                    agentRates={agents}
+                  ></PrintSummary>
+                </div>
+              ))}
+
+              <Divider></Divider>
+
+              <div className="flex flex-col gap-2 mt-4">
+                {!!totalNonResidentSum && (
+                  <div className="flex items-center justify-between">
+                    <Text className="text-black text-base font-bold">
+                      Grand Non-resident Total
+                    </Text>
+                    <Text size="lg" weight={700}>
+                      {totalNonResidentSum
+                        ? `$ ${totalNonResidentSum.toLocaleString(undefined, {
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 2,
+                          })}`
+                        : ""}
+                    </Text>
                   </div>
-
-                  <div className="w-[75%] pl-12 absolute right-0 flex flex-col gap-5">
-                    {!sumOfResidentCommission &&
-                      !sumOfNonResidentCommission &&
-                      (includeClientInCalculation || summarizedCalculation) && (
-                        <Alert
-                          icon={<IconAlertCircle size="1rem" />}
-                          color="yellow"
-                        >
-                          No commission has been added yet.
-                        </Alert>
-                      )}
-
-                    <Button
-                      onClick={() => {
-                        handlePrint();
-                        Mixpanel.track("User printed quotation!!!");
-                      }}
-                      pos={"absolute"}
-                      right={0}
-                      top={50}
-                      color="red"
-                    >
-                      Print Quotation
-                    </Button>
-                    <div className="mb-12" ref={componentRef}>
-                      <div className="flex mt-4 items-center justify-center">
-                        <div className="flex items-center gap-2">
-                          {files && (
-                            <Image
-                              src={files ? URL.createObjectURL(files) : ""}
-                              alt="logo"
-                              className="object-contain"
-                              width={120}
-                              height={60}
-                            />
-                          )}
-                        </div>
-                      </div>
-
-                      {state.map((item, index) => (
-                        <div key={index} className="w-full">
-                          <PrintSummary
-                            stays={stays}
-                            calculateStay={item}
-                            updateTotals={updateTotals}
-                            includeClientInCalculation={
-                              includeClientInCalculation
-                            }
-                            summarizedCalculation={summarizedCalculation}
-                            agentRates={agents}
-                          ></PrintSummary>
-                        </div>
-                      ))}
-
-                      <Divider></Divider>
-
-                      <div className="px-4 flex flex-col gap-2 mt-4">
-                        {!!totalNonResidentSum && (
-                          <div className="flex items-center justify-between">
-                            <Text className="text-black text-base font-bold">
-                              Grand Non-resident Total
-                            </Text>
-                            <Text size="lg" weight={700}>
-                              {totalNonResidentSum
-                                ? `$ ${totalNonResidentSum.toLocaleString(
-                                    undefined,
-                                    {
-                                      minimumFractionDigits: 0,
-                                      maximumFractionDigits: 2,
-                                    }
-                                  )}`
-                                : ""}
-                            </Text>
-                          </div>
-                        )}
-                        {!!totalResidentSum && (
-                          <div className="flex items-center justify-between">
-                            <Text className="text-black text-base font-bold">
-                              Grand Resident Total
-                            </Text>
-                            <Text size="lg" weight={700}>
-                              {totalResidentSum
-                                ? `KES ${totalResidentSum.toLocaleString(
-                                    undefined,
-                                    {
-                                      minimumFractionDigits: 0,
-                                      maximumFractionDigits: 2,
-                                    }
-                                  )}`
-                                : ""}
-                            </Text>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <Button
-                      onClick={() => {
-                        handlePrint();
-                        Mixpanel.track("User printed quotation!!!");
-                      }}
-                      mt={12}
-                      pos={"absolute"}
-                      right={0}
-                      bottom={4}
-                      color="red"
-                    >
-                      Print Quotation
-                    </Button>
+                )}
+                {!!totalResidentSum && (
+                  <div className="flex items-center justify-between">
+                    <Text className="text-black text-base font-bold">
+                      Grand Resident Total
+                    </Text>
+                    <Text size="lg" weight={700}>
+                      {totalResidentSum
+                        ? `KES ${totalResidentSum.toLocaleString(undefined, {
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 2,
+                          })}`
+                        : ""}
+                    </Text>
                   </div>
-                </Flex>
-                {/* <Checkbox
+                )}
+              </div>
+            </div>
+
+            <Button
+              onClick={() => {
+                handlePrint();
+                Mixpanel.track("User printed quotation!!!");
+              }}
+              mt={12}
+              pos={"absolute"}
+              right={0}
+              bottom={4}
+              color="red"
+            >
+              Print Quotation
+            </Button>
+          </div>
+        </div>
+        {/* <Checkbox
                   label="Download calculation for client"
                   checked={includeClientInCalculation}
                   onChange={(event) =>
@@ -1165,7 +1339,7 @@ export default function Calculate() {
                   }
                 ></Checkbox> */}
 
-                {/* <Flex mt={6} justify="space-between" align="center">
+        {/* <Flex mt={6} justify="space-between" align="center">
                   <Text
                     onClick={() => {
                       close();
@@ -1186,121 +1360,7 @@ export default function Calculate() {
                     Download now
                   </Button>
                 </Flex> */}
-              </Modal>
-              <div className="w-[30%] right-6 md:right-12 fixed top-[90px]">
-                {/* <div className="flex justify-between px-4 items-center gap-4">
-                  <div></div>
-
-                  <Popover width={200} position="bottom" withArrow shadow="md">
-                    <Popover.Target>
-                      <Button
-                        variant="gradient"
-                        gradient={{
-                          from: "red",
-                          to: "red",
-                        }}
-                        className="flex items-center gap-4"
-                      >
-                        <IconDownload></IconDownload>
-                        <span>Download</span>
-                      </Button>
-                    </Popover.Target>
-                    <Popover.Dropdown>
-                      <Text
-                        onClick={open}
-                        className="hover:bg-gray-100 flex items-center gap-2 font-semibold p-2 rounded-md cursor-pointer"
-                        size="sm"
-                      >
-                        <IconCalculator></IconCalculator>
-                        <span>View Quotation</span>
-                      </Text>
-                      {stays.map((item, index) => (
-                        <Tabs.Panel key={index} value={item.slug}>
-                          {item.lodge_price_data_pdf && (
-                            <Text
-                              onClick={() => {
-                                handleDownloadClick(
-                                  item.lodge_price_data_pdf,
-                                  item.property_name
-                                );
-                              }}
-                              className="hover:bg-gray-100 flex items-center gap-2 p-2 rounded-md cursor-pointer"
-                              size="sm"
-                            >
-                              <IconGraph></IconGraph>
-                              <span>Lodge price data</span>
-                            </Text>
-                          )}
-                        </Tabs.Panel>
-                      ))}
-                    </Popover.Dropdown>
-                  </Popover>
-                </div> */}
-
-                <div className="overflow-y-scroll h-[410px] mt-4 flex flex-col gap-4 shadow-lg border border-solid border-gray-100 rounded-xl">
-                  {state.map((item, index) => (
-                    <Tabs.Panel
-                      key={index}
-                      value={item.slug}
-                      className="h-[500px]"
-                    >
-                      <Summary
-                        agentRates={agents}
-                        stays={stays}
-                        calculateStay={item}
-                      ></Summary>
-                    </Tabs.Panel>
-                  ))}
-                </div>
-
-                <Flex mt={18} className="w-full" gap={10}>
-                  <Button
-                    onClick={() => {
-                      open();
-                      Mixpanel.track("User clicked on print quote");
-                    }}
-                    className="flex w-full justify-center items-center font-semibold p-2 rounded-md cursor-pointer"
-                    size="sm"
-                    color="red"
-                  >
-                    <IconCalculator></IconCalculator>
-                    <span className="ml-1.5">Print quote</span>
-                  </Button>
-
-                  {stays.map((item, index) => (
-                    <Tabs.Panel
-                      className="w-full"
-                      key={index}
-                      value={item.slug}
-                    >
-                      {item.lodge_price_data_pdf && (
-                        <Button
-                          onClick={() => {
-                            Mixpanel.track("User checked contract rates", {
-                              property: item.property_name,
-                            });
-                            handleDownloadClick(
-                              item.lodge_price_data_pdf,
-                              item.property_name
-                            );
-                          }}
-                          className="flex w-full justify-center items-center gap-8 font-semibold p-2 rounded-md cursor-pointer"
-                          size="sm"
-                          color="red"
-                          variant="outline"
-                        >
-                          <IconGraph></IconGraph>
-                          <span className="ml-1.5">Contract rates</span>
-                        </Button>
-                      )}
-                    </Tabs.Panel>
-                  ))}
-                </Flex>
-              </div>
-            </Tabs>
-          )}
-        </div>
-      )}
+      </Modal>
 
       {isStayLoading && (
         <div className="absolute top-[50%] left-[50%] -translate-x-2/4">

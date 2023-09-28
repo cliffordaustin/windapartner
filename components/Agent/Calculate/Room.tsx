@@ -25,6 +25,8 @@ import {
   Tooltip,
   ScrollArea,
   Container,
+  Anchor,
+  Drawer,
 } from "@mantine/core";
 import { IconMinus, IconPlus, IconSelector, IconX } from "@tabler/icons-react";
 import { useContext, useEffect, useState } from "react";
@@ -301,7 +303,7 @@ export default function Room({ room, stay, index }: RoomProps) {
     return false;
   });
 
-  const clearFee = () => {
+  const clearRoom = () => {
     // clear all fields in first fee state
     const updatedItems: StateType[] = state.map((item) => {
       if (item.id === stay.id) {
@@ -738,72 +740,105 @@ export default function Room({ room, stay, index }: RoomProps) {
   const [isRoomOpen, setIsRoomOpen] = useState(false);
   const [isPackageOpen, setIsPackageOpen] = useState(false);
 
+  const [mobileGuestTypeDrawer, setMobileGuestTypeDrawer] = useState(false);
+
   return (
-    <div className="flex gap-0.5 items-center">
-      <Flex className="w-full" mt={18}>
-        <Popover
-          width={350}
-          position="bottom-start"
-          arrowOffset={60}
-          withArrow
-          shadow="md"
-          opened={isRoomOpen}
-          onChange={setIsRoomOpen}
-        >
-          <Popover.Target>
-            <Flex
-              justify={"space-between"}
-              align={"center"}
-              onClick={() => setIsRoomOpen((prev) => !prev)}
-              className="px-2 py-1 cursor-pointer rounded-l-md border border-solid w-[220px] border-gray-300"
-            >
-              <Flex direction="column" gap={4}>
-                <Text size="xs" weight={600} className="text-gray-500">
-                  Rooms
-                </Text>
-                <div className="w-[140px] overflow-hidden">
-                  <Text truncate size="sm" weight={600}>
-                    {room.name ? `${room.name}` : "Select the room"}
+    <div className="gap-0.5 items-center w-full">
+      <div className="flex flex-col mb-1 w-full">
+        <Flex className="w-full" mt={18}>
+          <Popover
+            width={300}
+            position="bottom-start"
+            arrowOffset={60}
+            withArrow
+            shadow="md"
+            opened={isRoomOpen}
+            onChange={setIsRoomOpen}
+          >
+            <Popover.Target>
+              <Flex
+                justify={"space-between"}
+                align={"center"}
+                onClick={() => setIsRoomOpen((prev) => !prev)}
+                className="px-2 py-1 cursor-pointer border border-solid w-[50%] lg:w-[33.3%] xl:w-[220px] border-gray-300"
+              >
+                <Flex direction="column" gap={4}>
+                  <Text size="xs" weight={600} className="text-gray-500">
+                    Rooms
                   </Text>
-                </div>
+                  <div className="w-[120px] overflow-hidden">
+                    <Text truncate size="sm" weight={600}>
+                      {room.name ? `${room.name}` : "Select the room"}
+                    </Text>
+                  </div>
+                </Flex>
+
+                <IconSelector className="text-gray-500"></IconSelector>
               </Flex>
+            </Popover.Target>
 
-              <IconSelector className="text-gray-500"></IconSelector>
-            </Flex>
-          </Popover.Target>
-
-          <Popover.Dropdown className="px-3">
-            {uniqueRooms.map((selectRoom, index) => (
-              <div key={index}>
-                {selectRoom.adult_capacity ||
-                selectRoom.child_capacity ||
-                selectRoom.infant_capacity ? (
-                  <Tooltip.Floating
-                    multiline
-                    width={220}
-                    color="white"
-                    position="bottom"
-                    className="text-gray-800 font-semibold border-gray-200 border border-solid"
-                    label={
-                      <div className="flex flex-col gap-2">
-                        {!!selectRoom.adult_capacity && (
-                          <Text size="sm" weight={600}>
-                            Adult Capacity: {selectRoom.adult_capacity}
-                          </Text>
-                        )}
-                        {!!selectRoom.child_capacity && (
-                          <Text size="sm" weight={600}>
-                            Child Capacity: {selectRoom.child_capacity}
-                          </Text>
-                        )}
-                        {!!selectRoom.infant_capacity && (
-                          <Text size="sm" weight={600}>
-                            Infant Capacity: {selectRoom.infant_capacity}
-                          </Text>
-                        )}
-                      </div>
-                    }
-                  >
+            <Popover.Dropdown className="px-3">
+              {uniqueRooms.map((selectRoom, index) => (
+                <div key={index}>
+                  {selectRoom.adult_capacity ||
+                  selectRoom.child_capacity ||
+                  selectRoom.infant_capacity ? (
+                    <Tooltip.Floating
+                      multiline
+                      width={220}
+                      color="white"
+                      position="bottom"
+                      className="text-gray-800 font-semibold border-gray-200 border border-solid"
+                      label={
+                        <div className="flex flex-col gap-2">
+                          {!!selectRoom.adult_capacity && (
+                            <Text size="sm" weight={600}>
+                              Adult Capacity: {selectRoom.adult_capacity}
+                            </Text>
+                          )}
+                          {!!selectRoom.child_capacity && (
+                            <Text size="sm" weight={600}>
+                              Child Capacity: {selectRoom.child_capacity}
+                            </Text>
+                          )}
+                          {!!selectRoom.infant_capacity && (
+                            <Text size="sm" weight={600}>
+                              Infant Capacity: {selectRoom.infant_capacity}
+                            </Text>
+                          )}
+                        </div>
+                      }
+                    >
+                      <Flex
+                        justify={"space-between"}
+                        align={"center"}
+                        onClick={() => {
+                          if (selectRoom.name === room.name) {
+                            deselectRoom();
+                          } else {
+                            clickSelectRoom(selectRoom);
+                            Mixpanel.track("User selected a room", {
+                              property: stay.property_name,
+                              room: selectRoom.name,
+                            });
+                          }
+                        }}
+                        // onMouseUp={() => {
+                        //   setIsRoomOpen(false);
+                        // }}
+                        className={
+                          "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                          (selectRoom.name === room.name
+                            ? "bg-[#FA5252] text-white"
+                            : "hover:bg-gray-100")
+                        }
+                      >
+                        <Text size="sm" weight={600}>
+                          {selectRoom.name}
+                        </Text>
+                      </Flex>
+                    </Tooltip.Floating>
+                  ) : (
                     <Flex
                       justify={"space-between"}
                       align={"center"}
@@ -832,246 +867,569 @@ export default function Room({ room, stay, index }: RoomProps) {
                         {selectRoom.name}
                       </Text>
                     </Flex>
-                  </Tooltip.Floating>
-                ) : (
-                  <Flex
-                    justify={"space-between"}
-                    align={"center"}
-                    onClick={() => {
-                      if (selectRoom.name === room.name) {
-                        deselectRoom();
-                      } else {
-                        clickSelectRoom(selectRoom);
-                        Mixpanel.track("User selected a room", {
-                          property: stay.property_name,
-                          room: selectRoom.name,
-                        });
-                      }
-                    }}
-                    // onMouseUp={() => {
-                    //   setIsRoomOpen(false);
-                    // }}
-                    className={
-                      "py-2 px-2 rounded-md mt-1 cursor-pointer " +
-                      (selectRoom.name === room.name
-                        ? "bg-[#FA5252] text-white"
-                        : "hover:bg-gray-100")
-                    }
-                  >
-                    <Text size="sm" weight={600}>
-                      {selectRoom.name}
-                    </Text>
-                  </Flex>
-                )}
-              </div>
-            ))}
-          </Popover.Dropdown>
-        </Popover>
-
-        <Popover
-          width={350}
-          position="bottom-start"
-          arrowOffset={60}
-          withArrow
-          shadow="md"
-          opened={isPackageOpen}
-          onChange={setIsPackageOpen}
-        >
-          <Popover.Target>
-            <Flex
-              justify={"space-between"}
-              align={"center"}
-              onClick={() => setIsPackageOpen((prev) => !prev)}
-              className="px-2 py-1 cursor-pointer border-l-transparent border border-solid w-[220px] border-gray-300"
-            >
-              <Flex direction="column" gap={4}>
-                <Text size="xs" weight={600} className="text-gray-500">
-                  Package
-                </Text>
-                <div className="w-[140px] overflow-hidden">
-                  <Text truncate size="sm" weight={600}>
-                    {room.package
-                      ? room.package.charAt(0).toUpperCase() +
-                        room.package.slice(1).toLowerCase()
-                      : "Select the package"}
-                  </Text>
+                  )}
                 </div>
-              </Flex>
+              ))}
+            </Popover.Dropdown>
+          </Popover>
 
-              <IconSelector className="text-gray-500"></IconSelector>
-            </Flex>
-          </Popover.Target>
-
-          <Popover.Dropdown className="px-3">
-            {selectedPackages.map((roomPackage, index) => (
+          <Popover
+            width={300}
+            position="bottom-start"
+            arrowOffset={60}
+            withArrow
+            shadow="md"
+            opened={isPackageOpen}
+            onChange={setIsPackageOpen}
+          >
+            <Popover.Target>
               <Flex
-                key={index}
                 justify={"space-between"}
                 align={"center"}
-                onClick={() => {
-                  if (roomPackage.name === room.package) {
-                    deselectPackage();
-                  } else {
-                    clickSelectPackage(
-                      roomPackage.name,
-                      roomPackage.description || ""
-                    );
-
-                    Mixpanel.track("User selected a package", {
-                      property: stay.property_name,
-                      room_package: roomPackage.name,
-                    });
-                  }
-                }}
-                // onMouseUp={() => {
-                //   setIsPackageOpen(false);
-                // }}
-                className={
-                  "rounded-md mt-1 cursor-pointer " +
-                  (room.package === roomPackage.name
-                    ? "bg-[#FA5252] text-white"
-                    : "hover:bg-gray-100")
-                }
+                onClick={() => setIsPackageOpen((prev) => !prev)}
+                className="px-2 py-1 cursor-pointer border-l-transparent border border-solid w-[50%] lg:w-[33.3%] xl:w-[220px] border-gray-300"
               >
-                <Text className="py-2 px-2 " size="sm" weight={600}>
-                  {roomPackage.name.charAt(0).toUpperCase() +
-                    roomPackage.name.slice(1).toLowerCase()}
-                </Text>
-              </Flex>
-            ))}
-          </Popover.Dropdown>
-        </Popover>
-
-        <Popover
-          width={470}
-          position="bottom-start"
-          arrowOffset={60}
-          withArrow
-          shadow="md"
-        >
-          <Popover.Target>
-            <Flex
-              justify={"space-between"}
-              align={"center"}
-              className="px-2 py-1 cursor-pointer border border-l-transparent border-solid w-[220px] border-gray-300"
-            >
-              <Flex direction="column" gap={4}>
-                <Text size="xs" weight={600} className="text-gray-500">
-                  Guests
-                </Text>
-                <div className="w-[140px] overflow-hidden">
-                  <Text truncate size="sm" weight={600}>
-                    {totalNumberOfGuests > 0
-                      ? `${totalNumberOfGuests} ${
-                          totalNumberOfGuests === 1 ? "Guest" : "Guests"
-                        }`
-                      : "Add guests"}
+                <Flex direction="column" gap={4}>
+                  <Text size="xs" weight={600} className="text-gray-500">
+                    Package
                   </Text>
-                </div>
+                  <div className="overflow-hidden">
+                    <Text truncate size="sm" weight={600}>
+                      {room.package
+                        ? room.package.charAt(0).toUpperCase() +
+                          room.package.slice(1).toLowerCase()
+                        : "Select the package"}
+                    </Text>
+                  </div>
+                </Flex>
+
+                <IconSelector className="text-gray-500"></IconSelector>
               </Flex>
+            </Popover.Target>
 
-              <IconSelector className="text-gray-500"></IconSelector>
-            </Flex>
-          </Popover.Target>
+            <Popover.Dropdown className="px-3">
+              {selectedPackages.map((roomPackage, index) => (
+                <Flex
+                  key={index}
+                  justify={"space-between"}
+                  align={"center"}
+                  onClick={() => {
+                    if (roomPackage.name === room.package) {
+                      deselectPackage();
+                    } else {
+                      clickSelectPackage(
+                        roomPackage.name,
+                        roomPackage.description || ""
+                      );
 
-          <Popover.Dropdown className="px-3">
-            {commonRoomNonResidentNamesWithDescription.length > 0 && (
-              <>
-                <Flex direction="column" gap={5}>
-                  <Text size="sm" mb={2} weight={600}>
-                    Non-Resident guests
+                      Mixpanel.track("User selected a package", {
+                        property: stay.property_name,
+                        room_package: roomPackage.name,
+                      });
+                    }
+                  }}
+                  // onMouseUp={() => {
+                  //   setIsPackageOpen(false);
+                  // }}
+                  className={
+                    "rounded-md mt-1 cursor-pointer " +
+                    (room.package === roomPackage.name
+                      ? "bg-[#FA5252] text-white"
+                      : "hover:bg-gray-100")
+                  }
+                >
+                  <Text className="py-2 px-2 " size="sm" weight={600}>
+                    {roomPackage.name.charAt(0).toUpperCase() +
+                      roomPackage.name.slice(1).toLowerCase()}
                   </Text>
-                  {room.nonResidentGuests.map((guest, index) => (
-                    <Flex gap={7} key={index} align={"center"}>
-                      <Popover
-                        width={150}
-                        position="bottom-start"
-                        arrowOffset={60}
-                        withArrow
-                        shadow="md"
-                      >
-                        <Popover.Target>
-                          <Flex
-                            justify={"space-between"}
-                            align={"center"}
-                            className="px-2 py-1 cursor-pointer border rounded-md border-solid w-[48%] border-gray-300"
-                          >
-                            <Flex direction="column" gap={4}>
-                              <Text
-                                size="xs"
-                                weight={600}
-                                className="text-gray-500"
-                              >
-                                Guest
-                              </Text>
-                              <Text
-                                transform="capitalize"
-                                size="sm"
-                                weight={600}
-                              >
-                                {guest.nonResident
-                                  ? guest.nonResident
-                                  : "Select guest"}
-                              </Text>
-                            </Flex>
+                </Flex>
+              ))}
+            </Popover.Dropdown>
+          </Popover>
 
-                            <IconSelector className="text-gray-500"></IconSelector>
-                          </Flex>
-                        </Popover.Target>
+          <Popover
+            width={470}
+            position="bottom-start"
+            arrowOffset={60}
+            withArrow
+            shadow="md"
+          >
+            <Popover.Target>
+              <div className="hidden lg:block lg:w-[33.3%] xl:w-[160px]">
+                <Flex
+                  justify={"space-between"}
+                  align={"center"}
+                  className="px-2 py-1 cursor-pointer border border-l-transparent border-solid w-full border-gray-300"
+                >
+                  <Flex direction="column" gap={4}>
+                    <Text size="xs" weight={600} className="text-gray-500">
+                      Guests
+                    </Text>
+                    <div className="w-[120px] overflow-hidden">
+                      <Text truncate size="sm" weight={600}>
+                        {totalNumberOfGuests > 0
+                          ? `${totalNumberOfGuests} ${
+                              totalNumberOfGuests === 1 ? "Guest" : "Guests"
+                            }`
+                          : "Add guests"}
+                      </Text>
+                    </div>
+                  </Flex>
 
-                        <Popover.Dropdown className="px-2 py-2">
-                          {guestTypes.map((guestType, index) => (
+                  <IconSelector className="text-gray-500"></IconSelector>
+                </Flex>
+              </div>
+            </Popover.Target>
+
+            <Popover.Dropdown className="px-3">
+              {commonRoomNonResidentNamesWithDescription.length > 0 && (
+                <>
+                  <Flex direction="column" gap={5}>
+                    <Text size="sm" mb={2} weight={600}>
+                      Non-Resident guests
+                    </Text>
+                    {room.nonResidentGuests.map((guest, index) => (
+                      <Flex gap={7} key={index} align={"center"}>
+                        <Popover
+                          width={150}
+                          position="bottom-start"
+                          arrowOffset={60}
+                          withArrow
+                          shadow="md"
+                        >
+                          <Popover.Target>
                             <Flex
-                              w="100%"
-                              onClick={() => {
-                                if (guest.nonResident === guestType) {
-                                  deselectNonResidentGuest(guest);
-                                } else {
-                                  clickSelectNonResidentGuest(guest, guestType);
-                                  Mixpanel.track("User selected a guest", {
-                                    property: stay.property_name,
-                                    guest: guestType,
-                                  });
-                                }
-                              }}
-                              key={index}
+                              justify={"space-between"}
+                              align={"center"}
+                              className="px-2 py-1 cursor-pointer border rounded-md border-solid w-[48%] border-gray-300"
                             >
-                              <Text
-                                w="100%"
-                                className={
-                                  "py-2 px-2 rounded-md mt-1 cursor-pointer " +
-                                  (guest.nonResident === guestType
-                                    ? "bg-[#FA5252] text-white"
-                                    : "hover:bg-gray-100")
-                                }
-                                size="sm"
-                                weight={600}
-                              >
-                                {guestType}
-                              </Text>
-                            </Flex>
-                          ))}
-                        </Popover.Dropdown>
-                      </Popover>
+                              <Flex direction="column" gap={4}>
+                                <Text
+                                  size="xs"
+                                  weight={600}
+                                  className="text-gray-500"
+                                >
+                                  Guest
+                                </Text>
+                                <Text
+                                  transform="capitalize"
+                                  size="sm"
+                                  weight={600}
+                                >
+                                  {guest.nonResident
+                                    ? guest.nonResident
+                                    : "Select guest"}
+                                </Text>
+                              </Flex>
 
-                      <Popover
-                        width={300}
-                        position="bottom-start"
-                        arrowOffset={60}
-                        withArrow
-                        shadow="md"
+                              <IconSelector className="text-gray-500"></IconSelector>
+                            </Flex>
+                          </Popover.Target>
+
+                          <Popover.Dropdown className="px-2 py-2">
+                            {guestTypes.map((guestType, index) => (
+                              <Flex
+                                w="100%"
+                                onClick={() => {
+                                  if (guest.nonResident === guestType) {
+                                    deselectNonResidentGuest(guest);
+                                  } else {
+                                    clickSelectNonResidentGuest(
+                                      guest,
+                                      guestType
+                                    );
+                                    Mixpanel.track("User selected a guest", {
+                                      property: stay.property_name,
+                                      guest: guestType,
+                                    });
+                                  }
+                                }}
+                                key={index}
+                              >
+                                <Text
+                                  w="100%"
+                                  className={
+                                    "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                                    (guest.nonResident === guestType
+                                      ? "bg-[#FA5252] text-white"
+                                      : "hover:bg-gray-100")
+                                  }
+                                  size="sm"
+                                  weight={600}
+                                >
+                                  {guestType}
+                                </Text>
+                              </Flex>
+                            ))}
+                          </Popover.Dropdown>
+                        </Popover>
+
+                        <Popover
+                          width={300}
+                          position="bottom-start"
+                          arrowOffset={60}
+                          withArrow
+                          shadow="md"
+                        >
+                          <Tooltip.Floating
+                            multiline
+                            width={220}
+                            color="white"
+                            position="bottom"
+                            className="text-gray-800 font-semibold border-gray-200 border border-solid"
+                            label={
+                              guest.guestType
+                                ? guest.guestType
+                                : "Select a guest type"
+                            }
+                          >
+                            <Popover.Target>
+                              <Flex
+                                justify={"space-between"}
+                                align={"center"}
+                                className="px-2 py-1 cursor-pointer border rounded-md border-solid w-[48%] border-gray-300"
+                              >
+                                <Flex direction="column" gap={4}>
+                                  <Text
+                                    size="xs"
+                                    weight={600}
+                                    className="text-gray-500"
+                                  >
+                                    Guest type
+                                  </Text>
+                                  <div className="w-[140px] overflow-hidden">
+                                    <Text
+                                      transform="capitalize"
+                                      size="sm"
+                                      truncate
+                                      weight={600}
+                                    >
+                                      {guest.guestType
+                                        ? guest.guestType
+                                        : "Select guest type"}
+                                    </Text>
+                                  </div>
+                                </Flex>
+
+                                <IconSelector className="text-gray-500"></IconSelector>
+                              </Flex>
+                            </Popover.Target>
+                          </Tooltip.Floating>
+
+                          <Popover.Dropdown className="px-0 py-2">
+                            <ScrollArea.Autosize
+                              type="auto"
+                              mah={300}
+                              offsetScrollbars={true}
+                              className="w-full px-2"
+                            >
+                              {commonRoomNonResidentNamesWithDescription.map(
+                                (guestType, index) => (
+                                  <Flex
+                                    w="100%"
+                                    onClick={() => {
+                                      setState(
+                                        state.map((item) => {
+                                          if (item.id === stay.id) {
+                                            return {
+                                              ...item,
+                                              rooms: item.rooms.map((item) => {
+                                                if (item.id === room.id) {
+                                                  return {
+                                                    ...item,
+                                                    nonResidentGuests:
+                                                      item.nonResidentGuests.map(
+                                                        (item) => {
+                                                          if (
+                                                            item.id === guest.id
+                                                          ) {
+                                                            return {
+                                                              ...item,
+                                                              guestType:
+                                                                guestType?.name,
+                                                            };
+                                                          }
+                                                          return item;
+                                                        }
+                                                      ),
+                                                  };
+                                                }
+                                                return item;
+                                              }),
+                                            };
+                                          }
+                                          return item;
+                                        })
+                                      );
+                                      Mixpanel.track(
+                                        "User selected a guest type",
+                                        {
+                                          property: stay.property_name,
+                                          guest_type: guestType?.name,
+                                        }
+                                      );
+                                    }}
+                                    key={index}
+                                  >
+                                    {guestType?.description ? (
+                                      <Tooltip.Floating
+                                        multiline
+                                        width={220}
+                                        color="white"
+                                        position="bottom"
+                                        className="text-gray-800 font-semibold border-gray-200 border border-solid"
+                                        label={guestType.description}
+                                      >
+                                        <Text
+                                          w="100%"
+                                          className={
+                                            "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                                            (guest.guestType === guestType?.name
+                                              ? "bg-[#FA5252] text-white"
+                                              : "hover:bg-gray-100")
+                                          }
+                                          size="sm"
+                                          weight={600}
+                                          transform="capitalize"
+                                        >
+                                          {guestType?.name}
+                                        </Text>
+                                      </Tooltip.Floating>
+                                    ) : (
+                                      <Text
+                                        w="100%"
+                                        className={
+                                          "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                                          (guest.guestType === guestType?.name
+                                            ? "bg-[#FA5252] text-white"
+                                            : "hover:bg-gray-100")
+                                        }
+                                        size="sm"
+                                        weight={600}
+                                        transform="capitalize"
+                                      >
+                                        {guestType?.name}
+                                      </Text>
+                                    )}
+                                  </Flex>
+                                )
+                              )}
+                            </ScrollArea.Autosize>
+                          </Popover.Dropdown>
+                        </Popover>
+
+                        <Flex
+                          h={50}
+                          className="border rounded-md border-solid border-gray-300"
+                          align="center"
+                          justify="center"
+                          gap={5}
+                        >
+                          <Container
+                            w={15}
+                            h={48}
+                            className="flex hover:bg-gray-100 cursor-pointer rounded-l-md items-center justify-center"
+                            onClick={() =>
+                              subtractNumberOfNonResidentGuest(guest)
+                            }
+                          >
+                            <Text className="text-2xl mb-1"> - </Text>
+                          </Container>
+                          <Text>{guest.numberOfGuests}</Text>
+                          <Container
+                            w={15}
+                            h={48}
+                            className="flex hover:bg-gray-100 cursor-pointer rounded-r-md items-center justify-center"
+                            onClick={() => addNumberOfNonResidentGuest(guest)}
+                          >
+                            <Text className="text-2xl"> + </Text>
+                          </Container>
+                        </Flex>
+
+                        <div
+                          onClick={() => {
+                            removeNonResidentGuest(guest);
+                          }}
+                          className="mt-2 cursor-pointer"
+                        >
+                          {index > 0 && (
+                            <IconX className="text-gray-600 w-5 h-5"></IconX>
+                          )}
+                        </div>
+                      </Flex>
+                    ))}
+                    <Flex mt={5} pr={5} align="center" justify="space-between">
+                      <Flex
+                        onClick={() => {
+                          setState(
+                            state.map((item) => {
+                              if (item.id === stay.id) {
+                                return {
+                                  ...item,
+                                  rooms: item.rooms.map((item) => {
+                                    if (item.id === room.id) {
+                                      return {
+                                        ...item,
+                                        nonResidentGuests: [
+                                          ...item.nonResidentGuests,
+                                          {
+                                            id: uuidv4(),
+                                            nonResident: "",
+                                            numberOfGuests: 1,
+                                            guestType: "",
+                                            description: "",
+                                          },
+                                        ],
+                                      };
+                                    }
+                                    return item;
+                                  }),
+                                };
+                              }
+                              return item;
+                            })
+                          );
+                        }}
+                        className="cursor-pointer w-fit"
+                        align="center"
+                        gap={4}
                       >
-                        <Tooltip.Floating
-                          multiline
-                          width={220}
-                          color="white"
-                          position="bottom"
-                          className="text-gray-800 font-semibold border-gray-200 border border-solid"
-                          label={
-                            guest.guestType
-                              ? guest.guestType
-                              : "Select a guest type"
-                          }
+                        <Text
+                          className="text-blue-500"
+                          size="sm"
+                          weight={600}
+                          color="blue"
+                        >
+                          Add Non-Resident Guest
+                        </Text>
+
+                        <IconPlus className="w-5 h-5 text-blue-500"></IconPlus>
+                      </Flex>
+
+                      <Text
+                        underline
+                        className="cursor-pointer"
+                        color="red"
+                        size="sm"
+                        onClick={() => {
+                          setState(
+                            state.map((item) => {
+                              if (item.id === stay.id) {
+                                return {
+                                  ...item,
+                                  rooms: item.rooms.map((item) => {
+                                    if (item.id === room.id) {
+                                      return {
+                                        ...item,
+                                        nonResidentGuests: [
+                                          {
+                                            id: uuidv4(),
+                                            nonResident: "",
+                                            numberOfGuests: 1,
+                                            guestType: "",
+                                            description: "",
+                                          },
+                                        ],
+                                      };
+                                    }
+                                    return item;
+                                  }),
+                                };
+                              }
+                              return item;
+                            })
+                          );
+                        }}
+                      >
+                        Clear all
+                      </Text>
+                    </Flex>
+                  </Flex>
+                </>
+              )}
+              {commonRoomResidentNamesWithDescription.length > 0 && (
+                <>
+                  <Divider className="my-2"></Divider>
+
+                  <Flex direction="column" gap={5}>
+                    <Text size="sm" mb={2} weight={600}>
+                      Resident guests
+                    </Text>
+                    {room.residentGuests.map((guest, index) => (
+                      <Flex key={index} gap={7} align={"center"}>
+                        <Popover
+                          width={150}
+                          position="bottom-start"
+                          arrowOffset={60}
+                          withArrow
+                          shadow="md"
+                        >
+                          <Popover.Target>
+                            <Flex
+                              justify={"space-between"}
+                              align={"center"}
+                              className="px-2 py-1 cursor-pointer border rounded-md border-solid w-[48%] border-gray-300"
+                            >
+                              <Flex direction="column" gap={4}>
+                                <Text
+                                  size="xs"
+                                  weight={600}
+                                  className="text-gray-500"
+                                >
+                                  Guest
+                                </Text>
+                                <Text
+                                  transform="capitalize"
+                                  size="sm"
+                                  weight={600}
+                                >
+                                  {guest.resident
+                                    ? guest.resident
+                                    : "Select guest"}
+                                </Text>
+                              </Flex>
+
+                              <IconSelector className="text-gray-500"></IconSelector>
+                            </Flex>
+                          </Popover.Target>
+
+                          <Popover.Dropdown className="px-2 py-2">
+                            {guestTypes.map((guestType, index) => (
+                              <Flex
+                                w="100%"
+                                onClick={() => {
+                                  if (guest.resident === guestType) {
+                                    deselectResidentGuest(guest);
+                                  } else {
+                                    clickSelectResidentGuest(guest, guestType);
+                                  }
+                                }}
+                                key={index}
+                              >
+                                <Text
+                                  w="100%"
+                                  className={
+                                    "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                                    (guest.resident === guestType
+                                      ? "bg-[#FA5252] text-white"
+                                      : "hover:bg-gray-100")
+                                  }
+                                  size="sm"
+                                  weight={600}
+                                >
+                                  {guestType}
+                                </Text>
+                              </Flex>
+                            ))}
+                          </Popover.Dropdown>
+                        </Popover>
+
+                        <Popover
+                          width={300}
+                          position="bottom-start"
+                          arrowOffset={60}
+                          withArrow
+                          shadow="md"
                         >
                           <Popover.Target>
                             <Flex
@@ -1104,72 +1462,80 @@ export default function Room({ room, stay, index }: RoomProps) {
                               <IconSelector className="text-gray-500"></IconSelector>
                             </Flex>
                           </Popover.Target>
-                        </Tooltip.Floating>
 
-                        <Popover.Dropdown className="px-0 py-2">
-                          <ScrollArea.Autosize
-                            type="auto"
-                            mah={300}
-                            offsetScrollbars={true}
-                            className="w-full px-2"
-                          >
-                            {commonRoomNonResidentNamesWithDescription.map(
-                              (guestType, index) => (
-                                <Flex
-                                  w="100%"
-                                  onClick={() => {
-                                    setState(
-                                      state.map((item) => {
-                                        if (item.id === stay.id) {
-                                          return {
-                                            ...item,
-                                            rooms: item.rooms.map((item) => {
-                                              if (item.id === room.id) {
-                                                return {
-                                                  ...item,
-                                                  nonResidentGuests:
-                                                    item.nonResidentGuests.map(
-                                                      (item) => {
-                                                        if (
-                                                          item.id === guest.id
-                                                        ) {
-                                                          return {
-                                                            ...item,
-                                                            guestType:
-                                                              guestType?.name,
-                                                          };
+                          <Popover.Dropdown className="px-0 py-2">
+                            <ScrollArea.Autosize
+                              type="auto"
+                              mah={300}
+                              offsetScrollbars={true}
+                              className="w-full px-2"
+                            >
+                              {commonRoomResidentNamesWithDescription.map(
+                                (guestType, index) => (
+                                  <Flex
+                                    w="100%"
+                                    onClick={() => {
+                                      setState(
+                                        state.map((item) => {
+                                          if (item.id === stay.id) {
+                                            return {
+                                              ...item,
+                                              rooms: item.rooms.map((item) => {
+                                                if (item.id === room.id) {
+                                                  return {
+                                                    ...item,
+                                                    residentGuests:
+                                                      item.residentGuests.map(
+                                                        (item) => {
+                                                          if (
+                                                            item.id === guest.id
+                                                          ) {
+                                                            return {
+                                                              ...item,
+                                                              guestType:
+                                                                guestType?.name,
+                                                            };
+                                                          }
+                                                          return item;
                                                         }
-                                                        return item;
-                                                      }
-                                                    ),
-                                                };
-                                              }
-                                              return item;
-                                            }),
-                                          };
-                                        }
-                                        return item;
-                                      })
-                                    );
-                                    Mixpanel.track(
-                                      "User selected a guest type",
-                                      {
-                                        property: stay.property_name,
-                                        guest_type: guestType?.name,
-                                      }
-                                    );
-                                  }}
-                                  key={index}
-                                >
-                                  {guestType?.description ? (
-                                    <Tooltip.Floating
-                                      multiline
-                                      width={220}
-                                      color="white"
-                                      position="bottom"
-                                      className="text-gray-800 font-semibold border-gray-200 border border-solid"
-                                      label={guestType.description}
-                                    >
+                                                      ),
+                                                  };
+                                                }
+                                                return item;
+                                              }),
+                                            };
+                                          }
+                                          return item;
+                                        })
+                                      );
+                                    }}
+                                    key={index}
+                                  >
+                                    {guestType?.description ? (
+                                      <Tooltip.Floating
+                                        multiline
+                                        width={220}
+                                        color="white"
+                                        position="bottom"
+                                        className="text-gray-800 font-semibold border-gray-200 border border-solid"
+                                        label={guestType.description}
+                                      >
+                                        <Text
+                                          w="100%"
+                                          className={
+                                            "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                                            (guest.guestType === guestType?.name
+                                              ? "bg-[#FA5252] text-white"
+                                              : "hover:bg-gray-100")
+                                          }
+                                          size="sm"
+                                          weight={600}
+                                          transform="capitalize"
+                                        >
+                                          {guestType?.name}
+                                        </Text>
+                                      </Tooltip.Floating>
+                                    ) : (
                                       <Text
                                         w="100%"
                                         className={
@@ -1184,71 +1550,641 @@ export default function Room({ room, stay, index }: RoomProps) {
                                       >
                                         {guestType?.name}
                                       </Text>
-                                    </Tooltip.Floating>
-                                  ) : (
-                                    <Text
-                                      w="100%"
-                                      className={
-                                        "py-2 px-2 rounded-md mt-1 cursor-pointer " +
-                                        (guest.guestType === guestType?.name
-                                          ? "bg-[#FA5252] text-white"
-                                          : "hover:bg-gray-100")
-                                      }
-                                      size="sm"
-                                      weight={600}
-                                      transform="capitalize"
-                                    >
-                                      {guestType?.name}
-                                    </Text>
-                                  )}
-                                </Flex>
-                              )
-                            )}
-                          </ScrollArea.Autosize>
-                        </Popover.Dropdown>
-                      </Popover>
+                                    )}
+                                  </Flex>
+                                )
+                              )}
+                            </ScrollArea.Autosize>
+                          </Popover.Dropdown>
+                        </Popover>
 
+                        <Flex
+                          h={50}
+                          className="border rounded-md border-solid border-gray-300"
+                          align="center"
+                          justify="center"
+                          gap={5}
+                        >
+                          <Container
+                            w={15}
+                            h={48}
+                            className="flex hover:bg-gray-100 cursor-pointer rounded-l-md items-center justify-center"
+                            onClick={() => subtractNumberOfResidentGuest(guest)}
+                          >
+                            <Text className="text-2xl mb-1"> - </Text>
+                          </Container>
+                          <Text>{guest.numberOfGuests}</Text>
+                          <Container
+                            w={15}
+                            h={48}
+                            className="flex hover:bg-gray-100 cursor-pointer rounded-r-md items-center justify-center"
+                            onClick={() => addNumberOfResidentGuest(guest)}
+                          >
+                            <Text className="text-2xl"> + </Text>
+                          </Container>
+                        </Flex>
+
+                        <div
+                          onClick={() => {
+                            removeResidentGuest(guest);
+                          }}
+                          className="mt-2 cursor-pointer"
+                        >
+                          {index > 0 && (
+                            <IconX className="text-gray-600 w-5 h-5"></IconX>
+                          )}
+                        </div>
+                      </Flex>
+                    ))}
+                    <Flex mt={5} pr={5} align="center" justify="space-between">
                       <Flex
-                        h={50}
-                        className="border rounded-md border-solid border-gray-300"
+                        onClick={() => {
+                          setState(
+                            state.map((item) => {
+                              if (item.id === stay.id) {
+                                return {
+                                  ...item,
+                                  rooms: item.rooms.map((item) => {
+                                    if (item.id === room.id) {
+                                      return {
+                                        ...item,
+                                        residentGuests: [
+                                          ...item.residentGuests,
+                                          {
+                                            id: uuidv4(),
+                                            resident: "",
+                                            numberOfGuests: 1,
+                                            guestType: "",
+                                            description: "",
+                                          },
+                                        ],
+                                      };
+                                    }
+                                    return item;
+                                  }),
+                                };
+                              }
+                              return item;
+                            })
+                          );
+                        }}
+                        className="cursor-pointer w-fit"
                         align="center"
-                        justify="center"
-                        gap={5}
+                        mt={5}
+                        gap={4}
                       >
-                        <Container
-                          w={15}
-                          h={48}
-                          className="flex hover:bg-gray-100 cursor-pointer rounded-l-md items-center justify-center"
-                          onClick={() =>
-                            subtractNumberOfNonResidentGuest(guest)
-                          }
+                        <Text
+                          className="text-blue-500"
+                          size="sm"
+                          weight={600}
+                          color="blue"
                         >
-                          <Text className="text-2xl mb-1"> - </Text>
-                        </Container>
-                        <Text>{guest.numberOfGuests}</Text>
-                        <Container
-                          w={15}
-                          h={48}
-                          className="flex hover:bg-gray-100 cursor-pointer rounded-r-md items-center justify-center"
-                          onClick={() => addNumberOfNonResidentGuest(guest)}
-                        >
-                          <Text className="text-2xl"> + </Text>
-                        </Container>
+                          Add Resident Guest
+                        </Text>
+
+                        <IconPlus className="w-5 h-5 text-blue-500"></IconPlus>
                       </Flex>
 
-                      <div
+                      <Text
+                        underline
+                        className="cursor-pointer"
+                        color="red"
+                        size="sm"
                         onClick={() => {
-                          removeNonResidentGuest(guest);
+                          setState(
+                            state.map((item) => {
+                              if (item.id === stay.id) {
+                                return {
+                                  ...item,
+                                  rooms: item.rooms.map((item) => {
+                                    if (item.id === room.id) {
+                                      return {
+                                        ...item,
+                                        residentGuests: [
+                                          {
+                                            id: uuidv4(),
+                                            numberOfGuests: 1,
+                                            resident: "",
+                                            guestType: "",
+                                            description: "",
+                                          },
+                                        ],
+                                      };
+                                    }
+                                    return item;
+                                  }),
+                                };
+                              }
+                              return item;
+                            })
+                          );
                         }}
-                        className="mt-2 cursor-pointer"
                       >
-                        {index > 0 && (
-                          <IconX className="text-gray-600 w-5 h-5"></IconX>
-                        )}
-                      </div>
+                        Clear all
+                      </Text>
                     </Flex>
-                  ))}
-                  <Flex mt={5} pr={5} align="center" justify="space-between">
+                  </Flex>
+                </>
+              )}
+            </Popover.Dropdown>
+          </Popover>
+
+          <Popover
+            width={450}
+            position="bottom-end"
+            arrowOffset={60}
+            withArrow
+            shadow="md"
+          >
+            <Popover.Target>
+              <div className="hidden xl:block">
+                <Flex
+                  justify={"space-between"}
+                  align={"center"}
+                  className="px-2 py-1 cursor-pointer border-l border-l-transparent border border-solid w-[180px] border-gray-300"
+                >
+                  <Flex direction="column" gap={4}>
+                    <Text size="xs" weight={600} className="text-gray-500">
+                      Park/Conservancy fees
+                    </Text>
+                    <div className="w-[140px] overflow-hidden">
+                      <Text truncate size="sm" weight={600}>
+                        {numberOfSelectedFees > 0
+                          ? `${numberOfSelectedFees} ${
+                              numberOfSelectedFees === 1
+                                ? "Selected"
+                                : "Selected"
+                            }`
+                          : "Add fees"}
+                      </Text>
+                    </div>
+                  </Flex>
+
+                  <IconSelector className="text-gray-500"></IconSelector>
+                </Flex>
+              </div>
+            </Popover.Target>
+
+            <Popover.Dropdown className="px-3">
+              <Flex direction="column" gap={5}>
+                <Text size="sm" weight={600}>
+                  Park/conservancy fees
+                </Text>
+
+                {otherFees?.map((fee, index) => (
+                  <Flex
+                    key={index}
+                    justify={"space-between"}
+                    mt={6}
+                    align={"center"}
+                  >
+                    <Checkbox
+                      color="red"
+                      label={`${fee.name}`}
+                      checked={
+                        !!room.otherFees.find((item) => item.id === fee.id)
+                      }
+                      onClick={() => {
+                        Mixpanel.track("User selected a fee", {
+                          property: stay.property_name,
+                          fee: fee.name,
+                        });
+                      }}
+                      onChange={(event) => {
+                        handleOtherFees(event, fee);
+                      }}
+                    ></Checkbox>
+                  </Flex>
+                ))}
+              </Flex>
+            </Popover.Dropdown>
+          </Popover>
+        </Flex>
+        <Flex className="w-full">
+          <div
+            onClick={() => {
+              setMobileGuestTypeDrawer(true);
+            }}
+            className="lg:hidden block w-[50%]"
+          >
+            <Flex
+              justify={"space-between"}
+              align={"center"}
+              className="px-2 py-1 cursor-pointer border border-r-0 border-t-0 border-solid w-full border-gray-300"
+            >
+              <Flex direction="column" gap={4}>
+                <Text size="xs" weight={600} className="text-gray-500">
+                  Guests
+                </Text>
+                <div className="w-[120px] overflow-hidden">
+                  <Text truncate size="sm" weight={600}>
+                    {totalNumberOfGuests > 0
+                      ? `${totalNumberOfGuests} ${
+                          totalNumberOfGuests === 1 ? "Guest" : "Guests"
+                        }`
+                      : "Add guests"}
+                  </Text>
+                </div>
+              </Flex>
+
+              <IconSelector className="text-gray-500"></IconSelector>
+            </Flex>
+          </div>
+
+          <Drawer
+            opened={mobileGuestTypeDrawer}
+            onClose={() => {
+              setMobileGuestTypeDrawer(false);
+            }}
+            title="Guests"
+            closeButtonProps={{
+              style: {
+                width: 30,
+                height: 30,
+              },
+            }}
+            classNames={{
+              title: "font-bold",
+              header: "!static",
+              // body: "px-0 py-0",
+            }}
+            position="bottom"
+            overlayProps={{ opacity: 0.5, blur: 4 }}
+          >
+            {commonRoomNonResidentNamesWithDescription.length > 0 && (
+              <>
+                <Flex direction="column" gap={5}>
+                  <Text size="sm" mb={2} weight={600}>
+                    Non-Resident guests
+                  </Text>
+                  <div className="relative">
+                    {room.nonResidentGuests.map((guest, index) => (
+                      <div key={index} className="flex flex-col">
+                        <Flex
+                          gap={7}
+                          align={"center"}
+                          justify={"space-between"}
+                        >
+                          <Popover
+                            width={150}
+                            position="bottom-start"
+                            arrowOffset={60}
+                            withArrow
+                            shadow="md"
+                          >
+                            <Popover.Target>
+                              <Flex
+                                justify={"space-between"}
+                                align={"center"}
+                                className="px-2 py-1 cursor-pointer border rounded-md border-solid min-w-[140px] border-gray-300"
+                              >
+                                <Flex direction="column" gap={4}>
+                                  <Text
+                                    size="xs"
+                                    weight={600}
+                                    className="text-gray-500"
+                                  >
+                                    Guest
+                                  </Text>
+                                  <Text
+                                    transform="capitalize"
+                                    size="sm"
+                                    weight={600}
+                                  >
+                                    {guest.nonResident
+                                      ? guest.nonResident
+                                      : "Select guest"}
+                                  </Text>
+                                </Flex>
+
+                                <IconSelector className="text-gray-500"></IconSelector>
+                              </Flex>
+                            </Popover.Target>
+
+                            <Popover.Dropdown className="px-2 py-2">
+                              {guestTypes.map((guestType, index) => (
+                                <Flex
+                                  w="100%"
+                                  onClick={() => {
+                                    if (guest.nonResident === guestType) {
+                                      deselectNonResidentGuest(guest);
+                                    } else {
+                                      clickSelectNonResidentGuest(
+                                        guest,
+                                        guestType
+                                      );
+                                      Mixpanel.track("User selected a guest", {
+                                        property: stay.property_name,
+                                        guest: guestType,
+                                      });
+                                    }
+                                  }}
+                                  key={index}
+                                >
+                                  <Text
+                                    w="100%"
+                                    className={
+                                      "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                                      (guest.nonResident === guestType
+                                        ? "bg-[#FA5252] text-white"
+                                        : "hover:bg-gray-100")
+                                    }
+                                    size="sm"
+                                    weight={600}
+                                  >
+                                    {guestType}
+                                  </Text>
+                                </Flex>
+                              ))}
+                            </Popover.Dropdown>
+                          </Popover>
+
+                          <Popover
+                            width={300}
+                            position="bottom-start"
+                            arrowOffset={60}
+                            withArrow
+                            shadow="md"
+                          >
+                            <Tooltip.Floating
+                              multiline
+                              width={220}
+                              color="white"
+                              position="bottom"
+                              className="text-gray-800 font-semibold border-gray-200 border border-solid"
+                              label={
+                                guest.guestType
+                                  ? guest.guestType
+                                  : "Select a guest type"
+                              }
+                            >
+                              <Popover.Target>
+                                <Flex
+                                  justify={"space-between"}
+                                  align={"center"}
+                                  className="px-2 py-1 cursor-pointer border rounded-md border-solid w-[48%] border-gray-300"
+                                >
+                                  <Flex direction="column" gap={4}>
+                                    <Text
+                                      size="xs"
+                                      weight={600}
+                                      className="text-gray-500"
+                                    >
+                                      Guest type
+                                    </Text>
+                                    <div className="w-[120px] overflow-hidden">
+                                      <Text
+                                        transform="capitalize"
+                                        size="sm"
+                                        truncate
+                                        weight={600}
+                                      >
+                                        {guest.guestType
+                                          ? guest.guestType
+                                          : "Select guest type"}
+                                      </Text>
+                                    </div>
+                                  </Flex>
+
+                                  <IconSelector className="text-gray-500"></IconSelector>
+                                </Flex>
+                              </Popover.Target>
+                            </Tooltip.Floating>
+
+                            <Popover.Dropdown className="px-0 py-2">
+                              <ScrollArea.Autosize
+                                type="auto"
+                                mah={300}
+                                offsetScrollbars={true}
+                                className="w-full px-2"
+                              >
+                                {commonRoomNonResidentNamesWithDescription.map(
+                                  (guestType, index) => (
+                                    <Flex
+                                      w="100%"
+                                      onClick={() => {
+                                        setState(
+                                          state.map((item) => {
+                                            if (item.id === stay.id) {
+                                              return {
+                                                ...item,
+                                                rooms: item.rooms.map(
+                                                  (item) => {
+                                                    if (item.id === room.id) {
+                                                      return {
+                                                        ...item,
+                                                        nonResidentGuests:
+                                                          item.nonResidentGuests.map(
+                                                            (item) => {
+                                                              if (
+                                                                item.id ===
+                                                                guest.id
+                                                              ) {
+                                                                return {
+                                                                  ...item,
+                                                                  guestType:
+                                                                    guestType?.name,
+                                                                };
+                                                              }
+                                                              return item;
+                                                            }
+                                                          ),
+                                                      };
+                                                    }
+                                                    return item;
+                                                  }
+                                                ),
+                                              };
+                                            }
+                                            return item;
+                                          })
+                                        );
+                                        Mixpanel.track(
+                                          "User selected a guest type",
+                                          {
+                                            property: stay.property_name,
+                                            guest_type: guestType?.name,
+                                          }
+                                        );
+                                      }}
+                                      key={index}
+                                    >
+                                      {guestType?.description ? (
+                                        <Tooltip.Floating
+                                          multiline
+                                          width={220}
+                                          color="white"
+                                          position="bottom"
+                                          className="text-gray-800 font-semibold border-gray-200 border border-solid"
+                                          label={guestType.description}
+                                        >
+                                          <Text
+                                            w="100%"
+                                            className={
+                                              "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                                              (guest.guestType ===
+                                              guestType?.name
+                                                ? "bg-[#FA5252] text-white"
+                                                : "hover:bg-gray-100")
+                                            }
+                                            size="sm"
+                                            weight={600}
+                                            transform="capitalize"
+                                          >
+                                            {guestType?.name}
+                                          </Text>
+                                        </Tooltip.Floating>
+                                      ) : (
+                                        <Text
+                                          w="100%"
+                                          className={
+                                            "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                                            (guest.guestType === guestType?.name
+                                              ? "bg-[#FA5252] text-white"
+                                              : "hover:bg-gray-100")
+                                          }
+                                          size="sm"
+                                          weight={600}
+                                          transform="capitalize"
+                                        >
+                                          {guestType?.name}
+                                        </Text>
+                                      )}
+                                    </Flex>
+                                  )
+                                )}
+                              </ScrollArea.Autosize>
+                            </Popover.Dropdown>
+                          </Popover>
+
+                          <Flex
+                            className="border border-gray-300"
+                            align="center"
+                            justify="center"
+                            gap={4}
+                            // direction="column"
+                          >
+                            <div
+                              className="flex bg-gray-100 border border-solid border-gray-200 h-[28px] w-[28px] cursor-pointer items-center justify-center"
+                              onClick={() =>
+                                subtractNumberOfNonResidentGuest(guest)
+                              }
+                            >
+                              <Text className="text-2xl mb-1"> - </Text>
+                            </div>
+                            <Text className="text-sm">
+                              {guest.numberOfGuests}
+                            </Text>
+                            <div
+                              className="flex bg-gray-100 border border-solid border-gray-200 h-[28px] w-[28px] cursor-pointer items-center justify-center"
+                              onClick={() => addNumberOfNonResidentGuest(guest)}
+                            >
+                              <Text className="text-xl"> + </Text>
+                            </div>
+                          </Flex>
+
+                          {/* <div
+                        onClick={() => {
+                             removeNonResidentGuest(guest);
+                           }}
+                           className="mt-2 cursor-pointer"
+                         >
+                           {index > 0 && (
+                             <IconX className="text-gray-600 w-5 h-5"></IconX>
+                           )}
+                         </div> */}
+                        </Flex>
+
+                        <div className="flex items-center justify-between">
+                          <div></div>
+                          <Anchor
+                            component="button"
+                            type="button"
+                            color="red"
+                            size="sm"
+                            onClick={() => {
+                              if (index > 0) {
+                                removeNonResidentGuest(guest);
+                              } else {
+                                setState(
+                                  state.map((item) => {
+                                    if (item.id === stay.id) {
+                                      return {
+                                        ...item,
+                                        rooms: item.rooms.map((item) => {
+                                          if (item.id === room.id) {
+                                            return {
+                                              ...item,
+                                              nonResidentGuests: [
+                                                {
+                                                  id: uuidv4(),
+                                                  nonResident: "",
+                                                  numberOfGuests: 1,
+                                                  guestType: "",
+                                                  description: "",
+                                                },
+                                              ],
+                                            };
+                                          }
+                                          return item;
+                                        }),
+                                      };
+                                    }
+                                    return item;
+                                  })
+                                );
+                              }
+                            }}
+                          >
+                            {index > 0 ? "Remove" : "Clear"}
+                          </Anchor>
+                        </div>
+                      </div>
+                    ))}
+
+                    <Anchor
+                      component="button"
+                      type="button"
+                      color="blue"
+                      size="sm"
+                      onClick={() => {
+                        setState(
+                          state.map((item) => {
+                            if (item.id === stay.id) {
+                              return {
+                                ...item,
+                                rooms: item.rooms.map((item) => {
+                                  if (item.id === room.id) {
+                                    return {
+                                      ...item,
+                                      nonResidentGuests: [
+                                        ...item.nonResidentGuests,
+                                        {
+                                          id: uuidv4(),
+                                          nonResident: "",
+                                          numberOfGuests: 1,
+                                          guestType: "",
+                                          description: "",
+                                        },
+                                      ],
+                                    };
+                                  }
+                                  return item;
+                                }),
+                              };
+                            }
+                            return item;
+                          })
+                        );
+                      }}
+                      align="center"
+                      className="flex absolute bottom-0 items-center gap-1"
+                    >
+                      <IconPlus size="1rem"></IconPlus>
+                      <Text size="sm">Add Non-Resident Guest</Text>
+                    </Anchor>
+                  </div>
+                  {/* <Flex mt={5} pr={5} align="center" justify="space-between">
                     <Flex
                       onClick={() => {
                         setState(
@@ -1333,7 +2269,7 @@ export default function Room({ room, stay, index }: RoomProps) {
                     >
                       Clear all
                     </Text>
-                  </Flex>
+                  </Flex> */}
                 </Flex>
               </>
             )}
@@ -1345,248 +2281,383 @@ export default function Room({ room, stay, index }: RoomProps) {
                   <Text size="sm" mb={2} weight={600}>
                     Resident guests
                   </Text>
-                  {room.residentGuests.map((guest, index) => (
-                    <Flex key={index} gap={7} align={"center"}>
-                      <Popover
-                        width={150}
-                        position="bottom-start"
-                        arrowOffset={60}
-                        withArrow
-                        shadow="md"
-                      >
-                        <Popover.Target>
-                          <Flex
-                            justify={"space-between"}
-                            align={"center"}
-                            className="px-2 py-1 cursor-pointer border rounded-md border-solid w-[48%] border-gray-300"
+                  <div className="relative">
+                    {room.residentGuests.map((guest, index) => (
+                      <div key={index} className="flex flex-col">
+                        <Flex
+                          gap={7}
+                          align={"center"}
+                          justify={"space-between"}
+                        >
+                          <Popover
+                            width={150}
+                            position="bottom-end"
+                            arrowOffset={60}
+                            withArrow
+                            shadow="md"
+                            classNames={{
+                              dropdown: "",
+                            }}
                           >
-                            <Flex direction="column" gap={4}>
-                              <Text
-                                size="xs"
-                                weight={600}
-                                className="text-gray-500"
+                            <Popover.Target>
+                              <Flex
+                                justify={"space-between"}
+                                align={"center"}
+                                className="px-2 py-1 cursor-pointer border rounded-md border-solid sm:w-[48%] border-gray-300"
                               >
-                                Guest
-                              </Text>
-                              <Text
-                                transform="capitalize"
-                                size="sm"
-                                weight={600}
-                              >
-                                {guest.resident
-                                  ? guest.resident
-                                  : "Select guest"}
-                              </Text>
-                            </Flex>
-
-                            <IconSelector className="text-gray-500"></IconSelector>
-                          </Flex>
-                        </Popover.Target>
-
-                        <Popover.Dropdown className="px-2 py-2">
-                          {guestTypes.map((guestType, index) => (
-                            <Flex
-                              w="100%"
-                              onClick={() => {
-                                if (guest.resident === guestType) {
-                                  deselectResidentGuest(guest);
-                                } else {
-                                  clickSelectResidentGuest(guest, guestType);
-                                }
-                              }}
-                              key={index}
-                            >
-                              <Text
-                                w="100%"
-                                className={
-                                  "py-2 px-2 rounded-md mt-1 cursor-pointer " +
-                                  (guest.resident === guestType
-                                    ? "bg-[#FA5252] text-white"
-                                    : "hover:bg-gray-100")
-                                }
-                                size="sm"
-                                weight={600}
-                              >
-                                {guestType}
-                              </Text>
-                            </Flex>
-                          ))}
-                        </Popover.Dropdown>
-                      </Popover>
-
-                      <Popover
-                        width={300}
-                        position="bottom-start"
-                        arrowOffset={60}
-                        withArrow
-                        shadow="md"
-                      >
-                        <Popover.Target>
-                          <Flex
-                            justify={"space-between"}
-                            align={"center"}
-                            className="px-2 py-1 cursor-pointer border rounded-md border-solid w-[48%] border-gray-300"
-                          >
-                            <Flex direction="column" gap={4}>
-                              <Text
-                                size="xs"
-                                weight={600}
-                                className="text-gray-500"
-                              >
-                                Guest type
-                              </Text>
-                              <div className="w-[140px] overflow-hidden">
-                                <Text
-                                  transform="capitalize"
-                                  size="sm"
-                                  truncate
-                                  weight={600}
+                                <Flex
+                                  direction="column"
+                                  className="w-[100px]"
+                                  gap={4}
                                 >
-                                  {guest.guestType
-                                    ? guest.guestType
-                                    : "Select guest type"}
-                                </Text>
-                              </div>
-                            </Flex>
+                                  <Text
+                                    size="xs"
+                                    weight={600}
+                                    className="text-gray-500"
+                                  >
+                                    Guest
+                                  </Text>
+                                  <Text
+                                    transform="capitalize"
+                                    size="sm"
+                                    weight={600}
+                                  >
+                                    {guest.resident
+                                      ? guest.resident
+                                      : "Select guest"}
+                                  </Text>
+                                </Flex>
 
-                            <IconSelector className="text-gray-500"></IconSelector>
-                          </Flex>
-                        </Popover.Target>
+                                <IconSelector className="text-gray-500"></IconSelector>
+                              </Flex>
+                            </Popover.Target>
 
-                        <Popover.Dropdown className="px-0 py-2">
-                          <ScrollArea.Autosize
-                            type="auto"
-                            mah={300}
-                            offsetScrollbars={true}
-                            className="w-full px-2"
-                          >
-                            {commonRoomResidentNamesWithDescription.map(
-                              (guestType, index) => (
+                            <Popover.Dropdown className="px-2 py-2">
+                              {guestTypes.map((guestType, index) => (
                                 <Flex
                                   w="100%"
                                   onClick={() => {
-                                    setState(
-                                      state.map((item) => {
-                                        if (item.id === stay.id) {
-                                          return {
-                                            ...item,
-                                            rooms: item.rooms.map((item) => {
-                                              if (item.id === room.id) {
-                                                return {
-                                                  ...item,
-                                                  residentGuests:
-                                                    item.residentGuests.map(
-                                                      (item) => {
-                                                        if (
-                                                          item.id === guest.id
-                                                        ) {
-                                                          return {
-                                                            ...item,
-                                                            guestType:
-                                                              guestType?.name,
-                                                          };
-                                                        }
-                                                        return item;
-                                                      }
-                                                    ),
-                                                };
-                                              }
-                                              return item;
-                                            }),
-                                          };
-                                        }
-                                        return item;
-                                      })
-                                    );
+                                    if (guest.resident === guestType) {
+                                      deselectResidentGuest(guest);
+                                    } else {
+                                      clickSelectResidentGuest(
+                                        guest,
+                                        guestType
+                                      );
+                                    }
                                   }}
                                   key={index}
                                 >
-                                  {guestType?.description ? (
-                                    <Tooltip.Floating
-                                      multiline
-                                      width={220}
-                                      color="white"
-                                      position="bottom"
-                                      className="text-gray-800 font-semibold border-gray-200 border border-solid"
-                                      label={guestType.description}
-                                    >
-                                      <Text
-                                        w="100%"
-                                        className={
-                                          "py-2 px-2 rounded-md mt-1 cursor-pointer " +
-                                          (guest.guestType === guestType?.name
-                                            ? "bg-[#FA5252] text-white"
-                                            : "hover:bg-gray-100")
-                                        }
-                                        size="sm"
-                                        weight={600}
-                                        transform="capitalize"
-                                      >
-                                        {guestType?.name}
-                                      </Text>
-                                    </Tooltip.Floating>
-                                  ) : (
-                                    <Text
-                                      w="100%"
-                                      className={
-                                        "py-2 px-2 rounded-md mt-1 cursor-pointer " +
-                                        (guest.guestType === guestType?.name
-                                          ? "bg-[#FA5252] text-white"
-                                          : "hover:bg-gray-100")
-                                      }
-                                      size="sm"
-                                      weight={600}
-                                      transform="capitalize"
-                                    >
-                                      {guestType?.name}
-                                    </Text>
-                                  )}
+                                  <Text
+                                    w="100%"
+                                    className={
+                                      "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                                      (guest.resident === guestType
+                                        ? "bg-[#FA5252] text-white"
+                                        : "hover:bg-gray-100")
+                                    }
+                                    size="sm"
+                                    weight={600}
+                                  >
+                                    {guestType}
+                                  </Text>
                                 </Flex>
-                              )
-                            )}
-                          </ScrollArea.Autosize>
-                        </Popover.Dropdown>
-                      </Popover>
+                              ))}
+                            </Popover.Dropdown>
+                          </Popover>
 
-                      <Flex
-                        h={50}
-                        className="border rounded-md border-solid border-gray-300"
-                        align="center"
-                        justify="center"
-                        gap={5}
-                      >
-                        <Container
-                          w={15}
-                          h={48}
-                          className="flex hover:bg-gray-100 cursor-pointer rounded-l-md items-center justify-center"
-                          onClick={() => subtractNumberOfResidentGuest(guest)}
-                        >
-                          <Text className="text-2xl mb-1"> - </Text>
-                        </Container>
-                        <Text>{guest.numberOfGuests}</Text>
-                        <Container
-                          w={15}
-                          h={48}
-                          className="flex hover:bg-gray-100 cursor-pointer rounded-r-md items-center justify-center"
-                          onClick={() => addNumberOfResidentGuest(guest)}
-                        >
-                          <Text className="text-2xl"> + </Text>
-                        </Container>
-                      </Flex>
+                          <Popover
+                            width={300}
+                            position="bottom-start"
+                            arrowOffset={60}
+                            withArrow
+                            shadow="md"
+                          >
+                            <Popover.Target>
+                              <Flex
+                                justify={"space-between"}
+                                align={"center"}
+                                className="px-2 py-1 cursor-pointer border rounded-md border-solid sm:w-[48%] border-gray-300"
+                              >
+                                <Flex direction="column" gap={4}>
+                                  <Text
+                                    size="xs"
+                                    weight={600}
+                                    className="text-gray-500"
+                                  >
+                                    Guest type
+                                  </Text>
+                                  <div className="w-[140px] overflow-hidden">
+                                    <Text
+                                      transform="capitalize"
+                                      size="sm"
+                                      truncate
+                                      weight={600}
+                                    >
+                                      {guest.guestType
+                                        ? guest.guestType
+                                        : "Select guest type"}
+                                    </Text>
+                                  </div>
+                                </Flex>
 
-                      <div
-                        onClick={() => {
-                          removeResidentGuest(guest);
-                        }}
-                        className="mt-2 cursor-pointer"
-                      >
-                        {index > 0 && (
-                          <IconX className="text-gray-600 w-5 h-5"></IconX>
-                        )}
+                                <IconSelector className="text-gray-500"></IconSelector>
+                              </Flex>
+                            </Popover.Target>
+
+                            <Popover.Dropdown className="px-0 py-2">
+                              <ScrollArea.Autosize
+                                type="auto"
+                                mah={300}
+                                offsetScrollbars={true}
+                                className="w-full px-2"
+                              >
+                                {commonRoomResidentNamesWithDescription.map(
+                                  (guestType, index) => (
+                                    <Flex
+                                      w="100%"
+                                      onClick={() => {
+                                        setState(
+                                          state.map((item) => {
+                                            if (item.id === stay.id) {
+                                              return {
+                                                ...item,
+                                                rooms: item.rooms.map(
+                                                  (item) => {
+                                                    if (item.id === room.id) {
+                                                      return {
+                                                        ...item,
+                                                        residentGuests:
+                                                          item.residentGuests.map(
+                                                            (item) => {
+                                                              if (
+                                                                item.id ===
+                                                                guest.id
+                                                              ) {
+                                                                return {
+                                                                  ...item,
+                                                                  guestType:
+                                                                    guestType?.name,
+                                                                };
+                                                              }
+                                                              return item;
+                                                            }
+                                                          ),
+                                                      };
+                                                    }
+                                                    return item;
+                                                  }
+                                                ),
+                                              };
+                                            }
+                                            return item;
+                                          })
+                                        );
+                                      }}
+                                      key={index}
+                                    >
+                                      {guestType?.description ? (
+                                        <Tooltip.Floating
+                                          multiline
+                                          width={220}
+                                          color="white"
+                                          position="bottom"
+                                          className="text-gray-800 font-semibold border-gray-200 border border-solid"
+                                          label={guestType.description}
+                                        >
+                                          <Text
+                                            w="100%"
+                                            className={
+                                              "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                                              (guest.guestType ===
+                                              guestType?.name
+                                                ? "bg-[#FA5252] text-white"
+                                                : "hover:bg-gray-100")
+                                            }
+                                            size="sm"
+                                            weight={600}
+                                            transform="capitalize"
+                                          >
+                                            {guestType?.name}
+                                          </Text>
+                                        </Tooltip.Floating>
+                                      ) : (
+                                        <Text
+                                          w="100%"
+                                          className={
+                                            "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                                            (guest.guestType === guestType?.name
+                                              ? "bg-[#FA5252] text-white"
+                                              : "hover:bg-gray-100")
+                                          }
+                                          size="sm"
+                                          weight={600}
+                                          transform="capitalize"
+                                        >
+                                          {guestType?.name}
+                                        </Text>
+                                      )}
+                                    </Flex>
+                                  )
+                                )}
+                              </ScrollArea.Autosize>
+                            </Popover.Dropdown>
+                          </Popover>
+
+                          <Flex
+                            className="border border-gray-300"
+                            align="center"
+                            justify="center"
+                            gap={4}
+                            // direction="column"
+                          >
+                            <div
+                              className="flex bg-gray-100 border border-solid border-gray-200 h-[28px] w-[28px] cursor-pointer items-center justify-center"
+                              onClick={() =>
+                                subtractNumberOfResidentGuest(guest)
+                              }
+                            >
+                              <Text className="text-2xl mb-1"> - </Text>
+                            </div>
+                            <Text className="text-sm">
+                              {guest.numberOfGuests}
+                            </Text>
+                            <div
+                              className="flex bg-gray-100 border border-solid border-gray-200 h-[28px] w-[28px] cursor-pointer items-center justify-center"
+                              onClick={() => addNumberOfResidentGuest(guest)}
+                            >
+                              <Text className="text-xl"> + </Text>
+                            </div>
+                          </Flex>
+
+                          {/* <Flex
+                          h={50}
+                          className="border rounded-md border-solid border-gray-300"
+                          align="center"
+                          justify="center"
+                          gap={5}
+                        >
+                          <Container
+                            w={15}
+                            h={48}
+                            className="flex hover:bg-gray-100 cursor-pointer rounded-l-md items-center justify-center"
+                            onClick={() => subtractNumberOfResidentGuest(guest)}
+                          >
+                            <Text className="text-2xl mb-1"> - </Text>
+                          </Container>
+                          <Text>{guest.numberOfGuests}</Text>
+                          <Container
+                            w={15}
+                            h={48}
+                            className="flex hover:bg-gray-100 cursor-pointer rounded-r-md items-center justify-center"
+                            onClick={() => addNumberOfResidentGuest(guest)}
+                          >
+                            <Text className="text-2xl"> + </Text>
+                          </Container>
+                        </Flex>
+
+                        <div
+                          onClick={() => {
+                            removeResidentGuest(guest);
+                          }}
+                          className="mt-2 cursor-pointer"
+                        >
+                          {index > 0 && (
+                            <IconX className="text-gray-600 w-5 h-5"></IconX>
+                          )}
+                        </div> */}
+                        </Flex>
+                        <div className="flex items-center justify-between">
+                          <div></div>
+                          <Anchor
+                            component="button"
+                            type="button"
+                            color="red"
+                            size="sm"
+                            onClick={() => {
+                              if (index > 0) {
+                                removeResidentGuest(guest);
+                              } else {
+                                setState(
+                                  state.map((item) => {
+                                    if (item.id === stay.id) {
+                                      return {
+                                        ...item,
+                                        rooms: item.rooms.map((item) => {
+                                          if (item.id === room.id) {
+                                            return {
+                                              ...item,
+                                              residentGuests: [
+                                                {
+                                                  id: uuidv4(),
+                                                  resident: "",
+                                                  numberOfGuests: 1,
+                                                  guestType: "",
+                                                  description: "",
+                                                },
+                                              ],
+                                            };
+                                          }
+                                          return item;
+                                        }),
+                                      };
+                                    }
+                                    return item;
+                                  })
+                                );
+                              }
+                            }}
+                          >
+                            {index > 0 ? "Remove" : "Clear"}
+                          </Anchor>
+                        </div>
                       </div>
-                    </Flex>
-                  ))}
-                  <Flex mt={5} pr={5} align="center" justify="space-between">
+                    ))}
+
+                    <Anchor
+                      component="button"
+                      type="button"
+                      color="blue"
+                      size="sm"
+                      onClick={() => {
+                        setState(
+                          state.map((item) => {
+                            if (item.id === stay.id) {
+                              return {
+                                ...item,
+                                rooms: item.rooms.map((item) => {
+                                  if (item.id === room.id) {
+                                    return {
+                                      ...item,
+                                      residentGuests: [
+                                        ...item.residentGuests,
+                                        {
+                                          id: uuidv4(),
+                                          resident: "",
+                                          numberOfGuests: 1,
+                                          guestType: "",
+                                          description: "",
+                                        },
+                                      ],
+                                    };
+                                  }
+                                  return item;
+                                }),
+                              };
+                            }
+                            return item;
+                          })
+                        );
+                      }}
+                      align="center"
+                      mt={5}
+                      className="flex absolute bottom-0 items-center gap-1"
+                    >
+                      <IconPlus size="1rem"></IconPlus>
+                      <Text size="sm">Add Resident Guest</Text>
+                    </Anchor>
+                  </div>
+                  {/* <Flex mt={5} pr={5} align="center" justify="space-between">
                     <Flex
                       onClick={() => {
                         setState(
@@ -1672,156 +2743,123 @@ export default function Room({ room, stay, index }: RoomProps) {
                     >
                       Clear all
                     </Text>
-                  </Flex>
+                  </Flex> */}
                 </Flex>
               </>
             )}
-          </Popover.Dropdown>
-        </Popover>
+          </Drawer>
 
-        <Popover
-          width={450}
-          position="bottom-end"
-          arrowOffset={60}
-          withArrow
-          shadow="md"
-        >
-          <Popover.Target>
-            <Flex
-              justify={"space-between"}
-              align={"center"}
-              className="px-2 py-1 cursor-pointer rounded-r-md border-l border-l-transparent border border-solid w-[180px] border-gray-300"
-            >
-              <Flex direction="column" gap={4}>
-                <Text size="xs" weight={600} className="text-gray-500">
-                  Park/Conservancy fees
-                </Text>
-                <div className="w-[160px] overflow-hidden">
-                  <Text truncate size="sm" weight={600}>
-                    {numberOfSelectedFees > 0
-                      ? `${numberOfSelectedFees} ${
-                          numberOfSelectedFees === 1 ? "Selected" : "Selected"
-                        }`
-                      : "Add fees"}
-                  </Text>
-                </div>
-              </Flex>
-
-              <IconSelector className="text-gray-500"></IconSelector>
-            </Flex>
-          </Popover.Target>
-
-          <Popover.Dropdown className="px-3">
-            <Flex direction="column" gap={5}>
-              <Text size="sm" weight={600}>
-                Park/conservancy fees
-              </Text>
-
-              {otherFees?.map((fee, index) => (
+          <Popover
+            width={300}
+            position="bottom-end"
+            arrowOffset={60}
+            withArrow
+            shadow="md"
+          >
+            <Popover.Target>
+              <div className="xl:hidden block w-[50%] lg:w-[33.3%]">
                 <Flex
-                  key={index}
                   justify={"space-between"}
-                  mt={6}
                   align={"center"}
+                  className="px-2 py-1 cursor-pointer border border-t-0 border-solid w-full border-gray-300"
                 >
-                  <Checkbox
-                    color="red"
-                    label={`${fee.name}`}
-                    checked={
-                      !!room.otherFees.find((item) => item.id === fee.id)
-                    }
-                    onClick={() => {
-                      Mixpanel.track("User selected a fee", {
-                        property: stay.property_name,
-                        fee: fee.name,
-                      });
-                    }}
-                    onChange={(event) => {
-                      handleOtherFees(event, fee);
-                    }}
-                  ></Checkbox>
+                  <Flex direction="column" gap={4}>
+                    <Text size="xs" weight={600} className="text-gray-500">
+                      Park fees
+                    </Text>
+                    <div className="w-[120px] overflow-hidden">
+                      <Text truncate size="sm" weight={600}>
+                        {numberOfSelectedFees > 0
+                          ? `${numberOfSelectedFees} ${
+                              numberOfSelectedFees === 1
+                                ? "Selected"
+                                : "Selected"
+                            }`
+                          : "Add fees"}
+                      </Text>
+                    </div>
+                  </Flex>
+
+                  <IconSelector className="text-gray-500"></IconSelector>
                 </Flex>
-              ))}
+              </div>
+            </Popover.Target>
 
-              {/* {stay.other_fees_non_resident.map(
-                (fee, index) =>
-                  !!(fee.adult_price || fee.child_price || fee.teen_price) && (
-                    <Flex
-                      key={index}
-                      justify={"space-between"}
-                      mt={6}
-                      align={"center"}
-                    >
-                      <Checkbox
-                        color="red"
-                        label={`${fee.name}`}
-                        checked={
-                          !!room.nonResidentParkFee.find(
-                            (item) => item.id === fee.id
-                          )
-                        }
-                        onChange={(event) => {
-                          handleNonResidentFees(event, fee);
-                        }}
-                      ></Checkbox>
-                    </Flex>
-                  )
-              )}
-
-              <Divider mt={6} size="xs" />
-
-              {stay.other_fees_resident.length > 0 && (
+            <Popover.Dropdown className="px-3">
+              <Flex direction="column" gap={5}>
                 <Text size="sm" weight={600}>
-                  Resident guests
+                  Park/conservancy fees
                 </Text>
-              )}
 
-              {stay.other_fees_resident.map((fee, index) => (
-                <Flex
-                  mt={6}
-                  key={index}
-                  justify={"space-between"}
-                  align={"center"}
-                >
-                  <Checkbox
-                    color="red"
-                    label={`${fee.name}`}
-                    checked={
-                      !!room.residentParkFee.find((item) => item.id === fee.id)
-                    }
-                    onChange={(event) => {
-                      handleResidentFees(event, fee);
-                    }}
-                  ></Checkbox>
-                  <Text size="sm" weight={600}>
-                    KES{fee.price}
-                  </Text>
-                </Flex>
-              ))} */}
-            </Flex>
-          </Popover.Dropdown>
-        </Popover>
-      </Flex>
+                {otherFees?.map((fee, index) => (
+                  <Flex
+                    key={index}
+                    justify={"space-between"}
+                    mt={6}
+                    align={"center"}
+                  >
+                    <Checkbox
+                      color="red"
+                      label={`${fee.name}`}
+                      checked={
+                        !!room.otherFees.find((item) => item.id === fee.id)
+                      }
+                      onClick={() => {
+                        Mixpanel.track("User selected a fee", {
+                          property: stay.property_name,
+                          fee: fee.name,
+                        });
+                      }}
+                      onChange={(event) => {
+                        handleOtherFees(event, fee);
+                      }}
+                    ></Checkbox>
+                  </Flex>
+                ))}
+              </Flex>
+            </Popover.Dropdown>
+          </Popover>
+        </Flex>
+      </div>
 
-      <div
+      <div className="flex items-center justify-between">
+        <div></div>
+        <Anchor
+          component="button"
+          type="button"
+          color="red"
+          size="sm"
+          onClick={() => {
+            if (index === 0) {
+              clearRoom();
+            } else {
+              removeRoom();
+            }
+          }}
+        >
+          Clear
+        </Anchor>
+      </div>
+
+      {/* <div
         onClick={() => {
           removeRoom();
         }}
         className="mt-5 cursor-pointer"
       >
         {index > 0 && <IconX className="text-gray-600"></IconX>}
-      </div>
+      </div> */}
 
-      <div
+      {/* <div
         onClick={() => {
-          clearFee();
+          clearRoom();
         }}
         className="mt-5 cursor-pointer"
       >
         {index === 0 && hasContentInFirstFee && (
           <IconX className="text-gray-600"></IconX>
         )}
-      </div>
+      </div> */}
     </div>
   );
 }

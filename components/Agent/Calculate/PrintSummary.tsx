@@ -66,7 +66,7 @@ export default function PrintSummary({
       ? differenceInCalendarDays(calculateStay.date[1], calculateStay.date[0])
       : 1;
 
-  const days = nights + 1;
+  const days = nights;
 
   const totalNumberOfGuests = calculateStay.rooms.reduce((acc, room) => {
     const countResidentGuestTypes = pricing.countResidentGuestTypesWithPrice(
@@ -195,38 +195,37 @@ export default function PrintSummary({
       totalNonResidentPrice * ((calculateStay.nonResidentCommission || 0) / 100)
     : totalNonResidentPrice;
 
+  // let residentFullTotalPrice =
+  //   totalResidentPrice +
+  //   totalResidentParkFees +
+  //   totalResidentExtraFees +
+  //   activityResidentTotalPrice;
+
   let residentFullTotalPrice =
     totalResidentPrice +
+    totalResidentPrice * (Number(calculateStay.residentCommission) / 100) +
     totalResidentParkFees +
     totalResidentExtraFees +
+    totalResidentExtraFees * (Number(calculateStay.residentCommission) / 100) +
     activityResidentTotalPrice;
 
-  residentFullTotalPrice = includeClientInCalculation
-    ? residentFullTotalPrice
-    : totalResidentPrice +
-      totalResidentPrice * (Number(calculateStay.residentCommission) / 100) +
-      totalResidentParkFees +
-      totalResidentExtraFees +
-      totalResidentExtraFees *
-        (Number(calculateStay.residentCommission) / 100) +
-      activityResidentTotalPrice;
+  // let nonResidentFullTotalPrice =
+  //   totalNonResidentPrice +
+  //   totalNonResidentParkFees +
+  //   totalNonResidentExtraFees +
+  //   activityTotalPrice;
 
   let nonResidentFullTotalPrice =
     totalNonResidentPrice +
+    totalNonResidentPrice *
+      (Number(calculateStay.nonResidentCommission) / 100) +
     totalNonResidentParkFees +
     totalNonResidentExtraFees +
+    totalNonResidentExtraFees *
+      (Number(calculateStay.nonResidentCommission) / 100) +
     activityTotalPrice;
 
-  nonResidentFullTotalPrice = includeClientInCalculation
-    ? nonResidentFullTotalPrice
-    : totalNonResidentPrice +
-      totalNonResidentPrice *
-        (Number(calculateStay.nonResidentCommission) / 100) +
-      totalNonResidentParkFees +
-      totalNonResidentExtraFees +
-      totalNonResidentExtraFees *
-        (Number(calculateStay.nonResidentCommission) / 100) +
-      activityTotalPrice;
+  // console.log("totalNonResidentPrice", totalNonResidentPrice);
 
   useEffect(() => {
     updateTotals(calculateStay.id, residentFullTotalPrice, true);
@@ -242,7 +241,7 @@ export default function PrintSummary({
   );
 
   return (
-    <table className="px-5 py-3 w-full">
+    <table className="md:px-5 py-3 w-full">
       {!!(nonResidentFullTotalPrice || residentFullTotalPrice) && (
         <>
           <thead>
@@ -435,10 +434,7 @@ export default function PrintSummary({
                             <ActivitiesSummary
                               key={index}
                               activity={activity}
-                              numberOfGuests={
-                                totalNumberOfGuests +
-                                totalNumberOfNonResidentGuests
-                              }
+                              numberOfGuests={totalNumberOfNonResidentGuests}
                               summarizedCalculation={summarizedCalculation}
                               nights={nights}
                             ></ActivitiesSummary>
@@ -669,7 +665,7 @@ export default function PrintSummary({
                           {!summarizedCalculation && (
                             <Text size="sm" weight={600}>
                               {activityResidentTotalPrice
-                                ? `$ ${activityResidentTotalPrice.toLocaleString(
+                                ? `KES ${activityResidentTotalPrice.toLocaleString(
                                     undefined,
                                     {
                                       minimumFractionDigits: 0,
@@ -687,10 +683,7 @@ export default function PrintSummary({
                               key={index}
                               activity={activity}
                               summarizedCalculation={summarizedCalculation}
-                              numberOfGuests={
-                                totalNumberOfGuests +
-                                totalNumberOfNonResidentGuests
-                              }
+                              numberOfGuests={totalNumberOfGuests}
                               nights={nights}
                             ></ActivitiesResidentSummary>
                           ))}

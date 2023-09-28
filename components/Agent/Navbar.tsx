@@ -78,9 +78,9 @@ export default function Navbar({
     }
   };
   return (
-    <div className="flex items-center border-b justify-between sm:px-8 px-6 md:px-6 lg:px-12 h-[80px]">
+    <div className="flex items-center gap-2 md:gap-0 border-b justify-between px-4 md:px-6 lg:px-12 h-[80px]">
       <Link href={navBarLogoLink}>
-        <div className="relative w-28 h-9 cursor-pointer">
+        <div className="relative w-24 h-8 md:w-28 hidden sm:block md:h-9 cursor-pointer">
           <Image
             alt="Winda logo"
             src="/images/winda_logo/horizontal-blue-font.png"
@@ -92,13 +92,26 @@ export default function Navbar({
             priority
           />
         </div>
+        <div className="relative w-7 h-10 md:w-28 md:h-9 sm:hidden cursor-pointer">
+          <Image
+            alt="Winda logo"
+            src="/images/winda_logo/winda-logo.png"
+            className="w-full h-full"
+            sizes="(max-width: 768px) 100vw,
+              (max-width: 1200px) 50vw,
+              33vw"
+            fill
+            priority
+          />
+        </div>
       </Link>
 
       {includeSearch && (
-        <div className="px-3 w-[370px] flex items-center shadow-md h-[50px] rounded-3xl">
+        <div className="px-3 w-[300px] md:w-[370px] flex items-center shadow-md h-[50px] rounded-3xl">
           <Input
             icon={<IconSearch size="1rem" className="text-gray-500" />}
             placeholder="Search a location"
+            className="w-full"
             w={350}
             styles={{
               input: {
@@ -186,7 +199,7 @@ export default function Navbar({
               //   router.push("/partner/agent");
               // }
             }}
-            className="font-semibold hover:bg-gray-100 rounded-full bg-transparent text-black"
+            className="font-semibold hidden md:block hover:bg-gray-100 rounded-full bg-transparent text-black"
           >
             Switch to agent
           </Button>
@@ -208,7 +221,7 @@ export default function Navbar({
               //   router.push("/partner/lodge");
               // }
             }}
-            className="font-semibold hover:bg-gray-100 rounded-full bg-transparent text-black"
+            className="font-semibold hidden md:block hover:bg-gray-100 rounded-full bg-transparent text-black"
           >
             Switch to property
           </Button>
@@ -231,6 +244,7 @@ export default function Navbar({
         )} */}
         <UserDropdown
           navBarAccountLink={navBarAccountLink}
+          propertyPage={propertyPage}
           user={user}
         ></UserDropdown>
       </div>

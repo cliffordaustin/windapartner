@@ -95,7 +95,7 @@ export default function AgentPriceTable({
 
   return (
     <div className="relative">
-      <div className="flex items-center gap-4 justify-center mb-5">
+      <div className="flex md:flex-row flex-col items-center gap-4 justify-center mb-5">
         <DatePickerInput
           type="range"
           value={date}
@@ -114,83 +114,90 @@ export default function AgentPriceTable({
           numberOfColumns={2}
           autoSave="true"
         />
-        <Popover
-          width={300}
-          position="bottom-start"
-          arrowOffset={60}
-          withArrow
-          shadow="md"
-        >
-          <Popover.Target>
-            <div>
-              <Text size="sm" className="mb-1" weight={600}>
-                Guest type
-              </Text>
-              <Flex
-                justify={"space-between"}
-                align={"center"}
-                className="px-2 py-[11px] cursor-pointer border rounded-sm border-solid w-[220px] border-gray-300"
-              >
-                <Flex direction="column" gap={4}>
-                  <div className="w-[140px] overflow-hidden">
-                    <Text
-                      transform="capitalize"
-                      size="sm"
-                      truncate
-                      weight={600}
-                    >
-                      {guestType ? guestType : "Select guest type"}
-                    </Text>
-                  </div>
-                </Flex>
-
-                <IconSelector className="text-gray-500"></IconSelector>
-              </Flex>
-            </div>
-          </Popover.Target>
-
-          <Popover.Dropdown className="px-0 py-2">
-            <ScrollArea.Autosize
-              type="auto"
-              mah={300}
-              offsetScrollbars={true}
-              className="w-full pl-3"
-            >
-              {allGuestTypes.map((guest, index) => (
+        <div className="flex gap-4 items-center">
+          <Popover
+            width={300}
+            position="bottom-start"
+            arrowOffset={60}
+            withArrow
+            shadow="md"
+          >
+            <Popover.Target>
+              <div>
+                <Text size="sm" className="mb-1" weight={600}>
+                  Guest type
+                </Text>
                 <Flex
-                  w="100%"
-                  onClick={() => {
-                    setGuestType(guest);
-                  }}
-                  key={index}
+                  justify={"space-between"}
+                  align={"center"}
+                  className="px-2 py-[11px] cursor-pointer border rounded-sm border-solid w-[220px] border-gray-300"
                 >
-                  <Text
-                    w="100%"
-                    className={
-                      "py-2 px-2 rounded-md mt-1 cursor-pointer " +
-                      (guestType === guest
-                        ? "bg-[#FA5252] text-white"
-                        : "hover:bg-gray-100")
-                    }
-                    size="sm"
-                    weight={600}
-                    transform="capitalize"
-                  >
-                    {guest}
-                  </Text>
-                </Flex>
-              ))}
-            </ScrollArea.Autosize>
-          </Popover.Dropdown>
-        </Popover>
+                  <Flex direction="column" gap={4}>
+                    <div className="w-[140px] overflow-hidden">
+                      <Text
+                        transform="capitalize"
+                        size="sm"
+                        truncate
+                        weight={600}
+                      >
+                        {guestType ? guestType : "Select guest type"}
+                      </Text>
+                    </div>
+                  </Flex>
 
-        <Switch
-          className="mt-[22px]"
-          label="Display rack rates"
-          color="red"
-          checked={displayRackRates}
-          onChange={(event) => setDisplayRackRate(event.currentTarget.checked)}
-        />
+                  <IconSelector className="text-gray-500"></IconSelector>
+                </Flex>
+              </div>
+            </Popover.Target>
+
+            <Popover.Dropdown className="px-0 py-2">
+              <ScrollArea.Autosize
+                type="auto"
+                mah={300}
+                offsetScrollbars={true}
+                className="w-full pl-3"
+              >
+                {allGuestTypes.map((guest, index) => (
+                  <Flex
+                    w="100%"
+                    onClick={() => {
+                      setGuestType(guest);
+                    }}
+                    key={index}
+                  >
+                    <Text
+                      w="100%"
+                      className={
+                        "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                        (guestType === guest
+                          ? "bg-[#FA5252] text-white"
+                          : "hover:bg-gray-100")
+                      }
+                      size="sm"
+                      weight={600}
+                      transform="capitalize"
+                    >
+                      {guest}
+                    </Text>
+                  </Flex>
+                ))}
+              </ScrollArea.Autosize>
+            </Popover.Dropdown>
+          </Popover>
+
+          <Switch
+            className="mt-[22px]"
+            label="Display rack rates"
+            classNames={{
+              label: "text-sm",
+            }}
+            color="red"
+            checked={displayRackRates}
+            onChange={(event) =>
+              setDisplayRackRate(event.currentTarget.checked)
+            }
+          />
+        </div>
       </div>
       <Divider className="mb-5" />
       {!roomTypesLoading && date[0] && date[1] && (

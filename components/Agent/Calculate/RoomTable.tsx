@@ -90,13 +90,14 @@ export default function RoomTable({
           <Accordion
             variant="separated"
             className="!p-0"
-            defaultValue={uniqueRooms[0]?.name || ""}
+            defaultValue={uniqueRooms.map((room) => room.name || "")}
             classNames={{
               content: "p-0",
               // item: "border-none",
               // control:
               //   "border-t border-x border-b-0 border-solid border-gray-300",
             }}
+            multiple
           >
             {isNonResident &&
               uniqueRooms.map((room, index) => (

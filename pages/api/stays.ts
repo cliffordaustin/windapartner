@@ -10,6 +10,7 @@ import {
 } from "../../utils/types";
 import { format, subDays } from "date-fns";
 import { Auth } from "aws-amplify";
+import { SetStateAction } from "react";
 
 type StayDetailProps = {
   slug: string;

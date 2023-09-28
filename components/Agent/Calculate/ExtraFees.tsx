@@ -2,6 +2,7 @@ import { Context, ExtraFee, StateType } from "@/context/CalculatePage";
 import { Mixpanel } from "@/utils/mixpanelconfig";
 import { AgentStay } from "@/utils/types";
 import {
+  Anchor,
   Flex,
   Input,
   NumberInput,
@@ -58,7 +59,7 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
             if (extraFee.id === fee.id) {
               return {
                 ...extraFee,
-                price: Number(value),
+                price: value,
               };
             }
             return extraFee;
@@ -227,319 +228,356 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
   const [pricingTypeOpened, setPricingTypeOpened] = useState(false);
 
   return (
-    <div className="flex items-center">
-      <Flex w="100%" mt={18}>
-        {/* <Popover
-          width={350}
-          position="bottom-start"
-          arrowOffset={60}
-          withArrow
-          shadow="md"
-        >
-          <Popover.Target>
-            <Flex
-              justify={"space-between"}
-              align={"center"}
-              className="px-2 py-1 cursor-pointer rounded-l-md border border-solid w-[220px] border-gray-300"
-            >
-              <Flex direction="column" gap={2}>
-                <Text size="xs" weight={600} className="text-gray-500">
-                  Fee name
-                </Text>
+    <div className="items-center">
+      <div className="flex mb-1 flex-col w-full">
+        <Flex w="100%" mt={18}>
+          <Flex
+            justify={"space-between"}
+            align={"center"}
+            className="px-2 py-1 cursor-pointer border border-solid w-[50%] lg:w-[33.3%] xl:w-[220px] border-gray-300"
+          >
+            <Flex direction="column" className="w-full" gap={2}>
+              {/* <Text size="xs" weight={600} className="text-gray-500">
+                Fee name
+              </Text> */}
 
-                <Text size="sm" weight={600}>
-                  {fee.name ? fee.name : "Enter fee name"}
-                </Text>
-                <TextInput
-              placeholder="Enter fee name"
-              className="w-full"
-              value={fee.name}
-              id={fee.id}
-              label="Fee name"
-              labelProps={{ className: "font-semibold text-gray-600 mb-1" }}
-              onChange={(event) => {
-                handleFeeNameChange(event);
-              }}
-            ></TextInput>
-              </Flex>
-
-              <IconSelector className="text-gray-500"></IconSelector>
-            </Flex>
-          </Popover.Target>
-
-          <Popover.Dropdown className="px-3">
-            <TextInput
-              placeholder="Enter fee name"
-              className="w-full"
-              value={fee.name}
-              id={fee.id}
-              label="Fee name"
-              labelProps={{ className: "font-semibold text-gray-600 mb-1" }}
-              onChange={(event) => {
-                handleFeeNameChange(event);
-              }}
-            ></TextInput>
-          </Popover.Dropdown>
-        </Popover> */}
-
-        <Flex
-          justify={"space-between"}
-          align={"center"}
-          className="px-2 py-1 cursor-pointer rounded-l-md border border-solid w-[200px] border-gray-300"
-        >
-          <Flex direction="column" gap={2}>
-            <Text size="xs" weight={600} className="text-gray-500">
-              Fee name
-            </Text>
-
-            {/* <Text size="sm" weight={600}>
-                  {fee.name ? fee.name : "Enter fee name"}
-                </Text> */}
-            <TextInput
-              placeholder="Enter fee name"
-              className="w-full"
-              value={fee.name}
-              id={fee.id}
-              classNames={{
-                input: "border-none px-0 !py-0 focus:ring-0 focus:outline-none",
-              }}
-              onChange={(event) => {
-                handleFeeNameChange(event);
-              }}
-              onBlur={() => {
-                if (fee.name) {
-                  Mixpanel.track("User entered an extra fee name", {
-                    property: stay.property_name,
-                    extra_fee: fee.name,
-                  });
-                }
-              }}
-            ></TextInput>
-          </Flex>
-
-          {/* <IconSelector className="text-gray-500"></IconSelector> */}
-        </Flex>
-
-        <Popover
-          width={350}
-          position="bottom-start"
-          arrowOffset={60}
-          withArrow
-          shadow="md"
-          opened={opened}
-          onChange={setOpened}
-        >
-          <Popover.Target>
-            <Flex
-              justify={"space-between"}
-              align={"center"}
-              onClick={() => setOpened((prev) => !prev)}
-              className="px-2 py-1 cursor-pointer border-l border-l-transparent border border-solid w-[220px] border-gray-300"
-            >
-              <Flex direction="column" gap={4}>
-                <Text size="xs" weight={600} className="text-gray-500">
-                  Guest type
-                </Text>
-                <Text size="sm" weight={600}>
-                  {fee.guestType ? fee.guestType : "Select guest type"}
-                </Text>
-              </Flex>
-
-              <IconSelector className="text-gray-500"></IconSelector>
-            </Flex>
-          </Popover.Target>
-
-          <Popover.Dropdown className="px-3">
-            {guestTypes.map((guestType, index) => (
-              <Flex
-                key={index}
-                justify={"space-between"}
-                align={"center"}
-                onClick={() => {
-                  if (guestType === fee.guestType) {
-                    handleGuestTypeDeselect();
-                  } else {
-                    handleGuestTypeChange(guestType);
-                    Mixpanel.track("User selected an extra fee guest type", {
+              <TextInput
+                placeholder="Enter fee name"
+                className="w-full"
+                value={fee.name}
+                id={fee.id}
+                classNames={{
+                  input:
+                    "border-none px-0 !py-0 !w-full focus:ring-0 focus:outline-none",
+                  wrapper: "w-full",
+                }}
+                onChange={(event) => {
+                  handleFeeNameChange(event);
+                }}
+                onBlur={() => {
+                  if (fee.name) {
+                    Mixpanel.track("User entered an extra fee name", {
                       property: stay.property_name,
-                      guest_type: fee.guestType,
+                      extra_fee: fee.name,
                     });
                   }
                 }}
-                // onMouseUp={() => {
-                //   setOpened(false);
-                // }}
-                className={
-                  "py-2 px-2 rounded-md mt-1 cursor-pointer " +
-                  (fee.guestType === guestType
-                    ? "bg-[#FA5252] text-white"
-                    : "hover:bg-gray-100")
-                }
-              >
-                <Text size="sm" weight={600}>
-                  {guestType.charAt(0).toUpperCase() +
-                    guestType.slice(1).toLowerCase()}
-                </Text>
-              </Flex>
-            ))}
-          </Popover.Dropdown>
-        </Popover>
-
-        <Popover
-          width={350}
-          position="bottom-start"
-          arrowOffset={60}
-          withArrow
-          shadow="md"
-          opened={pricingTypeOpened}
-          onChange={setPricingTypeOpened}
-        >
-          <Popover.Target>
-            <Flex
-              justify={"space-between"}
-              align={"center"}
-              onClick={() => setPricingTypeOpened((prev) => !prev)}
-              className="px-2 py-1 cursor-pointer border-l border-l-transparent border border-solid w-[220px] border-gray-300"
-            >
-              <Flex direction="column" gap={4}>
-                <Text size="xs" weight={600} className="text-gray-500">
-                  Pricing type
-                </Text>
-                <Text size="sm" weight={600}>
-                  {fee.pricingType
-                    ? fee.pricingType.charAt(0).toUpperCase() +
-                      fee.pricingType.slice(1).toLowerCase()
-                    : "Select pricing type"}
-                </Text>
-              </Flex>
-
-              <IconSelector className="text-gray-500"></IconSelector>
+              ></TextInput>
             </Flex>
-          </Popover.Target>
 
-          <Popover.Dropdown className="px-3">
-            {pricingTypes.map((pricingType, index) => (
+            {/* <IconSelector className="text-gray-500"></IconSelector> */}
+          </Flex>
+
+          <Popover
+            width={300}
+            position="bottom-start"
+            arrowOffset={60}
+            withArrow
+            shadow="md"
+          >
+            <Popover.Target>
               <Flex
-                key={index}
                 justify={"space-between"}
                 align={"center"}
-                onClick={() => {
-                  // handlePricingTypeChange(pricingType);
-                  if (pricingType === fee.pricingType) {
-                    handlePricingTypeDeselect();
-                  } else {
-                    handlePricingTypeChange(pricingType);
-                    Mixpanel.track("User selected an extra fee pricing type", {
+                className="px-2 py-1 cursor-pointer border-l border-l-transparent border border-solid w-[50%] lg:w-[33.3%] xl:w-[220px] border-gray-300"
+              >
+                <Flex direction="column" gap={4}>
+                  <Text size="xs" weight={600} className="text-gray-500">
+                    Guest type
+                  </Text>
+                  <Text size="sm" weight={600}>
+                    {fee.guestType ? fee.guestType : "Select guest type"}
+                  </Text>
+                </Flex>
+
+                <IconSelector className="text-gray-500"></IconSelector>
+              </Flex>
+            </Popover.Target>
+
+            <Popover.Dropdown className="px-3">
+              {guestTypes.map((guestType, index) => (
+                <Flex
+                  key={index}
+                  justify={"space-between"}
+                  align={"center"}
+                  onClick={() => {
+                    if (guestType === fee.guestType) {
+                      handleGuestTypeDeselect();
+                    } else {
+                      handleGuestTypeChange(guestType);
+                      Mixpanel.track("User selected an extra fee guest type", {
+                        property: stay.property_name,
+                        guest_type: fee.guestType,
+                      });
+                    }
+                  }}
+                  // onMouseUp={() => {
+                  //   setOpened(false);
+                  // }}
+                  className={
+                    "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                    (fee.guestType === guestType
+                      ? "bg-[#FA5252] text-white"
+                      : "hover:bg-gray-100")
+                  }
+                >
+                  <Text size="sm" weight={600}>
+                    {guestType.charAt(0).toUpperCase() +
+                      guestType.slice(1).toLowerCase()}
+                  </Text>
+                </Flex>
+              ))}
+            </Popover.Dropdown>
+          </Popover>
+
+          <Popover
+            width={350}
+            position="bottom-start"
+            arrowOffset={60}
+            withArrow
+            shadow="md"
+          >
+            <Popover.Target>
+              <div className="hidden lg:block w-[50%] lg:w-[33.3%] xl:w-[220px]">
+                <Flex
+                  justify={"space-between"}
+                  align={"center"}
+                  className="px-2 py-1 cursor-pointer border-l border-l-transparent border border-solid w-full border-gray-300"
+                >
+                  <Flex direction="column" gap={4}>
+                    <Text size="xs" weight={600} className="text-gray-500">
+                      Pricing type
+                    </Text>
+                    <Text size="sm" weight={600}>
+                      {fee.pricingType
+                        ? fee.pricingType.charAt(0).toUpperCase() +
+                          fee.pricingType.slice(1).toLowerCase()
+                        : "Select pricing type"}
+                    </Text>
+                  </Flex>
+
+                  <IconSelector className="text-gray-500"></IconSelector>
+                </Flex>
+              </div>
+            </Popover.Target>
+
+            <Popover.Dropdown className="px-3">
+              {pricingTypes.map((pricingType, index) => (
+                <Flex
+                  key={index}
+                  justify={"space-between"}
+                  align={"center"}
+                  onClick={() => {
+                    // handlePricingTypeChange(pricingType);
+                    if (pricingType === fee.pricingType) {
+                      handlePricingTypeDeselect();
+                    } else {
+                      handlePricingTypeChange(pricingType);
+                      Mixpanel.track(
+                        "User selected an extra fee pricing type",
+                        {
+                          property: stay.property_name,
+                          pricing_type: fee.pricingType,
+                        }
+                      );
+                    }
+                  }}
+                  // onMouseUp={() => {
+                  //   setPricingTypeOpened(false);
+                  // }}
+                  className={
+                    "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                    (fee.pricingType === pricingType
+                      ? "bg-[#FA5252] text-white"
+                      : "hover:bg-gray-100")
+                  }
+                >
+                  <Text size="sm" weight={600}>
+                    {pricingType.charAt(0).toUpperCase() +
+                      pricingType.slice(1).toLowerCase()}
+                  </Text>
+                </Flex>
+              ))}
+            </Popover.Dropdown>
+          </Popover>
+
+          <Flex
+            justify={"space-between"}
+            align={"center"}
+            className="px-2 py-1 hidden xl:flex cursor-pointer border border-l-transparent border-solid w-[220px] border-gray-300"
+          >
+            <Flex direction="column" className="w-full" gap={4}>
+              {/* <Text size="xs" weight={600} className="text-gray-500">
+                Price
+              </Text> */}
+              <NumberInput
+                placeholder="Enter fee price"
+                value={fee.price}
+                classNames={{
+                  input:
+                    "border-none px-0 !h-full !w-full !py-0 focus:ring-0 focus:outline-none",
+                  wrapper: "h-[40px] !w-full",
+                }}
+                onBlur={() => {
+                  if (fee.price) {
+                    Mixpanel.track("User entered an extra fee price", {
                       property: stay.property_name,
-                      pricing_type: fee.pricingType,
+                      extra_fee_prce: fee.price,
                     });
                   }
                 }}
-                // onMouseUp={() => {
-                //   setPricingTypeOpened(false);
-                // }}
-                className={
-                  "py-2 px-2 rounded-md mt-1 cursor-pointer " +
-                  (fee.pricingType === pricingType
-                    ? "bg-[#FA5252] text-white"
-                    : "hover:bg-gray-100")
+                icon={
+                  fee.guestType === "Resident" && fee.price
+                    ? "KES"
+                    : fee.guestType === "Non-resident" && fee.price
+                    ? "$"
+                    : ""
                 }
-              >
-                <Text size="sm" weight={600}>
-                  {pricingType.charAt(0).toUpperCase() +
-                    pricingType.slice(1).toLowerCase()}
-                </Text>
-              </Flex>
-            ))}
-          </Popover.Dropdown>
-        </Popover>
+                onChange={(value) => {
+                  handleFeePriceChange(value);
+                }}
+              ></NumberInput>
+            </Flex>
 
-        <Flex
-          justify={"space-between"}
-          align={"center"}
-          className="px-2 py-1 cursor-pointer border rounded-r-md border-l-transparent border-solid w-[220px] border-gray-300"
-        >
-          <Flex direction="column" gap={4}>
-            <Text size="xs" weight={600} className="text-gray-500">
-              Price
-            </Text>
-            <NumberInput
-              placeholder="Enter fee price"
-              className="w-[210px]"
-              value={fee.price}
-              classNames={{
-                input: "border-none px-0 !py-0 focus:ring-0 focus:outline-none",
-              }}
-              onBlur={() => {
-                if (fee.price) {
-                  Mixpanel.track("User entered an extra fee price", {
-                    property: stay.property_name,
-                    extra_fee_prce: fee.price,
-                  });
-                }
-              }}
-              icon={
-                fee.guestType === "Resident" && fee.price
-                  ? "KES"
-                  : fee.guestType === "Non-resident" && fee.price
-                  ? "$"
-                  : ""
-              }
-              onChange={(value) => {
-                handleFeePriceChange(value);
-              }}
-            ></NumberInput>
+            {/* <IconSelector className="text-gray-500"></IconSelector> */}
           </Flex>
-
-          {/* <IconSelector className="text-gray-500"></IconSelector> */}
         </Flex>
 
-        {/* <Popover
-          width={350}
-          position="bottom-end"
-          arrowOffset={60}
-          withArrow
-          shadow="md"
-        >
-          <Popover.Target>
-            <Flex
-              justify={"space-between"}
-              align={"center"}
-              className="px-2 py-1 cursor-pointer border rounded-r-md border-l-transparent border-solid w-[220px] border-gray-300"
-            >
-              <Flex direction="column" gap={4}>
-                <Text size="xs" weight={600} className="text-gray-500">
-                  Price
-                </Text>
-                <Text size="sm" weight={600}>
-                  {fee.price
-                    ? `${fee.guestType === "Resident" ? "KES" : "$"} ${
-                        fee.price
-                      }`
-                    : "Enter fee price"}
-                </Text>
-              </Flex>
+        <Flex w="100%">
+          <Popover
+            width={300}
+            position="bottom-start"
+            arrowOffset={60}
+            withArrow
+            shadow="md"
+          >
+            <Popover.Target>
+              <div className="lg:hidden block w-[50%] lg:w-[220px]">
+                <Flex
+                  justify={"space-between"}
+                  align={"center"}
+                  className="px-2 py-1 cursor-pointer border-l border-r-0 border-t-transparent border border-solid w-full border-gray-300"
+                >
+                  <Flex direction="column" gap={4}>
+                    <Text size="xs" weight={600} className="text-gray-500">
+                      Pricing type
+                    </Text>
+                    <Text size="sm" weight={600}>
+                      {fee.pricingType
+                        ? fee.pricingType.charAt(0).toUpperCase() +
+                          fee.pricingType.slice(1).toLowerCase()
+                        : "Select pricing type"}
+                    </Text>
+                  </Flex>
 
-              <IconSelector className="text-gray-500"></IconSelector>
+                  <IconSelector className="text-gray-500"></IconSelector>
+                </Flex>
+              </div>
+            </Popover.Target>
+
+            <Popover.Dropdown className="px-3">
+              {pricingTypes.map((pricingType, index) => (
+                <Flex
+                  key={index}
+                  justify={"space-between"}
+                  align={"center"}
+                  onClick={() => {
+                    // handlePricingTypeChange(pricingType);
+                    if (pricingType === fee.pricingType) {
+                      handlePricingTypeDeselect();
+                    } else {
+                      handlePricingTypeChange(pricingType);
+                      Mixpanel.track(
+                        "User selected an extra fee pricing type",
+                        {
+                          property: stay.property_name,
+                          pricing_type: fee.pricingType,
+                        }
+                      );
+                    }
+                  }}
+                  // onMouseUp={() => {
+                  //   setPricingTypeOpened(false);
+                  // }}
+                  className={
+                    "py-2 px-2 rounded-md mt-1 cursor-pointer " +
+                    (fee.pricingType === pricingType
+                      ? "bg-[#FA5252] text-white"
+                      : "hover:bg-gray-100")
+                  }
+                >
+                  <Text size="sm" weight={600}>
+                    {pricingType.charAt(0).toUpperCase() +
+                      pricingType.slice(1).toLowerCase()}
+                  </Text>
+                </Flex>
+              ))}
+            </Popover.Dropdown>
+          </Popover>
+
+          <Flex
+            justify={"space-between"}
+            align={"center"}
+            className="px-2 cursor-pointer border border-t-0 border-solid xl:hidden block w-[50%] lg:w-[33.3%] border-gray-300"
+          >
+            <Flex direction="column" className="w-full bg-green-300" gap={4}>
+              {/* <Text size="xs" weight={600} className="text-gray-500">
+                Price
+              </Text> */}
+              <NumberInput
+                placeholder="Enter fee price"
+                value={fee.price}
+                classNames={{
+                  input:
+                    "border-none px-0 !h-full !w-full !rounded-none !py-0 focus:ring-0 focus:outline-none",
+                  wrapper: "h-[52.4px] !w-full",
+                }}
+                onBlur={() => {
+                  if (fee.price) {
+                    Mixpanel.track("User entered an extra fee price", {
+                      property: stay.property_name,
+                      extra_fee_prce: fee.price,
+                    });
+                  }
+                }}
+                icon={
+                  fee.guestType === "Resident" && fee.price
+                    ? "KES"
+                    : fee.guestType === "Non-resident" && fee.price
+                    ? "$"
+                    : ""
+                }
+                onChange={(value) => {
+                  handleFeePriceChange(value);
+                }}
+              ></NumberInput>
             </Flex>
-          </Popover.Target>
 
-          <Popover.Dropdown className="px-3">
-            <NumberInput
-              placeholder="Enter fee price"
-              className="w-full"
-              value={fee.price}
-              label="Fee price"
-              labelProps={{ className: "font-semibold text-gray-600 mb-1" }}
-              onChange={(value) => {
-                handleFeePriceChange(value);
-              }}
-            ></NumberInput>
-          </Popover.Dropdown>
-        </Popover> */}
-      </Flex>
+            {/* <IconSelector className="text-gray-500"></IconSelector> */}
+          </Flex>
+        </Flex>
+      </div>
 
-      <div
+      <div className="flex items-center justify-between">
+        <div></div>
+        <Anchor
+          component="button"
+          type="button"
+          color="red"
+          size="sm"
+          onClick={() => {
+            if (index === 0) {
+              clearFee();
+            } else {
+              removeFee();
+            }
+          }}
+        >
+          Clear
+        </Anchor>
+      </div>
+
+      {/* <div
         onClick={() => {
           removeFee();
         }}
@@ -557,7 +595,7 @@ export default function ExtraFees({ fee, stay, index }: ExtraFeesProps) {
         {index === 0 && hasContentInFirstFee && (
           <IconX className="text-gray-600"></IconX>
         )}
-      </div>
+      </div> */}
     </div>
   );
 }
