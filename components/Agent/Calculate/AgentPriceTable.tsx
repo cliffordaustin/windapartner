@@ -13,6 +13,7 @@ import { IconCalendar, IconSelector } from "@tabler/icons-react";
 import {
   Divider,
   Flex,
+  Loader,
   Popover,
   ScrollArea,
   Switch,
@@ -205,7 +206,7 @@ export default function AgentPriceTable({
         </div>
       </div>
       <Divider className="mb-5" />
-      {!roomTypesLoading && date[0] && date[1] && (
+      {!roomTypesLoading && date[0] && date[1] && !roomTypesLoading && (
         <RoomTable
           roomTypes={roomTypes}
           isNonResident={isNonResident}
@@ -214,6 +215,12 @@ export default function AgentPriceTable({
           date={date}
           displayRackRates={displayRackRates}
         />
+      )}
+
+      {roomTypesLoading && (
+        <div className="w-full flex items-center justify-center">
+          <Loader className="mx-aut0" color="red"></Loader>
+        </div>
       )}
     </div>
   );
