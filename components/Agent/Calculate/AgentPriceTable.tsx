@@ -81,7 +81,12 @@ export default function AgentPriceTable({
     },
     [roomTypes]
   );
-  const allGuestTypes = getAllGuestTypes(roomTypes || []);
+  let allGuestTypes = getAllGuestTypes(roomTypes || []);
+
+  // all guest types should be unique
+  allGuestTypes = allGuestTypes.filter(
+    (guest, index) => allGuestTypes.indexOf(guest) === index
+  );
 
   const [guestType, setGuestType] = useState<string>(allGuestTypes[0]);
 
