@@ -519,7 +519,7 @@ export default function Calculate() {
                             <Text>
                               {agents && agents.length > 0
                                 ? "Please note, the rates shown are nett"
-                                : "Please note, the rates shown are rack. To view nett rates,"}
+                                : "Please note, the rates shown are rack. To view nett rates:"}
                             </Text>
                             <div className="flex items-center gap-3">
                               {/* {!stay.has_property_access && (
