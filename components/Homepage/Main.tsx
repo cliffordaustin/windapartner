@@ -85,10 +85,10 @@ function Main({ targetRef }: MainProps) {
     <div className="">
       <div
         ref={targetRef}
-        className="relative hidden md:flex black-gradient rounded-xl h-[280px] md:h-[500px] mx-auto w-[90%] items-center justify-center"
+        className="relative flex black-gradient md:rounded-xl h-[280px] md:h-[500px] mx-auto md:w-[90%] items-center justify-center"
       >
         <video
-          className="rounded-xl w-[80%] h-[200px] md:w-[800px] md:h-[425px] absolute bottom-[7%] z-20"
+          className="rounded-xl hidden md:block w-[80%] h-[200px] md:w-[800px] md:h-[425px] absolute bottom-[7%] z-20"
           muted
           id="video"
           // controls
@@ -106,9 +106,28 @@ function Main({ targetRef }: MainProps) {
             width={700}
           ></source>
         </video>
+
+        <video
+          className="rounded-t-xl md:hidden w-full h-[240px] md:w-[800px] md:h-[425px] bottom-0 z-20"
+          muted
+          id="video"
+          autoPlay
+          loop
+        >
+          <source
+            src="https://winda-guide.s3.eu-west-2.amazonaws.com/video/Travel-Agent-Screen-recording-2023-08-01-5.04.48-PM-_online-video-cutter.com_.webm"
+            type="video/webm"
+            width={700}
+          ></source>
+          <source
+            src="https://winda-guide.s3.eu-west-2.amazonaws.com/video/Travel+Agent+Screen+recording+2023-08-01+5.04.48+PM+(online-video-cutter.com).mp4"
+            type="video/mp4"
+            width={700}
+          ></source>
+        </video>
       </div>
 
-      <div ref={targetRef} className="relative md:hidden mt-10">
+      {/* <div ref={targetRef} className="relative md:hidden mt-10">
         <video
           className="rounded-t-xl w-full h-[240px] md:w-[800px] md:h-[425px] bottom-0 z-20"
           muted
@@ -127,7 +146,7 @@ function Main({ targetRef }: MainProps) {
             width={700}
           ></source>
         </video>
-      </div>
+      </div> */}
       <div className="w-full mx-auto mt-10">
         <Text className="font-semibold text-center text-2xl md:text-3xl px-4">
           See how teams use Safari Pricer
