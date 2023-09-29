@@ -127,3 +127,13 @@
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+.black-gradient {
+  background: rgb(33, 37, 41);
+  background: linear-gradient(
+    145deg,
+    rgba(33, 37, 41, 1) 0%,
+    rgba(52, 58, 64, 1) 45%,
+    rgba(73, 80, 87, 1) 100%
+  );
+}

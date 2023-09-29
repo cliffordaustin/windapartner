@@ -4,14 +4,27 @@ import {
   Flex,
   Grid,
   List,
+  Menu,
   Modal,
+  NavLink,
+  Tabs,
   Text,
   TextInput,
   Textarea,
   ThemeIcon,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { IconCircleCheck, IconCircleX } from "@tabler/icons-react";
+import {
+  IconCalculator,
+  IconCircleCheck,
+  IconCircleDashed,
+  IconCircleX,
+  IconHome,
+  IconLockAccess,
+  IconNote,
+  IconNotes,
+  IconUser,
+} from "@tabler/icons-react";
 import axios from "axios";
 import Image from "next/image";
 import React from "react";
@@ -69,26 +82,382 @@ function Main({ targetRef }: MainProps) {
       });
   };
   return (
-    <div>
-      <div ref={targetRef} className="bg-[#f5f3f4]">
-        <div className="py-8 max-w-[1300px] mx-auto">
+    <div className="">
+      <div
+        ref={targetRef}
+        className="relative hidden md:flex black-gradient rounded-xl h-[280px] md:h-[500px] mx-auto w-[90%] items-center justify-center"
+      >
+        <video
+          className="rounded-xl w-[80%] h-[200px] md:w-[800px] md:h-[425px] absolute bottom-[7%] z-20"
+          muted
+          id="video"
+          // controls
+          autoPlay
+          loop
+        >
+          <source
+            src="https://winda-guide.s3.eu-west-2.amazonaws.com/video/Travel-Agent-Screen-recording-2023-08-01-5.04.48-PM-_online-video-cutter.com_.webm"
+            type="video/webm"
+            width={700}
+          ></source>
+          <source
+            src="https://winda-guide.s3.eu-west-2.amazonaws.com/video/Travel+Agent+Screen+recording+2023-08-01+5.04.48+PM+(online-video-cutter.com).mp4"
+            type="video/mp4"
+            width={700}
+          ></source>
+        </video>
+      </div>
+
+      <div ref={targetRef} className="relative md:hidden mt-10">
+        <video
+          className="rounded-t-xl w-full h-[240px] md:w-[800px] md:h-[425px] bottom-0 z-20"
+          muted
+          id="video"
+          autoPlay
+          loop
+        >
+          <source
+            src="https://winda-guide.s3.eu-west-2.amazonaws.com/video/Travel-Agent-Screen-recording-2023-08-01-5.04.48-PM-_online-video-cutter.com_.webm"
+            type="video/webm"
+            width={700}
+          ></source>
+          <source
+            src="https://winda-guide.s3.eu-west-2.amazonaws.com/video/Travel+Agent+Screen+recording+2023-08-01+5.04.48+PM+(online-video-cutter.com).mp4"
+            type="video/mp4"
+            width={700}
+          ></source>
+        </video>
+      </div>
+      <div className="w-full mx-auto mt-10">
+        <Text className="font-semibold text-center text-2xl md:text-3xl px-4">
+          See how teams use Safari Pricer
+        </Text>
+
+        <Tabs
+          color="dark"
+          className="w-full md:w-[90%] mx-auto"
+          defaultValue="consultants"
+        >
+          <Tabs.List className="mt-4 w-fit mx-auto">
+            <Tabs.Tab value="consultants" className="px-2 md:px-4 md:text-lg">
+              Tour Consultants
+            </Tabs.Tab>
+            <Tabs.Tab value="private" className="px-2 md:px-4 md:text-lg">
+              Private Guides
+            </Tabs.Tab>
+            <Tabs.Tab value="properties" className="px-2 md:px-4 md:text-lg">
+              Properties
+            </Tabs.Tab>
+          </Tabs.List>
+
+          <Tabs.Panel value="consultants">
+            <div className="mt-8 w-[90%] md:w-full mx-auto bg-[#f5f3f4] flex gap-6 h-[400px] rounded-xl">
+              <div className="flex flex-col gap-6 w-full md:w-[50%] py-5 px-6 md:px-12">
+                <div className="">
+                  <Text className="text-xl md:text-2xl py-5">
+                    Deliver a wide variety of itineraries to your clients in
+                    minutes.
+                  </Text>
+
+                  <div className="bg-gray-300 h-[1px] w-[50%]"></div>
+                </div>
+
+                <List
+                  spacing="xs"
+                  size="sm"
+                  center
+                  icon={
+                    <ThemeIcon color="dark" size={24} radius="xl">
+                      <IconCircleCheck size="1rem" />
+                    </ThemeIcon>
+                  }
+                >
+                  <List.Item>
+                    Calculate the trip’s cost across multiple locations.
+                  </List.Item>
+                  <List.Item>
+                    Create quotes and send to your clients in minutes.
+                  </List.Item>
+                  <List.Item>
+                    Direct access to most properties in East Africa.
+                  </List.Item>
+                </List>
+
+                <Menu
+                  trigger="hover"
+                  width={250}
+                  position="bottom-end"
+                  withArrow
+                  shadow="md"
+                >
+                  <Menu.Target>
+                    <div>
+                      <Button
+                        size="lg"
+                        color="dark"
+                        className="transition-all duration-300 w-fit hidden md:block"
+                      >
+                        Get started
+                      </Button>
+
+                      <Button
+                        size="md"
+                        color="dark"
+                        className="transition-all duration-300 w-fit md:hidden"
+                      >
+                        Get started
+                      </Button>
+                    </div>
+                  </Menu.Target>
+                  <Menu.Dropdown className="px-3 py-2">
+                    <NavLink
+                      label="Agent"
+                      component="a"
+                      href="/signin?next_state=agent&register=1"
+                      icon={<IconUser size="1rem" stroke={1.5} />}
+                    />
+                    <NavLink
+                      label="Property Owner"
+                      component="a"
+                      href="/signin?next_state=property&register=1"
+                      icon={<IconHome size="1rem" stroke={1.5} />}
+                    />
+                  </Menu.Dropdown>
+                </Menu>
+              </div>
+              <div className="hidden md:block md:w-[60%] relative">
+                <Image
+                  src="/images/home/tour-consultants.png"
+                  className={"object-cover object-top"}
+                  alt={"Images of Tour Consultants"}
+                  sizes="100%"
+                  priority
+                  fill
+                />
+
+                {/* <div className="absolute bg-black w-full h-full inset-0 bg-opacity-5"></div> */}
+              </div>
+            </div>
+          </Tabs.Panel>
+
+          <Tabs.Panel value="private">
+            <div className="mt-8 w-[90%] md:w-full mx-auto bg-[#f5f3f4] flex gap-6 h-[400px] rounded-xl">
+              <div className="flex flex-col gap-6 w-full md:w-[50%] py-5 px-6 md:px-12">
+                <div className="">
+                  <Text className="text-xl md:text-2xl py-5">
+                    Create your own quotes across multiple locations quickly and
+                    accurately.
+                  </Text>
+
+                  <div className="bg-gray-300 h-[1px] w-[50%]"></div>
+                </div>
+
+                <List
+                  spacing="xs"
+                  size="sm"
+                  center
+                  icon={
+                    <ThemeIcon color="dark" size={24} radius="xl">
+                      <IconCircleCheck size="1rem" />
+                    </ThemeIcon>
+                  }
+                >
+                  <List.Item>Create quotes on mobile.</List.Item>
+                  <List.Item>Available while offline on safari.</List.Item>
+                  <List.Item>Integrates with your itinerary builder.</List.Item>
+                </List>
+
+                <Menu
+                  trigger="hover"
+                  width={250}
+                  position="bottom-end"
+                  withArrow
+                  shadow="md"
+                >
+                  <Menu.Target>
+                    <div>
+                      <Button
+                        size="lg"
+                        color="dark"
+                        className="transition-all duration-300 w-fit hidden md:block"
+                      >
+                        Get started
+                      </Button>
+
+                      <Button
+                        size="md"
+                        color="dark"
+                        className="transition-all duration-300 w-fit md:hidden"
+                      >
+                        Get started
+                      </Button>
+                    </div>
+                  </Menu.Target>
+                  <Menu.Dropdown className="px-3 py-2">
+                    <NavLink
+                      label="Agent"
+                      component="a"
+                      href="/signin?next_state=agent&register=1"
+                      icon={<IconUser size="1rem" stroke={1.5} />}
+                    />
+                    <NavLink
+                      label="Property Owner"
+                      component="a"
+                      href="/signin?next_state=property&register=1"
+                      icon={<IconHome size="1rem" stroke={1.5} />}
+                    />
+                  </Menu.Dropdown>
+                </Menu>
+              </div>
+              <div className="hidden md:block md:w-[60%] relative">
+                <Image
+                  src="/images/home/private-guides.png"
+                  className={"object-cover object-top"}
+                  alt={"Images of Private Guides"}
+                  sizes="100%"
+                  priority
+                  fill
+                />
+              </div>
+            </div>
+          </Tabs.Panel>
+
+          <Tabs.Panel value="properties">
+            <div className="mt-8 w-[90%] md:w-full mx-auto bg-[#f5f3f4] flex gap-6 h-[400px] rounded-xl">
+              <div className="flex flex-col gap-6 w-full md:w-[50%] py-5 px-6 md:px-12">
+                <div className="">
+                  <Text className="text-xl md:text-2xl py-5">
+                    Increase your property’s visibility to a larger audience of
+                    travel agents and tour operators.
+                  </Text>
+
+                  <div className="bg-gray-300 h-[1px] w-[50%]"></div>
+                </div>
+
+                <List
+                  spacing="xs"
+                  size="sm"
+                  center
+                  icon={
+                    <ThemeIcon color="dark" size={24} radius="xl">
+                      <IconCircleCheck size="1rem" />
+                    </ThemeIcon>
+                  }
+                >
+                  <List.Item>
+                    Promote your offers to all agents on Safari Pricer.
+                  </List.Item>
+                  <List.Item>
+                    Centrally manage all agent contracts in one place.
+                  </List.Item>
+                  <List.Item>
+                    Automate access to your rates by agents.
+                  </List.Item>
+                </List>
+
+                <Menu
+                  trigger="hover"
+                  width={250}
+                  position="bottom-end"
+                  withArrow
+                  shadow="md"
+                >
+                  <Menu.Target>
+                    <div>
+                      <Button
+                        size="lg"
+                        color="dark"
+                        className="transition-all duration-300 w-fit hidden md:block"
+                      >
+                        Get started
+                      </Button>
+
+                      <Button
+                        size="md"
+                        color="dark"
+                        className="transition-all duration-300 w-fit md:hidden"
+                      >
+                        Get started
+                      </Button>
+                    </div>
+                  </Menu.Target>
+                  <Menu.Dropdown className="px-3 py-2">
+                    <NavLink
+                      label="Agent"
+                      component="a"
+                      href="/signin?next_state=agent&register=1"
+                      icon={<IconUser size="1rem" stroke={1.5} />}
+                    />
+                    <NavLink
+                      label="Property Owner"
+                      component="a"
+                      href="/signin?next_state=property&register=1"
+                      icon={<IconHome size="1rem" stroke={1.5} />}
+                    />
+                  </Menu.Dropdown>
+                </Menu>
+              </div>
+              <div className="hidden md:block md:w-[60%] relative">
+                <Image
+                  src="/images/home/properties.png"
+                  className={"object-cover object-top"}
+                  alt={"Images of Properties"}
+                  sizes="100%"
+                  priority
+                  fill
+                />
+              </div>
+            </div>
+          </Tabs.Panel>
+        </Tabs>
+
+        {/* <div className="py-8 max-w-[1300px] mx-auto">
           <div className="px-6 md:px-12 lg:px-24 flex-col md:flex-row flex items-center gap-4 md:gap-10">
-            <div className="flex flex-col gap-4 md:gap-6">
+            <div className="flex gap-3 flex-col">
               <Text
                 className={
-                  "font-black md:mb-2 uppercase text-xl self-baseline sm:text-2xl md:text-4xl xl:text-4xl text-black "
+                  "md:mb-2 text-xl self-baseline sm:text-xl md:text-2xl font-normal "
                 }
               >
-                For Properties
+                Safari pricer helps you churn a travel quote in{" "}
+                <span className="font-bold">minutes.</span>
               </Text>
-              <Text
-                className={
-                  "mb-2 text-xl pr-12 sm:text-xl md:text-2xl xl:text-2xl text-black "
-                }
-              >
-                Manage travel agents and your contract rates in a central
-                database.
-              </Text>
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-[30px] h-[30px] bg-red-600 rounded-full flex items-center justify-center">
+                    <IconLockAccess
+                      color="white"
+                      className=""
+                      size={20}
+                    ></IconLockAccess>
+                  </div>
+                  <Text className={"text-sm md:text-lg text-black "}>
+                    Access all your suppliers in one place.
+                  </Text>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-[30px] h-[30px] bg-red-600 rounded-full flex items-center justify-center">
+                    <IconCalculator color="white" size={20}></IconCalculator>
+                  </div>
+                  <Text className={"text-sm md:text-lg text-black "}>
+                    Calculate rack and nett rates automatically.
+                  </Text>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-[30px] h-[30px] bg-red-600 rounded-full flex items-center justify-center">
+                    <IconNotes color="white" size={20}></IconNotes>
+                  </div>
+                  <Text className={"text-sm md:text-lg text-black "}>
+                    Creat quote and invoice to send to your customers.
+                  </Text>
+                </div>
+              </div>
             </div>
 
             <div className="h-[220px] md:h-[250px] lg:h-[280px] w-[420px] md:w-[760px] relative">
@@ -99,21 +468,21 @@ function Main({ targetRef }: MainProps) {
                 height="240"
                 className="w-full h-full absolute inset-0"
                 id="video"
+                // autoPlay
               >
                 <source
-                  src="https://winda-guide.s3.eu-west-2.amazonaws.com/video/Property+Screen+recording+2023-08-01+5.10.04+PM.webm"
+                  src="https://winda-guide.s3.eu-west-2.amazonaws.com/video/Travel+Agent+Screen+recording+2023-08-01+5.04.48+PM.webm"
                   type="video/webm"
                   width={700}
                 ></source>
                 <source
-                  src="https://winda-guide.s3.eu-west-2.amazonaws.com/video/Property+Screen+recording+2023-08-01+5.10.04+PM.mp4"
+                  src="https://winda-guide.s3.eu-west-2.amazonaws.com/video/Travel+Agent+Screen+recording+2023-08-01+5.04.48+PM.mp4"
                   type="video/mp4"
                   width={700}
                 ></source>
               </video>
             </div>
           </div>
-
           <div className="px-6 md:px-24 flex flex-col justify-center items-center gap-5 mt-14">
             <Text
               className={
@@ -151,7 +520,6 @@ function Main({ targetRef }: MainProps) {
               </Button>
             </div>
           </div>
-
           <Modal
             opened={opened}
             onClose={close}
@@ -167,11 +535,11 @@ function Main({ targetRef }: MainProps) {
                 email={form.values.email}
               ></PropertySignin>
             </div>
-          </Modal>
-        </div>
+          </Modal>   
+        </div> */}
       </div>
 
-      <div className="max-w-[1100px] mx-auto mt-12 md:mt-24 px-6 md:px-12">
+      {/* <div className="max-w-[1100px] mx-auto mt-12 md:mt-24 px-6 md:px-12">
         <Text
           className="font-bold mt-1 text-center mb-2 text-2xl self-baseline sm:text-2xl md:text-4xl xl:text-4xl text-black"
           color="black"
@@ -477,7 +845,7 @@ function Main({ targetRef }: MainProps) {
             </Button>
           </form>
         </Flex>
-      </div>
+      </div> */}
     </div>
   );
 }
